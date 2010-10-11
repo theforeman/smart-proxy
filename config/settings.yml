@@ -1,0 +1,4 @@
+--- 
+:tftproot: /tftpboot
+:puppetca: true
+:log_file: /tmp/proxy.log
