@@ -8,4 +8,5 @@ module Proxy
   require "proxy/tftp"
   require "proxy/puppetca"
   require "proxy/puppet"
+  require "proxy/dns"
 end

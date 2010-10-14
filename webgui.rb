@@ -60,3 +60,29 @@ delete "/puppet/ca/:cert" do
   certnames = params[:cert]
   certnames.collect {|certname| Proxy::PuppetCA.clean(certname)}.to_json
 end
+
+post "/dns" do
+  fqdn = params[:fqdn]
+  value = params[:value]
+  type = params[:type]
+  begin
+    halt 400 unless Proxy::DNS.create({:fqdn => fqdn, :value => value, :type => type})
+  rescue Exception => e.to_s
+    halt 400, e
+  end
+end
+
+delete "/dns/:value" do
+  case params[:value]
+  when /.in-addr.arpa$/
+    type = "PTR"
+    value = params[:value]
+  else
+    fqdn = params[:value]
+  end
+  begin
+    halt 400 unless Proxy::DNS.remove({:fqdn => fqdn, :value => value, :type => type})
+  rescue Exception => e.to_s
+    halt 400, e
+  end
+end

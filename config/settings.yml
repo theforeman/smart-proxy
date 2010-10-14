@@ -2,3 +2,4 @@
 :tftproot: /tftpboot
 :puppetca: true
 :log_file: /tmp/proxy.log
+:dns_key: /home/proxy/keys/Kapi.+157+47848.private
