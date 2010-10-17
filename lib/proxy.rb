@@ -10,6 +10,7 @@ module Proxy
   require "proxy/puppetca" if SETTINGS.puppet_ca
   require "proxy/puppet"   if SETTINGS.puppet
   require "proxy/dns"      if SETTINGS.dns
+  require "proxy/dhcp"     if SETTINGS.dhcp
 
   def self.features
     MODULES.collect{|mod| mod if SETTINGS.send mod}.compact
