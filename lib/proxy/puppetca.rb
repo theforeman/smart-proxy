@@ -52,11 +52,11 @@ module Proxy::Puppetca
     private
 
     def ssldir
-      SETTINGS[:ssldir] || "/var/lib/puppet/ssl"
+      SETTINGS.ssldir || "/var/lib/puppet/ssl"
     end
 
     def puppetdir
-      SETTINGS[:puppetdir] || "/etc/puppet"
+      SETTINGS.puppetdir || "/etc/puppet"
     end
 
   end

@@ -6,6 +6,8 @@ module Proxy::Log
     # We must make our own ruby based logger if we are a standalone proxy server
     require 'logger'
     # We keep the last 6 10MB log files
-    return Logger.new(SETTINGS[:log_file], 6, 1024*1024*10)
+    log = Logger.new(SETTINGS.log_file, 6, 1024*1024*10)
+    log.level = SETTINGS.log_level if SETTINGS.log_level
+    return log
   end
 end

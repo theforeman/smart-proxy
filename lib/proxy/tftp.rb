@@ -36,7 +36,7 @@ module Proxy::TFTP
 
     def fetch_boot_file prefix, path
       filename = path.split("/")[-1]
-      dst      = "#{SETTINGS[:tftproot]}/#{prefix}-#{filename}"
+      dst      = "#{SETTINGS.tftproot}/#{prefix}-#{filename}"
       cmd = "wget --no-check-certificate -q #{path} -O \"#{dst}\""
       logger.debug "trying to execute #{cmd}"
       `#{cmd}`
@@ -45,7 +45,7 @@ module Proxy::TFTP
     private
     # returns the absolute path
     def path(p = nil)
-      p ||= SETTINGS[:tftproot] || File.dirname(__FILE__) + "/tftpboot"
+      p ||= SETTINGS.tftproot || File.dirname(__FILE__) + "/tftpboot"
       # are we running in RAILS or as a standalone CGI?
       dir = defined?(RAILS_ROOT) ? RAILS_ROOT : File.dirname(__FILE__)
       return (p =~ /^\//) ? p : "#{dir}/#{p}"

@@ -1,5 +1,21 @@
 --- 
+# enable TFTP management
+#:tftp: true
 :tftproot: /tftpboot
-:puppetca: true
-:log_file: /tmp/proxy.log
+
+# enable DNS management
+:dns: true
 :dns_key: /home/proxy/keys/Kapi.+157+47848.private
+
+# enable PuppetCA management
+#:puppetca: true
+
+# enable Puppet management
+#:puppet: true
+
+# Where our proxy log files are stored
+# filename or STDOUT
+:log_file: STDOUT
+# valid options are 
+# Logger::WARN, Logger::DEBUG, Logger::Error, Logger::Fatal, Logger:INFO, LOGGER::UNKNOWN
+:log_level: Logger::DEBUG
