@@ -3,7 +3,7 @@ module Proxy::TFTP
 
   class << self
 
-    # creates TFTP link to a predefine syslinux config file
+    # creates TFTP syslinux config file
     # Assumes we want to use pxelinux.cfg for configuration files.
     def create mac, config
       if mac.nil? or config.nil?
@@ -11,8 +11,10 @@ module Proxy::TFTP
         return false
       end
 
-      File.open("#{path}/pxelinux.cfg/#{syslinux_mac(mac)}", 'w') {|f| f.write(config) }
-      logger.debug "TFTP entry for #{mac} created successfully"
+      Fileutils.mkdir_p syslinux_dir
+
+      File.open(syslinux_mac(mac), 'w') {|f| f.write(config) }
+      logger.info "TFTP entry for #{mac} created successfully"
     rescue StandardError => e
       logger.warn "TFTP Adding entry failed: #{e}"
       false
@@ -22,7 +24,7 @@ module Proxy::TFTP
     # Assumes we want to use pxelinux.cfg for configuration files.
     # parameter is a mac address
     def remove mac
-      file = "#{path}/pxelinux.cfg/#{syslinux_mac(mac)}"
+      file = syslinux_mac(mac)
       if File.exists?(file)
         FileUtils.rm_f file
         logger.debug "TFTP entry for #{mac} removed successfully"
@@ -52,7 +54,11 @@ module Proxy::TFTP
     end
 
     def syslinux_mac mac
-      "/01-"+mac.gsub(/:/,"-").downcase
+      "#{syslinux_dir}/01-"+mac.gsub(/:/,"-").downcase
+    end
+
+    def syslinux_dir
+      "#{path}/pxelinux.cfg"
     end
 
   end
