@@ -1,0 +1,29 @@
+%h2= @subnet
+%h3 Records
+%table
+  %th IP
+  %th MAC
+  %th TFTP Server
+  %th Boot filename
+  %th Hostname
+  - @subnet.reservations.sort.each do |record|
+    %tr
+      %td=record.ip
+      %td=record.mac
+      %td=record.filename
+      %td=record.nextServer
+      %td=record.title
+%h3 Leases
+%table
+  %th IP
+  %th MAC
+  %th Lease Starts
+  %th Lease Ends
+  %th Lease State
+  - @subnet.leases.sort.each do |record|
+    %tr
+      %td=record.ip
+      %td=record.mac
+      %td=record.starts 
+      %td=record.ends
+      %td=record.state

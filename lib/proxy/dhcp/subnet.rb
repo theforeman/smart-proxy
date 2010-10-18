@@ -50,6 +50,7 @@ module Proxy::DHCP
     end
 
     def load
+      self.clear
       return false if loaded?
       @loaded = true
       server.loadSubnetData self
@@ -92,11 +93,10 @@ module Proxy::DHCP
     def add_record record
       unless has_mac?(record.mac) or has_ip?(record.ip)
         @records[record.ip] = record
-        logger.debug"Added #{record} to #{to_s}"
+        logger.debug "Added #{record} to #{to_s}"
         return true
       end
-      logger.warn "Record #{record} already exists in #{to_s} - can't add"
-      logger.info @records
+      logger.warn "Record #{record} already exists in #{to_s} - can't add again"
       return false
     end
 

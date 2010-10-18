@@ -1,0 +1,4 @@
+%h2 Subnets
+- @subnets.each do |subnet|
+  %a(href="/dhcp/#{subnet.network}")
+    %li=subnet

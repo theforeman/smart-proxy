@@ -38,6 +38,7 @@ module Proxy::DHCP
 
     # Abstracted Subnet loader method
     def loadSubnets
+      self.clear
       logger.debug "loading subnets for #{name}"
     end
 
@@ -53,7 +54,6 @@ module Proxy::DHCP
 
     # Adds a Subnet to a server object
     def add_subnet subnet
-      logger.debug "adding subnet #{subnet} to #{name}"
       if find_subnet(subnet.network).nil?
         @subnets << validate_subnet(subnet)
         logger.debug "added #{subnet} to #{name}"

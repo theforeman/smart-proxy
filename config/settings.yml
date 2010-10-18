@@ -1,14 +1,14 @@
 --- 
 # enable TFTP management
-#:tftp: true
-:tftproot: /tftpboot
+:tftp: true
+:tftproot: /tmp/tftpboot
 
 # enable DNS management
 :dns: true
 :dns_key: /home/proxy/keys/Kapi.+157+47848.private
 
 # enable DHCP management
-:dns: true
+:dhcp: true
 
 # enable PuppetCA management
 #:puppetca: true
