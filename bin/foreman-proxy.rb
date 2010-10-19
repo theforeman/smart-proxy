@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-$LOAD_PATH.unshift *Dir["#{File.dirname(__FILE__)}/lib"]
+$LOAD_PATH.unshift *Dir["#{File.dirname(__FILE__)}/../lib"]
 
 require "rubygems"
 require "sinatra"

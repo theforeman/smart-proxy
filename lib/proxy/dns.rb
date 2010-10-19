@@ -1,5 +1,5 @@
 module Proxy::DNS
-  class Server
+  class Record
     include Proxy::Log
 
     def initalize options = {}

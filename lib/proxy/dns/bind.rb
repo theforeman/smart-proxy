@@ -1,7 +1,7 @@
 require "proxy/dns"
 
 module Proxy::DNS
-  class Bind < Server
+  class Bind < Record
 
     def initialize(options = {})
       raise "Unable to find Key file - check your dns_key settings" unless File.exists?(SETTINGS.dns_key)
@@ -11,7 +11,7 @@ module Proxy::DNS
     # create({ :fqdn => "node01.lab", :value => "192.168.100.2"}
     # create({ :fqdn => "node01.lab", :value => "3.100.168.192.in-addr.arpa",
     #          :type => "PTR"}
-    def create options = {}
+    def create
       nsupdate "connect"
       case @type
       when "A"
@@ -23,7 +23,7 @@ module Proxy::DNS
     end
 
     # remove({ :fqdn => "node01.lab", :value => "192.168.100.2"}
-    def remove options = {}
+    def remove
       nsupdate "connect"
       case @type
       when "A"
