@@ -2,11 +2,18 @@
 
 $LOAD_PATH.unshift *Dir["#{File.dirname(__FILE__)}/../lib"]
 
+path = "#{File.dirname(__FILE__)}/.."
+
 require "rubygems"
 require "sinatra"
 require "proxy"
 require "json"
 require "haml"
+
+set :root, path
+set :views, path + '/views'
+set :public, path + '/public'
+
 require "tftp_api" if SETTINGS.tftp
 require "puppet_api" if SETTINGS.puppet
 require "puppetca_api" if SETTINGS.puppetca
