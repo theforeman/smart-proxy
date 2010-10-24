@@ -1,4 +1,5 @@
 require 'fileutils'
+require 'pathname'
 
 module Proxy::TFTP
   extend Proxy::Log
@@ -38,12 +39,18 @@ module Proxy::TFTP
       false
     end
 
-    def fetch_boot_file prefix, path
-      filename = path.split("/")[-1]
-      dst      = "#{SETTINGS.tftproot}/#{prefix}-#{filename}"
-      cmd = "wget --no-check-certificate -q #{path} -O \"#{dst}\""
+    def fetch_boot_file dst, src
+      filename    = src.split("/")[-1]
+      destination = Pathname.new("#{SETTINGS.tftproot}/#{dst}-#{filename}")
+
+      #ensure that our image direcotry exists
+      #as the dst might contain another sub directory
+      FileUtils.mkdir_p destination.parent
+
+      cmd = "wget --no-check-certificate -c -q #{src} -O \"#{destination}\""
       logger.debug "trying to execute #{cmd}"
       `#{cmd}`
+      $? == 0
     end
 
     private
