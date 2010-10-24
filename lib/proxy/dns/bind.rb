@@ -3,7 +3,7 @@ require "proxy/dns"
 module Proxy::DNS
   class Bind < Record
 
-    def initialize(options = {})
+    def initialize options = {}
       raise "Unable to find Key file - check your dns_key settings" unless File.exists?(SETTINGS.dns_key)
       super(options)
     end

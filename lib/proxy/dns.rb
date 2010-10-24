@@ -2,7 +2,7 @@ module Proxy::DNS
   class Record
     include Proxy::Log
 
-    def initalize options = {}
+    def initialize options = {}
       @server = options[:zone]  || "localhost"
       @fqdn   = options[:fqdn]
       @ttl    = options[:ttl]   || "86400"

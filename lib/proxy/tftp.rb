@@ -1,3 +1,5 @@
+require 'fileutils'
+
 module Proxy::TFTP
   extend Proxy::Log
 
@@ -11,7 +13,7 @@ module Proxy::TFTP
         return false
       end
 
-      Fileutils.mkdir_p syslinux_dir
+      FileUtils.mkdir_p syslinux_dir
 
       File.open(syslinux_mac(mac), 'w') {|f| f.write(config) }
       logger.info "TFTP entry for #{mac} created successfully"
