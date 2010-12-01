@@ -41,8 +41,7 @@ module Proxy::DNS
       if cmd == "connect"
         @om = IO.popen("/usr/bin/nsupdate -k #{SETTINGS.dns_key}", "r+")
         @om.puts "server #{@server}"
-      elsif
-        cmd == "disconnect"
+      elsif cmd == "disconnect"
         @om.puts "send"
         @om.puts "answer"
         @om.close_write
@@ -50,7 +49,15 @@ module Proxy::DNS
         @om.close
         @om = nil # we cannot serialize an IO obejct, even if closed.
         # TODO Parse output for errors!
-        return true
+        if status.empty?
+          logger.debug "nsupdate returned no status!"
+          false
+        elsif status[1] !~ /status: NOERROR/
+          logger.debug "nsupdate: errors\n" + status.join("\n")
+          false
+        else
+          true
+        end
       else
         logger.debug "nsupdate: executed - #{cmd}"
         @om.puts cmd
