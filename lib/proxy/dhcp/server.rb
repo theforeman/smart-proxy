@@ -12,9 +12,9 @@ module Proxy::DHCP
     include Proxy::Validations
 
     def initialize(name)
-      @name = name
+      @name    = name
       @subnets = []
-      @loaded = false
+      @loaded  = false
     end
 
     def loaded?

@@ -12,9 +12,9 @@ module Proxy::DHCP
     include Proxy::Validations
 
     def initialize(subnet, ip, mac, options = {})
-      @subnet = validate_subnet subnet
-      @ip = validate_ip ip
-      @mac = validate_mac mac.downcase
+      @subnet  = validate_subnet subnet
+      @ip      = validate_ip ip
+      @mac     = validate_mac mac.downcase
       @options = options
       @subnet.add_record(self)
     end
