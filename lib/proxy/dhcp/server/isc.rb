@@ -2,10 +2,10 @@ require 'time'
 module Proxy::DHCP
   class ISC < Server
 
-    def initialize name, config, leases
-      super(name)
-      @config = config
-      @leases = leases
+    def initialize options
+      super(options[:name])
+      @config = options[:config]
+      @leases = options[:leases]
     end
 
     def delRecord subnet, record
@@ -13,19 +13,16 @@ module Proxy::DHCP
       validate_record record
       raise InvalidRecord, "#{record} is static - unable to delete" unless record.deleteable?
 
+      msg = "Removed DHCP reservation for #{record.name} => #{record}"
       omcmd "connect"
       omcmd "set hardware-address = #{record.mac}"
       omcmd "open"
       omcmd "remove"
-      if omcmd("disconnect")
-        logger.info "removed DHCP reservation for #{record}"
-        subnet.delete record
-        return true
-      end
+      omcmd("disconnect", msg)
+      subnet.delete record
     end
 
     def addRecord options = {}
-      msg = []
       ip = validate_ip options[:ip]
       mac = validate_mac options[:mac]
       raise Proxy::DHCP::Error, "Must provide host-name" unless options[:name]
@@ -33,6 +30,7 @@ module Proxy::DHCP
       raise Proxy::DHCP::Error, "Already exists" if find_record(ip)
       raise Proxy::DHCP::Error, "Unknown subnet for #{ip}" unless subnet = find_subnet(IPAddr.new(ip))
 
+      msg = "Added DHCP reservation for #{record.name} => #{record}"
       omcmd "connect"
       omcmd "set name = \"#{name}\""
       omcmd "set ip-address = #{ip}"
@@ -53,21 +51,18 @@ module Proxy::DHCP
 
       omcmd "set statements = \"#{statements.join(" ")}\"" unless statements.empty?
       omcmd "create"
-      if omcmd("disconnect")
-        logger.info "created DHCP reservation for #{name} @ #{ip}/#{mac}"
-        Proxy::DHCP::Reservation.new(subnet, ip, mac, options)
-        return true
-      end
-      return false
+      omcmd("disconnect")
+      Proxy::DHCP::Reservation.new(subnet, ip, mac, options)
     end
 
     def loadSubnetData subnet
+      super
       conf = format((@config+@leases).split("\n"))
       # scan for host statements
       conf.scan(/host\s+(\S+\s*\{[^}]+\})/) do |host|
-        if host[0] =~ /^(\S+)\s*\{([^\}]+)/
-          title = $1
-          body  = $2
+        if match = host[0].match(/^(\S+)\s*\{([^\}]+)/)
+          title = match[1]
+          body  = match[2]
           opts = {:title => title}
           body.split(";").each do |data|
             opts.merge!(parse_record_options(data))
@@ -81,14 +76,13 @@ module Proxy::DHCP
           Proxy::DHCP::Reservation.new(subnet, opts[:ip], opts[:mac], opts)
         rescue Exception => e
           logger.warn "skipped #{title} - #{e}"
-          false
         end
       end
 
       conf.scan(/lease\s+(\S+\s*\{[^}]+\})/) do |lease|
-        if lease[0] =~ /^(\S+)\s*\{([^\}]+)/
-          ip = $1
-          body  = $2
+        if match = lease[0].match(/^(\S+)\s*\{([^\}]+)/)
+          ip   = match[1]
+          body = match[2]
           opts = {}
           body.split(";").each do |data|
             opts.merge! parse_record_options(data)
@@ -97,15 +91,18 @@ module Proxy::DHCP
           Proxy::DHCP::Lease.new(opts.merge({:subnet => subnet, :ip => ip}))
         end
       end
+      report "Enumerated hosts on #{subnet.network}"
     end
 
     private
     def loadSubnets
+      super
       @config.each_line do |line|
         if line =~ /^\s*subnet\s+([\d\.]+)\s+netmask\s+([\d\.]+)/
           Proxy::DHCP::Subnet.new(self, $1, $2)
         end
       end
+      "Enumerated the scopes on #{@name}"
     end
 
     #prepare text for parsing
@@ -151,7 +148,7 @@ module Proxy::DHCP
       return options
     end
 
-    def omcmd cmd
+    def omcmd cmd, msg=nil
       status = nil
       if cmd == "connect"
         @om = IO.popen("/usr/bin/omshell", "r+")
@@ -163,19 +160,29 @@ module Proxy::DHCP
         @om.close_write
         status = @om.readlines
         @om.close
-        @om = nil # we cannot serialize an IO obejct, even if closed.
+        @om = nil # we cannot serialize an IO object, even if closed.
       else
         logger.debug "omshell: executed - #{cmd}"
         @om.puts cmd
       end
 
-      if status.to_s =~ /can't/
-        logger.warn "failed to perform omshell commmand: #{status}"
-        return false
-      else
-        return true
-      end
+      report msg, status
+    end
 
+    def report msg, response=""
+      if response.to_s =~ /can't|no more/
+       logger.error "Omshell failed:\n" + status
+        msg.sub! /Removed/,    "remove"
+        msg.sub! /Added/,      "add"
+        msg.sub! /Enumerated/, "enumerate"
+        msg  = "Failed to #{msg}"
+        raise Proxy::DHCP::Error.new(msg)
+      else
+        logger.info msg
+      end
+    rescue
+      logger.error "Omshell failed:\n" + status
+      raise Proxy::DHCP::Error.new("Unknown error while processing '#{msg}'")
     end
 
     def ip2hex ip
