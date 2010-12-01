@@ -6,7 +6,7 @@ require 'proxy/validations'
 module Proxy::DHCP
   # Represents a DHCP Subnet
   class Subnet
-    attr_reader :network, :netmask, :server, :leases
+    attr_reader :network, :netmask, :server, :leases, :timestamp
     attr_accessor :options
 
     include Proxy::DHCP
@@ -14,13 +14,14 @@ module Proxy::DHCP
     include Proxy::Validations
 
     def initialize server, network, netmask
-      @server  = validate_server server
-      @network = validate_ip network
-      @netmask = validate_ip netmask
-      @options = {}
-      @records = {}
-      @loaded  = false
-      raise Proxy::DHCP::Error, "unable to Add Subnet" unless @server.add_subnet(self)
+      @server    = validate_server server
+      @network   = validate_ip network
+      @netmask   = validate_ip netmask
+      @options   = {}
+      @records   = {}
+      @timestamp = Time.now
+      @loaded    = false
+      raise Proxy::DHCP::Error, "Unable to Add Subnet" unless @server.add_subnet(self)
     end
 
     def include? ip
@@ -54,7 +55,7 @@ module Proxy::DHCP
       return false if loaded?
       @loaded = true
       server.loadSubnetData self
-      logger.debug "lazy loaded #{to_s} records"
+      logger.debug "Lazy loaded #{to_s} records"
     end
 
     def reload
@@ -68,6 +69,7 @@ module Proxy::DHCP
     end
 
     def [] record
+      self.load if not loaded?
       begin
         return has_mac?(record) if validate_mac(record)
       rescue
@@ -115,9 +117,9 @@ module Proxy::DHCP
           # TODO: check for a more faster / portable way
           `ping -q -c 1 #{ip} >/dev/null`
           if $? == 0 or Ping.pingecho(ip,1)
-            logger.info "found a pingable IP(#{ip}) address which don't have a Proxy::DHCP record"
+            logger.info "Found a pingable IP(#{ip}) address which does not have a Proxy::DHCP record"
           else
-            logger.debug "found free ip #{ip} out of a total of #{free_ips.size} free ips"
+            logger.debug "Found free ip #{ip} out of a total of #{free_ips.size} free ips"
             return ip
           end
         end
