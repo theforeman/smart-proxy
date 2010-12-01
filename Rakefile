@@ -26,14 +26,14 @@ end
 
 spec = Gem::Specification.new do |s|
   s.name = "foreman_proxy"
-  s.version = "0.0.1"
+  s.version = "0.0.2"
   s.author = "Ohad Levy"
   s.email = "ohadlevy@gmail.com"
   s.homepage = "http://theforeman.org/"
   s.platform = Gem::Platform::RUBY
   s.summary = "Foreman Proxy Agent, manage remote DHCP, DNS, TFTP and Puppet servers"
   s.files = FileList["{bin,public,config,views,lib}/**/*"].to_a
-  s.default_executable = 'bin/foreman_proxy.rb'
+  s.default_executable = 'bin/smart_proxy.rb'
   s.require_path = "lib"
   s.test_files = FileList["{test}/**/*test.rb"].to_a
   s.has_rdoc = true
