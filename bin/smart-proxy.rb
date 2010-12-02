@@ -9,6 +9,8 @@ require "sinatra"
 require "proxy"
 require "json"
 require "haml"
+require "proxy/log"
+include Proxy::Log
 
 set :root, path
 set :views, path + '/views'

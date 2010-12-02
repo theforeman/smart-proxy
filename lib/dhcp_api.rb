@@ -11,6 +11,7 @@ def dhcp_setup
   end
   @subnets = @server.subnets
 rescue => e
+  logger.warn "unable to process something: #{e}"
   halt 400, e.to_s
 end
 
@@ -78,6 +79,7 @@ post "/dhcp/:network" do
                       :hostname=>params[:name], :filename=> params[:filename],
                       :name=>params[:name], :ip=>params[:ip]})
   rescue => e
+    logger.warn "Failed to process request - #{e}"
     halt 400, e.to_s
   end
 end
