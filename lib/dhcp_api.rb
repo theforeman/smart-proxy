@@ -53,7 +53,8 @@ end
 
 get "/dhcp/:network/unused_ip" do
   begin
-    load_subnet.unused_ip
+    content_type :json
+    ({:ip => load_subnet.unused_ip}).to_json
   rescue => e
     halt 400, e.to_s
   end
