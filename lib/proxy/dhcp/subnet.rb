@@ -149,5 +149,9 @@ module Proxy::DHCP
       records.collect{|r| r if r.kind == "lease"}.compact
     end
 
+    def <=> other
+      network <=> other.network
+    end
+
   end
 end

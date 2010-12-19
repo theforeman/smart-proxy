@@ -44,20 +44,24 @@ h2{
 }
 
 ol{
-    padding-top:20px;
+    clear:both;
     background-color:#ade;
     display:block;
 }
 
 li {
-    color:white;
-    text-align:center;
-    display:inline;
-    padding:5px 10px 0 10px;
-    margin-right:2px;
-    background-color: #69a;
+	color:white;
+	padding:5px 10px 0 10px;
+	margin-right:2px;
+}
+
+#nav li {
+	text-align:center;
+	display:inline;
+	background-color: #69a;
+
 }
 
 a{
-    text-decoration:none;
+	text-decoration:none;
 }

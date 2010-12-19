@@ -91,7 +91,13 @@ delete "/dhcp/:network/:record" do
     record = load_subnet[params[:record]]
     halt 404, "Record #{params[:network]}/#{params[:record]} not found" unless record
     @server.delRecord @subnet, record
+    if request.accept.include?("application/json")
+      content_type :json
+    else
+      redirect "/dhcp/#{params[:network]}"
+    end
+
   rescue Exception => e
-    halt 400, e.to_s
+    halt 400, "Unable to delete record: #{e}"
   end
 end

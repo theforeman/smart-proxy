@@ -6,13 +6,21 @@
   %th TFTP Server
   %th Boot filename
   %th Hostname
+  %th Delete
   - @subnet.reservations.sort.each do |record|
     %tr
       %td=record.ip
       %td=record.mac
-      %td=record.filename
       %td=record.nextServer
+      %td=record.filename
       %td=record.title
+      %td
+        %form{:method => "post", :action => "/dhcp/#{@subnet.network}/#{record.mac}"}
+          %input{:type => "hidden", :name => "_method", :value => "delete"}
+            %div
+              %input{:name => "commit", :type => "submit", :value => "delete"}
+
+="Total of #{@subnet.reservations.size} reservations"
 %h3 Leases
 %table
   %th IP
@@ -27,3 +35,5 @@
       %td=record.starts 
       %td=record.ends
       %td=record.state
+  ="Total of #{@subnet.leases.size} leases"
+="Total of #{@subnet.size} records"
