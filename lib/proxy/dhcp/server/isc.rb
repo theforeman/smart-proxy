@@ -42,8 +42,13 @@ module Proxy::DHCP
       if options[:filename]
         statements << "filename = \\\"#{options[:filename]}\\\";"
       end
-      if options[:nextserver]
-        statements << "next-server = #{ip2hex options[:nextserver]};"
+      if ns=options[:nextserver]
+        begin
+          ns=ip2hex validate_ip(ns)
+        rescue
+          ns = "\\\"#{ns}\\\""
+        end
+        statements << "next-server = #{ns};"
       end
       if name
         statements << "option host-name = \\\"#{name}\\\";"
@@ -136,7 +141,12 @@ module Proxy::DHCP
       when /^deleted/
         options[:deleted] = true
       when /^supersede server.next-server\s+=\s+(\S+)/
-        options[:nextServer] = hex2ip($1)
+        begin
+          ns = validate_ip hex2ip($1)
+        rescue
+          ns = $1.gsub("\"","")
+        end
+        options[:nextServer] = ns
       when /^supersede server.filename\s+=\s+"(\S+)"/
         options[:filename] = $1
       when "dynamic"
