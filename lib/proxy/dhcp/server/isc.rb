@@ -73,7 +73,7 @@ module Proxy::DHCP
           end
         end
         begin
-          Proxy::DHCP::Reservation.new(subnet, opts[:ip], opts[:mac], opts)
+          Proxy::DHCP::Reservation.new(subnet, opts[:ip], opts[:mac], opts) if subnet.include? opts[:ip]
         rescue Exception => e
           logger.warn "skipped #{title} - #{e}"
         end
