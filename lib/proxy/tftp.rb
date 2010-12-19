@@ -32,7 +32,7 @@ module Proxy::TFTP
         FileUtils.rm_f file
         logger.debug "TFTP entry for #{mac} removed successfully"
       else
-        logger.warn "Skipping a request to delete a file which doesn't exists"
+        logger.info "TFTP: Skipping a request to delete a file which doesn't exists"
       end
     rescue StandardError => e
       logger.warn "TFTP removing entry failed: #{e}"
@@ -47,7 +47,7 @@ module Proxy::TFTP
       #as the dst might contain another sub directory
       FileUtils.mkdir_p destination.parent
 
-      cmd = "wget --no-check-certificate -c -q #{src} -O \"#{destination}\""
+      cmd = "wget --no-check-certificate -b -c -q #{src} -O \"#{destination}\" &"
       logger.debug "trying to execute #{cmd}"
       `#{cmd}`
       $? == 0
