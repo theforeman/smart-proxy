@@ -1,4 +1,5 @@
 require 'time'
+require 'resolv'
 module Proxy::DHCP
   class ISC < Server
 
@@ -39,20 +40,9 @@ module Proxy::DHCP
 
       # TODO: Extract this block into a generic dhcp options helper
       statements = []
-      if options[:filename]
-        statements << "filename = \\\"#{options[:filename]}\\\";"
-      end
-      if ns=options[:nextserver]
-        begin
-          ns=ip2hex validate_ip(ns)
-        rescue
-          ns = "\\\"#{ns}\\\""
-        end
-        statements << "next-server = #{ns};"
-      end
-      if name
-        statements << "option host-name = \\\"#{name}\\\";"
-      end
+      statements << "filename = \\\"#{options[:filename]}\\\";" if options[:filename]
+      statements << bootServer(options[:nextserver]) if options[:nextserver]
+      statements << "option host-name = \\\"#{name}\\\";" if name
 
       omcmd "set statements = \"#{statements.join(" ")}\"" unless statements.empty?
       omcmd "create"
@@ -214,6 +204,20 @@ module Proxy::DHCP
     rescue => e
       logger.warn "Unable to parse time #{e}"
       raise "Unable to parse time #{e}"
+    end
+
+    def bootServer server
+      begin
+        ns = validate_ip(server)
+      rescue
+        begin
+          ns = Resolv.new.getaddress(server)
+        rescue
+          logger.warn "Failed to resolve IP address for #{server}"
+          ns = "\\\"#{server}\\\""
+        end
+      end
+      "next-server = #{ns};"
     end
 
   end
