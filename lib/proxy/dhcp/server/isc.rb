@@ -76,14 +76,14 @@ module Proxy::DHCP
 
       conf.scan(/lease\s+(\S+\s*\{[^}]+\})/) do |lease|
         if match = lease[0].match(/^(\S+)\s*\{([^\}]+)/)
-          ip   = match[1]
+          next unless ip = match[1]
           body = match[2]
           opts = {}
           body.split(";").each do |data|
             opts.merge! parse_record_options(data)
           end
-          next if opts[:state] == "free" or opts[:state] == "abandoned" or ip.nil? or mac.nil?
-          Proxy::DHCP::Lease.new(opts.merge({:subnet => subnet, :ip => ip})) if subnet.include? opts[:ip]
+          next if opts[:state] == "free" or opts[:state] == "abandoned" or opts[:mac].nil?
+          Proxy::DHCP::Lease.new(opts.merge({:subnet => subnet, :ip => ip})) if subnet.include? ip
         end
       end
       report "Enumerated hosts on #{subnet.network}"
