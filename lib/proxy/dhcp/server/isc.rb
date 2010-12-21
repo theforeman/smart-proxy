@@ -208,10 +208,10 @@ module Proxy::DHCP
 
     def bootServer server
       begin
-        ns = validate_ip(server)
+        ns = ip2hex validate_ip(server)
       rescue
         begin
-          ns = Resolv.new.getaddress(server)
+          ns = ip2hex Resolv.new.getaddress(server)
         rescue
           logger.warn "Failed to resolve IP address for #{server}"
           ns = "\\\"#{server}\\\""
