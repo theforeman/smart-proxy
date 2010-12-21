@@ -82,8 +82,8 @@ module Proxy::DHCP
           body.split(";").each do |data|
             opts.merge! parse_record_options(data)
           end
-          next if opts[:state] == "free" or ip.nil?
-          Proxy::DHCP::Lease.new(opts.merge({:subnet => subnet, :ip => ip}))
+          next if opts[:state] == "free" or opts[:state] == "abandoned" or ip.nil? or mac.nil?
+          Proxy::DHCP::Lease.new(opts.merge({:subnet => subnet, :ip => ip})) if subnet.include? opts[:ip]
         end
       end
       report "Enumerated hosts on #{subnet.network}"
