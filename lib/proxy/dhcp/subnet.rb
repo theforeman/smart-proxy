@@ -6,7 +6,7 @@ require 'proxy/validations'
 module Proxy::DHCP
   # Represents a DHCP Subnet
   class Subnet
-    attr_reader :network, :netmask, :server, :leases, :timestamp
+    attr_reader :network, :netmask, :server, :timestamp
     attr_accessor :options
 
     include Proxy::DHCP
