@@ -35,7 +35,7 @@ get "/dhcp" do
       halt 404 unless @subnets
       @subnets.map{|s| {:network => s.network, :netmask => s.netmask }}.to_json
     else
-      haml :"dhcp/index"
+      erb :"dhcp/index"
     end
   rescue => e
     halt 400, e.to_s
@@ -45,7 +45,7 @@ end
 get "/dhcp/:network" do
   begin
     load_subnet
-    haml :"dhcp/show"
+    erb :"dhcp/show"
   rescue => e
     halt 400, e.to_s
   end
