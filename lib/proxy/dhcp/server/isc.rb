@@ -170,7 +170,7 @@ module Proxy::DHCP
 
     def report msg, response=""
       if response.to_s =~ /can't|no more/
-       logger.error "Omshell failed:\n" + status
+       logger.error "Omshell failed:\n" + response
         msg.sub! /Removed/,    "remove"
         msg.sub! /Added/,      "add"
         msg.sub! /Enumerated/, "enumerate"
