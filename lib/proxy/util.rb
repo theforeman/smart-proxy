@@ -1,5 +1,5 @@
 module Proxy::Util
-  # searches for binaries in predinfed directories and user PATH
+  # searches for binaries in predefined directories and user PATH
   # accepts a binary name and an array of paths to search first
   # if path is ommited will search only in user PATH
   def which(bin, *path)

@@ -10,7 +10,7 @@ module Proxy::TFTP
     # Assumes we want to use pxelinux.cfg for configuration files.
     def create mac, config
       if mac.nil? or config.nil?
-        logger.info "invalid parameters recieved"
+        logger.info "invalid parameters received"
         return false
       end
 

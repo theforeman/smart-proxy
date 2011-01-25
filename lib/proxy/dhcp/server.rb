@@ -27,6 +27,7 @@ module Proxy::DHCP
     end
 
     def load
+      self.clear
       @loaded = true
       loadSubnets
     end
@@ -38,28 +39,28 @@ module Proxy::DHCP
 
     # Abstracted Subnet loader method
     def loadSubnets
-      self.clear
-      logger.debug "loading subnets for #{name}"
+      logger.debug "Loading subnets for #{name}"
     end
 
     # Abstracted Subnet data loader method
     def loadSubnetData subnet
-      logger.debug "loading subnets for #{subnet}"
+      raise "Invalid Subnet" unless subnet.is_a? Proxy::DHCP::Subnet
+      logger.debug "Loading subnet data for #{subnet}"
     end
 
     # Abstracted Subnet options loader method
     def loadSubnetOptions subnet
-      logger.debug "loading Subnet options for #{subnet}"
+      logger.debug "Loading Subnet options for #{subnet}"
     end
 
     # Adds a Subnet to a server object
     def add_subnet subnet
       if find_subnet(subnet.network).nil?
         @subnets << validate_subnet(subnet)
-        logger.debug "added #{subnet} to #{name}"
+        logger.debug "Added #{subnet} to #{name}"
         return true
       end
-      logger.warn "subnet #{subnet} already exists in server #{name}"
+      logger.warn "Subnet #{subnet} already exists in server #{name}"
       return false
     end
 

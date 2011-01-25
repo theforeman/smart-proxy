@@ -1,5 +1,4 @@
 require 'time'
-require 'resolv'
 module Proxy::DHCP
   class ISC < Server
 
@@ -91,6 +90,7 @@ module Proxy::DHCP
 
     private
     def loadSubnets
+      super
       @config.each_line do |line|
         if line =~ /^\s*subnet\s+([\d\.]+)\s+netmask\s+([\d\.]+)/
           Proxy::DHCP::Subnet.new(self, $1, $2)
