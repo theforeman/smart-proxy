@@ -13,12 +13,16 @@
 - foreman.prod.domain
 - foreman.dev.domain
 
+# enable the daemon to run in the background
+:daemon: true
+
 # port used by the proxy
 :port: 8443
 
 # Enable TFTP management
 :tftp: true
 :tftproot: /tmp/tftpboot
+
 
 # Enable DNS management
 :dns: true

@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 
 $LOAD_PATH.unshift *Dir["#{File.dirname(__FILE__)}/../lib"]
+APP_ROOT = "#{File.dirname(__FILE__)}/.."
 
 require "rubygems"
 require "proxy"
@@ -15,11 +16,11 @@ class SmartProxy < Sinatra::Base
   include Proxy::Log
   require 'helpers'
 
-  path = "#{File.dirname(__FILE__)}/.."
-  set :root, path
-  set :views, path + '/views'
-  set :public, path + '/public'
+  set :root, APP_ROOT
+  set :views, APP_ROOT + '/views'
+  set :public, APP_ROOT + '/public'
   set :logging, true
+  set :env,     :production
   set :run,     true
 
   require "tftp_api"     if SETTINGS.tftp
