@@ -40,6 +40,7 @@ spec = Gem::Specification.new do |s|
   s.extra_rdoc_files = ["README"]
   s.add_dependency 'json'
   s.add_dependency 'sinatra'
+  s.add_dependency 'net/ping'
   s.rubyforge_project = 'rake'
   s.description = <<EOF
 Foreman Proxy is used via The Foreman Project, it allows Foreman to manage
