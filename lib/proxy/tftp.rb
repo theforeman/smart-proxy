@@ -47,8 +47,8 @@ module Proxy::TFTP
       #as the dst might contain another sub directory
       FileUtils.mkdir_p destination.parent
 
-      cmd = "wget --no-check-certificate -b -c -q #{src} -O \"#{destination}\""
-      logger.debug "trying to execute #{cmd}"
+      cmd = "wget --no-check-certificate -b -c -q #{src} -O \"#{destination}\" -o #{SETTINGS.log_file}"
+      logger.debug "Executing #{cmd}"
       `#{cmd}`
       $? == 0
     end
