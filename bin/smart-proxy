@@ -4,12 +4,13 @@ $LOAD_PATH.unshift *Dir["#{File.dirname(__FILE__)}/../lib"]
 
 require "rubygems"
 require "proxy"
-require "sinatra"
+require "sinatra-patch"
 require "json"
 require "proxy/log"
 require "helpers"
 
 class SmartProxy < Sinatra::Base
+  attr_reader :ssl_options
 
   include Proxy::Log
   require 'helpers'
@@ -26,6 +27,36 @@ class SmartProxy < Sinatra::Base
   require "puppetca_api" if SETTINGS.puppetca
   require "dns_api"      if SETTINGS.dns
   require "dhcp_api"     if SETTINGS.dhcp
+
+  # we force webrick to allow SSL
+  set :server, "webrick"
+  set :port, SETTINGS.port if SETTINGS.port
+
+  # SSL Setup
+  unless SETTINGS.ssl_private_key and SETTINGS.ssl_certificate and SETTINGS.ssl_ca_file
+    warn "WARNING: Missing SSL setup, working in clear text mode !\n"
+  else
+    begin
+      @ssl_options = {:SSLEnable => true,
+        :SSLVerifyClient      => OpenSSL::SSL::VERIFY_PEER,
+        :SSLPrivateKey        => OpenSSL::PKey::RSA.new(File.read(SETTINGS.ssl_private_key)),
+        :SSLCertificate       => OpenSSL::X509::Certificate.new(File.read(SETTINGS.ssl_certificate)),
+        :SSLCACertificateFile => SETTINGS.ssl_ca_file
+      }
+    rescue => e
+      warn "Unable to access the SSL keys. Are the values correct in settings.yml and do permissions allow reading?: #{e}"
+      exit 1
+    end
+  end
+
+  before do
+    # If we reach here then the peer is verified and cannot be spoofed
+    if ssl_options and SETTINGS.trusted_hosts
+      unless SETTINGS.trusted_hosts.include? request.host
+        log_halt 403, "Untrusted client #{request.host} attempted to access #{request.path_info}. Check :trusted_hosts: in settings.yml"
+      end
+    end
+  end
 
   run!
 end
