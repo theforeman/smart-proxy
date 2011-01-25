@@ -6,7 +6,7 @@ module Proxy
   require "proxy/log"
   require "proxy/util"
   require "proxy/tftp"     if SETTINGS.tftp
-  require "proxy/puppetca" if SETTINGS.puppet_ca
+  require "proxy/puppetca" if SETTINGS.puppetca
   require "proxy/puppet"   if SETTINGS.puppet
   require "proxy/dns"      if SETTINGS.dns
   require "proxy/dhcp"     if SETTINGS.dhcp

@@ -1,5 +1,5 @@
 require 'proxy/log'
-module Proxy::Puppetca
+module Proxy::PuppetCA
   extend Proxy::Log
   extend Proxy::Util
 
@@ -47,6 +47,10 @@ module Proxy::Puppetca
       autosign.each_line { |line| found = true if line.chomp == fqdn }
       autosign.puts fqdn if found == false
       autosign.close
+    end
+
+    def autosign_list
+      File.exist?("#{puppetdir}/autosign.conf") ? File.read("#{puppetdir}/autosign.conf").split : []
     end
 
     private

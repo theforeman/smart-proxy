@@ -1,18 +1,30 @@
 class SmartProxy
-  put "/puppet/ca/autosign" do
+  get "/puppet/ca/autosign" do
     content_type :json
-    certnames = params[:cert]
     begin
-      case params[:state]
-      when 'enable'
-        return certnames.collect{|certname| Proxy::PuppetCA.sign(certname)}.to_json
-      when 'disable'
-        return certnames.collect {|certname| Proxy::PuppetCA.disable(certname)}.to_json
-      else
-        log_halt 400, "Puppet CA: Unknown state: Neither enable or disable"
-      end
+      Proxy::PuppetCA.autosign_list.to_json
     rescue => e
-      log_halt 500, "Failed to autosign #{params[:cert]}" + e.to_s
+      log_halt 500, "Failed to list autosign entries: #{e}"
+    end
+  end
+
+  post "/puppet/ca/autosign/:certname" do
+    content_type :json
+    certname = params[:certname]
+    begin
+      Proxy::PuppetCA.sign(certname).to_json
+    rescue => e
+      log_halt 500, "Failed to enable autosign for #{params[:certname]}: #{e}"
+    end
+  end
+
+  delete "/puppet/ca/autosign/:certname" do
+    content_type :json
+    certname = params[:certname]
+    begin
+      Proxy::PuppetCA.disable(certname).to_json
+    rescue => e
+      log_halt 500, "Failed to remove autosign for #{params[:certname]}: #{e}"
     end
   end
 
@@ -22,7 +34,7 @@ class SmartProxy
       certnames = params[:cert]
       certnames.collect {|certname| Proxy::PuppetCA.clean(certname)}.to_json
     rescue => e
-      log_halt 500, "Failed to remove certificate(s) for #{certnames}" + e.to_s
+      log_halt 500, "Failed to remove certificate(s) for #{certnames} #{e}"
     end
   end
 end
