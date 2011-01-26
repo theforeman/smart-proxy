@@ -2,7 +2,7 @@ require "proxy/dns/bind"
 
 class SmartProxy
   def setup(opts)
-    @server = Proxy::DNS::Bind.new(opts)
+    @server = Proxy::DNS::Bind.new(opts.merge :server => SETTINGS.dns_server)
   end
 
   post "/dns/" do

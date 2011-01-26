@@ -27,6 +27,7 @@
 # Enable DNS management
 :dns: true
 :dns_key: /home/proxy/keys/Kapi.+157+47848.private
+:dns_server: dns.domain.com
 
 # Enable DHCP management
 :dhcp: true

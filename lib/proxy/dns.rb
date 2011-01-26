@@ -3,10 +3,10 @@ module Proxy::DNS
     include Proxy::Log
 
     def initialize options = {}
-      @server = options[:zone]  || "localhost"
+      @server = options[:server] || "localhost"
       @fqdn   = options[:fqdn]
-      @ttl    = options[:ttl]   || "86400"
-      @type   = options[:type]  || "A"
+      @ttl    = options[:ttl]    || "86400"
+      @type   = options[:type]   || "A"
       @value  = options[:value]
 
       raise("Must define FQDN or Value") if @fqdn.nil? and @value.nil?
