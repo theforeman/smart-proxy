@@ -36,6 +36,7 @@ class SmartProxy < Sinatra::Base
   # SSL Setup
   unless SETTINGS.ssl_private_key and SETTINGS.ssl_certificate and SETTINGS.ssl_ca_file
     warn "WARNING: Missing SSL setup, working in clear text mode !\n"
+    @ssl_options = {}
   else
     begin
       @ssl_options = {:SSLEnable => true,
@@ -59,5 +60,5 @@ class SmartProxy < Sinatra::Base
     end
   end
 
-  run!
+  run!({}, @ssl_options)
 end
