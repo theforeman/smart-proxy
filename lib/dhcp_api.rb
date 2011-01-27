@@ -50,7 +50,12 @@ class SmartProxy < Sinatra::Base
   get "/dhcp/:network" do
     begin
       load_subnet
-      erb :"dhcp/show"
+      if request.accept.include?("application/json")
+        content_type :json
+        {:reservations => @subnet.reservations, :leases => @subnet.leases}.to_json
+      else
+        erb :"dhcp/show"
+      end
     rescue => e
       log_halt 400, e.to_s
     end
