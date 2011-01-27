@@ -12,11 +12,14 @@ module Sinatra
       handler_name = handler.name.gsub(/.*::/, '')
       puts "Starting Foreman Proxy on #{port} using #{handler_name}" unless handler_name =~/cgi/i
 
-      FileUtils.mkdir_p(File.join(APP_ROOT, 'tmp/pids'))
-
       if SETTINGS.daemon
         Process.daemon(true)
-        pid = "#{APP_ROOT}/tmp/pids/server.pid"
+        if SETTINGS.daemon_pid.nil?
+          pid = "#{APP_ROOT}/tmp/pids/server.pid"
+        else
+          pid = "#{SETTINGS.daemon_pid}"
+        end
+        puts "Writing to #{pid}"
         File.open(pid, 'w'){ |f| f.write(Process.pid) }
         at_exit { File.delete(pid) if File.exist?(pid) }
       end

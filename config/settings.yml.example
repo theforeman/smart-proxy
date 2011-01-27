@@ -15,6 +15,7 @@
 
 # enable the daemon to run in the background
 :daemon: true
+:daemon_pid: /var/run/foreman-proxy/foreman-proxy.pid
 
 # port used by the proxy
 :port: 8443

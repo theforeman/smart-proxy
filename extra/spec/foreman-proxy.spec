@@ -43,6 +43,7 @@ install -d -m0755 %{buildroot}%{_datadir}/%{name}/config
 install -d -m0755 %{buildroot}%{_sysconfdir}/%{name}
 install -d -m0755 %{buildroot}%{_localstatedir}/lib/%{name}
 install -d -m0750 %{buildroot}%{_localstatedir}/log/%{name}
+install -d -m0750 %{buildroot}%{_var}/run/%{name}
 
 install -Dp -m0644 %{confdir}/%{name}.sysconfig %{buildroot}%{_sysconfdir}/sysconfig/%{name}
 install -Dp -m0755 %{confdir}/%{name}.init %{buildroot}%{_initrddir}/%{name}
@@ -80,6 +81,8 @@ rm -rf %{buildroot}
 %config(noreplace) %{_sysconfdir}/logrotate.d/%{name}
 %attr(-,%{name},%{name}) %{_localstatedir}/lib/%{name}
 %attr(-,%{name},%{name}) %{_localstatedir}/log/%{name}
+%attr(-,%{name},%{name}) %{_var}/run/%{name}
+
 
 %pre
 # Add the "foreman-proxy" user and group
