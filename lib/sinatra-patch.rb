@@ -21,7 +21,9 @@ module Sinatra
         at_exit { File.delete(pid) if File.exist?(pid) }
       end
       handler.run self, {:Host => bind, :Port => port}.merge(ssl_options) do |server|
-        [:INT, :TERM].each { |sig| trap(sig) { quit!(server, handler_name) } }
+        [:INT, :TERM].each { |sig| trap(sig) { 
+		server.respond_to?(:stop) ? server.stop : quit!(server, handler_name) 
+	} }
         set :running, true
       end
     rescue Errno::EADDRINUSE => e
