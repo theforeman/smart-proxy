@@ -12,14 +12,14 @@ module Proxy::PuppetCA
       logger.debug "executing #{command}"
       response = `#{command}`
       unless $? == 0
-        logger.warn "failed to run puppetca: #{response}"
-        raise "execution of puppetca failed, check log files"
+        logger.warn "Failed to run puppetca: #{response}"
+        raise "Execution of puppetca failed, check log files"
       end
     end
 
     #remove certname from autosign if exists
     def disable certname
-      raise "no such file #{autosign_file}" unless File.exists?(autosign_file)
+      raise "No such file #{autosign_file}" unless File.exists?(autosign_file)
 
       entries = open(autosign_file, File::RDONLY).readlines.collect do |l|
         l if l.chomp != certname
@@ -27,7 +27,7 @@ module Proxy::PuppetCA
       autosign = open(autosign_file, File::TRUNC|File::RDWR)
       autosign.write entries
       autosign.close
-      logger.info "removed #{certname} from autosign"
+      logger.info "Removed #{certname} from autosign"
     end
 
     # add certname to puppet autosign file
@@ -41,7 +41,7 @@ module Proxy::PuppetCA
       autosign.each_line { |line| found = true if line.chomp == certname }
       autosign.puts certname if found == false
       autosign.close
-      logger.info "added #{certname} to autosign"
+      logger.info "Added #{certname} to autosign"
     end
 
     # list of hosts which are now allowed to be installed via autosign
@@ -50,14 +50,14 @@ module Proxy::PuppetCA
     end
 
     # list of all certificates and their state/fingerprint
-    def all
+    def list
       find_puppetca
       command = "#{@sudo} -S #{@puppetca} --list --all"
-      logger.debug "executing #{command}"
+      logger.debug "Executing #{command}"
       response = `#{command}`
       unless $? == 0
-        logger.warn "failed to run puppetca: #{response}"
-        raise "execution of puppetca failed, check log files"
+        logger.warn "Failed to run puppetca: #{response}"
+        raise "Execution of puppetca failed, check log files"
       end
 
       hash = {}
@@ -87,14 +87,14 @@ module Proxy::PuppetCA
         logger.warn "unable to find puppetca binary"
         raise "unable to find puppetca"
       end
-      logger.debug "found puppetca at #{@puppetca}"
+      logger.debug "Found puppetca at #{@puppetca}"
 
       @sudo = which("sudo", "/usr/bin")
       unless File.exists?("#{@sudo}")
         logger.warn "unable to find sudo binary"
-        raise "unable to find sudo"
+        raise "Unable to find sudo"
       end
-      logger.debug "found sudo at #{@sudo}"
+      logger.debug "Found sudo at #{@sudo}"
 
     end
 
@@ -115,7 +115,7 @@ module Proxy::PuppetCA
       case str
       when /(\+|\-)\s+(.*)\s+\((\S+)\)/
         state = $1 == "-" ? "revoked" : "valid"
-        return {$2 => {:state => status, :fingerprint => $3}}
+        return {$2 => {:state => state, :fingerprint => $3}}
       when /(.*)\s+\((\S+)\)/
         return {$1 => {:state => "pending", :fingerprint => $2}}
       else

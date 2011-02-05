@@ -2,7 +2,7 @@ class SmartProxy
   get "/puppet/ca" do
     content_type :json
     begin
-      Proxy::PuppetCA.list("all").to_json
+      Proxy::PuppetCA.list.to_json
     rescue => e
       log_halt 406, "Failed to list certificates: #{e}"
     end
