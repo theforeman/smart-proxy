@@ -3,7 +3,7 @@ class SmartProxy
     begin
       Proxy::TFTP.fetch_boot_file(params[:prefix], params[:path])
     rescue => e
-      halt 400, e.to_s
+      log_halt 400, e.to_s
     end
   end
 
@@ -12,18 +12,27 @@ class SmartProxy
     mac = params[:mac]
     syslinux = params[:syslinux_config]
     begin
-      halt 400, "Failed to create a tftp reservation for #{mac}" unless Proxy::TFTP.create(mac, syslinux)
+      log_halt 400, "Failed to create a tftp reservation for #{mac}" unless Proxy::TFTP.create(mac, syslinux)
     rescue Exception => e
-      halt 400, e.to_s
+      log_halt 400, e.to_s
     end
   end
 
   # delete a record from a network
   delete "/tftp/:mac" do
     begin
-      halt 400, "Failed to remove tftp reservation for #{params[:mac]}" unless Proxy::TFTP.remove(params[:mac])
+      log_halt 400, "Failed to remove tftp reservation for #{params[:mac]}" unless Proxy::TFTP.remove(params[:mac])
     rescue => e
-      halt 400, e.to_s
+      log_halt 400, e.to_s
     end
   end
+
+  post "/tftp/create_default" do
+    begin
+      log_halt 400, "Failed to create PXE default file" unless Proxy::TFTP.create_default params[:menu]
+    rescue
+      log_halt 400, e.to_s
+    end
+  end
+
 end

@@ -23,6 +23,14 @@ module Proxy::TFTP
       false
     end
 
+    def create_default config
+      if config.nil?
+        return false
+      end
+      FileUtils.mkdir_p syslinux_dir
+      File.open(syslinux_default, 'w') {|f| f.write(config) }
+    end
+
     # removes links created by create method
     # Assumes we want to use pxelinux.cfg for configuration files.
     # parameter is a mac address
@@ -64,6 +72,10 @@ module Proxy::TFTP
 
     def syslinux_mac mac
       "#{syslinux_dir}/01-"+mac.gsub(/:/,"-").downcase
+    end
+
+    def syslinux_default
+      "#{syslinux_dir}/default"
     end
 
     def syslinux_dir
