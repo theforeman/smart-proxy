@@ -1,0 +1,8 @@
+bin usr/share/foreman-proxy
+config usr/share/foreman-proxy
+lib usr/share/foreman-proxy
+public usr/share/foreman-proxy
+Rakefile usr/share/foreman-proxy
+tasks usr/share/foreman-proxy
+views usr/share/foreman-proxy
+debian/settings.yml etc/foreman-proxy

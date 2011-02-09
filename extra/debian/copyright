@@ -1,0 +1,29 @@
+This work was packaged for Debian by:
+
+    Jochen Schalanda <jochen@schalanda.name> on Tue, 08 Feb 2011 22:02:53 +0100
+
+It was downloaded from:
+
+    http://theforeman.org/projects/smart-proxy
+
+Upstream Author(s):
+
+    Ohad Levy <ohadlevy@gmail.com>
+
+Copyright:
+
+    Copyright (C) 2010-2011 Ohad Levy <ohadlevy@gmail.com>
+
+License:
+
+    GPL-3
+
+On any Debian system, you can find the complete text of the GNU GPL
+(GNU General Public License) in the file '/usr/share/common-licenses/GPL-3'.
+
+The Debian packaging is:
+
+    Copyright (C) 2011 Jochen Schalanda <jochen@schalanda.name>
+
+and is licensed under the GPL version 3,
+see "/usr/share/common-licenses/GPL-3".

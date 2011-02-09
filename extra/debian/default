@@ -1,0 +1,6 @@
+# Defaults for smart-proxy initscript
+# sourced by /etc/init.d/foreman-proxy
+
+DAEMON_USER="foreman-proxy:foreman-proxy"
+DAEMON_HOME="/usr/share/foreman-proxy"
+DAEMON_ARGS=""

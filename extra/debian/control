@@ -1,0 +1,20 @@
+Source: foreman-proxy
+Section: net
+Priority: extra
+Maintainer: Jochen Schalanda <jochen@schalanda.name>
+Build-Depends: debhelper (>= 7.0.50~)
+Standards-Version: 3.9.1
+Homepage: http://theforeman.org/projects/smart-proxy
+Vcs-Git: git://github.com/ohadlevy/smart-proxy.git
+Vcs-Browser: https://github.com/ohadlevy/smart-proxy
+
+Package: foreman-proxy
+Architecture: all
+Depends: ruby, rubygems, libopenssl-ruby, libsinatra-ruby, libjson-ruby, libnet-ping-ruby, rake, ${misc:Depends}
+Description: RESTful proxies for DNS, DHCP, TFTP, and Puppet
+ Smart-Proxy is a project which provides a RESTful API to various sub-systems
+ like DNS, DHCP, TFTP, and Puppet.
+ .
+ Its goal is to provide API for a higher level orchestration tools.
+ Smart-Proxy provides an easy way to add or extended existing
+ sub-systems and APIs.

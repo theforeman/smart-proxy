@@ -1,0 +1,52 @@
+---
+# SSL Setup
+
+# if enabled, all communication would be verfied via SSL
+# NOTE that both certificates need to be signed by the same CA in order for this to work
+# see http://theforeman.org/projects/smart-proxy/wiki/SSL for more information
+#:ssl_certificate: ssl/certs/fqdn.pem
+#:ssl_ca_file: ssl/certs/ca.pem
+#:ssl_private_key: ssl/private_keys/fqdn.key
+# the hosts which the proxy accepts connections from
+# commenting the following lines would mean every verified SSL connection allowed
+#:trusted_hosts:
+#- foreman.prod.domain
+#- foreman.dev.domain
+
+# enable the daemon to run in the background
+:daemon: true
+:daemon_pid: /var/run/foreman-proxy/foreman-proxy.pid
+
+# port used by the proxy
+:port: 8443
+
+# Enable TFTP management
+#:tftp: true
+#:tftproot: /tmp/tftpboot
+
+
+# Enable DNS management
+#:dns: true
+#:dns_key: /home/proxy/keys/Kapi.+157+47848.private
+#:dns_server: dns.domain.com
+
+# Enable DHCP management
+#:dhcp: true
+# The vendor can be either isc or native_ms
+#:dhcp_vendor: isc
+# Settings for Ubuntu ISC
+#:dhcp_config: /etc/dhcp3/dhcpd.conf
+#:dhcp_leases: /var/lib/dhcp3/dhcpd.leases
+
+# enable PuppetCA management
+#:puppetca: true
+
+# enable Puppet management
+#:puppet: true
+
+# Where our proxy log files are stored
+# filename or STDOUT
+:log_file: /var/log/foreman-proxy/foreman-proxy.log
+# valid options are
+# Logger::WARN, Logger::DEBUG, Logger::Error, Logger::Fatal, Logger:INFO, LOGGER::UNKNOWN
+#:log_level: Logger::DEBUG
