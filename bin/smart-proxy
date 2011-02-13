@@ -28,6 +28,7 @@ class SmartProxy < Sinatra::Base
   require "puppetca_api" if SETTINGS.puppetca
   require "dns_api"      if SETTINGS.dns
   require "dhcp_api"     if SETTINGS.dhcp
+  require "features_api"
 
   # we force webrick to allow SSL
   set :server, "webrick"

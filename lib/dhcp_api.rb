@@ -102,6 +102,7 @@ class SmartProxy < Sinatra::Base
       @server.delRecord @subnet, record
       if request.accept.include?("application/json")
         content_type :json
+        {}
       else
         redirect "/dhcp/#{params[:network]}"
       end
