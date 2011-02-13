@@ -10,6 +10,10 @@ module Sinatra
       set options
       handler      = detect_rack_handler
       handler_name = handler.name.gsub(/.*::/, '')
+
+      # Hack to cope with renamed options in Sinatra 1.0.a
+      bind = host if VERSION == '1.0.a'
+
       puts "Starting Foreman Proxy on #{port} using #{handler_name}" unless handler_name =~/cgi/i
 
       FileUtils.mkdir_p(File.join(APP_ROOT, 'tmp/pids'))
