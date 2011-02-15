@@ -29,6 +29,7 @@ module Proxy::TFTP
       end
       FileUtils.mkdir_p syslinux_dir
       File.open(syslinux_default, 'w') {|f| f.write(config) }
+      logger.info "Default TFTP #{syslinux_default} entry created successfully"
     end
 
     # removes links created by create method

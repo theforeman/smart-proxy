@@ -7,6 +7,14 @@ class SmartProxy
     end
   end
 
+  post "/tftp/create_default" do
+    begin
+      log_halt 400, "Failed to create PXE default file" unless Proxy::TFTP.create_default params[:menu]
+    rescue
+      log_halt 400, e.to_s
+    end
+  end
+
   # create a new TFTP reservation
   post "/tftp/:mac" do
     mac = params[:mac]
@@ -23,14 +31,6 @@ class SmartProxy
     begin
       log_halt 400, "Failed to remove tftp reservation for #{params[:mac]}" unless Proxy::TFTP.remove(params[:mac])
     rescue => e
-      log_halt 400, e.to_s
-    end
-  end
-
-  post "/tftp/create_default" do
-    begin
-      log_halt 400, "Failed to create PXE default file" unless Proxy::TFTP.create_default params[:menu]
-    rescue
       log_halt 400, e.to_s
     end
   end
