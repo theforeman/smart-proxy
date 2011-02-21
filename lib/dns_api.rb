@@ -14,7 +14,7 @@ class SmartProxy
       status = @server.create
       log_halt 400, "DNS create failed for #{fqdn}" unless status
     rescue Exception => e
-      halt 400, e.to_s
+      log_halt 400, e.to_s
     end
   end
 

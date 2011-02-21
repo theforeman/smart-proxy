@@ -11,7 +11,13 @@ desc 'Test the Foreman Proxy plugin.'
 Rake::TestTask.new(:test) do |t|
   t.libs << 'lib'
   t.libs << 'test'
-  t.pattern = 'test/**/*_test.rb'
+  files = FileList['test/**/*_test.rb']
+  if PLATFORM =~ /mingw/
+    files = FileList['test/**/server_ms_test*']
+  else
+    files = FileList['test/**/*_test.rb'].delete_if{|f| f =~ /_ms_/}
+  end
+  t.test_files  = files
   t.verbose = true
 end
 

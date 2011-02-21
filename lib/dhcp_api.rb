@@ -1,19 +1,21 @@
 class SmartProxy < Sinatra::Base
   def dhcp_setup
     raise "Smart Proxy is not configured to support DHCP" unless SETTINGS.dhcp
-    case SETTINGS.dhcp_vendor
+    case SETTINGS.dhcp_vendor.downcase
     when "isc"
       require 'proxy/dhcp/server/isc'
       unless SETTINGS.dhcp_config and SETTINGS.dhcp_leases \
         and File.exist?(SETTINGS.dhcp_config) and File.exist?(SETTINGS.dhcp_leases)
         log_halt 400, "Unable to find the DHCP configuration or lease files"
-      else
-        @server  = Proxy::DHCP::ISC.new({:name => "127.0.0.1",
-                                        :config => File.read(SETTINGS.dhcp_config),
-                                        :leases => File.read(SETTINGS.dhcp_leases)})
       end
+      @server = Proxy::DHCP::ISC.new({:name => "127.0.0.1",
+                                      :config => File.read(SETTINGS.dhcp_config),
+                                      :leases => File.read(SETTINGS.dhcp_leases)})
+    when "native_ms"
+      require 'proxy/dhcp/server/native_ms'
+      @server = Proxy::DHCP::NativeMS.new(:server => SETTINGS.dhcp_server ? SETTINGS.dhcp_server : "127.0.0.1")
     else
-      log_halt 400, "Unrecognised or missing DHCP vendor type: #{SETTINGS.dhcp_vendor.nil? ? "MISSING" : SETTINGS.dhcp_vendor}"
+      log_halt 400, "Unrecognized or missing DHCP vendor type: #{SETTINGS.dhcp_vendor.nil? ? "MISSING" : SETTINGS.dhcp_vendor}"
     end
     @subnets = @server.subnets
   rescue => e
