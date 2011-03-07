@@ -45,7 +45,7 @@ module Proxy::DHCP
 
       omcmd "set statements = \"#{statements.join(" ")}\"" unless statements.empty?
       omcmd "create"
-      omcmd("disconnect")
+      omcmd("disconnect",  msg)
       Proxy::DHCP::Reservation.new(subnet, ip, mac, options)
     end
 
@@ -154,8 +154,7 @@ module Proxy::DHCP
         @om.puts "server #{name}"
         @om.puts "connect"
         @om.puts "new host"
-      elsif
-        cmd == "disconnect"
+      elsif cmd == "disconnect"
         @om.close_write
         status = @om.readlines
         @om.close
@@ -169,19 +168,20 @@ module Proxy::DHCP
     end
 
     def report msg, response=""
-      if response.to_s =~ /can't|no more/
-       logger.error "Omshell failed:\n" + response
+      unless response.grep(/can't|no more/).empty?
+       logger.error "Omshell failed:\n" + response.join("")
         msg.sub! /Removed/,    "remove"
         msg.sub! /Added/,      "add"
         msg.sub! /Enumerated/, "enumerate"
         msg  = "Failed to #{msg}"
+        msg += ": Entry already exists" if response.grep(/object: already exists/).size > 0
         raise Proxy::DHCP::Error.new(msg)
       else
         logger.info msg
-      end
+      end if response
     rescue
-      logger.error "Omshell failed:\n" + status
-      raise Proxy::DHCP::Error.new("Unknown error while processing '#{msg}'")
+      logger.error "Omshell failed:\n" + response.join("")
+      raise Proxy::DHCP::Error.new(msg ? msg : "Unknown error while processing '#{msg}'")
     end
 
     def ip2hex ip

@@ -11,10 +11,11 @@ module Proxy::PuppetCA
       command = "#{@sudo} -S #{@puppetca} --clean #{certname}"
       logger.debug "executing #{command}"
       response = `#{command}`
-      unless $? == 0
+      unless $?.success?
         logger.warn "Failed to run puppetca: #{response}"
         raise "Execution of puppetca failed, check log files"
       end
+      true
     end
 
     #remove certname from autosign if exists
