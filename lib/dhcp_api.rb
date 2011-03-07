@@ -1,4 +1,5 @@
 class SmartProxy < Sinatra::Base
+  use Rack::MethodOverride
   def dhcp_setup
     raise "Smart Proxy is not configured to support DHCP" unless SETTINGS.dhcp
     case SETTINGS.dhcp_vendor.downcase
