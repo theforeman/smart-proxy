@@ -11,8 +11,7 @@ class SmartProxy
     type  = params[:type]
     begin
       setup({:fqdn => fqdn, :value => value, :type => type})
-      status = @server.create
-      log_halt 400, "DNS create failed for #{fqdn}" unless status
+      @server.create
     rescue Exception => e
       log_halt 400, e.to_s
     end
@@ -28,7 +27,7 @@ class SmartProxy
     end
     begin
       setup({:fqdn => fqdn, :value => value, :type => type})
-      log_halt 400, "DNS delete failed for #{fqdn}" unless @server.remove
+      @server.remove
     rescue => e
       log_halt 400, e.to_s
     end
