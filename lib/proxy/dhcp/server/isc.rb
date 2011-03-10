@@ -45,7 +45,7 @@ module Proxy::DHCP
 
       omcmd "set statements = \"#{statements.join(" ")}\"" unless statements.empty?
       omcmd "create"
-      omcmd("disconnect",  msg)
+      omcmd("disconnect", msg)
       Proxy::DHCP::Reservation.new(subnet, ip, mac, options)
     end
 
@@ -148,9 +148,8 @@ module Proxy::DHCP
     end
 
     def omcmd cmd, msg=nil
-      status = nil
       if cmd == "connect"
-        @om = IO.popen("/usr/bin/omshell", "r+")
+        @om = IO.popen("/bin/sh -c '/usr/bin/omshell 2>&1'", "r+")
         @om.puts "server #{name}"
         @om.puts "connect"
         @om.puts "new host"
@@ -159,29 +158,26 @@ module Proxy::DHCP
         status = @om.readlines
         @om.close
         @om = nil # we cannot serialize an IO object, even if closed.
+        report msg, status
       else
         logger.debug "omshell: executed - #{cmd}"
         @om.puts cmd
       end
-
-      report msg, status
     end
 
     def report msg, response=""
-      unless response.grep(/can't|no more/).empty?
-       logger.error "Omshell failed:\n" + response.join("")
+      if response.nil? or !response.grep(/can't|no more|not connected|Syntax error/).empty?
+        logger.error "Omshell failed:\n" + (response.nil? ? "No response from DHCP server" : response.join(", "))
         msg.sub! /Removed/,    "remove"
         msg.sub! /Added/,      "add"
         msg.sub! /Enumerated/, "enumerate"
         msg  = "Failed to #{msg}"
-        msg += ": Entry already exists" if response.grep(/object: already exists/).size > 0
+        msg += ": Entry already exists" if response and response.grep(/object: already exists/).size > 0
+        msg += ": No response from DHCP server" if response.nil? or response.grep(/not connected/).size > 0
         raise Proxy::DHCP::Error.new(msg)
       else
         logger.info msg
-      end if response
-    rescue
-      logger.error "Omshell failed:\n" + response.join("")
-      raise Proxy::DHCP::Error.new(msg ? msg : "Unknown error while processing '#{msg}'")
+      end
     end
 
     def ip2hex ip
