@@ -70,6 +70,9 @@ done
 # Put logs in %{_localstatedir}/log/%{name}
 ln -sv %{_localstatedir}/log/%{name} %{buildroot}%{_datadir}/%{name}/logs
 
+# Link temp directory to system wide temp
+ln -sv %{_tmppath} %{buildroot}%{_datadir}/%{name}/tmp
+
 %clean
 rm -rf %{buildroot}
 
