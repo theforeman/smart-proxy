@@ -114,17 +114,16 @@ module Proxy::DHCP
         return nil
       else
         free_ips.each do |ip|
-          logger.debug "searching for free ip - pinging #{ip}"
-          Net::Ping::TCP.service_check=true
-          t = Net::Ping::TCP.new(nil,nil,1)
-          i = Net::Ping::ICMP.new(nil,nil,1)
-          if t.ping(ip) or i.ping(ip)
+          logger.debug "Searching for free ip - pinging #{ip}"
+          if tcp_pingable?(ip) or icmp_pingable?(ip)
             logger.info "Found a pingable IP(#{ip}) address which does not have a Proxy::DHCP record"
           else
             logger.debug "Found free ip #{ip} out of a total of #{free_ips.size} free ips"
             return ip
           end
         end
+        logger.warn "No free IPs at #{to_s}"
+        nil
       end
     end
 
@@ -155,5 +154,28 @@ module Proxy::DHCP
       network <=> other.network
     end
 
+    private
+    def tcp_pingable? ip
+      Net::Ping::TCP.service_check=true
+      Net::Ping::TCP.new(nil,nil,1).ping(ip)
+    rescue
+      # We failed to check this address so we should not use it
+      true
+    end
+
+    def icmp_pingable? ip
+      if privileged_user
+        Net::Ping::ICMP.new(nil,nil,1).ping(ip)
+      else
+        system("ping -c 1 -W 1 #{ip} > /dev/null")
+      end
+    rescue
+      # We failed to check this address so we should not use it
+      true
+    end
+
+    def privileged_user
+      (PLATFORM =~ /linux/i and Process.uid == 0) or PLATFORM =~ /mingw/
+    end
   end
 end
