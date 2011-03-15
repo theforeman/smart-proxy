@@ -55,8 +55,8 @@ class SmartProxy < Sinatra::Base
   before do
     # If we reach here then the peer is verified and cannot be spoofed
     if ssl_options and SETTINGS.trusted_hosts
-      unless SETTINGS.trusted_hosts.include? request.host
-        log_halt 403, "Untrusted client #{request.host} attempted to access #{request.path_info}. Check :trusted_hosts: in settings.yml"
+      unless SETTINGS.trusted_hosts.include? request.env["REMOTE_HOST"].downcase
+        log_halt 403, "Untrusted client #{request.env["REMOTE_HOST"].downcase} attempted to access #{request.path_info}. Check :trusted_hosts: in settings.yml"
       end
     end
   end
