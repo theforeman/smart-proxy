@@ -51,5 +51,5 @@
 # filename or STDOUT
 :log_file: /tmp/proxy.log
 # valid options are
-# Logger::WARN, Logger::DEBUG, Logger::Error, Logger::Fatal, Logger:INFO, LOGGER::UNKNOWN
-#:log_level: Logger::DEBUG
+# WARN, DEBUG, Error, Fatal, INFO, UNKNOWN
+#:log_level: DEBUG
