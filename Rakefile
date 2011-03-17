@@ -32,7 +32,7 @@ end
 
 spec = Gem::Specification.new do |s|
   s.name = "foreman_proxy"
-  s.version = "0.0.2"
+  s.version = "0.1"
   s.author = "Ohad Levy"
   s.email = "ohadlevy@gmail.com"
   s.homepage = "http://theforeman.org/"

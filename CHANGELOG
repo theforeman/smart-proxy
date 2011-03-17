@@ -1,0 +1,147 @@
+2011-03-17	Ohad Levy <ohadlevy@gmail.com>
+	* fixes #732 - provide better defaults inside rpm package
+
+2011-03-17	Mark Bainter <mark.bainter@match.com>
+	* fixes #752 - Lookup the constant for the log level
+	* fixes #753 - puppetca.rb: Fixing typo in comparison operator
+
+2011-03-17	Lukas Zapletal <lzap+git@redhat.com>
+	* fixes #610 - tftp file fetching logging
+
+2011-03-16	Lukas Zapletal <lzap+git@redhat.com>
+	* Adding tags to gitignore file
+
+2011-03-15	Jochen Schalanda <jochen@schalanda.name>
+	* Fixes #665 - Set option 'bind' or 'host' depending on Sinatra version.
+
+2011-03-15	Paul Kelly <paul.ian.kelly@googlemail.com>
+	* Fixes #737 - Foreman host check was incorrect
+
+2011-03-13	Paul Kelly <paul.ian.kelly@googlemail.com>
+	* Fixes #707 - ICMP ping only for root
+	* Fixes #710-omshell-errors-on-stderr
+	* Fixes #652 - Minor error reporting issues
+	* Fixes #711 - DNS update errors are not returned to foreman
+
+2011-03-10	Lukas Zapletal <lzap+git@redhat.com>
+	* fixes #716 - spec file - no write permission to tmp dir
+
+2011-03-07	Ohad Levy <ohadlevy@gmail.com>
+	* fixes #713: DHCP delete returns "Sinatra doesn't know this ditty"
+
+2011-03-07	Paul Kelly <paul.ian.kelly@googlemail.com>
+	* Fixes #651 - Minor issues with the puppetca interface
+
+2011-02-24	Ohad Levy <ohadlevy@gmail.com>
+	* fixes #689 - rpm spec file does not require net-ping
+
+2011-02-21	Paul Kelly <paul.ian.kelly@googlemail.com>
+	* Fixes #64 - microsoft DHCP support
+
+2011-02-15	Ohad Levy <ohadlevy@gmail.com>
+	* fixes #627 - Smart Proxy should be able to create a default tftp menu
+
+2011-02-13	Paul Kelly <paul.ian.kelly@googlemail.com>
+	* Fixes #663 - Provides a feature query facility
+
+2011-02-10	Justin Sherrill <jsherril@redhat.com>
+	* Fixes #627 - added the ability to save a default pxe boot file
+
+2011-02-09	Jochen Schalanda <jochen@schalanda.name>
+	* Fixes feature #550 - Added Debian package specification.
+
+2011-02-08	Paul Kelly <paul.ian.kelly@googlemail.com>
+	* Fixes #655 - add :json to log_halt
+
+2011-02-01	Lukas Zapletal <lzap+git@redhat.com>
+	* fixes #620 - PID file creation under /var/log/foreman-proxy
+	* fixes #549 - Add a rpm package for the smart proxy
+
+2011-01-27	Ohad Levy <ohadlevy@gmail.com>
+	* fixes #625 - provide dhcp subnet details via json
+	* fixes #624 - allow the proxy to list/show puppet certificates
+	* fixes #662 - smart proxy can't be stopped
+
+2011-01-27	Paul Kelly <pikelly@blueyonder.co.uk>
+	* Fixes #619 - dsn_key is optional
+	* Fixes #618 - Provide a dns_server setting
+
+2011-01-26	Paul Kelly <pikelly@blueyonder.co.uk>
+	* Fixes #617 - The @ssl_options is not passed to the run\! call
+
+2011-01-25	Ohad Levy <ohadlevy@gmail.com>
+	* fixes #615 - puppetca should comply with rest best practices
+	* fixes #614 - proxy should support Daemon mode
+	* fixes #613 - Allow to use SSL to communicate with the proxy
+	* cleanup sinatra code. helpers are now shared accross all urls.
+	* fixes #610 - tftp file fetching should be logged into the smart-proxy log
+	* fixes #571 - Use Net
+	* Clean up of unused code, typos and debug messages
+
+2011-01-06	Ohad Levy <ohadlevy@gmail.com>
+	* fixes #574 - Exception trace when omshell does not perform
+
+2010-12-23	Ohad Levy <ohadlevy@gmail.com>
+	* Ensuring that we read the erb files... not the deleted haml files :)
+	* remove redundent attribute
+	* converted haml temlpates to erb templates, as it seems that haml is not packaged on RHEL/CentOS platform
+
+2010-12-21	Ohad Levy <ohadlevy@gmail.com>
+	* cleanup logic, refs #557
+	* update CSS that subnets will be visible in Chrome too
+	* fixes #557 - Adds abandoned lease state to ISC dhcp
+	* dhcp next servers need to be stored in hex, refs #554
+
+2010-12-20	Ohad Levy <ohadlevy@gmail.com>
+	* Fixes #554 - ISC dhcp reservation has incorrect next server value if using host name vs ip
+	* wget should not be sent into the background immediately, refs #513
+
+2010-12-19	Ohad Levy <ohadlevy@gmail.com>
+	* Fixes #513 - move tftp file fatching to run as in the background
+	* Fixes #537 - dhcp next server could be saved as a name, not just IP
+	* Fixes #548 - Subnet sometimes include records from other subnets ISC dhcp does not restrict users to put the host entries inside a subnet block.
+	* Minor imporvements to the build in dhcp broswer - * added delete reservation option * sorted subnet list * add counters to subnets and records page * fixed incorrect table headers in subnet details page * fixed annonying extra whitespace in the top bar
+
+2010-12-16	Ohad Levy <ohadlevy@gmail.com>
+	* free IP now returns JSON
+
+2010-12-02	Ohad Levy <ohadlevy@gmail.com>
+	* record is not created at this stage...
+	* Added loggin
+
+2010-12-01	Ohad Levy <ohadlevy@gmail.com>
+	* Sample config file
+	* Added more verbose errors upon API requests
+	* Added more error messages to nsupdate based on pikelly patches
+	* Added timestamps to subnets data
+	* cleanup the dhcp api's added more error messages etc
+	* added dhcp vendor type and configuration files into settings
+	* withspaces alignments
+	* Renamed foreman-proxy to smart-proxy
+
+2010-10-24	Ohad Levy <ohadlevy@gmail.com>
+	* create the image directory if it doesnt exists Return status of boot file fetching
+	* fixed typos
+
+2010-10-22	Ohad Levy <ohadlevy@gmail.com>
+	* MAC validations should be case insensitive
+
+2010-10-21	Ohad Levy <ohadlevy@gmail.com>
+	* it show now be possible to run it though the bin directory
+	* remove swp files
+
+2010-10-19	Ohad Levy <ohadlevy@gmail.com>
+	* added gem spec file
+
+2010-10-18	Ohad Levy <ohadlevy@gmail.com>
+	* added DHCP broke down rest actions into seperate files
+
+2010-10-17	Ohad Levy <ohadlevy@gmail.com>
+	* Added DHCP as a module
+	* minor refactoring to tftp module
+	* Changed SETTINGS to openstruct Chagned DNS from a module into a class (wip)
+
+2010-10-14	Ohad Levy <ohadlevy@gmail.com>
+	* Added DNS management
+	* first commit
+
