@@ -54,7 +54,7 @@ module Proxy::DNS
           raise Proxy::DNS::Error.new("Got no response from the DNS server")
         elsif status[1] !~ /status: NOERROR/
           logger.debug "nsupdate: errors\n" + status.join("\n")
-          raise Proxy::DNS::Error.new("Update errors: ") + status.join("\n")
+          raise Proxy::DNS::Error.new("Update errors: #{status.join("\n")}")
         end
       else
         logger.debug "nsupdate: executed - #{cmd}"
