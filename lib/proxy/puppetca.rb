@@ -69,7 +69,7 @@ module Proxy::PuppetCA
     end
 
     def pending
-      all.delete_if {|k,v| v[:state] =! "pending"}
+      all.delete_if {|k,v| v[:state] != "pending"}
     end
 
     private
