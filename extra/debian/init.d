@@ -40,9 +40,13 @@ SCRIPTNAME=/etc/init.d/$NAME
 do_start()
 {
         PIDFILE_DIR=$(dirname $PIDFILE)
-        if [ ! -x $PIDFILE_DIR ]
-        then
+        if [ ! -x $PIDFILE_DIR ]; then
             mkdir -p $PIDFILE_DIR && chown $DAEMON_USER $PIDFILE_DIR
+        fi
+
+        TMP_DIR=/usr/share/$NAME/tmp
+        if [ ! -x $TMP_DIR ]; then
+            mkdir -p $TMP_DIR && chown $DAEMON_USER $TMP_DIR
         fi
 
 	# Return

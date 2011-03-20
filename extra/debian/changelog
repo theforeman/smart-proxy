@@ -1,3 +1,9 @@
+foreman-proxy (0.1-1) unstable; urgency=low
+
+  * First public release
+
+ -- Jochen Schalanda <jochen@schalanda.name>  Sun, 20 Mar 2011 14:58:00 +0100
+
 foreman-proxy (0.0.2-1) unstable; urgency=low
 
   * Initial release
