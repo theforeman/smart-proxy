@@ -136,12 +136,16 @@ module Proxy::DHCP
         msg.sub! /Added/,      "add"
         msg.sub! /Enumerated/, "enumerate"
         msg.sub! /Queried/,    "query"
+        match = ""
         msg  = "Failed to #{msg}"
-        msg += ": No entry found" if response.grep(/not a reserved client/)
+        msg += ": No entry found" if response.grep(/not a reserved client/).size > 0
+        msg += ": #{match}" if (match = response.grep(/used by another client/)).size > 0
         raise Proxy::DHCP::Error.new(msg)
       else
         logger.info msg unless error_only
       end
+    rescue Proxy::DHCP::Error
+      raise
     rescue
       logger.error "Netsh failed:\n" + (response.is_a?(Array) ? response.join("\n") : "Response was not an array! #{response}")
       raise Proxy::DHCP::Error.new("Unknown error while processing '#{msg}'")
