@@ -3,6 +3,7 @@ require 'rake/testtask'
 require 'rake/rdoctask'
 require 'rake/packagetask'
 require 'rake/gempackagetask'
+load 'tasks/proxy_tasks.rake'
 
 desc 'Default: run unit tests.'
 task :default => :test
