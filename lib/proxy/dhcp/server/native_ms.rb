@@ -26,6 +26,10 @@ module Proxy::DHCP
 
     def addRecord options={}
       super(options)
+      ip     = options[:ip]
+      mac    = options[:mac]
+      name   = options[:hostname]
+      subnet = find_subnet(IPAddr.new(ip))
 
       msg = "Added DHCP reservation for #{name} => #{ip} - #{mac}"
       cmd = "scope #{subnet.network} add reservedip #{ip} #{mac.gsub(/:/,"")} #{name}"

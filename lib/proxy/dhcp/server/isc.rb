@@ -24,8 +24,12 @@ module Proxy::DHCP
 
     def addRecord options = {}
       super(options)
+      ip     = options[:ip]
+      mac    = options[:mac]
+      name   = options[:hostname]
+      subnet = find_subnet(IPAddr.new(ip))
+      msg    = "Added DHCP reservation for #{name}"
 
-      msg = "Added DHCP reservation for #{options[:name]}"
       omcmd "connect"
       omcmd "set name = \"#{name}\""
       omcmd "set ip-address = #{ip}"
@@ -35,10 +39,10 @@ module Proxy::DHCP
       # TODO: Extract this block into a generic dhcp options helper
       statements = []
       statements << "filename = \\\"#{options[:filename]}\\\";" if options[:filename]
-      statements << bootServer(options[:nextserver]) if options[:nextserver]
-      statements << "option host-name = \\\"#{name}\\\";" if name
+      statements << bootServer(options[:nextserver])            if options[:nextserver]
+      statements << "option host-name = \\\"#{name}\\\";"       if name
 
-      omcmd "set statements = \"#{statements.join(" ")}\"" unless statements.empty?
+      omcmd "set statements = \"#{statements.join(" ")}\""      unless statements.empty?
       omcmd "create"
       omcmd("disconnect", msg)
       Proxy::DHCP::Reservation.new(subnet, ip, mac, options)
