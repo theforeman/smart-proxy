@@ -23,12 +23,7 @@ module Proxy::DHCP
     end
 
     def addRecord options = {}
-      ip = validate_ip options[:ip]
-      mac = validate_mac options[:mac]
-      raise Proxy::DHCP::Error, "Must provide host-name" unless options[:name]
-      name = options[:name]
-      raise Proxy::DHCP::Error, "Already exists" if find_record(ip)
-      raise Proxy::DHCP::Error, "Unknown subnet for #{ip}" unless subnet = find_subnet(IPAddr.new(ip))
+      super(options)
 
       msg = "Added DHCP reservation for #{options[:name]}"
       omcmd "connect"
