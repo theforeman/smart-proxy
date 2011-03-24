@@ -76,7 +76,7 @@ module Proxy::DHCP
     def find_record record
       subnets.each do |s|
         s.records.each do |v|
-          return v if record.is_a?(String) and v.ip == record
+          return v if record.is_a?(String) and (v.ip == record or v.mac == record)
           return v if record.is_a?(Proxy::DHCP::Record) and v == record
           return v if record.is_a?(IPAddr) and v.ip == record.to_s
         end
@@ -84,8 +84,22 @@ module Proxy::DHCP
       return nil
     end
 
+    def ensure_ip_and_mac_unused ip, mac
+      entry = nil
+      raise Proxy::DHCP::Error, "Address #{ip} is used by this reservation: #{entry.ip} - #{entry.mac}"  if (entry = find_record(ip))
+      raise Proxy::DHCP::Error, "MAC #{mac} is used by this reservation: #{entry.mac} - #{entry.ip}"     if (entry = find_record(mac))
+    end
+
     def inspect
       self
+    end
+
+    def addRecord options = {}
+      ip = validate_ip options[:ip]
+      mac = validate_mac options[:mac]
+      ensure_ip_and_mac_unused ip, mac
+      name = options[:hostname] || raise(Proxy::DHCP::Error, "Must provide hostname")
+      raise Proxy::DHCP::Error, "Unknown subnet for #{ip}" unless subnet = find_subnet(IPAddr.new(ip))
     end
 
     def delRecord subnet, record
