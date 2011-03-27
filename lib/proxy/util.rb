@@ -16,7 +16,7 @@ module Proxy::Util
       @@tasks = @@tasks.collect { |t| nil unless t.is_a? String }.compact
 
       # run the task in its own thread
-      logger.debug "Starting task (total: #{@@tasks.count}): #{cmd}"
+      logger.debug "Starting task (total: #{@@tasks.size}): #{cmd}"
       @task = Thread.new(cmd) do |cmd|
         Open3::popen3(cmd) do |stdin,stdout,stderr,thr|
           # PIDs are not available under Ruby 1.8
