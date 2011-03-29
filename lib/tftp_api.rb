@@ -26,6 +26,16 @@ class SmartProxy
     end
   end
 
+  # Get the value for next_server
+  get "/tftp/serverName" do
+     begin
+        log_halt 400, "Smart Proxy does not have a TFTP next_server configured" unless SETTINGS.tftp_server
+        {:serverName => SETTINGS.tftp_server}.to_json
+     rescue Exception => e
+        log_halt 400, 2.to_s
+     end
+  end
+
   # delete a record from a network
   delete "/tftp/:mac" do
     begin

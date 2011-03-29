@@ -22,6 +22,7 @@
 
 # Enable TFTP management
 :tftp: true
+:tftp_server: tftp.domain.com
 :tftproot: /tmp/tftpboot
 
 
