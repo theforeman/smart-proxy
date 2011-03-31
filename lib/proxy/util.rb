@@ -49,7 +49,7 @@ module Proxy::Util
   # if path is ommited will search only in user PATH
   def which(bin, *path)
     path += ENV['PATH'].split(File::PATH_SEPARATOR)
-    path.uniq.each do |dir|
+    path.flatten.uniq.each do |dir|
       dest = File.join(dir, bin)
       return dest if FileTest.file? dest and FileTest.executable? dest
     end
