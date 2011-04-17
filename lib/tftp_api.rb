@@ -26,6 +26,12 @@ class SmartProxy
     end
   end
 
+  # Get the value for next_server
+  get "/tftp/serverName" do
+     {"serverName" => (SETTINGS.tftp_servername || "")}.to_json
+  end
+
+
   # delete a record from a network
   delete "/tftp/:mac" do
     begin

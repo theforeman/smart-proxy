@@ -23,6 +23,8 @@
 # Enable TFTP management
 :tftp: false
 #:tftproot: /var/lib/tftpboot
+# Defines the TFTP Servername to use, overrides the name in the subnet declaration
+#:tftp_servername: tftp.domain.com
 
 
 # Enable DNS management
