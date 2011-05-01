@@ -5,24 +5,19 @@ module Proxy::PuppetCA
 
   class << self
 
+    def sign certname
+      puppetca("sign", certname)
+    end
+
     def clean certname
-      find_puppetca
-      certname.downcase!
-      command = "#{@sudo} -S #{@puppetca} --clean #{certname}"
-      logger.debug "executing #{command}"
-      response = `#{command}`
-      unless $?.success?
-        logger.warn "Failed to run puppetca: #{response}"
-        raise "Execution of puppetca failed, check log files"
-      end
-      true
+      puppetca("clear", certname)
     end
 
     #remove certname from autosign if exists
     def disable certname
       raise "No such file #{autosign_file}" unless File.exists?(autosign_file)
 
-      entries = open(autosign_file, File::RDONLY).readlines.collect do |l|
+      entries  = open(autosign_file, File::RDONLY).readlines.collect do |l|
         l if l.chomp != certname
       end.uniq.compact
       autosign = open(autosign_file, File::TRUNC|File::RDWR)
@@ -33,7 +28,7 @@ module Proxy::PuppetCA
 
     # add certname to puppet autosign file
     # parameter is certname to use
-    def sign certname
+    def autosign certname
       FileUtils.touch(autosign_file) unless File.exist?(autosign_file)
 
       autosign = open(autosign_file, File::RDWR)
@@ -74,7 +69,7 @@ module Proxy::PuppetCA
 
     private
 
-    # heler to find puppetca and sudo binaries
+    # helper to find puppetca and sudo binaries
     # checks if our CA really exists
     def find_puppetca
       ssl_dir = Pathname.new ssldir
@@ -114,14 +109,28 @@ module Proxy::PuppetCA
     # parse the puppetca --list output
     def certificate str
       case str
-      when /(\+|\-)\s+(.*)\s+\((\S+)\)/
-        state = $1 == "-" ? "revoked" : "valid"
-        return {$2 => {:state => state, :fingerprint => $3}}
-      when /(.*)\s+\((\S+)\)/
-        return {$1 => {:state => "pending", :fingerprint => $2}}
-      else
-        return {}
+        when /(\+|\-)\s+(.*)\s+\((\S+)\)/
+          state = $1 == "-" ? "revoked" : "valid"
+          return { $2 => { :state => state, :fingerprint => $3 } }
+        when /(.*)\s+\((\S+)\)/
+          return { $1 => { :state => "pending", :fingerprint => $2 } }
+        else
+          return {}
       end
+    end
+
+    def puppetca mode, certname
+      raise "invalid mode #{mode}" unless mode =~ /^(clean|sign)$/
+      find_puppetca
+      certname.downcase!
+      command = "#{@sudo} -S #{@puppetca} --sign #{certname}"
+      logger.debug "executing #{command}"
+      response = `#{command}`
+      unless $?.success?
+        logger.warn "Failed to run puppetca: #{response}"
+        raise "Execution of puppetca failed, check log files"
+      end
+      $?.success?
     end
   end
 end

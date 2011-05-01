@@ -21,7 +21,7 @@ class SmartProxy
     content_type :json
     certname = params[:certname]
     begin
-      Proxy::PuppetCA.sign(certname)
+      Proxy::PuppetCA.autosign(certname)
     rescue => e
       log_halt 406, "Failed to enable autosign for #{certname}: #{e}"
     end
@@ -37,6 +37,15 @@ class SmartProxy
     end
   end
 
+  post "/puppet/ca/:certname" do
+    content_type :json
+    certname = params[:certname]
+    begin
+      Proxy::PuppetCA.sign(certname)
+    rescue => e
+      log_halt 406, "Failed to enable autosign for #{certname}: #{e}"
+    end
+  end
   delete "/puppet/ca/:certname" do
     begin
       content_type :json
