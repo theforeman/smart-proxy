@@ -10,7 +10,7 @@ module Proxy::PuppetCA
     end
 
     def clean certname
-      puppetca("clear", certname)
+      puppetca("clean", certname)
     end
 
     #remove certname from autosign if exists
@@ -123,7 +123,7 @@ module Proxy::PuppetCA
       raise "invalid mode #{mode}" unless mode =~ /^(clean|sign)$/
       find_puppetca
       certname.downcase!
-      command = "#{@sudo} -S #{@puppetca} --sign #{certname}"
+      command = "#{@sudo} -S #{@puppetca} --#{mode} #{certname}"
       logger.debug "executing #{command}"
       response = `#{command}`
       unless $?.success?
