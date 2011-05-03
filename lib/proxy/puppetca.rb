@@ -1,4 +1,6 @@
 require 'proxy/log'
+require 'openssl'
+
 module Proxy::PuppetCA
   extend Proxy::Log
   extend Proxy::Util
@@ -60,7 +62,7 @@ module Proxy::PuppetCA
       response.split("\n").each do |line|
         hash.merge! certificate(line) rescue logger.warn("Failed to parse line: #{line}")
       end
-      hash
+      hash.merge(ca_inventory) {|key, h1, h2| h1.merge(h2)}
     end
 
     def pending
@@ -117,6 +119,31 @@ module Proxy::PuppetCA
         else
           return {}
       end
+    end
+
+    def ca_inventory
+      inventory = Pathname.new(ssldir).join("ca","inventory.txt")
+      raise "Unable to find CA inventory file at #{inventory}" unless File.exists?(inventory)
+      hash = {}
+      # 0x005a 2011-04-16T07:12:46GMT 2016-04-14T07:12:46GMT /CN=uuid
+      File.read(inventory).each_line do |cert|
+        if cert =~ /(0(x|X)(\d|[a-f]|[A-F])+)\s+(\d+\S+)\s+(\d+\S+)\s+\/CN=(\S+)/
+          hash[$6] = {:serial => $1.to_i(16), :not_before => $4, :not_after => $5}
+        end
+      end
+      crl = revoked_serials
+      hash.each do |cert,values|
+        values[:state] = "revoked" if crl.include?(values[:serial])
+      end
+      hash
+    end
+
+    def revoked_serials
+      crl = Pathname.new(ssldir).join("ca","ca_crl.pem")
+      raise "Unable to find CRL" unless File.exists?(crl)
+
+      crl = OpenSSL::X509::CRL.new(File.read(crl))
+      crl.revoked.collect {|r| r.serial}
     end
 
     def puppetca mode, certname
