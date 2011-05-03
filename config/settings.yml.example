@@ -43,6 +43,8 @@
 # Settings for Redhat ISC
 #:dhcp_config: /etc/dhcpd.conf
 #:dhcp_leases: /var/lib/dhcpd/dhcpd.leases
+#:dhcp_key_name: secret_key_name
+#:dhcp_key_secret: secret_key
 
 # enable PuppetCA management
 :puppetca: false
