@@ -1,5 +1,7 @@
 module Proxy
   MODULES = %w{dns dhcp tftp puppetca puppet}
+  VERSION = "0.2"
+
   require "proxy/settings"
   require "fileutils"
   require "pathname"
@@ -14,6 +16,10 @@ module Proxy
 
   def self.features
     MODULES.collect{|mod| mod if SETTINGS.send mod}.compact
+  end
+
+  def self.version
+    {:version => VERSION}
   end
 
 end

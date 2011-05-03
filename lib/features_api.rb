@@ -12,4 +12,13 @@ class SmartProxy < Sinatra::Base
       log_halt 400, e.to_s
     end
   end
+
+  get "/version" do
+    begin
+      Proxy.version.to_json
+    rescue => e
+      log_halt 400, e.to_s
+    end
+  end
+
 end
