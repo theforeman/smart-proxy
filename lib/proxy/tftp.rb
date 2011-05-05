@@ -57,7 +57,7 @@ module Proxy::TFTP
       #as the dst might contain another sub directory
       FileUtils.mkdir_p destination.parent
 
-      cmd = "wget --no-check-certificate -nv -c #{src} -O \"#{destination}\""
+      cmd = "wget --timeout=10 --tries=3 --no-check-certificate -nv -c #{src} -O \"#{destination}\""
       Proxy::Util::CommandTask.new(cmd)
     end
 
