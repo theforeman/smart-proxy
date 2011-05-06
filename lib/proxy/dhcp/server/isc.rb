@@ -162,7 +162,7 @@ module Proxy::DHCP
         @om = nil # we cannot serialize an IO object, even if closed.
         report msg, status
       else
-        logger.debug "omshell: executed - #{SETTINGS.dhcp_key_secret.nil? ? cmd : cmd.sub(SETTINGS.dhcp_key_secret,"[filtered]")}"
+        logger.debug "omshell: executed - #{SETTINGS.dhcp_key_secret.nil? ? cmd : cmd.gsub(SETTINGS.dhcp_key_secret,"[filtered]")}"
         @om.puts cmd
       end
     end
