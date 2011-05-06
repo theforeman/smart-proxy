@@ -148,10 +148,8 @@ module Proxy::DHCP
 
     def omcmd cmd, msg=nil
       if cmd == "connect"
-        if SETTINGS.dhcp_key_name and SETTINGS.dhcp_key_secret
-          args = "key #{SETTINGS.dhcp_key} #{SETTINGS.dhcp_key_secret}"
-        end
-        @om = IO.popen("/bin/sh -c '/usr/bin/omshell #{args} 2>&1'", "r+")
+        @om = IO.popen("/bin/sh -c '/usr/bin/omshell 2>&1'", "r+")
+        @om.puts "key #{SETTINGS.dhcp_key_name} \"#{SETTINGS.dhcp_key_secret}\"" if SETTINGS.dhcp_key_name and SETTINGS.dhcp_key_secret
         @om.puts "server #{name}"
         @om.puts "connect"
         @om.puts "new host"
