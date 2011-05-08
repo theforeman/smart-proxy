@@ -3,6 +3,8 @@ require "proxy/dns"
 module Proxy::DNS
   class Bind < Record
 
+    include Proxy::Util
+
     def initialize options = {}
       raise "Unable to find Key file - check your dns_key settings" unless SETTINGS.dns_key == false or File.exists?(SETTINGS.dns_key)
       super(options)
@@ -36,10 +38,19 @@ module Proxy::DNS
 
     private
 
+    def find_nsupdate
+      @nsupdate = which("nsupdate", "/usr/bin")
+      unless File.exists?("#{@nsupdate}")
+        logger.warn "unable to find nsupdate binary, maybe missing bind-utils package?"
+        raise "unable to find nsupdate binary"
+      end
+    end
+
     def nsupdate cmd
       status = nil
       if cmd == "connect"
-        @om = IO.popen("/usr/bin/nsupdate -k #{SETTINGS.dns_key}", "r+")
+        find_nsupdate if @nsupdate.nil?
+        @om = IO.popen("#{@nsupdate} -k #{SETTINGS.dns_key}", "r+")
         @om.puts "server #{@server}"
       elsif cmd == "disconnect"
         @om.puts "send"
