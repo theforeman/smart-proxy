@@ -1,7 +1,7 @@
-require "proxy/dns"
+require "proxy/dns/server"
 
 module Proxy::DNS
-  class Bind < Record
+  class Bind < Proxy::DNS::Server
 
     include Proxy::Util
 
