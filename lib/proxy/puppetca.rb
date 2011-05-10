@@ -5,6 +5,8 @@ module Proxy::PuppetCA
   extend Proxy::Log
   extend Proxy::Util
 
+  class NotPresent < RuntimeError; end
+
   class << self
 
     def sign certname
@@ -19,13 +21,24 @@ module Proxy::PuppetCA
     def disable certname
       raise "No such file #{autosign_file}" unless File.exists?(autosign_file)
 
-      entries  = open(autosign_file, File::RDONLY).readlines.collect do |l|
-        l if l.chomp != certname
+      found = false
+      entries = open(autosign_file, File::RDONLY).readlines.collect do |l|
+        if l.chomp != certname
+          l
+        else
+          found = true
+          nil
+        end
       end.uniq.compact
-      autosign = open(autosign_file, File::TRUNC|File::RDWR)
-      autosign.write entries
-      autosign.close
-      logger.info "Removed #{certname} from autosign"
+      if found
+        autosign = open(autosign_file, File::TRUNC|File::RDWR)
+        autosign.write entries
+        autosign.close
+        logger.info "Removed #{certname} from autosign"
+      else
+        logger.info "Attempt to remove nonexistant client autosign for #{certname}"
+        raise NotPresent, "Attempt to remove nonexistant client autosign for #{certname}"
+      end
     end
 
     # add certname to puppet autosign file
@@ -151,15 +164,24 @@ module Proxy::PuppetCA
     end
 
     def puppetca mode, certname
-      raise "invalid mode #{mode}" unless mode =~ /^(clean|sign)$/
+      raise "Invalid mode #{mode}" unless mode =~ /^(clean|sign)$/
       find_puppetca
       certname.downcase!
       command = "#{@sudo} -S #{@puppetca} --#{mode} #{certname}"
-      logger.debug "executing #{command}"
-      response = `#{command}`
-      unless $?.success?
-        logger.warn "Failed to run puppetca: #{response}"
-        raise "Execution of puppetca failed, check log files"
+      logger.debug "Executing #{command}"
+      response = `#{command} 2>&1`
+      if $?.success?
+        logger.info "#{mode}ed puppet certificate for #{certname}"
+      else
+        # Later versions of puppetca return OK even if the certificate is not present
+        # However we can report this condition for 0.24 and not flag an error to foreman
+        if response =~ /Could not find client certificate/
+          logger.info "Attempt to remove nonexistant client certificate for #{certname}"
+          raise NotPresent, "Attempt to remove nonexistant client certificate for #{certname}"
+        else
+          logger.warn "Failed to run puppetca: #{response}"
+          raise "Execution of puppetca failed, check log files"
+        end
       end
       $?.success?
     end

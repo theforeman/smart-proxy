@@ -32,6 +32,8 @@ class SmartProxy
     certname = params[:certname]
     begin
       Proxy::PuppetCA.disable(certname)
+    rescue Proxy::PuppetCA::NotPresent => e
+      log_halt 404, "#{e}"
     rescue => e
       log_halt 406, "Failed to remove autosign for #{certname}: #{e}"
     end
@@ -51,6 +53,8 @@ class SmartProxy
       content_type :json
       certname = params[:certname]
       Proxy::PuppetCA.clean(certname)
+    rescue Proxy::PuppetCA::NotPresent => e
+      log_halt 404, "#{e}"
     rescue => e
       log_halt 406, "Failed to remove certificate(s) for #{certname}: #{e}"
     end
