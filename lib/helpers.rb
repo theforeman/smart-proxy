@@ -1,11 +1,21 @@
 class SmartProxy < Sinatra::Base
 
   helpers do
-    def log_halt code, message
+    # Accepts a html error code and a message, which is then returned to the caller after adding to the proxy log
+    # OR  a block which is executed and its errors handled in a similar way.
+    # If no code is supplied when the block is declared then the html error used is 400.
+    def log_halt code=nil, message=nil
+      begin
+        if block_given?
+          return yield
+        end
+      rescue => e
+        message += e.message
+        code     = code || 400
+      end
       content_type :json if request.accept.include?("application/json")
       logger.error message
       halt code, message
     end
   end
-
 end

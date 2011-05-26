@@ -3,65 +3,53 @@ require 'pathname'
 require "proxy/util"
 
 module Proxy::TFTP
-  extend Proxy::Log
 
-  class << self
+  class Tftp
+    include Proxy::Log
+    # Creates TFTP pxeconfig file
+    def set mac, config
+      raise "Invalid parameters received" if mac.nil? or config.nil?
 
-    # creates TFTP syslinux config file
-    # Assumes we want to use pxelinux.cfg for configuration files.
-    def create mac, config
-      if mac.nil? or config.nil?
-        logger.info "invalid parameters received"
-        return false
-      end
+      FileUtils.mkdir_p pxeconfig_dir
 
-      FileUtils.mkdir_p syslinux_dir
-
-      File.open(syslinux_mac(mac), 'w') {|f| f.write(config) }
-      logger.info "TFTP entry for #{mac} created successfully"
-    rescue StandardError => e
-      logger.warn "TFTP Adding entry failed: #{e}"
-      false
+      File.open(pxeconfig_file(mac), 'w') {|f| f.write(config) }
+      logger.info "TFTP: entry for #{mac} created successfully"
     end
 
-    def create_default config
-      if config.nil?
-        return false
-      end
-      FileUtils.mkdir_p syslinux_dir
-      File.open(syslinux_default, 'w') {|f| f.write(config) }
-      logger.info "Default TFTP #{syslinux_default} entry created successfully"
-    end
-
-    # removes links created by create method
-    # Assumes we want to use pxelinux.cfg for configuration files.
-    # parameter is a mac address
-    def remove mac
-      file = syslinux_mac(mac)
+    # Removes pxeconfig files
+    def del mac
+      file = pxeconfig_file(mac)
       if File.exists?(file)
         FileUtils.rm_f file
-        logger.debug "TFTP entry for #{mac} removed successfully"
+        logger.debug "TFTP: entry for #{mac} removed successfully"
       else
         logger.info "TFTP: Skipping a request to delete a file which doesn't exists"
       end
-    rescue StandardError => e
-      logger.warn "TFTP removing entry failed: #{e}"
-      false
     end
 
-    def fetch_boot_file dst, src
-      filename    = src.split("/")[-1]
-      destination = Pathname.new("#{SETTINGS.tftproot}/#{dst}-#{filename}")
-
-      #ensure that our image direcotry exists
-      #as the dst might contain another sub directory
-      FileUtils.mkdir_p destination.parent
-
-      cmd = "wget --timeout=10 --tries=3 --no-check-certificate -nv -c #{src} -O \"#{destination}\""
-      Proxy::Util::CommandTask.new(cmd)
+    # Gets the contents of a pxeconfig file
+    def get mac
+      file = pxeconfig_file(mac)
+      if File.exists?(file)
+        config = File.open(pxeconfig_file(mac), 'r') {|f| f.readlines }
+        logger.debug "TFTP: entry for #{mac} read successfully"
+      else
+        logger.info "TFTP: Skipping a request to read a file which doesn't exists"
+        raise "File #{file} not found"
+      end
+      config
     end
 
-    private
+    # Creates a default menu file
+    def create_default config
+      raise "Default config not supplied" if config.nil?
+
+      FileUtils.mkdir_p File.dirname pxe_default
+      File.open(pxe_default, 'w') {|f| f.write(config) }
+      logger.info "TFTP: #{pxe_default} entry created successfully"
+    end
+
+    protected
     # returns the absolute path
     def path(p = nil)
       p ||= SETTINGS.tftproot || File.dirname(__FILE__) + "/tftpboot"
@@ -69,18 +57,43 @@ module Proxy::TFTP
       dir = defined?(RAILS_ROOT) ? RAILS_ROOT : File.dirname(__FILE__)
       return (p =~ /^\//) ? p : "#{dir}/#{p}"
     end
+  end
 
-    def syslinux_mac mac
-      "#{syslinux_dir}/01-"+mac.gsub(/:/,"-").downcase
-    end
-
-    def syslinux_default
-      "#{syslinux_dir}/default"
-    end
-
-    def syslinux_dir
+  class Syslinux < Tftp
+    def pxeconfig_dir
       "#{path}/pxelinux.cfg"
     end
+    def pxe_default
+      "#{pxeconfig_dir}/default"
+    end
+    def pxeconfig_file mac
+      "#{pxeconfig_dir}/01-"+mac.gsub(/:/,"-").downcase
+    end
+  end
 
+  class Pxegrub < Tftp
+    def pxeconfig_dir
+      "#{path}"
+    end
+    def pxe_default
+      "#{pxeconfig_dir}/boot/grub/menu.lst"
+    end
+    def pxeconfig_file mac
+      "#{pxeconfig_dir}/menu.lst.01"+mac.gsub(/:/,"").upcase
+    end
+  end
+
+  class << self
+    def fetch_boot_file dst, src
+      filename    = src.split("/")[-1]
+      destination = Pathname.new("#{SETTINGS.tftproot}/#{dst}-#{filename}")
+
+      # Ensure that our image directory exists
+      # as the dst might contain another sub directory
+      FileUtils.mkdir_p destination.parent
+
+      cmd = "wget --timeout=10 --tries=3 --no-check-certificate -nv -c #{src} -O \"#{destination}\""
+      Proxy::Util::CommandTask.new(cmd)
+    end
   end
 end
