@@ -1,4 +1,62 @@
+2011-05-29	Jochen Schalanda <jochen@schalanda.name>
+	* * Added new changelog entry for smart-proxy 0.2rc2 release * Changed source format to '3.0 (native)'
+
+2011-05-26	Paul Kelly <paul.ian.kelly@googlemail.com>
+	* Fixes #846 - supports Solaris TFTP pxe configuration files
+
+2011-05-11	Paul Kelly <paul.ian.kelly@googlemail.com>
+	* Fixes #845 - puppetca delete operations should report NotFound
+
+2011-05-08	Ohad Levy <ohadlevy@gmail.com>
+	* fixes #879 - Cryptic error message when nsupdate is not found
+
+2011-05-06	Ohad Levy <ohadlevy@gmail.com>
+	* fixes #880 - incorrect parsing of key settings causes wrong argument type
+	* partial fix - refs #853
+	* refs #853 - fixes typo
+
+2011-05-05	Marcello de Sousa <foreman-dev@area151.com>
+	* fixes #878 - Include wget limits for timeout and retries.
+
+2011-05-03	Ohad Levy <ohadlevy@gmail.com>
+	* fixes #783 -API should contain a version
+	* fixes #853 - If used with the proxy, the dhcpd server is open for connections from any server
+	* refs #873 - do not merge pending certificate request info with revoked certificates
+	* fixes #873 - puppetca api should include revoked certificates and timestamps
+
+2011-05-01	Ohad Levy <ohadlevy@gmail.com>
+	* refs #869 - fixed typos
+	* fixes #869 - Enable API to sign pending certificate requests
+
+2011-04-17	Ohad Levy <ohadlevy@gmail.com>
+	* Fixes Bug #800, Adds support for tftp_servername
+
+2011-04-06	Jochen Schalanda <jochen@schalanda.name>
+	* (Re-) Introduced dedicated system user for smart-proxy
+
+2011-03-31	Frank Sweetser <fs@WPI.EDU>
+	* fixes #801 - Flatten path before iterating
+
+2011-03-27	Ohad Levy <ohadlevy@gmail.com>
+	* fixes #795 - Failed to fetch boot files on older ruby versions
+
+2011-03-24	Ohad Levy <ohadlevy@gmail.com>
+	* Fixes #781 - Cleanups and remove ebarresing code
+	* Merge branch '781' into develop
+	* fixes #787 - add rake task to send patches
+	* Fixes #781 - DHCP create attempted when mac already used
+
+2011-03-24	Paul kelly <paul.ian.kelly@googlemail.com>
+	* Fixes 779 - windows 64 bit detection wrong
+	* Fixed #780 - Broken error messaging in MS DHCP
+
+2011-03-20	Jochen Schalanda <jochen@schalanda.name>
+	* fixes # 764 - Updated Debian package specs for version 0.1
+
 2011-03-17	Ohad Levy <ohadlevy@gmail.com>
+	* fixes #755 - parenthesize warning
+	* fixes #754 - undefined method '+' for #<Proxy
+	* Updating releas relate files
 	* fixes #732 - provide better defaults inside rpm package
 
 2011-03-17	Mark Bainter <mark.bainter@match.com>
