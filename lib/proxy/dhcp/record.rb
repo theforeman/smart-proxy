@@ -6,12 +6,11 @@ module Proxy::DHCP
   class Record
 
     attr_reader :ip, :mac, :subnet
-    attr_accessor :options
     include Proxy::DHCP
     include Proxy::Log
     include Proxy::Validations
 
-    def initialize(subnet, ip, mac, options = {})
+    def initialize(subnet, ip, mac, options = nil)
       @subnet  = validate_subnet subnet
       @ip      = validate_ip ip
       @mac     = validate_mac mac.downcase
@@ -25,6 +24,14 @@ module Proxy::DHCP
 
     def inspect
       self
+    end
+
+    def options= value
+      @options = value
+    end
+
+    def options
+      @options || subnet.server.loadRecordOptions(self).merge(:mac => mac, :ip => ip)
     end
 
     def [] opt

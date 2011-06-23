@@ -62,7 +62,7 @@ module Proxy::DHCP
           ip  = $1
           mac = $2.gsub(/-/,":").match(/^(.*?).$/)[1]
           begin
-            Proxy::DHCP::Reservation.new(subnet, ip, mac)
+            Proxy::DHCP::Reservation.new(subnet, ip, mac) if subnet.include? ip
           rescue Exception => e
             logger.warn "Skipped #{line} - #{e}"
           end
@@ -84,9 +84,9 @@ module Proxy::DHCP
       subnet = record.subnet
       raise "unable to find subnet for #{record}" if subnet.nil?
       cmd = "scope #{subnet.network} Show ReservedOptionValue #{record.ip}"
-      msg = "Queried #{record.name} options"
+      msg = "Queried #{record.ip} options"
 
-      record.options = parse_options(execute(cmd, msg))
+      record.options = parse_options(execute(cmd, msg)).merge(:ip => record.ip, :mac => record.mac)
     end
 
 
