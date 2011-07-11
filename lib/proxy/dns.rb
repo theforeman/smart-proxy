@@ -1,5 +1,6 @@
 module Proxy::DNS
   class Error < RuntimeError; end
+  class Collision < RuntimeError; end
   class Record
     include Proxy::Log
 

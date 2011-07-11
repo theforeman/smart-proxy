@@ -5,6 +5,7 @@ module Proxy::DHCP
   require "proxy/dhcp/server"
   Optcode = {:hostname => 12, :filename => 67, :nextserver => 66}
   class Error < RuntimeError; end
+  class Collision < RuntimeError; end
   class InvalidRecord < RuntimeError; end
 
   def kind

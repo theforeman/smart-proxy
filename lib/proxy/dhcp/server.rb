@@ -86,8 +86,8 @@ module Proxy::DHCP
 
     def ensure_ip_and_mac_unused ip, mac
       entry = nil
-      raise Proxy::DHCP::Error, "Address #{ip} is used by this reservation: #{entry.ip} - #{entry.mac}"  if (entry = find_record(ip))
-      raise Proxy::DHCP::Error, "MAC #{mac} is used by this reservation: #{entry.mac} - #{entry.ip}"     if (entry = find_record(mac))
+      raise Proxy::DHCP::Collision, "Address #{ip} is used by this reservation: #{entry.ip} - #{entry.mac}"  if (entry = find_record(ip))
+      raise Proxy::DHCP::Collision, "MAC #{mac} is used by this reservation: #{entry.mac} - #{entry.ip}"     if (entry = find_record(mac))
     end
 
     def inspect

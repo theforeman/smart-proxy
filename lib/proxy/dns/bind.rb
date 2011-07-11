@@ -4,6 +4,7 @@ module Proxy::DNS
   class Bind < Record
 
     include Proxy::Util
+    attr_reader :resolver
 
     def initialize options = {}
       raise "Unable to find Key file - check your dns_key settings" unless SETTINGS.dns_key == false or File.exists?(SETTINGS.dns_key)
@@ -15,13 +16,25 @@ module Proxy::DNS
     #          :type => "PTR"}
     def create
       nsupdate "connect"
+
+      @resolver = Resolv::DNS.new(:nameserver => @server)
       case @type
-      when "A"
-        nsupdate "update add #{@fqdn}.  #{@ttl} #{@type} #{@value}"
-      when "PTR"
-        nsupdate "update add #{@value}.  #{@ttl} IN #{@type} #{@fqdn}"
+        when "A"
+          if ip = dns_find(@fqdn)
+            raise(Proxy::DNS::Collision, "#{@fqdn} is alread used by #{ip}")
+          else
+            nsupdate "update add #{@fqdn}.  #{@ttl} #{@type} #{@value}"
+          end
+        when "PTR"
+          if name = dns_find(@value)
+            raise(Proxy::DNS::Collision, "#{@value} is alread used by #{name}")
+          else
+            nsupdate "update add #{@value}.  #{@ttl} IN #{@type} #{@fqdn}"
+          end
       end
       nsupdate "disconnect"
+    ensure
+      @om.close unless @om.closed?
     end
 
     # remove({ :fqdn => "node01.lab", :value => "192.168.100.2"}
@@ -71,6 +84,16 @@ module Proxy::DNS
         logger.debug "nsupdate: executed - #{cmd}"
         @om.puts cmd
       end
+    end
+    private
+    def dns_find key
+      if match = key.match(/(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/)
+        resolver.getname(match[1..4].reverse.join(".")).to_s
+      else
+        resolver.getaddress(key).to_s
+      end
+    rescue Resolv::ResolvError
+      false
     end
   end
 end

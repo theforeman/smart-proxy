@@ -92,6 +92,8 @@ class SmartProxy < Sinatra::Base
       @server.addRecord({ :mac=> params[:mac], :nextserver=> params[:nextserver],
                         :hostname=>params[:name], :filename=> params[:filename],
                         :name=>params[:name], :ip=>params[:ip]})
+    rescue Proxy::DHCP::Collision => e
+      log_halt 409, e.to_s
     rescue => e
       log_halt 400, e.to_s
     end
