@@ -64,7 +64,7 @@ module Proxy::DNS
       status = nil
       if cmd == "connect"
         find_nsupdate if @nsupdate.nil?
-        @om = IO.popen("#{@nsupdate} -k #{SETTINGS.dns_key}", "r+")
+        @om = IO.popen("#{@nsupdate} #{SETTINGS.dns_key ? "-k " + SETTINGS.dns_key : ""}", "r+")
         @om.puts "server #{@server}"
       elsif cmd == "disconnect"
         @om.puts "send"
