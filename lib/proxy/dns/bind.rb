@@ -1,4 +1,5 @@
 require "proxy/dns"
+require 'resolv'
 
 module Proxy::DNS
   class Bind < Record
