@@ -35,7 +35,7 @@ module Proxy::DNS
       end
       nsupdate "disconnect"
     ensure
-      @om.close unless @om.closed?
+      @om.close unless @om.nil? or @om.closed?
     end
 
     # remove({ :fqdn => "node01.lab", :value => "192.168.100.2"}
