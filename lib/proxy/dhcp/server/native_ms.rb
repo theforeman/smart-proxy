@@ -28,7 +28,7 @@ module Proxy::DHCP
       super(options)
       ip     = options[:ip]
       mac    = options[:mac]
-      name   = options[:hostname]
+      name   = options[:name]
       subnet = find_subnet(IPAddr.new(ip))
 
       msg = "Added DHCP reservation for #{name} => #{ip} - #{mac}"
