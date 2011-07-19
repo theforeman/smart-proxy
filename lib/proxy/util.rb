@@ -46,7 +46,7 @@ module Proxy::Util
 
   # searches for binaries in predefined directories and user PATH
   # accepts a binary name and an array of paths to search first
-  # if path is ommited will search only in user PATH
+  # if path is omitted will search only in user PATH
   def which(bin, *path)
     path += ENV['PATH'].split(File::PATH_SEPARATOR)
     path.flatten.uniq.each do |dir|

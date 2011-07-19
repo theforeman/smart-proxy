@@ -15,13 +15,12 @@
       <td><%= record.filename %></td>
       <td><%= record.title %></td>
       <td>
-        <form action=<%= "/dhcp/#{@subnet.network}/#{record.mac}" %> method='post'> 
-          <input name='_method' type='hidden' value='delete'> 
-          <div> 
-            <input name='commit' type='submit' value='delete' /> 
-          </div> 
-          </input> 
-        </form> 
+        <form action="<%= "/dhcp/#{@subnet.network}/#{record.mac}" %>" method="post">
+          <input name='_method' type='hidden' value='delete' />
+          <div>
+            <input name='commit' type='submit' value='delete' />
+          </div>
+        </form>
       </td>
     </tr>
   <% end %>

@@ -22,13 +22,13 @@ module Proxy::DNS
       case @type
         when "A"
           if ip = dns_find(@fqdn)
-            raise(Proxy::DNS::Collision, "#{@fqdn} is alread used by #{ip}")
+            raise(Proxy::DNS::Collision, "#{@fqdn} is already used by #{ip}")
           else
             nsupdate "update add #{@fqdn}.  #{@ttl} #{@type} #{@value}"
           end
         when "PTR"
           if name = dns_find(@value)
-            raise(Proxy::DNS::Collision, "#{@value} is alread used by #{name}")
+            raise(Proxy::DNS::Collision, "#{@value} is already used by #{name}")
           else
             nsupdate "update add #{@value}.  #{@ttl} IN #{@type} #{@fqdn}"
           end
@@ -72,7 +72,7 @@ module Proxy::DNS
         @om.close_write
         status = @om.readlines
         @om.close
-        @om = nil # we cannot serialize an IO obejct, even if closed.
+        @om = nil # we cannot serialize an IO object, even if closed.
         # TODO Parse output for errors!
         if status.empty?
           logger.debug "nsupdate returned no status!"

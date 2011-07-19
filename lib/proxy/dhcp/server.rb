@@ -99,11 +99,20 @@ module Proxy::DHCP
       mac = validate_mac options[:mac]
       ensure_ip_and_mac_unused ip, mac
       name = options[:hostname] || raise(Proxy::DHCP::Error, "Must provide hostname")
+      raise(Proxy::DHCP::Error, "DHCP implementation does not support Vendor Options") if vendor_options_included?(options) and !vendor_options_supported?
       raise Proxy::DHCP::Error, "Unknown subnet for #{ip}" unless subnet = find_subnet(IPAddr.new(ip))
     end
 
     def delRecord subnet, record
       subnet.delete record
+    end
+
+    def vendor_options_included? options
+      !(options.keys.grep(/^</).empty?)
+    end
+
+    def vendor_options_supported?
+      false
     end
 
   end

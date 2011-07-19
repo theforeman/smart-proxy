@@ -89,9 +89,7 @@ class SmartProxy < Sinatra::Base
     begin
       content_type :json
       log_halt 400, "Record #{params[:network]}/#{params[:ip]} already exists" if @server.find_record(params[:ip])
-      @server.addRecord({ :mac=> params[:mac], :nextserver=> params[:nextserver],
-                        :hostname=>params[:name], :filename=> params[:filename],
-                        :name=>params[:name], :ip=>params[:ip]})
+      @server.addRecord(params)
     rescue Proxy::DHCP::Collision => e
       log_halt 409, e.to_s
     rescue => e

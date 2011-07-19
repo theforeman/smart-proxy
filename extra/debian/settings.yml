@@ -1,7 +1,7 @@
 ---
 # SSL Setup
 
-# if enabled, all communication would be verfied via SSL
+# if enabled, all communication would be verified via SSL
 # NOTE that both certificates need to be signed by the same CA in order for this to work
 # see http://theforeman.org/projects/smart-proxy/wiki/SSL for more information
 #:ssl_certificate: ssl/certs/fqdn.pem
