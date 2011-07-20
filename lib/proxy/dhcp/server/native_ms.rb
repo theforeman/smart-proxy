@@ -151,6 +151,8 @@ module Proxy::DHCP
       execute(cmd, msg).each do |line|
         # 172.29.216.0   - 255.255.254.0  -Active        -DC BRS               -
         if match = line.match(/^\s*([\d\.]+)\s*-\s*([\d\.]+)\s*-\s*(Active|Disabled)/)
+          next if (managed_subnets = SETTINGS.dhcp_subnets) and !managed_subnets.include? "#{match[1]}/#{match[2]}"
+
           subnet = Proxy::DHCP::Subnet.new(self, match[1], match[2])
         end
       end

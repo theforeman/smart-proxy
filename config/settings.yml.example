@@ -37,6 +37,9 @@
 :dhcp: false
 # The vendor can be either isc or native_ms
 :dhcp_vendor: isc
+# dhcp_subnets is a Native MS implementation setting. It restricts the subnets queried to a
+# subset, so as to reduce the query time.
+#:dhcp_subnets: [192.168.205.0/255.255.255.128, 192.168.205.128/255.255.255.128]
 # Settings for Ubuntu ISC
 #:dhcp_config: /etc/dhcp3/dhcpd.conf
 #:dhcp_leases: /var/lib/dhcp3/dhcpd.leases
