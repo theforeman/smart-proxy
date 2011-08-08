@@ -87,6 +87,12 @@ module Proxy::DHCP
       report "Enumerated hosts on #{subnet.network}"
     end
 
+    # loadRecordOptions is called when a reservation does not have any options at all.
+    # It is not clear how this could ever occur in this server implementation
+    def loadRecordOptions
+      {}  # No options
+    end
+
     private
     def loadSubnets
       super
