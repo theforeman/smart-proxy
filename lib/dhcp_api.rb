@@ -88,7 +88,7 @@ class SmartProxy < Sinatra::Base
   post "/dhcp/:network" do
     begin
       content_type :json
-      log_halt 400, "Record #{params[:network]}/#{params[:ip]} already exists" if @server.find_record(params[:ip])
+      log_halt 409, "Record #{params[:network]}/#{params[:ip]} already exists" if @server.find_record(params[:ip])
       @server.addRecord(params)
     rescue Proxy::DHCP::Collision => e
       log_halt 409, e.to_s
