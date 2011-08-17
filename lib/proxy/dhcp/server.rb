@@ -84,12 +84,6 @@ module Proxy::DHCP
       return nil
     end
 
-    def ensure_ip_and_mac_unused ip, mac
-      entry = nil
-      raise Proxy::DHCP::Collision, "Address #{ip} is used by this reservation: #{entry.ip} - #{entry.mac}"  if (entry = find_record(ip))
-      raise Proxy::DHCP::Collision, "MAC #{mac} is used by this reservation: #{entry.mac} - #{entry.ip}"     if (entry = find_record(mac))
-    end
-
     def inspect
       self
     end
@@ -97,10 +91,24 @@ module Proxy::DHCP
     def addRecord options = {}
       ip = validate_ip options[:ip]
       mac = validate_mac options[:mac]
-      ensure_ip_and_mac_unused ip, mac
       name = options[:hostname] || raise(Proxy::DHCP::Error, "Must provide hostname")
       raise(Proxy::DHCP::Error, "DHCP implementation does not support Vendor Options") if vendor_options_included?(options) and !vendor_options_supported?
       raise Proxy::DHCP::Error, "Unknown subnet for #{ip}" unless subnet = find_subnet(IPAddr.new(ip))
+
+      # try to figure out if we already have this record
+      record = find_record(options[:ip]) || find_record(options[:mac])
+      unless record.nil?
+        if Record.compare_options(record.options, options)
+          # we already got this record, no need to do anything
+          logger.debug "We already got the same DHCP record - skipping"
+          raise Proxy::DHCP::AlreadyExists
+        else
+          logger.warn "Request to create a conflicting record"
+          logger.debug "request: #{options.inspect}"
+          logger.debug "local:   #{record.options.inspect}"
+          raise Proxy::DHCP::Collision, "Record #{options[:network]}/#{options[:ip]} already exists"
+        end
+      end
     end
 
     def delRecord subnet, record

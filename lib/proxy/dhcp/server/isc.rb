@@ -54,21 +54,21 @@ module Proxy::DHCP
       # scan for host statements
       conf.scan(/host\s+(\S+\s*\{[^}]+\})/) do |host|
         if match = host[0].match(/^(\S+)\s*\{([^\}]+)/)
-          title = match[1]
+          hostname = match[1]
           body  = match[2]
-          opts = {:title => title}
+          opts = {:hostname => hostname}
           body.split(";").each do |data|
             opts.merge!(parse_record_options(data))
           end
           if opts[:deleted]
-            subnet.delete find_record_by_title(subnet, title)
+            subnet.delete find_record_by_hostname(subnet, hostname)
             next
           end
         end
         begin
           Proxy::DHCP::Reservation.new(subnet, opts[:ip], opts[:mac], opts) if subnet.include? opts[:ip]
         rescue Exception => e
-          logger.warn "skipped #{title} - #{e}"
+          logger.warn "skipped #{hostname} - #{e}"
         end
       end
 
@@ -194,9 +194,9 @@ module Proxy::DHCP
       hex.split(":").map{|h| h.to_i(16).to_s}.join(".")
     end
 
-    def find_record_by_title subnet, title
+    def find_record_by_hostname subnet, hostname
       subnet.records.each do |v|
-        return v if v.options[:title] == title
+        return v if v.options[:hostname] == hostname
       end
     end
 

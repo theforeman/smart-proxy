@@ -16,6 +16,7 @@ module Proxy::DHCP
       @mac     = validate_mac mac.downcase
       @options = options
       @subnet.add_record(self)
+      @deleteable = @options.delete(:omshell) if @options and @options[:omshell]
     end
 
     def to_s
@@ -40,12 +41,20 @@ module Proxy::DHCP
 
     #TODO move this away from here, as this suppose to be a generic interface
     def deleteable?
-      return true unless options[:omshell]
-      options[:omshell]
+      @deleteable
     end
 
     def <=>(other)
       self.ip <=> other.ip
+    end
+
+    # compare between incoming request and our existing record
+    # if our record has all requested attributes then we say they are comparable
+    def self.compare_options(record, request)
+      request.each do |k,v|
+        return false if record[k.to_sym] != v
+      end
+      true
     end
 
   end

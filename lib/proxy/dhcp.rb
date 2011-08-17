@@ -21,6 +21,7 @@ module Proxy::DHCP
   class Error < RuntimeError; end
   class Collision < RuntimeError; end
   class InvalidRecord < RuntimeError; end
+  class AlreadyExists < RuntimeError; end
 
   def kind
     self.class.to_s.sub("Proxy::DHCP::","").downcase
