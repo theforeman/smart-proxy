@@ -63,40 +63,40 @@ end
 
 if ARGV[0] == "--service"
   raise "The service flag is used only in a windows environment" unless PLATFORM =~ /mingw/
-  begin
-    require 'win32/daemon'
-    include Win32
+    begin
+      require 'win32/daemon'
+      include Win32
 
-    # Logfile must be absolute on windows
-    logfile = (SETTINGS.log_file =~ /^\\|^[a-z]:/i) ? SETTINGS.log_file : File.dirname(__FILE__) + "\\..\\#{SETTINGS.log_file}"
-    $stdout.reopen(logfile, "a")
-    $stdout.sync = true
-    $stderr.reopen($stdout)
-    puts "#{Time.now}: Service is starting"
+      # Logfile must be absolute on windows
+      logfile = (SETTINGS.log_file =~ /^\\|^[a-z]:/i) ? SETTINGS.log_file : File.dirname(__FILE__) + "\\..\\#{SETTINGS.log_file}"
+      $stdout.reopen(logfile, "a")
+      $stdout.sync = true
+      $stderr.reopen($stdout)
+      puts "#{Time.now}: Service is starting"
 
-    class Daemon
-      def service_init
-        puts "#{Time.now}: Service is initializing"
+      class Daemon
+        def service_init
+          puts "#{Time.now}: Service is initializing"
+        end
+
+        def service_main(*args)
+          puts "#{Time.now}: Service is running"
+          SmartProxy.run!()
+          puts "#{Time.now}: Service is terminating"
+        end
+
+        def service_stop
+          puts "#{Time.now}: Service stopped"
+          exit!
+        end
       end
 
-      def service_main(*args)
-        puts "#{Time.now}: Service is running"
-        SmartProxy.run!()
-        puts "#{Time.now}: Service is terminating"
-      end
-
-      def service_stop
-        puts "#{Time.now}: Service stopped"
-        exit!
-      end
+      daemon = Daemon.new
+      daemon.mainloop
+    rescue Exception => err
+      File.open(logfile, (File::APPEND|File::CREAT|File::WRONLY)){ |f| f.puts " ***Daemon failure #{Time.now} err=#{err}" }
+      raise
     end
-
-    daemon = Daemon.new
-    daemon.mainloop
-  rescue Exception => err
-    File.open(logfile, (File::APPEND|File::CREAT|File::WRONLY)){ |f| f.puts " ***Daemon failure #{Time.now} err=#{err}" }
-    raise
-  end
 else
   SmartProxy.run!()
 end
