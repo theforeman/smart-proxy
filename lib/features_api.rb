@@ -9,7 +9,7 @@ class SmartProxy < Sinatra::Base
         erb :"features/index"
       end
     rescue => e
-      log_halt 400, e.to_s
+      log_halt 400, e
     end
   end
 
@@ -17,7 +17,7 @@ class SmartProxy < Sinatra::Base
     begin
       Proxy.version.to_json
     rescue => e
-      log_halt 400, e.to_s
+      log_halt 400, e
     end
   end
 

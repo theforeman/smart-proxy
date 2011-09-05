@@ -20,7 +20,7 @@ class SmartProxy < Sinatra::Base
     end
     @subnets = @server.subnets
   rescue => e
-    log_halt 400, e.to_s
+    log_halt 400, e
   end
 
   helpers do
@@ -46,7 +46,7 @@ class SmartProxy < Sinatra::Base
         erb :"dhcp/index"
       end
     rescue => e
-      log_halt 400, e.to_s
+      log_halt 400, e
     end
   end
 
@@ -60,7 +60,7 @@ class SmartProxy < Sinatra::Base
         erb :"dhcp/show"
       end
     rescue => e
-      log_halt 400, e.to_s
+      log_halt 400, e
     end
   end
 
@@ -69,7 +69,7 @@ class SmartProxy < Sinatra::Base
       content_type :json
       ({:ip => load_subnet.unused_ip}).to_json
     rescue => e
-      log_halt 400, e.to_s
+      log_halt 400, e
     end
   end
 
@@ -80,7 +80,7 @@ class SmartProxy < Sinatra::Base
       log_halt 404, "Record #{params[:network]}/#{params[:record]} not found" unless record
       record.options.to_json
     rescue => e
-      log_halt 400, e.to_s
+      log_halt 400, e
     end
   end
 
@@ -91,11 +91,11 @@ class SmartProxy < Sinatra::Base
       options = params.reject{|k,v| k["network"]}
       @server.addRecord(options)
     rescue Proxy::DHCP::Collision => e
-      log_halt 409, e.to_s
+      log_halt 409, e
     rescue Proxy::DHCP::AlreadyExists
       # no need to do anything
     rescue => e
-      log_halt 400, e.to_s
+      log_halt 400, e
     end
   end
 
@@ -112,7 +112,7 @@ class SmartProxy < Sinatra::Base
         redirect "/dhcp/#{params[:network]}"
       end
     rescue Exception => e
-      log_halt 400, e.to_s
+      log_halt 400, e
     end
   end
 end

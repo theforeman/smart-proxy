@@ -13,9 +13,9 @@ class SmartProxy
       setup({:fqdn => fqdn, :value => value, :type => type})
       @server.create
     rescue Proxy::DNS::Collision => e
-      log_halt 409, e.to_s
+      log_halt 409, e
     rescue Exception => e
-      log_halt 400, e.to_s
+      log_halt 400, e
     end
   end
 
@@ -31,7 +31,7 @@ class SmartProxy
       setup({:fqdn => fqdn, :value => value, :type => type})
       @server.remove
     rescue => e
-      log_halt 400, e.to_s
+      log_halt 400, e
     end
   end
 end
