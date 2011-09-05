@@ -25,16 +25,13 @@ module Proxy::DHCP
     end
 
     def addRecord options={}
-      super(options)
-      ip     = options.delete "ip"
-      mac    = options.delete "mac"
-      name   = options.delete "name"
-      subnet = find_subnet options.delete "network"
+      record = super(options)
 
-      msg = "Added DHCP reservation for #{name} => #{ip} - #{mac}"
-      cmd = "scope #{subnet.network} add reservedip #{ip} #{mac.gsub(/:/,"")} #{name}"
-      execute(cmd, msg)
+      cmd = "scope #{record.subnet.network} add reservedip #{record.ip} #{record.mac.gsub(/:/,"")} #{record.name}"
+      execute(cmd, "Added DHCP reservation for #{record}")
 
+      options = record.options
+      options.delete_if{|k,v| k == :ip or k == :mac or k == :name }
       return if options.empty?  # This reservation is just for an IP and MAC
 
       # TODO: Refactor these execs into a popen
@@ -43,17 +40,17 @@ module Proxy::DHCP
         if match = key.match(/^<([^>]+)>(.*)/)
           vendor, attr = match[1,2]
           begin
-            execute "scope #{subnet.network} set reservedoptionvalue #{ip} #{SUNW[attr][:code]} #{SUNW[attr][:kind]} vendor=#{alternate_vendor_name || vendor} #{value}", msg, true
+            execute "scope #{record.subnet.network} set reservedoptionvalue #{record.ip} #{SUNW[attr][:code]} #{SUNW[attr][:kind]} vendor=#{alternate_vendor_name || vendor} #{value}", msg, true
           rescue Proxy::DHCP::Error => e
             alternate_vendor_name = find_or_create_vendor_name vendor, e
-            execute "scope #{subnet.network} set reservedoptionvalue #{ip} #{SUNW[attr][:code]} #{SUNW[attr][:kind]} vendor=#{alternate_vendor_name || vendor} #{value}", msg, true
+            execute "scope #{record.subnet.network} set reservedoptionvalue #{ip} #{SUNW[attr][:code]} #{SUNW[attr][:kind]} vendor=#{alternate_vendor_name || vendor} #{value}", msg, true
           end
         else
-          execute "scope #{subnet.network} set reservedoptionvalue #{ip} #{Standard[key][:code]} #{Standard[key][:kind]} #{value}", msg, true
+          execute "scope #{record.subnet.network} set reservedoptionvalue #{record.ip} #{Standard[key][:code]} #{Standard[key][:kind]} #{value}", msg, true
         end
       end
 
-      record = Proxy::DHCP::Reservation.new subnet, ip, mac, options
+      record
     end
 
     # We did not find the vendor name we wish to use registered on the DHCP server so we attempt to find if there is a vendor class using an abbreviated name.

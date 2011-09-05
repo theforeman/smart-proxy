@@ -92,11 +92,12 @@ module Proxy::DHCP
       ip = validate_ip options[:ip]
       mac = validate_mac options[:mac]
       name = options[:hostname] || raise(Proxy::DHCP::Error, "Must provide hostname")
+      net = options.delete("network")
+      subnet = find_subnet(net) || raise(Proxy::DHCP::Error, "No Subnet detected for: #{net.inspect}")
       raise(Proxy::DHCP::Error, "DHCP implementation does not support Vendor Options") if vendor_options_included?(options) and !vendor_options_supported?
-      raise Proxy::DHCP::Error, "Unknown subnet for #{ip}" unless subnet = find_subnet(IPAddr.new(ip))
 
       # try to figure out if we already have this record
-      record = find_record(options[:ip]) || find_record(options[:mac])
+      record = find_record(ip) || find_record(mac)
       unless record.nil?
         if Record.compare_options(record.options, options)
           # we already got this record, no need to do anything
@@ -106,9 +107,10 @@ module Proxy::DHCP
           logger.warn "Request to create a conflicting record"
           logger.debug "request: #{options.inspect}"
           logger.debug "local:   #{record.options.inspect}"
-          raise Proxy::DHCP::Collision, "Record #{options[:network]}/#{options[:ip]} already exists"
+          raise Proxy::DHCP::Collision, "Record #{net}/#{ip} already exists"
         end
       end
+      Proxy::DHCP::Reservation.new(options.merge({:subnet => subnet, :ip => ip, :mac => mac}))
     end
 
     def delRecord subnet, record

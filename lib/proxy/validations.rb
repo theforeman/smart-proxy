@@ -12,7 +12,7 @@ module Proxy::Validations
   # validates the mac
   def validate_mac mac
     raise Error, "Invalid MAC #{mac}" unless mac =~ /([a-f0-9]{1,2}:){5}[a-f0-9]{1,2}/i
-      mac
+      mac.downcase
   end
 
   def validate_subnet subnet

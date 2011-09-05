@@ -23,29 +23,25 @@ module Proxy::DHCP
     end
 
     def addRecord options = {}
-      super(options)
-      ip     = options[:ip]
-      mac    = options[:mac]
-      name   = options[:hostname]
-      subnet = find_subnet(IPAddr.new(ip))
-      msg    = "Added DHCP reservation for #{name}"
+      record = super(options)
 
       omcmd "connect"
-      omcmd "set name = \"#{name}\""
-      omcmd "set ip-address = #{ip}"
-      omcmd "set hardware-address = #{mac}"
+      omcmd "set name = \"#{record.name}\""
+      omcmd "set ip-address = #{record.ip}"
+      omcmd "set hardware-address = #{record.mac}"
       omcmd "set hardware-type = 1"         # This is ethernet
 
+      options = record.options
       # TODO: Extract this block into a generic dhcp options helper
       statements = []
-      statements << "filename = \\\"#{options[:filename]}\\\";" if options[:filename]
-      statements << bootServer(options[:nextserver])            if options[:nextserver]
-      statements << "option host-name = \\\"#{name}\\\";"       if name
+      statements << "filename = \\\"#{options[:filename]}\\\";"  if options[:filename]
+      statements << bootServer(options[:nextServer])             if options[:nextServer]
+      statements << "option host-name = \\\"#{record.name}\\\";" if record.name
 
       omcmd "set statements = \"#{statements.join(" ")}\""      unless statements.empty?
       omcmd "create"
-      omcmd("disconnect", msg)
-      Proxy::DHCP::Reservation.new(subnet, ip, mac, options)
+      omcmd("disconnect", "Added DHCP reservation for #{record}")
+      record
     end
 
     def loadSubnetData subnet
@@ -66,7 +62,7 @@ module Proxy::DHCP
           end
         end
         begin
-          Proxy::DHCP::Reservation.new(subnet, opts[:ip], opts[:mac], opts) if subnet.include? opts[:ip]
+          Proxy::DHCP::Reservation.new(opts.merge({:subnet => subnet})) if subnet.include? opts[:ip]
         rescue Exception => e
           logger.warn "skipped #{hostname} - #{e}"
         end
@@ -145,7 +141,7 @@ module Proxy::DHCP
       when /^supersede server.filename\s+=\s+"(\S+)"/
         options[:filename] = $1
       when "dynamic"
-        options[:omshell] = true
+        options[:deleteable] = true
         #TODO: check if adding a new reservation with omshell for a free lease still
         #generates a conflict
       end

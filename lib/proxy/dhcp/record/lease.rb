@@ -7,7 +7,7 @@ module Proxy::DHCP
       @starts = args[:starts]
       @ends = args[:ends]
       @state = args[:state]
-      super(args[:subnet], args[:ip], args[:mac],args[:options])
+      super(args)
     end
 
     def deletable?

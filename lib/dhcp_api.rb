@@ -88,8 +88,7 @@ class SmartProxy < Sinatra::Base
   post "/dhcp/:network" do
     begin
       content_type :json
-      options = params.reject{|k,v| k["network"]}
-      @server.addRecord(options)
+      @server.addRecord(params)
     rescue Proxy::DHCP::Collision => e
       log_halt 409, e
     rescue Proxy::DHCP::AlreadyExists

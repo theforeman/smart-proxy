@@ -6,17 +6,18 @@ module Proxy::DHCP
   class Record
 
     attr_reader :ip, :mac, :subnet
+    attr_writer :options
     include Proxy::DHCP
     include Proxy::Log
     include Proxy::Validations
 
-    def initialize(subnet, ip, mac, options = nil)
-      @subnet  = validate_subnet subnet
-      @ip      = validate_ip ip
-      @mac     = validate_mac mac.downcase
+    def initialize options = {}
+      @subnet  = validate_subnet options[:subnet]
+      @ip      = validate_ip options[:ip]
+      @mac     = validate_mac options[:mac]
+      @deleteable = options.delete(:deleteable) if options[:deleteable]
       @options = options
       @subnet.add_record(self)
-      @deleteable = @options.delete(:omshell) if @options and @options[:omshell]
     end
 
     def to_s
@@ -27,16 +28,14 @@ module Proxy::DHCP
       self
     end
 
-    def options= value
-      @options = value
-    end
-
     def options
-      @options || subnet.server.loadRecordOptions(self).merge(:mac => mac, :ip => ip)
+      @options.empty? ? @options = subnet.server.loadRecordOptions(self).merge(:mac => mac, :ip => ip) : @options
     end
 
     def [] opt
       @options[opt]
+    rescue
+      nil
     end
 
     #TODO move this away from here, as this suppose to be a generic interface
