@@ -5,8 +5,7 @@ module Proxy::DHCP
   # represent a DHCP Record
   class Record
 
-    attr_reader :ip, :mac, :subnet
-    attr_writer :options
+    attr_reader :ip, :mac, :subnet, :options
     include Proxy::DHCP
     include Proxy::Log
     include Proxy::Validations
@@ -28,12 +27,8 @@ module Proxy::DHCP
       self
     end
 
-    def options
-      @options.empty? ? @options = subnet.server.loadRecordOptions(self).merge(:mac => mac, :ip => ip) : @options
-    end
-
     def [] opt
-      @options[opt]
+      options[opt.to_sym]
     rescue
       nil
     end

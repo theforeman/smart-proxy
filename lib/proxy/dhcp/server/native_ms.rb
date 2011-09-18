@@ -31,14 +31,16 @@ module Proxy::DHCP
       execute(cmd, "Added DHCP reservation for #{record}")
 
       options = record.options
-      options.delete_if{|k,v| k == :ip or k == :mac or k == :name }
+      ignored_attributes = [:ip, :mac, :name, :subnet]
+      options.delete_if{|k,v| ignored_attributes.include?(k.to_sym) }
       return if options.empty?  # This reservation is just for an IP and MAC
 
       # TODO: Refactor these execs into a popen
       alternate_vendor_name = nil
       for key, value in options
-        if match = key.match(/^<([^>]+)>(.*)/)
-          vendor, attr = match[1,2]
+        if match = key.to_s.match(/^<([^>]+)>(.*)/)
+          vendor, attr = match[1,2].map(&:to_sym)
+          msg = "set value for #{key}"
           begin
             execute "scope #{record.subnet.network} set reservedoptionvalue #{record.ip} #{SUNW[attr][:code]} #{SUNW[attr][:kind]} vendor=#{alternate_vendor_name || vendor} #{value}", msg, true
           rescue Proxy::DHCP::Error => e
@@ -46,7 +48,9 @@ module Proxy::DHCP
             execute "scope #{record.subnet.network} set reservedoptionvalue #{ip} #{SUNW[attr][:code]} #{SUNW[attr][:kind]} vendor=#{alternate_vendor_name || vendor} #{value}", msg, true
           end
         else
-          execute "scope #{record.subnet.network} set reservedoptionvalue #{record.ip} #{Standard[key][:code]} #{Standard[key][:kind]} #{value}", msg, true
+          logger.debug "key: " + key.inspect
+          k = Standard[key] || Standard[key.to_sym]
+          execute "scope #{record.subnet.network} set reservedoptionvalue #{record.ip} #{k[:code]} #{k[:kind]} #{value}", msg, true
         end
       end
 
@@ -89,9 +93,20 @@ module Proxy::DHCP
         #     172.29.216.6      -    00-a0-e7-21-41-00-
         if line =~ /^\s+([\w\.]+)\s+-\s+([-a-f\d]+)/
           ip  = $1
+          next unless subnet.include?(ip)
           mac = $2.gsub(/-/,":").match(/^(.*?).$/)[1]
           begin
-            Proxy::DHCP::Reservation.new(subnet, ip, mac) if subnet.include? ip
+            opts = {:subnet => subnet, :ip => ip, :mac => mac}
+            opts.merge!(loadRecordOptions(opts))
+            logger.debug opts.inspect
+            if opts.include? :hostname
+              Proxy::DHCP::Reservation.new opts.merge({:deleteable => true})
+            else
+              # this is not a lease, rather reservation
+              # but we require option 12(hostname) to be defined for our leases
+              # workaround until #1172 is resolved.
+              Proxy::DHCP::Lease.new opts
+            end
           rescue Exception => e
             logger.warn "Skipped #{line} - #{e}"
           end
@@ -108,14 +123,13 @@ module Proxy::DHCP
       subnet.options = parse_options(execute(cmd, msg))
     end
 
-    def loadRecordOptions record
-      raise "invalid Record" unless record.is_a? Proxy::DHCP::Record
-      subnet = record.subnet
-      raise "unable to find subnet for #{record}" if subnet.nil?
-      cmd = "scope #{subnet.network} Show ReservedOptionValue #{record.ip}"
-      msg = "Queried #{record.ip} options"
+    private
+    def loadRecordOptions opts
+      raise "unable to find subnet for #{opts[:ip]}" if opts[:subnet].nil?
+      cmd = "scope #{opts[:subnet].network} Show ReservedOptionValue #{opts[:ip]}"
+      msg = "Queried #{opts[:ip]} options"
 
-      record.options = parse_options(execute(cmd, msg)).merge(:ip => record.ip, :mac => record.mac)
+      parse_options(execute(cmd, msg))
     end
 
     def installVendorClass vendor_class
@@ -133,7 +147,6 @@ module Proxy::DHCP
       end
     end
 
-    private
     def loadVendorClasses
       cmd = "show class"
       msg = "Queried vendor classes"
@@ -164,6 +177,7 @@ module Proxy::DHCP
       std_in = std_out = std_err = nil
       begin
         timeout(tsecs) do
+          logger.debug "executing: #{command}"
           std_in, std_out, std_err  = Open3.popen3(command)
           response  = std_out.readlines
           response += std_err.readlines
@@ -215,14 +229,17 @@ module Proxy::DHCP
         break if line.match(/^Command completed/)
 
         case line
-          when /For vendor class \[([^\]]+)\]:/
-            vendor = "<#{$1}>"
-          when /OptionId : (\d+)/
-            optionId = "#{vendor}#{$1}"
-          when /Option Element Value = (\S+)/
-            options[optionId] = $1
+        when /For vendor class \[([^\]]+)\]:/
+          vendor = "<#{$1}>"
+        when /OptionId : (\d+)/
+          optionId = "#{vendor}#{$1}".to_i
+        when /Option Element Value = (\S+)/
+          title = Standard.select {|k,v| v[:code] == optionId}.flatten[0]
+          logger.debug "found option #{title}"
+          options[title] = $1
         end
       end
+      logger.debug options.inspect
       return options
     end
 
@@ -234,10 +251,10 @@ module Proxy::DHCP
         break if line.match(/^Command completed/)
 
         case line
-          when /Class \[([^\]]+)\]:/
-            klass = $1
-          when /Isvendor= TRUE/
-            classes << klass
+        when /Class \[([^\]]+)\]:/
+          klass = $1
+        when /Isvendor= TRUE/
+          classes << klass
         end
       end
       return classes

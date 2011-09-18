@@ -4,7 +4,7 @@ module Proxy::DHCP
     attr_reader :name
 
     def initialize options = {}
-      @name = options[:name] || options[:hostname] || raise("Must define a name: #{@options.inspect}")
+      @name = options[:name] || options[:hostname] || raise("Must define a name: #{options.inspect}")
       super options
     end
 
@@ -13,7 +13,7 @@ module Proxy::DHCP
     end
 
     def method_missing arg
-      @options[arg]
+      options[arg]
     end
 
   end

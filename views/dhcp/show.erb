@@ -13,7 +13,7 @@
       <td><%= record.mac %></td>
       <td><%= record.nextServer %></td>
       <td><%= record.filename %></td>
-      <td><%= record.title %></td>
+      <td><%= record.name %></td>
       <td>
         <form action="<%= "/dhcp/#{@subnet.network}/#{record.mac}" %>" method="post">
           <input name='_method' type='hidden' value='delete' />
