@@ -44,8 +44,8 @@ module Proxy::DHCP
           begin
             execute "scope #{record.subnet.network} set reservedoptionvalue #{record.ip} #{SUNW[attr][:code]} #{SUNW[attr][:kind]} vendor=#{alternate_vendor_name || vendor} #{value}", msg, true
           rescue Proxy::DHCP::Error => e
-            alternate_vendor_name = find_or_create_vendor_name vendor, e
-            execute "scope #{record.subnet.network} set reservedoptionvalue #{ip} #{SUNW[attr][:code]} #{SUNW[attr][:kind]} vendor=#{alternate_vendor_name || vendor} #{value}", msg, true
+            alternate_vendor_name = find_or_create_vendor_name vendor.to_s, e
+            retry
           end
         else
           logger.debug "key: " + key.inspect
@@ -66,9 +66,9 @@ module Proxy::DHCP
     def find_or_create_vendor_name vendor, exception
       if exception.message =~ /Vendor class not found/
         # Try a heuristic to find an alternative vendor class
-        @classes = @classes || loadVendorClasses
+        classes = loadVendorClasses
         short_vendor = vendor.gsub(/^sun-/i, "")
-        if short_vendor != vendor and !(short_vendor = @classes.grep(/#{short_vendor}/i)).empty?
+        if short_vendor != vendor and !(short_vendor = classes.grep(/#{short_vendor}/i)).empty?
           short_vendor = short_vendor[0]
         else
           # OK. There does not appear to be a class with an abbreviated vendor name so lets try
@@ -140,8 +140,8 @@ module Proxy::DHCP
       cls = "SUNW.#{vendor_class}"
 
       execute("add class #{vendor_class} \"Vendor class for #{vendor_class}\" \"#{cls}\" 1", "Added class #{vendor_class}")
-      for option in ["root_server_ip", "root_server_hostname", "root_path_name", "install_server_ip", "install_server_name",
-                     "install_path", "sysid_server_path", "jumpstart_server_path"]
+      for option in [:root_server_ip, :root_server_hostname, :root_path_name, :install_server_ip, :install_server_name,
+                     :install_path, :sysid_server_path, :jumpstart_server_path]
         cmd = "add optiondef #{SUNW[option][:code]} #{option} #{SUNW[option][:kind]} 0 vendor=#{vendor_class}"
         execute cmd, "Added vendor option #{option}"
       end
@@ -223,18 +223,21 @@ module Proxy::DHCP
     def parse_options response
       optionId = nil
       options  = {}
-      vendor   = ""
       response.each do |line|
         line.chomp!
         break if line.match(/^Command completed/)
 
         case line
+        #TODO: this logic is broken, as the output reports only once the vendor type
+        # making it impossible to detect if its a standard option or a custom one.
         when /For vendor class \[([^\]]+)\]:/
-          vendor = "<#{$1}>"
+          options[:vendor] = "<#{$1}>"
         when /OptionId : (\d+)/
-          optionId = "#{vendor}#{$1}".to_i
+          optionId = $1.to_i
         when /Option Element Value = (\S+)/
-          title = Standard.select {|k,v| v[:code] == optionId}.flatten[0]
+          #TODO move options to a class or something
+          opts = SUNW.update(Standard)
+          title = opts.select {|k,v| v[:code] == optionId}.flatten[0]
           logger.debug "found option #{title}"
           options[title] = $1
         end
@@ -257,6 +260,7 @@ module Proxy::DHCP
           classes << klass
         end
       end
+      logger.debug "found the following classes: #{classes.join(", ")}"
       return classes
     end
 
