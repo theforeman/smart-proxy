@@ -14,7 +14,9 @@ module Proxy::PuppetCA
     end
 
     def clean certname
-      puppetca("clean", certname)
+      if !certificate_verify(certname)
+         puppetca("clean", certname)
+      end
     end
 
     #remove certname from autosign if exists
@@ -189,5 +191,20 @@ module Proxy::PuppetCA
       end
       $?.success?
     end
+
+   def certificate_verify certname
+      find_puppetca
+      certname.downcase!
+      command = "#{@sudo} -S #{@puppetca} --verify #{certname}"
+      logger.debug "Executing #{command}"
+      response = `#{command} 2>&1`
+      if $?.success?
+         logger.info "verified puppet certificate for #{certname}"
+         return true
+      else
+         logger.info "could not verify puppet certificate for #{certname}"
+         return false
+      end
+   end
   end
 end
