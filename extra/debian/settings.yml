@@ -21,32 +21,43 @@
 :port: 8443
 
 # Enable TFTP management
-#:tftp: true
-#:tftproot: /tmp/tftpboot
+:tftp: false
+#:tftproot: /var/lib/tftpboot
+# Defines the TFTP Servername to use, overrides the name in the subnet declaration
+#:tftp_servername: tftp.domain.com
 
 
 # Enable DNS management
-#:dns: true
-#:dns_key: /home/proxy/keys/Kapi.+157+47848.private
+:dns: false
+#:dns_key: /etc/rndc.key
+# use this setting if you are managing a dns server which is not localhost though this proxy
 #:dns_server: dns.domain.com
 
 # Enable DHCP management
-#:dhcp: true
+:dhcp: false
 # The vendor can be either isc or native_ms
-#:dhcp_vendor: isc
+:dhcp_vendor: isc
+# dhcp_subnets is a Native MS implementation setting. It restricts the subnets queried to a
+# subset, so as to reduce the query time.
+#:dhcp_subnets: [192.168.205.0/255.255.255.128, 192.168.205.128/255.255.255.128]
 # Settings for Ubuntu ISC
 #:dhcp_config: /etc/dhcp3/dhcpd.conf
 #:dhcp_leases: /var/lib/dhcp3/dhcpd.leases
+# Settings for Redhat ISC
+#:dhcp_config: /etc/dhcpd.conf
+#:dhcp_leases: /var/lib/dhcpd/dhcpd.leases
+#:dhcp_key_name: secret_key_name
+#:dhcp_key_secret: secret_key
 
 # enable PuppetCA management
-#:puppetca: true
+:puppetca: false
 
 # enable Puppet management
-#:puppet: true
+:puppet: false
 
 # Where our proxy log files are stored
 # filename or STDOUT
 :log_file: /var/log/foreman-proxy/foreman-proxy.log
 # valid options are
 # Logger::WARN, Logger::DEBUG, Logger::Error, Logger::Fatal, Logger:INFO, LOGGER::UNKNOWN
-#:log_level: Logger::DEBUG
+:log_level: Logger::INFO
