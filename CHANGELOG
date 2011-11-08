@@ -1,3 +1,52 @@
+2011-09-28	Ohad Levy <ohadlevy@gmail.com>
+	* fixes #1177 - Ensure that Solaris DHCP vendor options creation on Windows DHCP works correctly.
+
+2011-09-18	Ohad Levy <ohadlevy@gmail.com>
+	* fixes #1154 - ms dhcp smart proxy error 400
+
+2011-09-05	Ohad Levy <ohadlevy@gmail.com>
+	* refs #1022, fixes wrong condition if there is no entry in the settings file
+	* fixed identation
+	* clean up code passing, and removed duplicate code between dhcp server implementations
+	* fixes #1149 - add backtrace to log failures
+
+2011-09-05	Paul Kelly <paul.ian.kelly@googlemail.com>
+	* Fixes #1022 - trusted hosts are ignored
+
+2011-08-17	Ohad Levy <ohadlevy@gmail.com>
+	* fixes #1116 - When requesting the same dhcp reservation, if its not conflicting return 200
+
+2011-08-09	Paul Kelly <paul.ian.kelly@googlemail.com>
+	* Fixes #1100 - Conflict returns 400 error code
+	* Fixes #1094 - ISC loadRecordOptions call
+
+2011-07-20	Paul kelly <paul.ian.kelly@googlemail.com>
+	* Fixes #1055 - SETTINGS.dhcp_subnets
+
+2011-07-19	Paul kelly <paul.ian.kelly@googlemail.com>
+	* Fixes #1033 - DHCP Vendor options
+
+2011-07-12	Paul Kelly <paul.ian.kelly@googlemail.com>
+	* Fixes #1037 - dns_key should be optional
+	* Fixes #1036 - @om close error
+	* Fixes #1035 - Missing require resolv
+	* Fixes #1034 - Use name and not hostname option
+
+2011-07-11	Paul Kelly <paul.ian.kelly@googlemail.com>
+	* Fixes #1023 - Add collision exception type for DNS and DHCP
+
+2011-07-03	Corey Osman <corey@logicminds.biz>
+	* Fix: 1006 -- puppetrun is depreciated in puppet 2.6
+
+2011-06-23	Paul kelly <paul.ian.kelly@googlemail.com>
+	* Fixes #959 - Added Native MS DHCP options capture
+
+2011-06-23	Corey Osman <corey@logicminds.biz>
+	* Bugfix #1004 - puppetca is depreciated in puppet 2.6
+
+2011-06-06	Ohad Levy <ohadlevy@gmail.com>
+	* release of 0.2
+
 2011-05-29	Jochen Schalanda <jochen@schalanda.name>
 	* * Added new changelog entry for smart-proxy 0.2rc2 release * Changed source format to '3.0 (native)'
 
