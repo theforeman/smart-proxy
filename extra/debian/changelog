@@ -1,3 +1,9 @@
+foreman-proxy (0.3-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Jochen Schalanda <jochen@schalanda.name>  Tue, 08 Nov 2011 19:55:00 +0100
+
 foreman-proxy (0.1+0.2rc2-1) unstable; urgency=low
 
   * Release candidate 2 for version 0.2
