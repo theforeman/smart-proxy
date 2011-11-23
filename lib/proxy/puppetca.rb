@@ -134,9 +134,9 @@ module Proxy::PuppetCA
       case str
         when /(\+|\-)\s+(.*)\s+\((\S+)\)/
           state = $1 == "-" ? "revoked" : "valid"
-          return { $2 => { :state => state, :fingerprint => $3 } }
+          return { $2.strip => { :state => state, :fingerprint => $3 } }
         when /(.*)\s+\((\S+)\)/
-          return { $1 => { :state => "pending", :fingerprint => $2 } }
+          return { $1.strip => { :state => "pending", :fingerprint => $2 } }
         else
           return {}
       end
