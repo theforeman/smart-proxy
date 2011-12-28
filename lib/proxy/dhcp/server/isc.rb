@@ -170,6 +170,7 @@ module Proxy::DHCP
         msg  = "Failed to #{msg}"
         msg += ": Entry already exists" if response and response.grep(/object: already exists/).size > 0
         msg += ": No response from DHCP server" if response.nil? or response.grep(/not connected/).size > 0
+        raise Proxy::DHCP::Collision, "Hardware address conflict." if response and response.grep(/object: key conflict/).size > 0
         raise Proxy::DHCP::Error.new(msg)
       else
         logger.info msg
