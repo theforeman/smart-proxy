@@ -1,3 +1,19 @@
+2011-12-09	Paul Kelly <paul.ian.kelly@googlemail.com>
+	* fixes #1383 - aready existing dns entries should not raise a collision exception
+
+2011-12-04	Mikael Fridh <mfridh@marinsoftware.com>
+	* fixes #1366 - identifies omshell key conflict output
+
+2011-11-23	Ohad Levy <ohadlevy@gmail.com>
+	* fixes #1349 - some certificates are shown twice
+
+2011-11-08	Ohad Levy <ohadlevy@gmail.com>
+	* Merge pull request #8 from joschi/smart-proxy-0.3_deb
+	* version bump
+
+2011-11-08	Jochen Schalanda <jochen@schalanda.name>
+	* Updated Debian package specification after release of Smart-Proxy 0.4
+
 2011-09-28	Ohad Levy <ohadlevy@gmail.com>
 	* fixes #1177 - Ensure that Solaris DHCP vendor options creation on Windows DHCP works correctly.
 
