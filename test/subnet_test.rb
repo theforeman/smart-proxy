@@ -70,7 +70,7 @@ class Proxy::DHCPSubnetTest < Test::Unit::TestCase
   def add_record
     ip = "192.168.0.50"
     mac = "aa:bb:cc:dd:ee:Ff"
-    @subnet.add_record Proxy::DHCP::Record.new(@subnet, ip, mac)
+    @subnet.add_record Proxy::DHCP::Record.new(:subnet =>@subnet, :ip => ip, :mac => mac)
   end
 
   def test_should_add_records

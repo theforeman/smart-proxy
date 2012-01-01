@@ -6,7 +6,7 @@ class DHCPServerTest < Test::Unit::TestCase
   def setup
     @server = Proxy::DHCP::Server.new("testcase")
     @subnet = Proxy::DHCP::Subnet.new(@server, "192.168.0.0", "255.255.255.0")
-    @record = Proxy::DHCP::Record.new(@subnet, "192.168.0.11", "aa:bb:cc:dd:ee:ff")
+    @record = Proxy::DHCP::Record.new(:subnet => @subnet, :ip => "192.168.0.11", :mac => "aa:bb:cc:dd:ee:ff")
   end
 
   def test_should_provide_subnets

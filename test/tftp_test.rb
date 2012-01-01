@@ -3,7 +3,7 @@ require 'test/test_helper'
 class TftpTest < Test::Unit::TestCase
 
   def setup
-    @tftp = Proxy::TFTP
+    @tftp = Proxy::TFTP::Tftp.new
   end
 
   def test_should_have_a_logger
@@ -11,7 +11,7 @@ class TftpTest < Test::Unit::TestCase
   end
 
   def test_should_create_tftp_link
-    assert_equal @tftp.send(:path), SETTINGS.tftproot
+    assert_equal @tftp.send(:path), SETTINGS.tftproot ? SETTINGS.tftproot : File.dirname(__FILE__) + "../tftpboot"
   end
 
 end
