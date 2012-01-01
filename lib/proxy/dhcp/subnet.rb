@@ -105,10 +105,8 @@ module Proxy::DHCP
 
     # returns the next unused IP Address in a subnet
     # Pings the IP address as well (just in case its not in Proxy::DHCP)
-    def unused_ip
-      ips = valid_range.collect{|r| r.to_s}
-      used = records.collect{|r| r.ip}
-      free_ips = ips - used
+    def unused_ip args = {}
+      free_ips = valid_range(args) - records.collect{|r| r.ip}
       if free_ips.empty?
         logger.warn "No free IPs at #{to_s}"
         return nil
@@ -133,9 +131,18 @@ module Proxy::DHCP
       end
     end
 
-    def valid_range
+    def valid_range args = {}
+      logger.debug "trying to find an ip address, we got #{args.inspect}"
+      if args[:from] and (from=validate_ip(args[:from])) and args[:to] and (to=validate_ip(args[:to]))
+        raise Proxy::DHCP::Error, "Range does not belong to provided subnet" unless self.include?(from) and self.include?(to)
+        from = IPAddr.new(from)
+        to   = IPAddr.new(to)
+        raise Proxy::DHCP::Error, "#{from} can't be lower IP adderss then #{to} - chage the order?" if from > to
+        from..to
+      else
+        IPAddr.new(to_s).to_range
       # remove broadcast and network address
-      IPAddr.new(to_s).to_range.to_a[1..-2]
+      end.map(&:to_s) - [network, broadcast]
     end
 
     def inspect
@@ -152,6 +159,10 @@ module Proxy::DHCP
 
     def <=> other
       network <=> other.network
+    end
+
+    def broadcast
+      IPAddr.new(to_s).to_range.last.to_s
     end
 
     private

@@ -67,7 +67,7 @@ class SmartProxy < Sinatra::Base
   get "/dhcp/:network/unused_ip" do
     begin
       content_type :json
-      ({:ip => load_subnet.unused_ip}).to_json
+      ({:ip => load_subnet.unused_ip(:from => params[:from], :to => params[:to])}).to_json
     rescue => e
       log_halt 400, e
     end
