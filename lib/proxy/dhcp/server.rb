@@ -98,7 +98,7 @@ module Proxy::DHCP
 
       # try to figure out if we already have this record
       record = find_record(ip) || find_record(mac)
-      unless record.nil?
+      unless record.nil? or record.is_a?(Proxy::DHCP::Lease)
         if Record.compare_options(record.options, options)
           # we already got this record, no need to do anything
           logger.debug "We already got the same DHCP record - skipping"
