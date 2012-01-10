@@ -106,6 +106,13 @@ module Proxy::DHCP
     # returns the next unused IP Address in a subnet
     # Pings the IP address as well (just in case its not in Proxy::DHCP)
     def unused_ip args = {}
+      # first check if we already have a record for this host
+      # if we do, we can simply reuse the same ip address.
+      if args[:mac] and r=has_mac?(args[:mac])
+        logger.debug "Found an existing dhcp record #{r}, reusing..."
+        return r.ip
+      end
+
       free_ips = valid_range(args) - records.collect{|r| r.ip}
       if free_ips.empty?
         logger.warn "No free IPs at #{to_s}"
