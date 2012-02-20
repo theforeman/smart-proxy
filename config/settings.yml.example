@@ -54,6 +54,7 @@
 
 # enable Puppet management
 :puppet: false
+:puppet_conf: /etc/puppet/puppet.conf
 
 # Where our proxy log files are stored
 # filename or STDOUT
