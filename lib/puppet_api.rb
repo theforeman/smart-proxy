@@ -23,7 +23,7 @@ class SmartProxy
     begin
       env = Proxy::Puppet::Environment.find(params[:environment])
       log_halt 404, "Not found" unless env
-      env.to_json
+      {:name => env.name, :paths => env.paths}.to_json
     rescue => e
       log_halt 406, "Failed to show puppet environment: #{e}"
     end

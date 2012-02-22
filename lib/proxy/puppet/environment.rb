@@ -8,7 +8,7 @@ module Proxy::Puppet
     class << self
       # return a list of all puppet environments
       def all
-        puppet_environments.map { |env, path| new(:name => env, :path => path) }
+        puppet_environments.map { |env, path| new(:name => env, :paths => path.split(":")) }
       end
 
       def find name
@@ -26,29 +26,45 @@ module Proxy::Puppet
 
         env = { }
         # query for the environments variable
-        unless conf[:main][:environments].nil?
-          conf[:main][:environments].split(",").each { |e| env[e.to_sym] = conf[e.to_sym][:modulepath] unless conf[e.to_sym][:modulepath].nil? }
-        else
-          # 0.25 doesn't require the environments variable anymore, scanning for modulepath
+        if conf[:main][:environments].nil?
+          # 0.25 and newer doesn't require the environments variable anymore, scanning for modulepath
           conf.keys.each { |p| env[p] = conf[p][:modulepath] unless conf[p][:modulepath].nil? }
           # puppetmaster section "might" also returns the modulepath
           env.delete :main
           env.delete :puppetmasterd if env.size > 1
 
+        else
+          conf[:main][:environments].split(",").each { |e| env[e.to_sym] = conf[e.to_sym][:modulepath] unless conf[e.to_sym][:modulepath].nil? }
         end
         if env.values.compact.size == 0
           # fall back to defaults - we probably don't use environments
           env[:production] = conf[:main][:modulepath] || conf[:master][:modulepath]
         end
+
+        # are we using dynamic puppet environments?
+        env.each do|environment, modulepath|
+          if modulepath.include?("$environment")
+            # Dynamic environments - get every directory under the modulepath
+            modulepath.gsub(/\$environment.*/,"/").split(":").each do |base_dir|
+              Dir.glob("#{base_dir}/*") do |dir|
+                e = dir.split("/").last
+                env[e] = modulepath.gsub("$environment", e)
+              end
+            end
+            # get rid of the main environment
+            env.delete(environment)
+          end
+        end
+
         env.reject { |k, v| k.nil? or v.nil? }
       end
     end
 
-    attr_reader :name, :path
+    attr_reader :name, :paths
 
     def initialize args
-      @name = args[:name].to_s || raise("Must provide a name")
-      @path = args[:path].to_s || raise("Must provide a path")
+      @name = args[:name].to_s  || raise("Must provide a name")
+      @paths= args[:paths].to_s || raise("Must provide a path")
     end
 
     def to_s
@@ -56,7 +72,7 @@ module Proxy::Puppet
     end
 
     def classes
-      PuppetClass.scan_directory path
+      paths.map {|path| PuppetClass.scan_directory path}.flatten
     end
 
   end
