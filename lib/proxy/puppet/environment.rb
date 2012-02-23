@@ -43,7 +43,7 @@ module Proxy::Puppet
 
         # are we using dynamic puppet environments?
         env.each do|environment, modulepath|
-          if modulepath.include?("$environment")
+          if modulepath and modulepath.include?("$environment")
             # Dynamic environments - get every directory under the modulepath
             modulepath.gsub(/\$environment.*/,"/").split(":").each do |base_dir|
               Dir.glob("#{base_dir}/*") do |dir|
