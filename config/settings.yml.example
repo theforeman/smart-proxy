@@ -44,7 +44,10 @@
 #:dhcp_config: /etc/dhcp3/dhcpd.conf
 #:dhcp_leases: /var/lib/dhcp3/dhcpd.leases
 # Settings for Redhat ISC
+# Redhat 5
 #:dhcp_config: /etc/dhcpd.conf
+# Redhat 6
+#:dhcp_config: /etc/dhcp/dhcpd.conf
 #:dhcp_leases: /var/lib/dhcpd/dhcpd.leases
 #:dhcp_key_name: secret_key_name
 #:dhcp_key_secret: secret_key
@@ -58,7 +61,7 @@
 
 # Where our proxy log files are stored
 # filename or STDOUT
-:log_file: /tmp/proxy.log
+:log_file: /var/log/foreman-proxy/proxy.log
 # valid options are
-# WARN, DEBUG, Error, FATAL, INFO, UNKNOWN
-#:log_level: DEBUG
+# WARN, DEBUG, ERROR, FATAL, INFO, UNKNOWN
+:log_level: ERROR
