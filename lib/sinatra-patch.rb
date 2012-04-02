@@ -25,9 +25,13 @@ module Sinatra
         else
           pid = "#{SETTINGS.daemon_pid}"
         end
-        puts "Writing to #{pid}"
-        File.open(pid, 'w'){ |f| f.write(Process.pid) }
-        at_exit { File.delete(pid) if File.exist?(pid) }
+        begin
+          puts "Writing to #{pid}"
+          File.open(pid, 'w'){ |f| f.write(Process.pid) }
+          at_exit { File.delete(pid) if File.exist?(pid) }
+        rescue Exception => e
+          puts "== Error writing pid file #{pid}!"
+        end
       end
       handler.run self, {:Host => bind, :Port => port}.merge(@ssl_options) do |server|
         [:INT, :TERM].each { |sig| trap(sig) {
