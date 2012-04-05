@@ -21,7 +21,7 @@ class SmartProxy
 
   delete "/dns/:value" do
     case params[:value]
-    when /.in-addr.arpa$/
+    when /\.(in-addr|ip6)\.arpa$/
       type = "PTR"
       value = params[:value]
     else
