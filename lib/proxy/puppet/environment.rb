@@ -67,8 +67,8 @@ module Proxy::Puppet
     attr_reader :name, :paths
 
     def initialize args
-      @name = args[:name].to_s  || raise("Must provide a name")
-      @paths= args[:paths].to_s || raise("Must provide a path")
+      @name = args[:name].to_s || raise("Must provide a name")
+      @paths= args[:paths]     || raise("Must provide a path")
     end
 
     def to_s
