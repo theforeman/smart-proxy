@@ -1,0 +1,15 @@
+PACKAGE_NAME='foreman-proxy'
+VERSION='0.5'
+MAINTAINER='Greg Sutcliffe <gsutcliffe@gmail.com>'
+
+BUILD_DIR="/home/build/nightly-${PACKAGE_NAME}"
+TARGET="${BUILD_DIR}/${PACKAGE_NAME}"
+REPO='git://github.com/theforeman/smart-proxy.git'
+BRANCH='develop'
+
+REPO_DIR='/home/build/foreman-repo'
+DEB_REPO='nightly'
+
+function prepare_build() {
+  mv ./extra/debian .
+}
