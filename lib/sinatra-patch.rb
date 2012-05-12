@@ -1,7 +1,7 @@
 require "sinatra/base"
 require "openssl"
 require "webrick/https"
-require "daemon" unless PLATFORM =~/mingw/
+require "daemon" unless RUBY_PLATFORM =~/mingw/
 module Sinatra
   class Base
     # Run the Sinatra app as a self-hosted server using
@@ -18,7 +18,7 @@ module Sinatra
 
       FileUtils.mkdir_p(File.join(APP_ROOT, 'tmp/pids'))
 
-      if SETTINGS.daemon and PLATFORM !~ /mingw/
+      if SETTINGS.daemon and RUBY_PLATFORM !~ /mingw/
         Process.daemon(true)
         if SETTINGS.daemon_pid.nil?
           pid = "#{APP_ROOT}/tmp/pids/server.pid"

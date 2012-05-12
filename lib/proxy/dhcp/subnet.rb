@@ -1,6 +1,5 @@
 require 'ipaddr'
 require 'proxy/dhcp/monkey_patches' unless IPAddr.new.respond_to?('to_range')
-require 'ping'
 require 'proxy/validations'
 require "net/ping"
 
@@ -193,7 +192,7 @@ module Proxy::DHCP
     end
 
     def privileged_user
-      (PLATFORM =~ /linux/i and Process.uid == 0) or PLATFORM =~ /mingw/
+      (RUBY_PLATFORM =~ /linux/i and Process.uid == 0) or RUBY_PLATFORM =~ /mingw/
     end
   end
 end
