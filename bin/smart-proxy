@@ -18,7 +18,7 @@ class SmartProxy < Sinatra::Base
 
   set :root, APP_ROOT
   set :views, APP_ROOT + '/views'
-  set :public, APP_ROOT + '/public'
+  set :public_folder, APP_ROOT + '/public'
   set :logging, true
   set :env,     :production
   set :run,     true
