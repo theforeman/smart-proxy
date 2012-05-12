@@ -3,9 +3,9 @@
 set -e
 
 if [ $# -lt 1 ]; then
-  CONF="/home/build/.nightly-foreman"
+  CONF="/home/greg/build-area/.nightly-foreman"
 else
-  CONF="/home/build/.nightly-${1}"
+  CONF="/home/greg/build-area/.nightly-${1}"
 fi
 
 if [ -f "${CONF}" ]; then
@@ -51,7 +51,8 @@ cat debian/changelog.tmp >> debian/changelog
 rm -f debian/changelog.tmp
 
 echo -n '3.0 (native)' > debian/source/format
-/usr/bin/dpkg-buildpackage -F -tc -uc -us
+# We use -d here since on a Centos box we can't check the installed debs
+/usr/bin/dpkg-buildpackage -d -tc -uc -us
 
-/usr/bin/reprepro -b "${REPO_DIR}" includedsc "${DEB_REPO}" "${BUILD_DIR}"/*.dsc
-/usr/bin/reprepro -b "${REPO_DIR}" includedeb "${DEB_REPO}" "${BUILD_DIR}"/*.deb
+#/home/greg/bin/reprepro -b "${REPO_DIR}" includedeb "${DEB_REPO}" "${BUILD_DIR}"/*.deb
+/home/greg/bin/reprepro --ignore=wrongdistribution -b "${REPO_DIR}" include "${DEB_REPO}" "${BUILD_DIR}"/*.changes
