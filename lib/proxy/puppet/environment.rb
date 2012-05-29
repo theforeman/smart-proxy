@@ -41,6 +41,7 @@ module Proxy::Puppet
           env[:production] = conf[:main][:modulepath] || conf[:master][:modulepath]
         end
 
+        new_env = env.clone
         # are we using dynamic puppet environments?
         env.each do|environment, modulepath|
           if modulepath and modulepath.include?("$environment")
@@ -52,15 +53,15 @@ module Proxy::Puppet
             modulepath.gsub(/\$environment.*/,"/").split(":").each do |base_dir|
               Dir.glob("#{base_dir}/*").grep(/\/[A-Za-z0-9_]+$/) do |dir|
                 e = dir.split("/").last
-                env[e] = modulepath.gsub("$environment", e)
+                new_env[e] = modulepath.gsub("$environment", e)
               end
             end
             # get rid of the main environment
-            env.delete(environment)
+            new_env.delete(environment)
           end
         end
 
-        env.reject { |k, v| k.nil? or v.nil? }
+        new_env.reject { |k, v| k.nil? or v.nil? }
       end
     end
 
