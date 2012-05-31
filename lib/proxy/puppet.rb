@@ -23,8 +23,9 @@ module Proxy::Puppet
       command = %x[#{sudo} #{puppetrun} --host #{hosts.join(" --host ")}]
       unless command =~ /finished with exit code 0/
         logger.warn command
-        false
+        return false
       end
+      return true
     end
   end
 end
