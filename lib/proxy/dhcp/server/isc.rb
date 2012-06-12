@@ -4,7 +4,7 @@ module Proxy::DHCP
 
     def initialize options
       super(options[:name])
-      @config = options[:config]
+      @config = read_config(options[:config]).join("")
       @leases = options[:leases]
     end
 
@@ -219,6 +219,23 @@ module Proxy::DHCP
         log.gsub!(SETTINGS.dhcp_key_secret,"[filtered]")
       end
       logger.debug log
+    end
+
+    def read_config file
+      logger.debug "Reading config file #{file}"
+      config = []
+      File.readlines(file).each do |line|
+        if /^include\s+"(.*)"\s*;/ =~ line.strip
+          conf = $1
+          unless File.exist?(conf)
+            log_halt 400, "Unable to find the included DHCP configuration file: #{conf}"
+          end
+          config << read_config(conf)
+        else
+          config << line
+        end
+      end
+      return config
     end
 
   end
