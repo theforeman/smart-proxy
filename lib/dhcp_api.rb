@@ -10,7 +10,7 @@ class SmartProxy < Sinatra::Base
         log_halt 400, "Unable to find the DHCP configuration or lease files"
       end
       @server = Proxy::DHCP::ISC.new({:name => "127.0.0.1",
-                                      :config => File.read(SETTINGS.dhcp_config),
+                                      :config => SETTINGS.dhcp_config,
                                       :leases => File.read(SETTINGS.dhcp_leases)})
     when "native_ms"
       require 'proxy/dhcp/server/native_ms'
