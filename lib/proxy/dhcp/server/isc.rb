@@ -162,7 +162,7 @@ module Proxy::DHCP
     end
 
     def report msg, response=""
-      if response.nil? or !response.grep(/can't|no more|not connected|Syntax error/).empty?
+      if response.nil? or (!response.empty? and !response.grep(/can't|no more|not connected|Syntax error/).empty?)
         logger.error "Omshell failed:\n" + (response.nil? ? "No response from DHCP server" : response.join(", "))
         msg.sub! /Removed/,    "remove"
         msg.sub! /Added/,      "add"

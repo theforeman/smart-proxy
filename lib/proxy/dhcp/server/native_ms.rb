@@ -1,4 +1,5 @@
-require 'rubygems'
+require 'checks'
+require 'rubygems' if USE_GEMS
 require 'win32/open3'
 
 module Proxy::DHCP
