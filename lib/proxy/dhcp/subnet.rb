@@ -1,8 +1,9 @@
+require 'checks'
 require 'ipaddr'
 require 'proxy/dhcp/monkey_patches' unless IPAddr.new.respond_to?('to_range')
-require 'ping'
+require 'ping' unless RUBY_1_9
 require 'proxy/validations'
-require "net/ping"
+require 'net/ping'
 
 module Proxy::DHCP
   # Represents a DHCP Subnet
