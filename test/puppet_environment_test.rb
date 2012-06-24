@@ -3,7 +3,7 @@ require 'test/test_helper'
 class PuppetEnvironmentTest < Test::Unit::TestCase
 
   def test_puppet_class_should_be_an_opject
-    klass = Proxy::Puppet::Environment.new :name => "production", :path => "/etc/puppet/env/production"
+    klass = Proxy::Puppet::Environment.new :name => "production", :paths => ["/etc/puppet/env/production"]
     assert_kind_of Proxy::Puppet::Environment, klass
   end
 
