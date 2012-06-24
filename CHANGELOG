@@ -1,3 +1,85 @@
+2012-06-24	Ohad Levy <ohadlevy@gmail.com>
+	* fixed minor test failure
+
+2012-06-24	Greg Sutcliffe <gsutcliffe@ibahn.com>
+	* Changes for Ruby 1.8/9 compatibilty, and Debian packaging guidelines
+
+2012-06-13	Mikael Fridh <mfridh@marinsoftware.com>
+	* fixes #1567 - Foreman-proxy ignores dhcpd.conf include directive
+
+2012-06-06	Florent Castelli <orphis@spotify.com>
+	* Don't modify the hash we are iterating on when listing environments fixes #1654
+	* Filter folders matching correct environments name
+
+2012-06-06	kish <skihero@gmail.com>
+	* Was not returning true on command success, caused puppet_api.rb to print false messages.
+
+2012-05-15	Greg Sutcliffe <greg.sutcliffe@gmail.com>
+	* [DEB] Update build files for building on shell.theforeman.org
+
+2012-04-28	Ohad Levy <ohadlevy@gmail.com>
+	* Merge pull request #16 from mjc-/develop
+
+2012-04-27	mjc <github@bitz.ca>
+	* kill dead 'about' link
+
+2012-04-25	Ohad Levy <ohadlevy@gmail.com>
+	* fixes # 1587 Puppet's modulepath not interpreted correctly by proxy
+
+2012-04-05	Ohad Levy <ohadlevy@gmail.com>
+	* Merge pull request #15 from pencil/develop
+
+2012-04-05	Nils Caspar <ncaspar@me.com>
+	* support for IPv6 PTR
+
+2012-04-03	Lukas Zapletal <lzap+git@redhat.com>
+	* fixes #1565 - report error when cannot create pid
+
+2012-03-28	Jason Antman <jason@jasonantman.com>
+	* fixes #1552 - expand $confdir if used in puppet.conf modulepath
+
+2012-03-23	Florian Koch <florian.koch1981@googlemail.com>
+	* fixes #1548 - Default Settings File Improvments
+	* fixes #1547 - Stack Trace with log level Error
+
+2012-03-16	Ohad Levy <ohadlevy@gmail.com>
+	* ensure we are using the latest repo
+
+2012-02-28	Ulrich Dangel <uli@spamt.net>
+	* Add to_json method to lease and reservation module
+
+2012-02-23	Ohad Levy <ohadlevy@gmail.com>
+	* refs #1387 make sure that we won't fail if the modulepath detection is wrong
+
+2012-02-22	Ohad Levy <ohadlevy@gmail.com>
+	* fixes #1387 - support puppet dynamic environments detection
+	* refs #1499 - minor restructuring
+
+2012-02-20	Ohad Levy <ohadlevy@gmail.com>
+	* add more entries to gitignore
+	* fixes #1499 - show puppet environments and classes over the API
+
+2012-02-20	Ulrich Dangel <uli@spamt.net>
+	* Fix log_level comment for settings.yml.example
+	* Change default log_level for debians log_level to INFO
+
+2012-01-10	Ohad Levy <ohadlevy@gmail.com>
+	* fixes #1442 - ip suggestion should take into account nic mac address
+
+2012-01-09	Ohad Levy <ohadlevy@gmail.com>
+	* fixes #1438 - the proxy should not consider dhcp leases as conflicts
+
+2012-01-01	Ohad Levy <ohadlevy@gmail.com>
+	* fixes #884 - IP proposed during Host creation does not belong to IP range defined in the subnet
+	* fixed broken tests
+
+2011-12-28	Jochen Schalanda <jochen@schalanda.name>
+	* Added new changelog entry for Smart-Proxy 0.3.1 debian package
+
+2011-12-28	Ohad Levy <ohadlevy@gmail.com>
+	* Merge commit '0.3.1'
+	* version bump to 0.3.1
+
 2011-12-09	Paul Kelly <paul.ian.kelly@googlemail.com>
 	* fixes #1383 - aready existing dns entries should not raise a collision exception
 
@@ -5,6 +87,7 @@
 	* fixes #1366 - identifies omshell key conflict output
 
 2011-11-23	Ohad Levy <ohadlevy@gmail.com>
+	* fixes #1349 - some certificates are shown twice
 	* fixes #1349 - some certificates are shown twice
 
 2011-11-08	Ohad Levy <ohadlevy@gmail.com>
