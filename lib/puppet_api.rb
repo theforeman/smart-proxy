@@ -34,7 +34,7 @@ class SmartProxy
     begin
       env = Proxy::Puppet::Environment.find(params[:environment])
       log_halt 404, "Not found" unless env
-      env.classes.map{|k| {k.to_s => { :name => k.name, :module => k.module} } }.to_json
+      env.classes.map{|k| {k.to_s => { :name => k.name, :module => k.module, :params => k.params} } }.to_json
     rescue => e
       log_halt 406, "Failed to show puppet classes: #{e}"
     end
