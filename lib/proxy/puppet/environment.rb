@@ -38,7 +38,7 @@ module Proxy::Puppet
         end
         if env.values.compact.size == 0
           # fall back to defaults - we probably don't use environments
-          env[:production] = conf[:main][:modulepath] || conf[:master][:modulepath]
+          env[:production] = conf[:main][:modulepath] || conf[:master][:modulepath] || '/etc/puppet/modules'
         end
 
         new_env = env.clone
