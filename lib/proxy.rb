@@ -1,6 +1,6 @@
 module Proxy
   MODULES = %w{dns dhcp tftp puppetca puppet}
-  VERSION = "1.0RC1"
+  VERSION = "1.0RC2"
 
   require "checks"
   require "proxy/settings"
