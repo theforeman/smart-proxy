@@ -132,10 +132,10 @@ module Proxy::PuppetCA
     # parse the puppetca --list output
     def certificate str
       case str
-        when /(\+|\-)\s+(.*)\s+\((\S+)\)/
+        when /(\+|\-)\s+["]{0,1}(.*\w)["]{0,1}\s+\((\S+)\)/
           state = $1 == "-" ? "revoked" : "valid"
           return { $2.strip => { :state => state, :fingerprint => $3 } }
-        when /(.*)\s+\((\S+)\)/
+        when /\s*["]{0,1}(.*\w)["]{0,1}\s+\((\S+)\)/
           return { $1.strip => { :state => "pending", :fingerprint => $2 } }
         else
           return {}
