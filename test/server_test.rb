@@ -1,4 +1,4 @@
-require 'test/test_helper'
+require 'test_helper'
 require "proxy/dhcp"
 
 class DHCPServerTest < Test::Unit::TestCase
