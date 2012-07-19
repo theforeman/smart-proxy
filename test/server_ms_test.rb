@@ -1,6 +1,4 @@
-require 'test/unit'
-require 'test/test_helper'
-require 'proxy'
+require 'test_helper'
 require 'dhcp/server/native_ms'
 
 class DHCPServerMicrosoftTest < Test::Unit::TestCase

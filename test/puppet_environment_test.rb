@@ -1,4 +1,4 @@
-require 'test/test_helper'
+require 'test_helper'
 
 class PuppetEnvironmentTest < Test::Unit::TestCase
 
@@ -25,6 +25,7 @@ class PuppetEnvironmentTest < Test::Unit::TestCase
     env = mock_puppet_env.first
     assert_respond_to env, :classes
     assert_kind_of Array, env.classes
+    Puppet::Node::Environment.clear
     assert_kind_of Proxy::Puppet::PuppetClass, env.classes.first
   end
 

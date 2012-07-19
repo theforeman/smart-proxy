@@ -1,4 +1,4 @@
-require 'test/test_helper'
+require 'test_helper'
 
 class ProxyUtilTest < Test::Unit::TestCase
 

@@ -1,5 +1,4 @@
 require "test/unit"
-require 'pathname'
-$: << Pathname.new(__FILE__).join("../lib")
+$: << File.join(File.dirname(__FILE__), '..', 'lib')
 require "proxy"
 require "mocha"
