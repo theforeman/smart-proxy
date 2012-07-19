@@ -1,11 +1,12 @@
+2012-07-18	Ohad Levy <ohadlevy@gmail.com>
+	* 1.0RC2
+	* fixes #1759 - puppet 2.7.18 changed puppetca output
+
 2012-07-18	Greg Sutcliffe <greg.sutcliffe@gmail.com>
 	* fixes #1733 - Environment issue if the env is not specifically defined
 
 2012-07-18	Jeff Palmer <jeff@palmerit.net>
 	* Fixes #1734 : Bump version number in the Rakefile
-
-2012-07-18	Ohad Levy <ohadlevy@gmail.com>
-	* fixes #1759 - puppet 2.7.18 changed puppetca output
 
 2012-06-24	Ohad Levy <ohadlevy@gmail.com>
 	* 1.0RC1
