@@ -36,7 +36,13 @@ class SmartProxy < Sinatra::Base
   require "dns_api"      if SETTINGS.dns
   require "dhcp_api"     if SETTINGS.dhcp
   require "features_api"
-  require "facts_api" if defined? Facter
+
+  begin
+    require "facter"
+    require "facts_api" 
+  rescue LoadError
+    warn "Facter was not found, Facts API disabled"
+  end
 
   # we force webrick to allow SSL
   set :server, "webrick"
