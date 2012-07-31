@@ -6,6 +6,7 @@ APP_ROOT = "#{File.dirname(__FILE__)}/.."
 require "checks"
 require "rubygems" if USE_GEMS
 require "proxy"
+require "facter"
 require "sinatra-patch"
 require "json"
 require "proxy/log"
@@ -36,6 +37,7 @@ class SmartProxy < Sinatra::Base
   require "dns_api"      if SETTINGS.dns
   require "dhcp_api"     if SETTINGS.dhcp
   require "features_api"
+  require "facts_api"
 
   # we force webrick to allow SSL
   set :server, "webrick"
