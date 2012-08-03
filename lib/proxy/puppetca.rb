@@ -99,10 +99,10 @@ module Proxy::PuppetCA
 
       # puppetca is the old method of using puppet cert which is new in puppet 2.6
       default_path = ["/usr/sbin","/opt/puppet/bin"]
-      @puppetca = which("puppetca", default_path) || which("puppet", default_path)
+      @puppetca = which("puppet", default_path) || which("puppetca", default_path)
       unless File.exists?("#{@puppetca}")
-        logger.warn "unable to find puppetca binary"
-        raise "unable to find puppetca"
+        logger.warn "unable to find puppet or puppetca binary"
+        raise "unable to find puppet or puppetca"
       end
       # Append cert to the puppet command if we are not using the old puppetca command
       logger.debug "Found puppetca at #{@puppetca}"
