@@ -31,6 +31,10 @@
 :dns: false
 #:dns_key: /etc/rndc.key
 # use this setting if you are managing a dns server which is not localhost though this proxy
+#:dns_tsig_keytab: /usr/share/smart-proxy/dns.keytab
+#:dns_tsig_principal: domainuser
+#:dns_tsig_realm: REALM.LOCAL
+# use these three settings if you want to securely manage a ms dns server using GSS-TSIG 
 #:dns_server: dns.domain.com
 
 # Enable DHCP management
