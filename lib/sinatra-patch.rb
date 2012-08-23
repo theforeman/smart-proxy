@@ -18,6 +18,10 @@ module Sinatra
 
       FileUtils.mkdir_p(File.join(APP_ROOT, 'tmp/pids'))
 
+      # Create the PID's parent directory if it doesn't exist yet.
+      pid_path = SETTINGS.daemon_pid.gsub(/[^\/]+\/?$/, "")
+      FileUtils.mkdir_p(pid_path) unless File.exists?(pid_path)
+
       if SETTINGS.daemon and PLATFORM !~ /mingw/
         Process.daemon(true)
         if SETTINGS.daemon_pid.nil?
