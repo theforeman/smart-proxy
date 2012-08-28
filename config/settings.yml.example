@@ -59,6 +59,13 @@
 :puppet: false
 :puppet_conf: /etc/puppet/puppet.conf
 
+# enable BMC management  (Bare metal power and bios controls)
+# Ensure that you have freeipmi or ipmitool command line tools installed
+# You will also need the rubyipmi gem
+:bmc: false
+# Available bmc providers: freeipmi, ipmitool (Optional)
+#:bmc_default_provider: freeipmi
+
 # Where our proxy log files are stored
 # filename or STDOUT
 :log_file: /var/log/foreman-proxy/proxy.log
