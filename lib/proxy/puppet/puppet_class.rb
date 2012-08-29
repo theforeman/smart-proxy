@@ -1,4 +1,4 @@
-require 'puppet/parser'
+require 'puppet'
 
 module Proxy::Puppet
 
