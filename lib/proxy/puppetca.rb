@@ -179,7 +179,7 @@ module Proxy::PuppetCA
       else
         # Later versions of puppetca return OK even if the certificate is not present
         # However we can report this condition for 0.24 and not flag an error to foreman
-        if response =~ /Could not find client certificate/
+        if response =~ /Could not find client certificate/ or $?.exitstatus == 24
           logger.info "Attempt to remove nonexistant client certificate for #{certname}"
           raise NotPresent, "Attempt to remove nonexistant client certificate for #{certname}"
         else
