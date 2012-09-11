@@ -81,6 +81,8 @@ module Proxy::Puppet
                     raise TypeError
                 end
               end.join rescue nil
+            when Puppet::Parser::AST::Variable
+              "${#{value}}"
             when Puppet::Parser::AST::Type
               value.value
             when Puppet::Parser::AST::Name
