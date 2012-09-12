@@ -10,8 +10,8 @@ module Proxy::Puppet
       def scan_directory directory
         # Get a Puppet Parser to parse the manifest source
         parser = Puppet::Parser::Parser.new Puppet::Node::Environment.new
-        Dir.glob("#{directory}/*/manifests/**/*.pp").map do |manifest|
-          scan_manifest File.read(manifest), manifest, parser
+        Dir.glob("#{directory}/*/manifests/**/*.pp").map do |filename|
+          scan_manifest File.read(filename), filename, parser
         end.compact.flatten
       end
 
@@ -69,6 +69,7 @@ module Proxy::Puppet
               value.evaluate nil
             # Supported with stringification
             when Puppet::Parser::AST::Concat
+              # This is the case when two params are concatenated together ,e.g. "param_${key}_something"
               # Note1: only simple content are supported, plus variables whose raw name is taken
               # Note2: The variable substitution WON'T be done by Puppet from the ENC YAML output
               value.value.map do |v|
