@@ -4,6 +4,7 @@ module Proxy::Puppet
   require 'puppet'
 
   class Environment
+    extend Proxy::Log
 
     class << self
       # return a list of all puppet environments
@@ -21,6 +22,8 @@ module Proxy::Puppet
       def puppet_environments
         Puppet.clear
         Puppet[:config] = SETTINGS.puppet_conf if SETTINGS.puppet_conf
+        raise("Cannot read #{Puppet[:config]}") unless File.exist?(Puppet[:config])
+        logger.info "Reading environments from Puppet config file: #{Puppet[:config]}"
         Puppet.parse_config
         conf = Puppet.settings.instance_variable_get(:@values)
 
