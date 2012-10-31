@@ -49,8 +49,13 @@ module Proxy::Puppet
         env.each do|environment, modulepath|
           if modulepath and modulepath.include?("$environment")
             # expand $confdir if defined and used in modulepath
-            if conf[:main][:confdir] and modulepath.include?("$confdir")
-              modulepath.sub!("$confdir", conf[:main][:confdir])
+            if modulepath.include?("$confdir")
+              if conf[:main][:confdir]
+                modulepath.sub!("$confdir", conf[:main][:confdir])
+              else
+                # /etc/puppet is the default if $confdir is not defined
+                modulepath.sub!("$confdir", "/etc/puppet")
+              end
             end
             # Dynamic environments - get every directory under the modulepath
             modulepath.gsub(/\$environment.*/,"/").split(":").each do |base_dir|
