@@ -9,7 +9,7 @@ if RUBY_VERSION < "1.9"
         Dir.chdir "/"                  # Release old working directory.
       end
 
-      File.umask 0000                  # Ensure sensible umask. Adjust as needed.
+      File.umask 0022                  # Ensure sensible umask. Adjust as needed.
 
       logdir = File.join(APP_ROOT, "logs")
       FileUtils.mkdir_p logdir
