@@ -40,4 +40,12 @@ class SmartProxy
     end
   end
 
+  get "/puppet/version" do
+    content_type :json
+    begin
+      Puppet::PUPPETVERSION
+    rescue => e
+      log_halt 406, "Failed to retrieve the Puppet version"
+    end
+  end
 end
