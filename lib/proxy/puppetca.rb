@@ -93,7 +93,7 @@ module Proxy::PuppetCA
     def find_puppetca
       ssl_dir = Pathname.new ssldir
       unless (ssl_dir + "ca").directory?
-        logger.warn "PuppetCA: SSL/CA unavailable on this machine"
+        logger.warn "PuppetCA: SSL/CA unavailable on this machine: ssldir not found at #{ssl_dir}"
         raise "SSL/CA unavailable on this machine"
       end
 

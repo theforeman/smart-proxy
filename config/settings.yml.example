@@ -54,6 +54,8 @@
 
 # enable PuppetCA management
 :puppetca: false
+#:ssldir: /var/lib/puppet/ssl
+#:puppetdir: /etc/puppet
 
 # enable Puppet management
 :puppet: false
