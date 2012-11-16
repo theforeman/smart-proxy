@@ -1,6 +1,6 @@
 module Proxy::Puppet
 
-  #require 'proxy/puppet/puppet_class'
+  require 'proxy/puppet/puppet_class'
   require 'puppet'
 
   class Environment
