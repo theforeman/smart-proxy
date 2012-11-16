@@ -7,11 +7,6 @@ module Proxy::Puppet
     extend Proxy::Log
 
     class << self
-      # The puppet_environments method ensures this is false before attempting
-      # to call Puppet.parse_config() to prevent issues with loading the
-      # configuration more than once.
-      @configuration_loaded = false
-
       # return a list of all puppet environments
       def all
         puppet_environments.map { |env, path| new(:name => env, :paths => path.split(":")) }
@@ -25,16 +20,10 @@ module Proxy::Puppet
       private
 
       def puppet_environments
-        unless @configuration_loaded
-          Puppet.clear
-          Puppet[:config] = SETTINGS.puppet_conf if SETTINGS.puppet_conf
-          raise("Cannot read #{Puppet[:config]}") unless File.exist?(Puppet[:config])
-          logger.info "Reading environments from Puppet config file: #{Puppet[:config]}"
-          Puppet.parse_config
-
-          # Prevent the configuration from getting loaded again.
-          @configuration_loaded = true
-        end
+        Puppet[:config] = SETTINGS.puppet_conf if SETTINGS.puppet_conf
+        raise("Cannot read #{Puppet[:config]}") unless File.exist?(Puppet[:config])
+        logger.info "Reading environments from Puppet config file: #{Puppet[:config]}"
+        Puppet.settings.initialize_global_settings(Puppet[:config]) unless Puppet.settings.global_defaults_initialized?
 
         conf = Puppet.settings.instance_variable_get(:@values)
 
