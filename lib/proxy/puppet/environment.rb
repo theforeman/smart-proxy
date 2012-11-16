@@ -20,11 +20,11 @@ module Proxy::Puppet
       private
 
       def puppet_environments
-        Puppet.clear
         Puppet[:config] = SETTINGS.puppet_conf if SETTINGS.puppet_conf
         raise("Cannot read #{Puppet[:config]}") unless File.exist?(Puppet[:config])
         logger.info "Reading environments from Puppet config file: #{Puppet[:config]}"
-        Puppet.parse_config
+        Puppet.settings.initialize_global_settings(Puppet[:config]) unless Puppet.settings.global_defaults_initialized?
+
         conf = Puppet.settings.instance_variable_get(:@values)
 
         env = { }
