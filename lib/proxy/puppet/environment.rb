@@ -21,10 +21,25 @@ module Proxy::Puppet
 
       def puppet_environments
         Puppet.clear
+        if Puppet::PUPPETVERSION.to_i >= 3
+          # Used on Puppet 3.0, private method that clears the "initialized or
+          # not" state too, so a full config reload takes place and we pick up
+          # new environments
+          Puppet.settings.send(:clear_everything_for_tests)
+        end
+
         Puppet[:config] = SETTINGS.puppet_conf if SETTINGS.puppet_conf
         raise("Cannot read #{Puppet[:config]}") unless File.exist?(Puppet[:config])
         logger.info "Reading environments from Puppet config file: #{Puppet[:config]}"
-        Puppet.parse_config
+
+        if Puppet::PUPPETVERSION.to_i >= 3
+          # Initializing Puppet directly and not via the Faces API, so indicate
+          # the run mode to parse [master].  Don't use --run_mode=master or
+          # bug #17492 is hit and Puppet can't parse it.
+          Puppet.settings.initialize_global_settings(['--config', Puppet[:config], '--run_mode' 'master'])
+        else
+          Puppet.parse_config
+        end
         conf = Puppet.settings.instance_variable_get(:@values)
 
         env = { }
