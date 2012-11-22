@@ -5,6 +5,8 @@ module Proxy::PuppetCA
   extend Proxy::Log
   extend Proxy::Util
 
+  require 'puppet'
+
   class NotPresent < RuntimeError; end
 
   class << self
