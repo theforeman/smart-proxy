@@ -1,9 +1,12 @@
 require 'checks'
 require 'ipaddr'
 require 'proxy/dhcp/monkey_patches' unless IPAddr.new.respond_to?('to_range')
+require 'proxy/dhcp/monkey_patch_subnet' unless Array.new.respond_to?('rotate')
 require 'ping' unless RUBY_1_9
 require 'proxy/validations'
 require 'net/ping'
+require 'timeout'
+require 'tmpdir'
 
 module Proxy::DHCP
   # Represents a DHCP Subnet
@@ -32,6 +35,10 @@ module Proxy::DHCP
 
     def to_s
       "#{network}/#{netmask}"
+    end
+
+    def cidr
+      IPAddr.new(netmask).to_i.to_s(2).count("1")
     end
 
     def range
@@ -104,6 +111,30 @@ module Proxy::DHCP
       return false
     end
 
+    def get_index_and_lock filename
+      # Store for use in the unlock method
+      @filename = "#{Dir::tmpdir}/#{filename}"
+      @lockfile = "#{@filename}.lock"
+
+      # Loop if the file is locked
+      Timeout::timeout(30) { sleep 0.1 while File.exists? @lockfile }
+
+      # Touch the lock the file
+      File.open(@lockfile, "w") {}
+
+      @file = File.new(@filename,'r+') rescue File.new(@filename,'w+')
+
+      # this returns the index in the file
+      return @file.readlines.first.to_i rescue 0
+    end
+
+    def set_index_and_unlock index
+      @file.reopen(@filename,'w')
+      @file.write index
+      @file.close
+      File.delete @lockfile
+    end
+
     # returns the next unused IP Address in a subnet
     # Pings the IP address as well (just in case its not in Proxy::DHCP)
     def unused_ip args = {}
@@ -119,16 +150,28 @@ module Proxy::DHCP
         logger.warn "No free IPs at #{to_s}"
         return nil
       else
-        free_ips.each do |ip|
-          logger.debug "Searching for free ip - pinging #{ip}"
-          if tcp_pingable?(ip) or icmp_pingable?(ip)
-            logger.info "Found a pingable IP(#{ip}) address which does not have a Proxy::DHCP record"
-          else
-            logger.debug "Found free ip #{ip} out of a total of #{free_ips.size} free ips"
-            return ip
+        @index = 0
+        begin
+          # Read and lock the storage file
+          stored_index = get_index_and_lock("foreman-proxy_#{network}_#{cidr}.tmp")
+
+          free_ips.rotate(stored_index).each do |ip|
+            logger.debug "Searching for free ip - pinging #{ip}"
+            if tcp_pingable?(ip) or icmp_pingable?(ip)
+              logger.info "Found a pingable IP(#{ip}) address which does not have a Proxy::DHCP record"
+            else
+              logger.debug "Found free ip #{ip} out of a total of #{free_ips.size} free ips"
+              @index = free_ips.index(ip)+1
+              return ip
+            end
           end
+          logger.warn "No free IPs at #{to_s}"
+        rescue Exception => e
+          logger.debug e.message
+        ensure
+          # ensure we unlock the storage file
+          set_index_and_unlock @index
         end
-        logger.warn "No free IPs at #{to_s}"
         nil
       end
     end
