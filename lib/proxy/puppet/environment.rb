@@ -28,8 +28,12 @@ module Proxy::Puppet
           Puppet.settings.send(:clear_everything_for_tests)
         end
 
-        Puppet[:config] = SETTINGS.puppet_conf if SETTINGS.puppet_conf
-        raise("Cannot read #{Puppet[:config]}") unless File.exist?(Puppet[:config])
+        if SETTINGS.puppet_conf
+          Puppet[:config] = SETTINGS.puppet_conf
+          raise("Cannot read #{Puppet[:config]}") unless File.exist?(Puppet[:config])
+        elsif Puppet::PUPPETVERSION.to_i >= 3
+          Puppet[:config] = "/etc/puppet/puppet.conf"
+        end
         logger.info "Reading environments from Puppet config file: #{Puppet[:config]}"
 
         if Puppet::PUPPETVERSION.to_i >= 3
