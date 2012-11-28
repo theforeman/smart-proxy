@@ -34,7 +34,7 @@ module Proxy::PuppetCA
       end.uniq.compact
       if found
         autosign = open(autosign_file, File::TRUNC|File::RDWR)
-        autosign.write entries
+        autosign.write entries.join("\n")
         autosign.close
         logger.info "Removed #{certname} from autosign"
       else
