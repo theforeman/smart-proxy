@@ -17,7 +17,7 @@ class SmartProxy
         :mysql_username => SETTINGS.dns_mysql_username,
         :mysql_password => SETTINGS.dns_mysql_password,
       })
-      @server = Proxy::DNS::PowerDNS.new(options)
+      @server ||= Proxy::DNS::PowerDNS.new(options)
     else
       log_halt 400, "Unrecognized or missing DNS vendor type: #{SETTINGS.dns_vendor.nil? ? "MISSING" : SETTINGS.dns_vendor}"
     end
