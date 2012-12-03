@@ -24,7 +24,7 @@ module Proxy::DNS
           if ip = dns_find(@fqdn)
             raise(Proxy::DNS::Collision, "#{@fqdn} is already in use by #{ip}")
           else
-            @mysql_connection.query("INSERT INTO records (records.domain_id,records.name,records.ttl,records.content) VALUES (#{id}, '#{@fqdn}', #{@ttl}, '#{@value}');")
+            @mysql_connection.query("INSERT INTO records (records.domain_id,records.name,records.ttl,records.content,records.type) VALUES (#{id}, '#{@fqdn}', #{@ttl}, '#{@value}', '#{@type}');")
           end
         when "PTR"
           _ptrname = @value.split(/\./).reverse * ".";
@@ -32,7 +32,7 @@ module Proxy::DNS
           if name = dns_find(_ptrname)
             raise(Proxy::DNS::Collision, "#{@value} is already used by #{name}")
           else
-            @mysql_connection.query("INSERT INTO records (records.domain_id,records.name,records.ttl,records.content) VALUES (#{id}, '#{_ptrname}', #{@ttl}, '#{@fqdn}');")
+            @mysql_connection.query("INSERT INTO records (records.domain_id,records.name,records.ttl,records.content,records.type) VALUES (#{id}, '#{_ptrname}', #{@ttl}, '#{@fqdn}', 'PTR');")
           end
         end
     end
