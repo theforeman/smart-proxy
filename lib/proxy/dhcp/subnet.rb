@@ -2,9 +2,7 @@ require 'checks'
 require 'ipaddr'
 require 'proxy/dhcp/monkey_patches' unless IPAddr.new.respond_to?('to_range')
 require 'proxy/dhcp/monkey_patch_subnet' unless Array.new.respond_to?('rotate')
-require 'ping' unless RUBY_1_9
 require 'proxy/validations'
-require 'net/ping'
 require 'timeout'
 require 'tmpdir'
 
@@ -16,6 +14,7 @@ module Proxy::DHCP
 
     include Proxy::DHCP
     include Proxy::Log
+    include Proxy::Util
     include Proxy::Validations
 
     def initialize server, network, netmask
@@ -217,23 +216,21 @@ module Proxy::DHCP
     end
 
     private
-    def tcp_pingable? ip
-      Net::Ping::TCP.service_check=true
-      Net::Ping::TCP.new(nil,nil,1).ping(ip)
+    def pingable? ip
+      unless which("nmap", ENV["PATH"])
+        logger.debug "No nmap executable, falling back to ping"
+        return icmp_pingable?
+      end
+      # nmap covers tcp and icmp in a single check, so no need for two methods
+      logger.debug "running nmap on #{ip}"
+      (`nmap -n -sn -PR -PE -PP -PS22,80,443 #{ip}` =~ /Host seems down/).nil?
     rescue
       # We failed to check this address so we should not use it
       true
     end
 
     def icmp_pingable? ip
-      if privileged_user
-        Net::Ping::ICMP.new(nil,nil,1).ping(ip)
-      else
-        system("ping -c 1 -W 1 #{ip} > /dev/null")
-      end
-    rescue
-      # We failed to check this address so we should not use it
-      true
+      system("ping -c 1 -W 1 #{ip} > /dev/null")
     end
 
     def privileged_user
