@@ -2,9 +2,8 @@ require 'checks'
 require 'ipaddr'
 require 'proxy/dhcp/monkey_patches' unless IPAddr.new.respond_to?('to_range')
 require 'proxy/dhcp/monkey_patch_subnet' unless Array.new.respond_to?('rotate')
-require 'ping' unless RUBY_1_9
 require 'proxy/validations'
-require 'net/ping'
+require 'socket'
 require 'timeout'
 require 'tmpdir'
 
@@ -218,19 +217,47 @@ module Proxy::DHCP
 
     private
     def tcp_pingable? ip
-      Net::Ping::TCP.service_check=true
-      Net::Ping::TCP.new(nil,nil,1).ping(ip)
+      # This code is from net-ping, and stripped down for use here
+      # We don't need all the ldap dependencies net-ping brings in
+
+      @service_check = true
+      @port          = 7
+      @timeout       = 1
+      @exception     = nil
+      bool           = false
+      tcp            = nil
+
+      begin
+        Timeout.timeout(@timeout){
+          begin
+            tcp = TCPSocket.new(ip, @port)
+          rescue Errno::ECONNREFUSED => err
+            if @service_check
+              bool = true
+            else
+              @exception = err
+            end
+          rescue Exception => err
+            @exception = err
+          else
+            bool = true
+          end
+        }
+      rescue Timeout::Error => err
+        @exception = err
+      ensure
+        tcp.close if tcp
+      end
+
+      bool
     rescue
       # We failed to check this address so we should not use it
       true
     end
 
     def icmp_pingable? ip
-      if privileged_user
-        Net::Ping::ICMP.new(nil,nil,1).ping(ip)
-      else
-        system("ping -c 1 -W 1 #{ip} > /dev/null")
-      end
+      # Always shell to ping, instead of using net-ping
+      system("ping -c 1 -W 1 #{ip} > /dev/null")
     rescue
       # We failed to check this address so we should not use it
       true
