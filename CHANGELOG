@@ -1,3 +1,64 @@
+2012-12-10	Greg Sutcliffe <gsutclif@redhat.com>
+	* fixes #2031 - Remove dependency on net-ping
+
+2012-12-05	Greg Sutcliffe <gsutclif@redhat.com>
+	* fixes #2016 Use a tmpfile+lockfile to avoid race conditions in IP suggestion
+
+2012-12-05	Dominic Cleal <dcleal@redhat.com>
+	* fixes #1983 - use /etc/puppet/puppet.conf by default
+
+2012-11-28	Greg Sutcliffe <gsutclif@redhat.com>
+	* Fixes #1984 - explicitly call array.join when writing autosign.conf
+
+2012-11-22	Dominic Cleal <dcleal@redhat.com>
+	* fixes #1967 - missing require for Puppet constant
+	* fixes #1915 - load environments from Puppet 3
+
+2012-11-15	Sam Kottler <shk@redhat.com>
+	* Fixes #1941 - Load only the puppet binary when puppet 3 or higher is used
+	* Removed files related to packaging
+
+2012-11-15	Greg Sutcliffe <gsutclif@redhat.com>
+	* More detailed log message for puppetca ssldir Add ssldir and puppetdir to config examples Fixes #1104
+
+2012-11-11	Greg Sutcliffe <gsutclif@redhat.com>
+	* Fixes #1761 - default to /etc/puppet if we can't find a value for
+
+2012-11-07	Dominic Cleal <dcleal@redhat.com>
+	* fixes #1929 - set umask sensibly to prevent world writable files (CVE-2012-5477)
+
+2012-10-24	Greg Sutcliffe <gsutclif@redhat.com>
+	* Fixes #1914: Raise if we cannot read the puppet conf file, report the path otherwise
+
+2012-09-12	Ohad Levy <ohadlevy@gmail.com>
+	* fixes #1856 - adds a config.ru and allow the SP to run as a rack app.
+	* added comment for code clarity
+	* make sure that class parameters are prefixed correctly and not as strings
+
+2012-09-05	Ohad Levy <ohadlevy@gmail.com>
+	* fixes #1836 - puppet cert in 2.7.19 has a different exit code
+
+2012-08-29	Ohad Levy <ohadlevy@gmail.com>
+	* fixes #1835 - proxy now can import classes from puppet 2.7.19
+
+2012-08-28	Sam Kottler <sam@kottlerdevelopment.com>
+	* Create the pid parent dir if it doesn't exist
+
+2012-08-28	Corey Osman <corey@logicminds.biz>
+	* feature #1829 - add bmc ipmi support to smart proxy
+
+2012-07-31	Ohad Levy <ohadlevy@gmail.com>
+	* Merge branch '26' into develop
+	* minor cleanups to tests
+
+2012-07-31	Roberto <roberto_moral@cable.comcast.com>
+	* fixes #1797 - Added a REST interface for the Facts known about the proxy
+
+2012-07-19	Ohad Levy <ohadlevy@gmail.com>
+	* minor cleanups to tests
+	* Export arguments of parameterized classes
+	* 1.0 release
+
 2012-07-18	Ohad Levy <ohadlevy@gmail.com>
 	* 1.0RC2
 	* fixes #1759 - puppet 2.7.18 changed puppetca output
