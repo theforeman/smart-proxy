@@ -7,7 +7,7 @@ class ProxyTest < Test::Unit::TestCase
   end
 
   def test_which_should_return_a_binary_path
-    assert Proxy::PuppetCA.which("ls") == "/bin/ls"
+    assert_equal "/bin/ls", Proxy::PuppetCA.which("ls")
   end
 
   def test_should_clean_host

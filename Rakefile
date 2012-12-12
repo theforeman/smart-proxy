@@ -1,15 +1,22 @@
 require 'rake'
 require 'rake/testtask'
-require 'rake/rdoctask'
 require 'rake/packagetask'
-require 'rake/gempackagetask'
+require 'rdoc/task'
+require 'rubygems/package_task'
 load 'tasks/proxy_tasks.rake'
+load 'tasks/jenkins.rake'
+
+# Test for 1.9
+if (RUBY_VERSION.split('.').map{|s|s.to_i} <=> [1,9,0]) > 0 then
+  PLATFORM = RUBY_PLATFORM
+end
 
 desc 'Default: run unit tests.'
 task :default => :test
 
 desc 'Test the Foreman Proxy plugin.'
 Rake::TestTask.new(:test) do |t|
+  t.libs << '.'
   t.libs << 'lib'
   t.libs << 'test'
   files = FileList['test/**/*_test.rb']
@@ -54,6 +61,6 @@ Remote DHCP, DNS, TFTP and Puppet servers via a REST API
 EOF
 end
 
-Rake::GemPackageTask.new(spec) do |pkg|
+Gem::PackageTask.new(spec) do |pkg|
     pkg.need_tar_gz = true
 end

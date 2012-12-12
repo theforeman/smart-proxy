@@ -9,7 +9,7 @@ class PuppetEnvironmentTest < Test::Unit::TestCase
 
   def test_should_provide_puppet_envs
     env = Proxy::Puppet::Environment.send(:puppet_environments)
-#    assert env.keys.include?(:production)
+    assert env.keys.include?(:production)
   end
 
   def test_should_provide_env_objects
@@ -32,7 +32,7 @@ class PuppetEnvironmentTest < Test::Unit::TestCase
   private
 
   def mock_puppet_env
-    Proxy::Puppet::Environment.stubs(:puppet_environments).returns({:production => "/home/olevy/git/puppet-repos/modules"})
+    Proxy::Puppet::Environment.stubs(:puppet_environments).returns({:production => "./test/fixtures/modules"})
     Proxy::Puppet::Environment.all
   end
 end

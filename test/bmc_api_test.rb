@@ -19,7 +19,7 @@ class BmcApiTest < Test::Unit::TestCase
     user     ||= ENV["ipmiuser"] || "user"
     pass     ||= ENV["ipmipass"] || "pass"
     @host    ||= ENV["ipmihost"] || "host"
-    provider ||= ENV["ipmiprovider"] || nil
+    provider ||= ENV["ipmiprovider"] || "ipmitool"
     @args    = { :bmc_provider => provider }
     authorize user, pass
   end
