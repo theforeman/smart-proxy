@@ -4,3 +4,5 @@ config/settings.yml
 .idea
 logs
 *swp
+Gemfile.lock
+bundler.d/Gemfile.local.rb
