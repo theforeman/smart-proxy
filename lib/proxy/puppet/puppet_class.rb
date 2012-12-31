@@ -96,6 +96,8 @@ module Proxy::Puppet
             when Puppet::Parser::AST::ASTHash
               Hash[value.value.each.inject([]) { |arr, (k,v)| (arr << [ast_to_value(k), ast_to_value(v)]) rescue arr }]
             # Let's see if a raw evaluation works with no scope for any other type
+            when Puppet::Parser::AST::Function
+              "${#{value}}"
             else
               if value.respond_to? :evaluate
                 # Can probably work for: (depending on the actual content)
@@ -112,7 +114,6 @@ module Proxy::Puppet
                 # - Puppet::Parser::AST::Variable
                 # - Puppet::Parser::AST::HashOrArrayAccess
                 # - Puppet::Parser::AST::ResourceReference
-                # - Puppet::Parser::AST::Function
                 value.evaluate nil
               else
                 raise TypeError
