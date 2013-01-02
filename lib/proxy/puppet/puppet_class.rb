@@ -98,6 +98,8 @@ module Proxy::Puppet
             when Puppet::Parser::AST::Function
               value.to_s
             # Let's see if a raw evaluation works with no scope for any other type
+            when Puppet::Parser::AST::Function
+              "${#{value}}"
             else
               if value.respond_to? :evaluate
                 # Can probably work for: (depending on the actual content)
