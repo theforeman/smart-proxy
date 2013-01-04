@@ -7,7 +7,12 @@ class ProxyTest < Test::Unit::TestCase
   end
 
   def test_which_should_return_a_binary_path
-    assert_equal "/bin/ls", Proxy::PuppetCA.which("ls")
+    ENV.stubs(:[]).with('PATH').returns(['/foo', '/bin', '/usr/bin'].join(File::PATH_SEPARATOR))
+    { '/foo' => false, '/bin' => true, '/usr/bin' => false }.each do |p,r|
+      FileTest.stubs(:file?).with("#{p}/ls").returns(r)
+      FileTest.stubs(:executable?).with("#{p}/ls").returns(r)
+    end
+    assert_equal '/bin/ls', Proxy::PuppetCA.which('ls')
   end
 
   def test_should_clean_host
