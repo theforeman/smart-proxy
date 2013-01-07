@@ -66,16 +66,19 @@ module Proxy::Puppet
         new_env = env.clone
         # are we using dynamic puppet environments?
         env.each do|environment, modulepath|
-          if modulepath and modulepath.include?("$environment")
-            # expand $confdir if defined and used in modulepath
-            if modulepath.include?("$confdir")
-              if conf[:main][:confdir]
-                modulepath.gsub!("$confdir", conf[:main][:confdir])
-              else
-                # /etc/puppet is the default if $confdir is not defined
-                modulepath.gsub!("$confdir", "/etc/puppet")
-              end
+          next unless modulepath
+
+          # expand $confdir if defined and used in modulepath
+          if modulepath.include?("$confdir")
+            if conf[:main][:confdir]
+              modulepath.gsub!("$confdir", conf[:main][:confdir])
+            else
+              # /etc/puppet is the default if $confdir is not defined
+              modulepath.gsub!("$confdir", "/etc/puppet")
             end
+          end
+
+          if modulepath.include?("$environment")
             # Dynamic environments - get every directory under the modulepath
             modulepath.gsub(/\$environment.*/,"/").split(":").each do |base_dir|
               Dir.glob("#{base_dir}/*").grep(/\/[A-Za-z0-9_]+$/) do |dir|
