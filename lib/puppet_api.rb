@@ -1,9 +1,25 @@
 class SmartProxy
+  def puppet_setup(opts = {})
+    raise "Smart Proxy is not configured to support Puppet runs" unless SETTINGS.puppet
+    case SETTINGS.puppet_provider
+    when "puppetrun"
+      require 'proxy/puppet/puppetrun'
+      @server = Proxy::Puppet::PuppetRun.new(opts)
+    when "mcollective"
+      require 'proxy/puppet/mcollective'
+      @server = Proxy::Puppet::MCollective.new(opts)
+    else
+      log_halt 400, "Unrecognized or missing puppet_provider: #{SETTINGS.puppet_provider || "MISSING"}"
+    end
+  rescue => e
+    log_halt 400, e
+  end
+
   post "/puppet/run" do
-    hosts = params[:nodes]
+    nodes = params[:nodes]
     begin
-      log_halt 400, "Failed puppet run: No nodes defined" unless hosts
-      log_halt 500, "Failed puppet run: Check Log files" unless Proxy::Puppet.run hosts
+      log_halt 400, "Failed puppet run: No nodes defined" unless nodes
+      log_halt 500, "Failed puppet run: Check Log files" unless puppet_setup(:nodes => [nodes].flatten).run
     rescue => e
       log_halt 500, "Failed puppet run: #{e}"
     end
@@ -39,5 +55,4 @@ class SmartProxy
       log_halt 406, "Failed to show puppet classes: #{e}"
     end
   end
-
 end

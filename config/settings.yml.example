@@ -66,6 +66,10 @@
 
 # enable Puppet management
 :puppet: false
+# valid providers:
+#   puppetrun   (for puppetrun/kick, deprecated in Puppet 3)
+#   mcollective (uses mco puppet)
+:puppet_provider: puppetrun
 :puppet_conf: /etc/puppet/puppet.conf
 
 # enable BMC management  (Bare metal power and bios controls)
