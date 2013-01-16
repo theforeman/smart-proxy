@@ -1,9 +1,9 @@
 class SmartProxy
   post "/puppet/run" do
-    hosts = params[:nodes]
+    nodes = params[:nodes]
     begin
-      log_halt 400, "Failed puppet run: No nodes defined" unless hosts
-      log_halt 500, "Failed puppet run: Check Log files" unless Proxy::Puppet.run hosts
+      log_halt 400, "Failed puppet run: No nodes defined" unless nodes
+      log_halt 500, "Failed puppet run: Check Log files" unless Proxy::Puppet.run nodes
     rescue => e
       log_halt 500, "Failed puppet run: #{e}"
     end
@@ -39,5 +39,4 @@ class SmartProxy
       log_halt 406, "Failed to show puppet classes: #{e}"
     end
   end
-
 end
