@@ -1,4 +1,4 @@
-require 'puppet'
+require 'proxy/puppet/initializer'
 
 module Proxy::Puppet
 
@@ -9,6 +9,7 @@ module Proxy::Puppet
       # returns an array of PuppetClass objects.
       def scan_directory directory
         # Get a Puppet Parser to parse the manifest source
+        Initializer.load
         parser = Puppet::Parser::Parser.new Puppet::Node::Environment.new
         Dir.glob("#{directory}/*/manifests/**/*.pp").map do |filename|
           scan_manifest File.read(filename), filename, parser
@@ -18,7 +19,10 @@ module Proxy::Puppet
       def scan_manifest manifest, filename = '', parser = nil
         klasses = []
         # Get a Puppet Parser to parse the manifest source
-        parser ||= Puppet::Parser::Parser.new(Puppet::Node::Environment.new)
+        unless parser
+          Initializer.load
+          parser = Puppet::Parser::Parser.new(Puppet::Node::Environment.new)
+        end
         already_seen = Set.new parser.known_resource_types.hostclasses.keys
         already_seen << '' # Prevent the toplevel "main" class from matching
         ast = parser.parse manifest
