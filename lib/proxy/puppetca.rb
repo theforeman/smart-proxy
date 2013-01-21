@@ -35,6 +35,7 @@ module Proxy::PuppetCA
       if found
         autosign = open(autosign_file, File::TRUNC|File::RDWR)
         autosign.write entries.join("\n")
+        autosign.write "\n"
         autosign.close
         logger.info "Removed #{certname} from autosign"
       else
@@ -59,7 +60,12 @@ module Proxy::PuppetCA
 
     # list of hosts which are now allowed to be installed via autosign
     def autosign_list
-      File.exist?(autosign_file) ? File.read(autosign_file).split : []
+      return [] unless File.exist?(autosign_file)
+      File.read(autosign_file).split("\n").reject { |v|
+        v =~ /^\s*#.*|^$/ ## Remove comments and empty lines
+      }.map { |v|
+        v.chomp ## Strip trailing spaces
+      }
     end
 
     # list of all certificates and their state/fingerprint
