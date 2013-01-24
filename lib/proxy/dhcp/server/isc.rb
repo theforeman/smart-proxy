@@ -228,7 +228,7 @@ module Proxy::DHCP
         if /^include\s+"(.*)"\s*;/ =~ line.strip
           conf = $1
           unless File.exist?(conf)
-            log_halt 400, "Unable to find the included DHCP configuration file: #{conf}"
+            raise "Unable to find the included DHCP configuration file: #{conf}"
           end
           config << read_config(conf)
         else
