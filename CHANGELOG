@@ -1,3 +1,30 @@
+2013-01-24	Ohad Levy <ohadlevy@gmail.com>
+	* refs #1567 - fixed a copy paste error
+
+2013-01-20	Sam Kottler <shk@linux.com>
+	* Fixes #2143: Only create the log file parent dir if daemonize is true
+
+2013-01-20	Dominic Cleal <dcleal@redhat.com>
+	* fixes #2085 - load Puppet 3 app defaults for master mode too
+
+2013-01-08	DoubleMalt <christoph@web.crofting.com>
+	* fixes #2114 Add warning if no environments found
+
+2013-01-08	Dominic Cleal <dcleal@redhat.com>
+	* fixes #2099 - interpolate $confdir if $environment not used
+
+2013-01-08	Raffael Schmid <raffael@yux.ch>
+	* fixes #2099 - fix handling of multiple module paths
+
+2013-01-02	Ohad Levy <ohadlevy@gmail.com>
+	* fixes #2077 - proxy should not return nil for parameters with a function call
+
+2012-12-17	Greg Sutcliffe <gsutclif@redhat.com>
+	* fix tests running on both 1.8 and 1.9 ruby
+
+2012-12-10	Ohad Levy <ohadlevy@gmail.com>
+	* release bump to 1.1RC1
+
 2012-12-10	Greg Sutcliffe <gsutclif@redhat.com>
 	* fixes #2031 - Remove dependency on net-ping
 
