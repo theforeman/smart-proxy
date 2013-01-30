@@ -11,6 +11,8 @@ SETTINGS.log_file = File.join(logdir, 'test.log')
 SETTINGS.puppet_conf = File.join(File.dirname(__FILE__), 'fixtures', 'puppet.conf')
 
 require "proxy"
+require "proxy/puppetca"
+require "proxy/tftp"
 require "mocha/setup"
 require "rack/test"
 require 'sinatra'
