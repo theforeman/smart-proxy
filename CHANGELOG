@@ -1,4 +1,13 @@
+2013-01-30	Jan Vansteenkiste <jan@vstone.eu>
+	* Tests the autosign.conf operations
+	* fixes #1674: Ignore commented lines when reading all certificates in autosign and make sure the autosign file contains a EOL on the last line
+
+2013-01-30	Dominic Cleal <dcleal@redhat.com>
+	* Fix a number of tests and settings so tests run from example settings.yml
+	* fixes #2101 - add bundler / Gemfile
+
 2013-01-24	Ohad Levy <ohadlevy@gmail.com>
+	* version bump to RC3
 	* refs #1567 - fixed a copy paste error
 
 2013-01-20	Sam Kottler <shk@linux.com>
