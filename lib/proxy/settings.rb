@@ -10,7 +10,7 @@ class Settings < OpenStruct
 end
 
 settings = YAML.load(raw_config)
-if PLATFORM =~ /mingw/
+if RUBY_PLATFORM =~ /mingw/
   settings.delete :puppetca if settings.has_key? :puppetca
   settings.delete :puppet   if settings.has_key? :puppet
   settings[:x86_64] = File.exist?('c:\windows\sysnative\cmd.exe')
