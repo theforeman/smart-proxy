@@ -6,6 +6,13 @@ class ProxyUtilTest < Test::Unit::TestCase
     assert Proxy::Util.instance_methods.include? RUBY_VERSION >= '1.9.3' ? :which : "which"
   end
 
+  def test_util_shell_escape
+    assert Proxy::Util.methods.include? RUBY_VERSION >= '1.9.3' ? :escape_for_shell : "escape_for_shell"
+    assert_equal Proxy::Util.escape_for_shell("; rm -rf"), '\;\ rm\ -rf'
+    assert_equal Proxy::Util.escape_for_shell("vm.test.com,physical.test.com"), "vm.test.com,physical.test.com"
+    assert_equal Proxy::Util.escape_for_shell("vm.test.com physical.test.com"), 'vm.test.com\ physical.test.com'
+  end
+
   def test_commandtask_with_echo_exec
     t = Proxy::Util::CommandTask.new('echo test')
     # ruby 1.9 seems to return nil for $? in open3

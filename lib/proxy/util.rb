@@ -1,4 +1,5 @@
 require 'open3'
+require 'shellwords'
 
 module Proxy::Util
 
@@ -57,5 +58,26 @@ module Proxy::Util
   rescue StandardError => e
     logger.warn e
     return false
+  end
+
+  def self.escape_for_shell(command)
+    # This is a backport for  using the core Shellwords#escape that's in 1.9.2
+    # when using 1.8.7.
+    if RUBY_VERSION < '1.9.2'
+      return command.shellescape if command.respond_to? :shellescape
+
+      # An empty argument will be skipped, so return empty quotes.
+      return "''" if command.empty?
+      command = command.dup
+
+      # Process as a single byte sequence because not all shell
+      # implementations are multibyte aware.
+      command.gsub!(/([^A-Za-z0-9_\-.,:\/@\n])/n, "\\\\\\1")
+      command.gsub!(/\n/, "'\n'")
+
+      return command
+    else
+      Shellwords.escape(command)
+    end
   end
 end
