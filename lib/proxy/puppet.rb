@@ -27,13 +27,13 @@ module Proxy::Puppet
 
       # Returns a boolean with whether or not the command executed successfully.
       Open3.popen3(*puppet_cmd) do |stdin, stdout, stderr|
-	stdrout = stdout.read
-	if stdrout =~ /finished with exit code 0/
-	  return true
-	else
-	  logger.warn "The attempted puppetrun failed: \n#{stderr.read}\n#{stdrout}"
-	  return false
-	end
+        stdrout = stdout.read
+        if stdrout =~ /finished with exit code 0/
+          return true
+        else
+          logger.warn "The attempted puppetrun failed: \n#{stderr.read}\n#{stdrout}"
+          return false
+        end
       end
     end
   end
