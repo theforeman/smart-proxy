@@ -1,3 +1,4 @@
+require "checks"
 require "yaml"
 require "ostruct"
 require "pathname"
