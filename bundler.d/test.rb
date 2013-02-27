@@ -4,4 +4,6 @@ group :test do
   gem 'rack-test'
   gem 'single_test'
   gem 'ci_reporter', '>= 1.6.3'
+  gem 'rdoc'
+  gem 'minitest', :platforms => :ruby_19
 end
