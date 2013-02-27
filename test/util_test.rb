@@ -3,11 +3,11 @@ require 'test_helper'
 class ProxyUtilTest < Test::Unit::TestCase
 
   def test_util_should_support_path
-    assert Proxy::Util.instance_methods.include? RUBY_VERSION >= '1.9.3' ? :which : "which"
+    assert Proxy::Util.instance_methods.include? RUBY_VERSION =~ /^1\.8/ ? "which" : :which
   end
 
   def test_util_shell_escape
-    assert Proxy::Util.methods.include? RUBY_VERSION >= '1.9.3' ? :escape_for_shell : "escape_for_shell"
+    assert Proxy::Util.methods.include? RUBY_VERSION =~ /^1\.8/ ? "escape_for_shell" : :escape_for_shell
     assert_equal Proxy::Util.escape_for_shell("; rm -rf"), '\;\ rm\ -rf'
     assert_equal Proxy::Util.escape_for_shell("vm.test.com,physical.test.com"), "vm.test.com,physical.test.com"
     assert_equal Proxy::Util.escape_for_shell("vm.test.com physical.test.com"), 'vm.test.com\ physical.test.com'
