@@ -5,7 +5,27 @@ module Proxy::Squid
   require "proxy/settings"
 
   class << self
-    def reconfigure *host
+    def add *hosts
+      hosts.each do |ip_addr|
+        filename = File.join(SETTINGS.squid_conf_dir, 'foreman.d', "#{ip_addr}.conf")
+        File.open( filename, 'w' ) do |f|
+          f.puts "acl foreman_clients src #{ip_addr}"
+        end
+      end
+      reconfigure
+    end
+
+    def rm *hosts
+      hosts.each do |ip_addr|
+        filename = File.join(SETTINGS.squid_conf_dir, 'foreman.d', "#{ip_addr}.conf")
+        File.unlink( filename )
+      end
+      reconfigure
+    end
+  end
+
+  private
+  def reconfigure *host
       path  = ['/usr/sbin', '/usr/bin', '/opt/squid3/bin', '/opt/squid/bin']
       squid = which('squid3', path) || which('squid', path)
       sudo  = which('sudo', '/usr/bin')
@@ -29,23 +49,4 @@ module Proxy::Squid
 
       return true
     end
-
-    def add *hosts
-      hosts.each do |ip_addr|
-        filename = File.join(SETTINGS.squid_conf_dir, 'foreman.d', "#{ip_addr}.conf")
-        File.open( filename, 'w' ) do |f|
-          f.puts "acl foreman_clients src #{ip_addr}"
-        end
-      end
-      reconfigure
-    end
-
-    def rm *hosts
-      hosts.each do |ip_addr|
-        filename = File.join(SETTINGS.squid_conf_dir, 'foreman.d', "#{ip_addr}.conf")
-        File.unlink( filename )
-      end
-      reconfigure
-    end
-  end
 end
