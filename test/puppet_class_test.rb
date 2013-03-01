@@ -129,6 +129,7 @@ class PuppetClassTest < Test::Unit::TestCase
     manifest = <<-EOF
     class foreman::install (
       $mandatory,
+      $undef = undef,
       $emptyString = '',
       $emptyStringDq = "",
       $string = "foo",
@@ -146,6 +147,7 @@ class PuppetClassTest < Test::Unit::TestCase
     klass = klasses.first
     assert_equal({
       'mandatory' => nil,
+      'undef' => '',
       'emptyString' => '',
       'emptyStringDq' => '',
       'string' => 'foo',

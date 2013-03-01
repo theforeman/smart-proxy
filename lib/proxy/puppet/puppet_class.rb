@@ -92,8 +92,8 @@ module Proxy::Puppet
               value.value
             when Puppet::Parser::AST::Name
               (Puppet::Parser::Scope.number?(value.value) or value.value)
-            when Puppet::Parser::AST::Undef # equivalent of nil
-              nil
+            when Puppet::Parser::AST::Undef # equivalent of nil, but optional
+              ""
             # Depends on content
             when Puppet::Parser::AST::ASTArray
               value.inject([]) { |arr, v| (arr << ast_to_value(v)) rescue arr }
