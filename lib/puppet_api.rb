@@ -12,7 +12,7 @@ class SmartProxy
   get "/puppet/environments" do
     content_type :json
     begin
-      Proxy::Puppet::Environment.all.to_json
+      Proxy::Puppet::Environment.all.map(&:name).to_json
     rescue => e
       log_halt 406, "Failed to list puppet environments: #{e}"
     end
