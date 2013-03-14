@@ -160,6 +160,19 @@ class PuppetClassTest < Test::Unit::TestCase
     }, klass.params)
   end
 
+  def test_should_handle_import_in_a_manifest
+    klasses =  Proxy::Puppet::PuppetClass.scan_directory('./test/fixtures/modules_include')
+    assert_kind_of Array, klasses
+    assert_equal 2, klasses.size
+
+    klass = klasses.find {|k| k.name == "sub::foo" }
+    assert klass
+    assert_equal "testinclude", klass.module
+
+    klass = klasses.find {|k| k.name == "testinclude" }
+    assert klass
+  end
+
   #TODO add scans to a real puppet directory with modules
 
 end

@@ -1,0 +1,4 @@
+import "sub/*"
+
+class testinclude {
+}
