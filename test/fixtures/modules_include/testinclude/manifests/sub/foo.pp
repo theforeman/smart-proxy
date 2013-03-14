@@ -1,0 +1,2 @@
+class testinclude::sub::foo {
+}

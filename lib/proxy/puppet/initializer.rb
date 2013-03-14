@@ -32,6 +32,9 @@ module Proxy::Puppet
         else
           Puppet.parse_config
         end
+
+        # Don't follow imports, the proxy scans for .pp files itself
+        Puppet[:ignoreimport] = true
       end
     end
 
