@@ -1,4 +1,3 @@
-require 'proxy/bmc/ipmi'
 require 'proxy/bmc'
 
 class SmartProxy < Sinatra::Base
@@ -221,29 +220,37 @@ class SmartProxy < Sinatra::Base
 
     # Either use the default provider or allow user to specify provider in request
     provider_type ||= params[:bmc_provider] || SETTINGS.bmc_default_provider
-
     provider_type.downcase! if provider_type
 
-    raise "unauthorized" unless auth.provided?
+    case provider_type
+    when /ipmi/
+      require 'proxy/bmc/ipmi'
 
-    raise "bad_authentication_request" unless auth.basic?
+      raise "unauthorized" unless auth.provided?
+      raise "bad_authentication_request" unless auth.basic?
 
-    username, password = auth.credentials
+      username, password = auth.credentials
 
-    # check to see if provider is given and no default provider is set, search for installed providers
-    unless Proxy::BMC.installed?(provider_type)
-      # check if provider_type is a valid type
-      if Proxy::BMC.providers.include?(provider_type)
-        log_halt 400, "#{provider_type} is not installed, please install a ipmi provider"
-      else
-        log_halt 400, "Unrecognized or missing bmc provider type: #{provider_type}"
+      # check to see if provider is given and no default provider is set, search for installed providers
+      unless Proxy::BMC::IPMI.installed?(provider_type)
+        # check if provider_type is a valid type
+        if Proxy::BMC::IPMI.providers.include?(provider_type)
+          log_halt 400, "#{provider_type} is not installed, please install a ipmi provider"
+        else
+          log_halt 400, "Unrecognized or missing bmc provider type: #{provider_type}"
+        end
       end
-    end
 
-    # all the use of the http auth basic header to pass credentials
-    args = { :host     => params[:host], :username => username,
-             :password => password, :bmc_provider => provider_type }
-    @bmc = Proxy::BMC::IPMI.new(args)
+      # all the use of the http auth basic header to pass credentials
+      args = { :host     => params[:host], :username     => username,
+               :password => password,      :bmc_provider => provider_type }
+      @bmc = Proxy::BMC::IPMI.new(args)
+    when "shell"
+      require 'proxy/bmc/shell'
+      @bmc = Proxy::BMC::Shell.new
+    else
+      log_halt 400, "Unrecognized or missing BMC type: #{provider_type}"
+    end
   rescue => e
     log_halt 400, e
   end
