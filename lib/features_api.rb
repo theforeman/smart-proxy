@@ -2,7 +2,7 @@ class SmartProxy < Sinatra::Base
   get "/features" do
     begin
       @features = Proxy.features.sort
-      if request.accept.include?("application/json")
+      if request.accept? 'application/json'
         content_type :json
         @features.to_json
       else
