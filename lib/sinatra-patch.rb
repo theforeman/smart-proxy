@@ -49,4 +49,13 @@ module Sinatra
       puts "== Someone is already performing on port #{port}!"
     end
   end
+
+  module MonkeyRequest
+    # We need request.accept? method also in pre-1.3.0 versions. This is simplified
+    # version of the method that only accept one parameter (mime type string).
+    def accept? type
+      accept.include? type
+    end
+  end
+  Request.send :include, MonkeyRequest if not Request.method_defined? :accept?
 end
