@@ -86,27 +86,26 @@ module Proxy::DHCP
 
     def loadSubnetData subnet
       super
-      cmd = "scope #{subnet.network} show reservedip"
+      cmd = "scope #{subnet.network} show client 1"
       msg = "Enumerated hosts on #{subnet.network}"
 
       # Extract the data
       execute(cmd, msg).each do |line|
-        #     172.29.216.6      -    00-a0-e7-21-41-00-
-        if line =~ /^\s+([\w\.]+)\s+-\s+([-a-f\d]+)/
-          ip  = $1
+        #192.29.205.4    - 255.255.255.128- 00-1e-68-65-55-f8   -4/23/2013 6:41:21 PM   -D-
+        #192.29.205.5    - 255.255.255.128-00-1b-24-93-35-09   - NEVER EXPIRES        -U-  host.brs.company.com
+        if (match = line.match(/^([\d\.]+)\s*-\s*[\d\.]+\s*- ?([-a-f\d]+)\s*-\s*([^-]+?)\s*-(\w)-\s*(.*)/))
+          ip, mac, expire, kind, name  = match[1,5]
           next unless subnet.include?(ip)
-          mac = $2.gsub(/-/,":").match(/^(.*?).$/)[1]
+          # Some mac addresses appear to be more than 6 bytes!
+          mac = mac[0,17].gsub!(/-/,":")
           begin
-            opts = {:subnet => subnet, :ip => ip, :mac => mac}
+            opts = {:subnet => subnet, :ip => ip, :mac => mac, :name => name}
             opts.merge!(loadRecordOptions(opts))
             logger.debug opts.inspect
-            if opts.include? :hostname
-              Proxy::DHCP::Reservation.new opts.merge({:deleteable => true})
-            else
-              # this is not a lease, rather reservation
-              # but we require option 12(hostname) to be defined for our leases
-              # workaround until #1172 is resolved.
+            if kind == 'D' and expire !~ /^INACTIVE|^NEVER/
               Proxy::DHCP::Lease.new opts
+            else
+              Proxy::DHCP::Reservation.new opts.merge({:deleteable => true})
             end
           rescue Exception => e
             logger.warn "Skipped #{line} - #{e}"
