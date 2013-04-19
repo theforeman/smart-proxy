@@ -1,8 +1,8 @@
-require "proxy/dns/bind"
+require "proxy/dns/nsupdate"
 
 class SmartProxy
   def setup(opts)
-    @server = Proxy::DNS::Bind.new(opts.merge(:server => SETTINGS.dns_server))
+    @server = Proxy::DNS::Nsupdate.new(opts.merge(:server => SETTINGS.dns_server))
   end
 
   post "/dns/" do
