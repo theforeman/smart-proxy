@@ -6,6 +6,10 @@ module Proxy
       include Proxy::Log
       include Proxy::Util
 
+      def initialize
+        # Nothing needed to set up shell
+      end
+
       def self.installed?(args)
         return true # We can always shell out
       end
