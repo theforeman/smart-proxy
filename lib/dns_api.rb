@@ -1,8 +1,22 @@
-require "proxy/dns/bind"
-
 class SmartProxy
   def setup(opts)
-    @server = Proxy::DNS::Bind.new(opts.merge(:server => SETTINGS.dns_server))
+    raise "Smart Proxy is not configured to support DNS" unless SETTINGS.dns
+    case SETTINGS.dns_provider
+    when "nsupdate"
+      require 'proxy/dns/nsupdate'
+      @server = Proxy::DNS::Nsupdate.new(opts.merge(:server => SETTINGS.dns_server))
+    when "nsupdate_gss"
+      require 'proxy/dns/nsupdate_gss'
+      @server = Proxy::DNS::NsupdateGSS.new(opts.merge(
+        :server => SETTINGS.dns_server,
+        :tsig_keytab => SETTINGS.dns_tsig_keytab,
+        :tsig_principal => SETTINGS.dns_tsig_principal
+      ))
+    else
+      log_halt 400, "Unrecognized or missing DNS provider: #{SETTINGS.dns_provider || "MISSING"}"
+    end
+  rescue => e
+    log_halt 400, e
   end
 
   post "/dns/" do
