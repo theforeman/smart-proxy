@@ -2,7 +2,7 @@ require "proxy/dns"
 require 'resolv'
 
 module Proxy::DNS
-  class Bind < Record
+  class Nsupdate < Record
 
     include Proxy::Util
     attr_reader :resolver
@@ -50,21 +50,22 @@ module Proxy::DNS
       nsupdate "disconnect"
     end
 
-    private
+    protected
 
-    def find_nsupdate
-      @nsupdate = which("nsupdate", "/usr/bin")
-      unless File.exists?("#{@nsupdate}")
-        logger.warn "unable to find nsupdate binary, maybe missing bind-utils package?"
-        raise "unable to find nsupdate binary"
-      end
+    def nsupdate_args
+      args = ""
+      args = "-k #{SETTINGS.dns_key} " if SETTINGS.dns_key
+      args
     end
 
     def nsupdate cmd
       status = nil
       if cmd == "connect"
         find_nsupdate if @nsupdate.nil?
-        @om = IO.popen("#{@nsupdate} #{SETTINGS.dns_key ? "-k " + SETTINGS.dns_key : ""}", "r+")
+        nsupdate_cmd = "#{@nsupdate} #{nsupdate_args}"
+        logger.debug "running #{nsupdate_cmd}"
+        @om = IO.popen(nsupdate_cmd, "r+")
+        logger.debug "nsupdate: executed - server #{@server}"
         @om.puts "server #{@server}"
       elsif cmd == "disconnect"
         @om.puts "send"
@@ -83,7 +84,17 @@ module Proxy::DNS
         @om.puts cmd
       end
     end
+
     private
+
+    def find_nsupdate
+      @nsupdate = which("nsupdate", "/usr/bin")
+      unless File.exists?("#{@nsupdate}")
+        logger.warn "unable to find nsupdate binary, maybe missing bind-utils package?"
+        raise "unable to find nsupdate binary"
+      end
+    end
+
     def dns_find key
       if match = key.match(/(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/)
         resolver.getname(match[1..4].reverse.join(".")).to_s
