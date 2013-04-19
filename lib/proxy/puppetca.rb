@@ -106,7 +106,7 @@ module Proxy::PuppetCA
       end
 
       # puppetca is the old method of using puppet cert which is new in puppet 2.6
-      default_path = ["/usr/sbin","/opt/puppet/bin", "/usr/bin"]
+      default_path = ["/usr/sbin","/opt/puppet/bin", "/opt/puppet/sbin", "/usr/bin"]
 
       if Puppet::PUPPETVERSION.to_i < 3
         @puppetca = which("puppetca", default_path) || which("puppet", default_path)

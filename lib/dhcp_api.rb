@@ -37,7 +37,7 @@ class SmartProxy < Sinatra::Base
 
   get "/dhcp" do
     begin
-      if request.accept.include?("application/json")
+      if request.accept? 'application/json'
         content_type :json
 
         log_halt 404, "No subnets found on server @{name}" unless @subnets
@@ -53,7 +53,7 @@ class SmartProxy < Sinatra::Base
   get "/dhcp/:network" do
     begin
       load_subnet
-      if request.accept.include?("application/json")
+      if request.accept? 'application/json'
         content_type :json
         {:reservations => @subnet.reservations, :leases => @subnet.leases}.to_json
       else
@@ -104,7 +104,7 @@ class SmartProxy < Sinatra::Base
       record = load_subnet[params[:record]]
       log_halt 404, "Record #{params[:network]}/#{params[:record]} not found" unless record
       @server.delRecord @subnet, record
-      if request.accept.include?("application/json")
+      if request.accept? 'application/json'
         content_type :json
         {}
       else

@@ -62,10 +62,10 @@
 :puppet_conf: /etc/puppet/puppet.conf
 
 # enable BMC management  (Bare metal power and bios controls)
-# Ensure that you have freeipmi or ipmitool command line tools installed
-# You will also need the rubyipmi gem
+# Available providers:
+# - freeipmi / ipmitool - requires the appropriate package installed, and the rubyipmi gem
+# - shell - for local reboot control (requires sudo access to /sbin/shutdown for the proxy user)
 :bmc: false
-# Available bmc providers: freeipmi, ipmitool (Optional)
 #:bmc_default_provider: freeipmi
 
 # Where our proxy log files are stored
