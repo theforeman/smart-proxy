@@ -32,6 +32,10 @@
 #:dns_key: /etc/rndc.key
 # use this setting if you are managing a dns server which is not localhost though this proxy
 #:dns_server: dns.domain.com
+# use dns_tsig_* for GSS-TSIG updates using Kerberos.  Required for Windows MS DNS with
+# Secure Dynamic Updates, or BIND as used in FreeIPA.
+#:dns_tsig_keytab: /usr/share/foreman-proxy/dns.keytab
+#:dns_tsig_principal: DNS/host.example.com@EXAMPLE.COM
 
 # Enable DHCP management
 :dhcp: false

@@ -2,13 +2,18 @@ require "proxy/dns"
 require 'resolv'
 
 module Proxy::DNS
-  class Bind < Record
+  class Nsupdate < Record
 
     include Proxy::Util
     attr_reader :resolver
 
     def initialize options = {}
       raise "Unable to find Key file - check your dns_key settings" unless SETTINGS.dns_key == false or File.exists?(SETTINGS.dns_key)
+      if SETTINGS.dns_tsig_keytab
+        raise "Kerberos principal required - check dns_tsig_principal setting" unless SETTINGS.dns_tsig_principal
+        logger.debug "DNS GSS-TSIG authentication enabled"
+        require 'krb5_auth'
+      end
       super(options)
     end
 
@@ -52,6 +57,13 @@ module Proxy::DNS
 
     private
 
+    def nsupdate_args
+      args = ""
+      args = "-k #{SETTINGS.dns_key} " if SETTINGS.dns_key
+      args += "-g " if SETTINGS.dns_tsig_keytab
+      args
+    end
+
     def find_nsupdate
       @nsupdate = which("nsupdate", "/usr/bin")
       unless File.exists?("#{@nsupdate}")
@@ -60,11 +72,28 @@ module Proxy::DNS
       end
     end
 
+    def init_krb5_ccache
+      krb5 = Krb5Auth::Krb5.new
+      ccache = Krb5Auth::Krb5::CredentialsCache.new
+      logger.info "Requesting credentials for Kerberos principal #{SETTINGS.dns_tsig_principal} using keytab #{SETTINGS.dns_tsig_keytab}"
+      begin
+        krb5.get_init_creds_keytab SETTINGS.dns_tsig_principal, SETTINGS.dns_tsig_keytab, nil, ccache
+      rescue => e
+        logger.error "Failed to initialise credential cache from keytab: #{e}"
+        raise Proxy::DNS::Error.new("Unable to initialise Kerberos: #{e}")
+      end
+      logger.debug "Kerberos credential cache initialised with principal: #{ccache.primary_principal}"
+    end
+
     def nsupdate cmd
       status = nil
       if cmd == "connect"
         find_nsupdate if @nsupdate.nil?
-        @om = IO.popen("#{@nsupdate} #{SETTINGS.dns_key ? "-k " + SETTINGS.dns_key : ""}", "r+")
+        init_krb5_ccache if SETTINGS.dns_tsig_keytab
+        nsupdate_cmd = "#{@nsupdate} #{nsupdate_args}"
+        logger.debug "running #{nsupdate_cmd}"
+        @om = IO.popen(nsupdate_cmd, "r+")
+        logger.debug "nsupdate: executed - server #{@server}"
         @om.puts "server #{@server}"
       elsif cmd == "disconnect"
         @om.puts "send"
@@ -83,7 +112,7 @@ module Proxy::DNS
         @om.puts cmd
       end
     end
-    private
+
     def dns_find key
       if match = key.match(/(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/)
         resolver.getname(match[1..4].reverse.join(".")).to_s
