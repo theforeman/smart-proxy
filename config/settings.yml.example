@@ -29,9 +29,18 @@
 
 # Enable DNS management
 :dns: false
+# use these settings for bind
+#:dns_vendor: bind
 #:dns_key: /etc/rndc.key
 # use this setting if you are managing a dns server which is not localhost though this proxy
 #:dns_server: dns.domain.com
+
+# use these settings for powerdns
+#:dns_vendor: powerdns
+#:dns_mysql_database:
+#:dns_mysql_hostname:
+#:dns_mysql_username:
+#:dns_mysql_password:
 
 # Enable DHCP management
 :dhcp: false
