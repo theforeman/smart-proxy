@@ -50,6 +50,20 @@ class SmartProxy < Sinatra::Base
     end
   end
 
+  get %r{\/dhcp\/(([a-f0-9]{1,2}:){5}[a-f0-9]{1,2})} do |mac, unused_match|
+    begin
+      log_halt 404, "No subnets found on this server" unless @subnets
+      records = @subnets.map{|s| s.has_mac?(mac)}.compact.delete_if{|r| r == false }
+      log_halt 404, "not found" unless records[0]
+    rescue => e
+      log_halt 400, e
+    end
+    if request.accept? 'application/json'
+      content_type :json
+      records.to_json
+    end
+  end
+
   get "/dhcp/:network" do
     begin
       load_subnet
