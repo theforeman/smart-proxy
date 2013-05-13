@@ -32,7 +32,6 @@ module Proxy::Puppet
           # puppetmaster section "might" also returns the modulepath
           env.delete :main
           env.delete :puppetmasterd if env.size > 1
-
         else
           conf[:main][:environments].split(",").each { |e| env[e.to_sym] = conf[e.to_sym][:modulepath] unless conf[e.to_sym][:modulepath].nil? }
         end
@@ -57,16 +56,23 @@ module Proxy::Puppet
             end
           end
 
-          if modulepath.include?("$environment")
-            # Dynamic environments - get every directory under the modulepath
-            modulepath.gsub(/\$environment.*/,"/").split(":").each do |base_dir|
+          modulepath.split(":").each do |base_dir|
+            if base_dir.include?("$environment")
+              # remove this entry from the current env so that static paths are unaltered
+              temp_path = modulepath.split(':')
+              temp_path.delete base_dir
+              if temp_path.empty?
+                new_env.delete environment
+              else
+                new_env[environment] = temp_path.join(':')
+              end
+              # Dynamic environments - get every directory under the modulepath
+              base_dir.gsub!(/\$environment.*/,"/")
               Dir.glob("#{base_dir}/*").grep(/\/[A-Za-z0-9_]+$/) do |dir|
                 e = dir.split("/").last
-                new_env[e] = modulepath.gsub("$environment", e)
+                new_env[e] = base_dir.gsub("$environment", e)
               end
             end
-            # get rid of the main environment
-            new_env.delete(environment)
           end
         end
 

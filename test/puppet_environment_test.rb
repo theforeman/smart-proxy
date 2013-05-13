@@ -29,10 +29,78 @@ class PuppetEnvironmentTest < Test::Unit::TestCase
     assert_kind_of Proxy::Puppet::PuppetClass, env.classes.first
   end
 
+  def test_single_static_env
+    config = {
+        :main => {},
+        :production => { :modulepath=>'./test/fixtures/environments/prod' }
+    }
+    Puppet.settings.stubs(:instance_variable_get).returns(config)
+    env = Proxy::Puppet::Environment.all
+    assert_array_equal env.map { |e| e.name }, ['production']
+  end
+
+  def test_multiple_static_env
+    config = {
+        :main => {},
+        :production  => { :modulepath=>'./test/fixtures/environments/prod' },
+        :development => { :modulepath=>'./test/fixtures/environments/dev' }
+    }
+    Puppet.settings.stubs(:instance_variable_get).returns(config)
+    env = Proxy::Puppet::Environment.all
+    assert_array_equal env.map { |e| e.name }, ['development', 'production']
+  end
+
+  def test_multiple_modulepath_in_single_env_loads_all_classes
+    config = {
+        :main => {},
+        :production  => { :modulepath=>'./test/fixtures/environments/dev:./test/fixtures/environments/prod' },
+    }
+    Puppet.settings.stubs(:instance_variable_get).returns(config)
+    env = Proxy::Puppet::Environment.all
+    assert_array_equal env.map { |e| e.name }, ['production']
+    assert_array_equal env.first.classes.map { |c| c.name}, ['test','test2']
+  end
+
+  def test_single_modulepath_in_single_env_with_dynamic_path
+    config = {
+        :main => {},
+        :master => { :modulepath=>'./test/fixtures/environments/$environment/' }
+    }
+    Puppet.settings.stubs(:instance_variable_get).returns(config)
+    env = Proxy::Puppet::Environment.all
+    assert_array_equal env.map { |e| e.name }, ['dev','prod']
+  end
+
+  def test_multiple_modulepath_in_single_env_with_dynamic_path
+    config = {
+        :main => {},
+        :master => { :modulepath=>'./test/fixtures/environments/$environment:./test/fixtures/modules_include' }
+    }
+    Puppet.settings.stubs(:instance_variable_get).returns(config)
+    env = Proxy::Puppet::Environment.all
+    assert_array_equal env.map { |e| e.name }, ['dev', 'prod', 'master']
+  end
+
+  def test_multiple_modulepath_in_single_env_with_broken_entry
+    config = {
+        :main => {},
+        :master => { :modulepath=>'./no/such/$environment/modules:./test/fixtures/environments/prod' }
+    }
+    Puppet.settings.stubs(:instance_variable_get).returns(config)
+    env = Proxy::Puppet::Environment.all
+    assert_array_equal env.map { |e| e.name }, ['master']
+  end
+
   private
 
   def mock_puppet_env
-    Proxy::Puppet::Environment.stubs(:puppet_environments).returns({:production => "./test/fixtures/modules"})
+    Proxy::Puppet::Environment.stubs(:puppet_environments).returns({:production => "./test/fixtures/environments/prod"})
     Proxy::Puppet::Environment.all
   end
+
+  def assert_array_equal(expected, actual, message=nil)
+      full_message = build_message(message, "<?> expected but was\n<?>.\n", expected, actual)
+      assert_block(full_message) { (expected.size ==  actual.size) && (expected - actual == []) }
+  end
+
 end
