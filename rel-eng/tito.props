@@ -1,0 +1,11 @@
+[globalconfig]
+default_builder = tito.builder.Builder
+default_tagger = tito.tagger.VersionTagger
+changelog_do_not_remove_cherrypick = 0
+changelog_format = %s (%ae)
+
+[foreman-nightly-rhel6]
+disttag = .el6
+
+[foreman-nightly-fedora18]
+disttag = .fc18
