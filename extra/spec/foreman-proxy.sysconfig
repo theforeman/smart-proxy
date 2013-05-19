@@ -3,3 +3,6 @@
 
 # the user which runs the web interface
 #FOREMAN_PROXY_USER=foreman-proxy
+
+# location of the proxy config file
+#FOREMAN_PROXY_SETTINGS=/etc/foreman-proxy/settings.yml
