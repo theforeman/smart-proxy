@@ -17,9 +17,18 @@ RETVAL=0
 FOREMAN_PROXY_PID=/var/run/$prog/$prog.pid
 FOREMAN_PROXY_USER=${FOREMAN_PROXY_USER:-foreman-proxy}
 FOREMAN_PROXY_HOME=${FOREMAN_PROXY_HOME:-/usr/share/foreman-proxy}
+FOREMAN_PROXY_SETTINGS=${FOREMAN_PROXY_SETTINGS:-/etc/foreman-proxy/settings.yml}
 
 start() {
     echo -n $"Starting $prog: "
+
+    if egrep -q ':daemon:\s*false' $FOREMAN_PROXY_SETTINGS; then
+        echo -n $":daemon is false in settings.yml"
+        failure $":daemon is false in settings.yml"
+        echo
+        return 6
+    fi
+
     daemon --user ${FOREMAN_PROXY_USER} /usr/bin/ruby ${FOREMAN_PROXY_HOME}/bin/smart-proxy > /dev/null
     RETVAL=$?
     if [ $RETVAL = 0 ]
