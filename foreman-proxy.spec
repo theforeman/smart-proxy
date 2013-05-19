@@ -63,7 +63,7 @@ BuildRequires: systemd-units
 
 
 %description
-Manages DNS, DHCP, TFTP and puppet settinsg though HTTP Restful API
+Manages DNS, DHCP, TFTP and puppet settings though HTTP Restful API
 Mainly used by the foreman project (http://theforeman.org)
 
 %prep
