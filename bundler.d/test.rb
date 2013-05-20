@@ -5,5 +5,5 @@ group :test do
   gem 'single_test'
   gem 'ci_reporter', '>= 1.6.3'
   gem 'rdoc'
-  gem 'minitest', :platforms => :ruby_19
+  gem 'minitest', '~> 4.7', :platforms => :ruby_19
 end
