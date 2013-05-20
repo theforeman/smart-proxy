@@ -10,7 +10,7 @@
 %endif
 
 Name:           %{?scl_prefix}foreman-proxy
-Version:        1.1.9999
+Version:        1.2.9999
 Release:        1%{dist}
 Summary:        Restful Proxy for DNS, DHCP, TFTP, PuppetCA and Puppet
 

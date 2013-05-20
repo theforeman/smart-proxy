@@ -1,3 +1,66 @@
+2013-05-22	Dominic Cleal <dcleal@redhat.com>
+	* Bump version to 1.2-develop
+	* fixes #2514 - lock minitest to 4.7
+	* fixes #2523 - add missing require
+
+2013-05-22	Martin Bačovský <mbacovsk@redhat.com>
+	* fixes #2531 - support for scl-aware building, not SCL by default
+	* fixes #2515 - rkerberos RPM required
+
+2013-05-20	Ewoud Kohl van Wijngaarden <github@kohlvanwijngaarden.nl>
+	* Typo fix in the description
+
+2013-05-20	Dominic Cleal <dcleal@redhat.com>
+	* fixes #2510 - sync init script and changelog from foreman-rpms, fix shadow-utils dep
+
+2013-05-16	Martin Bačovský <mbacovsk@redhat.com>
+	* Added support for building with tito
+
+2013-05-10	Sam Kottler <shk@redhat.com>
+	* fixes #2116 - mcollective support for the proxy to initialize puppetrun
+
+2013-05-09	Dominic Cleal <dcleal@redhat.com>
+	* fixes #1685 - GSS-TSIG support for DNS updates
+
+2013-04-22	Greg Sutcliffe <gsutclif@redhat.com>
+	* Override the initialize method for the shell provider, as no connection setup is needed
+
+2013-04-10	Ashley Penney <apenney@gmail.com>
+	* fixes #2388 - The path to puppetca is /opt/puppet/sbin for PE.
+
+2013-04-10	Greg Sutcliffe <gsutclif@redhat.com>
+	* fixes #2387 - Add shell provider to the BMC API
+
+2013-04-10	Lukas Zapletal <lzap+git@redhat.com>
+	* adding Sinatra
+	* refactoring http accept header for Sinatra 1.4.2+
+
+2013-03-17	Dominic Cleal <dcleal@redhat.com>
+	* fixes #2067 - disable puppet's handling of 'import' to fix manifests containing it
+
+2013-03-10	Dominic Cleal <dcleal@redhat.com>
+	* Ignore .bundle dir
+	* fixes #2209 - explicitly use Proxy
+
+2013-03-04	Greg Sutcliffe <gsutclif@redhat.com>
+	* fixes #2255 Fix frozen facts in facts_api
+
+2013-03-04	Dominic Cleal <dcleal@redhat.com>
+	* fixes #2191 - undef in puppet class params is optional
+	* fixes #2261 - fixes for CI testing under Ruby 1.9
+
+2013-03-04	Sam Kottler <shk@redhat.com>
+	* Fixed bad indentation in the puppet clasS
+
+2013-02-25	Greg Sutcliffe <gsutclif@redhat.com>
+	* ignore RVM/RBenv files
+
+2013-02-25	Sam Kottler <shk@redhat.com>
+	* Fixed CVE-2013-0210 and added test for new escape method
+
+2013-02-04	Ohad Levy <ohadlevy@gmail.com>
+	* released 1.1
+
 2013-01-30	Jan Vansteenkiste <jan@vstone.eu>
 	* Tests the autosign.conf operations
 	* fixes #1674: Ignore commented lines when reading all certificates in autosign and make sure the autosign file contains a EOL on the last line
