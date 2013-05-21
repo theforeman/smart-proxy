@@ -45,6 +45,7 @@ Requires:       %{?scl_prefix}rubygems
 Requires:       %{?scl_prefix}rubygem(rake) >= 0.8.3
 Requires:       %{?scl_prefix}rubygem(sinatra)
 Requires:       %{?scl_prefix}rubygem(json)
+Requires:       %{?scl_prefix}rubygem(rkerberos)
 Requires:       sudo
 Requires:       wget
 Requires(pre):  shadow-utils
