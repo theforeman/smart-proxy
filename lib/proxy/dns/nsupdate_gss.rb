@@ -1,3 +1,4 @@
+require 'proxy/dns/nsupdate'
 require 'rkerberos'
 
 module Proxy::DNS
