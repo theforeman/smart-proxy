@@ -1,7 +1,9 @@
 %global homedir %{_datadir}/%{name}
 %global confdir config
 %global specdir extra/spec
-%global scl ruby193
+
+# forces build foreman-proxy without SCL
+%undefine scl
 
 %if "%{?scl}" == "ruby193"
     %global scl_prefix %{scl}-
