@@ -2,9 +2,6 @@
 %global confdir config
 %global specdir extra/spec
 
-# forces build foreman-proxy without SCL
-%undefine scl
-
 %if "%{?scl}" == "ruby193"
     %global scl_prefix %{scl}-
     %global scl_ruby /usr/bin/ruby193-ruby
@@ -12,8 +9,7 @@
     %global scl_ruby /usr/bin/ruby
 %endif
 
-
-Name:           foreman-proxy
+Name:           %{?scl_prefix}foreman-proxy
 Version:        1.1.9999
 Release:        1%{dist}
 Summary:        Restful Proxy for DNS, DHCP, TFTP, PuppetCA and Puppet
@@ -35,12 +31,6 @@ Requires: %{?scl_prefix}ruby(release)
 Requires: %{?scl_prefix}ruby(abi) = 1.9.1
 %endif
 %endif
-
-#%if 0%{?rhel} == 6 || 0%{?fedora} < 17
-#Requires: ruby(abi) = 1.8
-#%else
-#Requires: ruby(abi) = 1.9.1
-#%endif
 
 
 Requires:       %{?scl_prefix}rubygems
