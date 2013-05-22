@@ -9,3 +9,6 @@ disttag = .el6
 
 [foreman-nightly-fedora18]
 disttag = .fc18
+
+[foreman-nightly-nonscl-rhel6]
+disttag = .el6
