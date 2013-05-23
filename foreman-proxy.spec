@@ -22,16 +22,15 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildArch:      noarch
 
-%if 0%{?fedora} && 0%{?fedora} < 17
-Requires: %{?scl_prefix}ruby(abi) = 1.8
+%if "%{?scl}" == "ruby193" || 0%{?rhel} > 6 || (0%{?fedora} > 16 && 0%{?fedora} < 19)
+Requires: %{?scl_prefix}ruby(abi) = 1.9.1
 %else
 %if 0%{?fedora} && 0%{?fedora} > 18
 Requires: %{?scl_prefix}ruby(release)
 %else
-Requires: %{?scl_prefix}ruby(abi) = 1.9.1
+Requires: %{?scl_prefix}ruby(abi) = 1.8
 %endif
 %endif
-
 
 Requires:       %{?scl_prefix}rubygems
 Requires:       %{?scl_prefix}rubygem(rake) >= 0.8.3
