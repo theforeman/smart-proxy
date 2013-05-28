@@ -50,6 +50,17 @@ class SmartProxy < Sinatra::Base
     end
   end
 
+  get "/dhcp/find/:record" do
+    begin
+      content_type :json
+      records = @server.find_record(params[:record])
+      log_halt 404, "Record #{params[:record]} not found" unless records
+      records.to_json
+    rescue => e
+      log_halt 400, e
+    end
+  end
+
   get "/dhcp/:network" do
     begin
       load_subnet

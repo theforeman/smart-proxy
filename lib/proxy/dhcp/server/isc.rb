@@ -37,6 +37,7 @@ module Proxy::DHCP
       statements << "filename = \\\"#{options[:filename]}\\\";"  if options[:filename]
       statements << bootServer(options[:nextServer])             if options[:nextServer]
       statements << "option host-name = \\\"#{record.name}\\\";" if record.name
+      statements << "option grubmenu = \\\"#{options[:grubmenu]}\\\";" if options[:grubmenu]
 
       omcmd "set statements = \"#{statements.join(" ")}\""      unless statements.empty?
       omcmd "create"
@@ -112,6 +113,8 @@ module Proxy::DHCP
         options[:nextServer] = $1
       when /^filename\s+(\S+)/
         options[:filename] = $1
+      when /^grubmenu\s+(\S+)/
+        options[:grubmenu] = $1
         # Lease options
       when /^binding\s+state\s+(\S+)/
         options[:state] = $1
