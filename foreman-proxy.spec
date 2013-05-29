@@ -9,7 +9,7 @@
     %global scl_ruby /usr/bin/ruby
 %endif
 
-Name:           %{?scl_prefix}foreman-proxy
+Name:           foreman-proxy
 Version:        1.2.9999
 Release:        2%{dist}
 Summary:        Restful Proxy for DNS, DHCP, TFTP, PuppetCA and Puppet
