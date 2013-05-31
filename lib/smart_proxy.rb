@@ -33,6 +33,7 @@ class SmartProxy < Sinatra::Base
   require "dns_api"      if SETTINGS.dns
   require "dhcp_api"     if SETTINGS.dhcp
   require "bmc_api"      if SETTINGS.bmc
+  require "realm_api"    if SETTINGS.realm
   require "features_api"
 
   begin
