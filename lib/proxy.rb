@@ -1,5 +1,5 @@
 module Proxy
-  MODULES = %w{dns dhcp tftp puppetca puppet bmc}
+  MODULES = %w{dns dhcp tftp puppetca puppet bmc realm}
   VERSION = "1.2-develop"
 
   require "checks"
@@ -15,6 +15,7 @@ module Proxy
   require "proxy/dns"      if SETTINGS.dns
   require "proxy/dhcp"     if SETTINGS.dhcp
   require "proxy/bmc"      if SETTINGS.bmc
+  require "proxy/realm"    if SETTINGS.realm
 
   def self.features
     MODULES.collect{|mod| mod if SETTINGS.send mod}.compact
