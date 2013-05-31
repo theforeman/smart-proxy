@@ -120,6 +120,21 @@
 :bmc: false
 #:bmc_default_provider: freeipmi
 
+# Manage joining realms e.g. FreeIPA
+:realm: false
+
+# Available providers:
+#   freeipa
+:realm_provider: freeipa
+
+# Authentication for Kerberos-based Realms
+:realm_keytab: /etc/foreman-proxy/freeipa.keytab
+:realm_principal: realm-proxy@EXAMPLE.COM
+
+# FreeIPA specific settings
+# Remove from DNS when deleting the FreeIPA entry
+:freeipa_remove_dns: true
+
 # Where our proxy log files are stored
 # filename or STDOUT
 :log_file: /var/log/foreman-proxy/proxy.log

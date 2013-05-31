@@ -1,5 +1,6 @@
 require 'open3'
 require 'shellwords'
+require 'base64'
 
 module Proxy::Util
 
@@ -79,6 +80,14 @@ module Proxy::Util
       return command
     else
       Shellwords.escape(command)
+    end
+  end
+
+  def strict_encode64(str)
+    if Base64.respond_to?(:strict_encode64)
+      Base64.strict_encode64(str)
+    else
+      Base64.encode64(str).delete("\n")
     end
   end
 end
