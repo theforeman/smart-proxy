@@ -4,6 +4,9 @@ module Proxy
 
   require "checks"
   require "proxy/settings"
+
+  ::SETTINGS = Settings.load_from_file
+
   require "fileutils"
   require "pathname"
   require "rubygems" if USE_GEMS # required for testing
@@ -23,5 +26,4 @@ module Proxy
   def self.version
     {:version => VERSION}
   end
-
 end
