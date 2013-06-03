@@ -223,7 +223,7 @@ module Proxy::DHCP
 
     def parse_options ip
       dump_file = "#{name}.dump"
-      if !File.exist?(dump_file) or Time.now > File.mtime(dump_file) + 5 * 60
+      if !File.exist?(dump_file) or Time.now > File.mtime(dump_file) + SETTINGS.dhcp_cache_period
         dump = execute("dump", "dummy message", false, true)
         File.new("#{name}.dump", "w").puts(dump)
         @options_cache = {}
