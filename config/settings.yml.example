@@ -79,6 +79,12 @@
 :bmc: false
 #:bmc_default_provider: freeipmi
 
+# Enable Realm (Kerberos) Management
+#:realm: true
+#:realm_vendor: ipa
+#:realm_tsig_keytab: /usr/share/foreman-proxy/config/krb5.keytab
+#:realm_tsig_principal: foreman-proxy@EXAMPLE.COM
+
 # Where our proxy log files are stored
 # filename or STDOUT
 :log_file: /var/log/foreman-proxy/proxy.log

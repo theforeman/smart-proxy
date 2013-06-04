@@ -6,7 +6,7 @@ class SmartProxy < Sinatra::Base
     raise "Smart Proxy is not configured to support Realm" unless SETTINGS.realm
     #raise "No client host specified" unless fqdn
 
-    case SETTINGS.realm_provider.downcase
+    case SETTINGS.realm_vendor.downcase
       when "ipa"
 
         require 'proxy/realm/ipa'
