@@ -3,10 +3,12 @@ require 'proxy/puppet'
 module Proxy::Puppet
   class MCollective < Runner
     def run
-      mco_search_path = ["/usr/bin", "/opt/puppet/bin"]
       sudo = which("sudo", "/usr/bin")
+      logger.debug "Found sudo at #{sudo}"
 
+      mco_search_path = ["/usr/bin", "/opt/puppet/bin"]
       mco = which("mco", mco_search_path)
+      logger.debug "Found mco at #{mco}"
 
       unless sudo and mco
         logger.warn "sudo or the mco binary is missing."
@@ -16,6 +18,7 @@ module Proxy::Puppet
       mco << " puppet runonce -I #{nodes.join(' ')}"
 
       begin
+        logger.debug "Executing #{sudo} #{mco}"
         %x[#{sudo} #{mco}]
         true
       rescue
