@@ -11,10 +11,10 @@ module Proxy::Realm
       @fqdn = options[:fqdn]
       @tsig_keytab = options[:tsig_keytab]
       @tsig_principal = options[:tsig_principal]
-      raise "Keytab not configured via ipa_tsig_keytab for IPA GSS-TSIG support" unless tsig_keytab
-      raise "Unable to read ipa_tsig_keytab file at #{tsig_keytab}" unless File.exist?(tsig_keytab)
-      raise "Kerberos principal required - check ipa_tsig_principal setting" unless tsig_principal
-      init_krb5_ccache @tsig_keytab, @tsig_principal
+      raise "Keytab not configured via ipa_tsig_keytab for IPA GSS-TSIG support" unless @tsig_keytab
+      raise "Unable to read ipa_tsig_keytab file at #{@tsig_keytab}" unless File.exist?(@tsig_keytab)
+      raise "Kerberos principal required - check ipa_tsig_principal setting" unless @tsig_principal
+      init_krb5_ccache
       logger.debug "ipa: created client obj for #{@fqdn}"
     end
 
