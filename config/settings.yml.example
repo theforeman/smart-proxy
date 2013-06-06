@@ -80,6 +80,10 @@
 #:bmc_default_provider: freeipmi
 
 # Enable Realm (Kerberos) Management
+# N.B. - the foreman-proxy user will need to have write permissions to
+#        ~foreman-proxy/.ipa
+# N.B. - the foreman-proxy user will need to have "Host Administration" &
+#        "Host Enrollment" privileges in IPA as well as a keytab that says so!
 #:realm: true
 #:realm_vendor: ipa
 #:realm_tsig_keytab: /usr/share/foreman-proxy/config/krb5.keytab
