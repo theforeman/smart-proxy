@@ -8,7 +8,6 @@ class SmartProxy < Sinatra::Base
 
     case SETTINGS.realm_vendor.downcase
       when "ipa"
-
         require 'proxy/realm/ipa'
         unless SETTINGS.realm_tsig_keytab and SETTINGS.realm_tsig_principal \
           and File.exist?(SETTINGS.realm_tsig_keytab)

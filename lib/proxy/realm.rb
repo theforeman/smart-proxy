@@ -1,5 +1,4 @@
-require 'rkerberos'
-require 'krb5_auth'
+require 'proxy/kerberos'
 
 module Proxy::Realm
   class Error < RuntimeError; end
