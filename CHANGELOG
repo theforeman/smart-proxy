@@ -1,3 +1,15 @@
+2013-06-07	Dominic Cleal <dcleal@redhat.com>
+	* Release 1.2.0-RC2
+
+2013-06-07	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* fixes #2520 - defines default settings for dns and puppet (cherry picked from commit c4a245d514b1ce6de6c3c79a3e458e52caa4dc7e)
+
+2013-06-05	Kamil Winczek <kwinczek@gmail.com>
+	* fixes #2614 - log messages regarding puppetrun via mcollective (cherry picked from commit 414b3a69b79fdb010aac0c2d596a4045fb0aa8c5)
+
+2013-05-29	Greg Sutcliffe <gsutclif@redhat.com>
+	* Fixes #2119 - Properly support colon-separated modulepath (cherry picked from commit 722bba2d153d021827d7a1b6eb32748d0ceb7f86)
+
 2013-05-23	Dominic Cleal <dcleal@redhat.com>
 	* Release 1.2.0-RC1
 	* fixes #2547 - fix ruby-abi on non-SCL EL6 (cherry picked from commit 3d41a1e12359a713633198d7dc52337bfb315fde)

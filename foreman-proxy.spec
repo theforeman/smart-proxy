@@ -11,7 +11,7 @@
 
 Name:           %{?scl_prefix}foreman-proxy
 Version:        1.2.0
-Release:        0.1.RC1%{dist}
+Release:        0.2.RC2%{dist}
 Summary:        Restful Proxy for DNS, DHCP, TFTP, PuppetCA and Puppet
 
 Group:          Applications/System
@@ -177,6 +177,8 @@ fi
 
 
 %changelog
+* Fri Jun 07 2013 Dominic Cleal <dcleal@redhat.com> 1.2.0-0.2.RC2
+- Release 1.2.0-RC2
 * Thu May 23 2013 Dominic Cleal <dcleal@redhat.com> 1.2.0-0.1.RC1
 - Release 1.2.0-RC1
 * Thu May 16 2013 Martin Bačovský <mbacovsk@redhat.com> 1.1.9999-1
