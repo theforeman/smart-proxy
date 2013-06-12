@@ -73,10 +73,9 @@ module Proxy::Puppet
                 new_env[environment] = temp_path.join(':')
               end
               # Dynamic environments - get every directory under the modulepath
-              base_dir.gsub!(/\$environment.*/,"/")
-              Dir.glob("#{base_dir}/*").grep(/\/[A-Za-z0-9_]+$/) do |dir|
+              Dir.glob("#{base_dir.gsub(/\$environment(.*)/,"/")}/*").grep(/\/[A-Za-z0-9_]+$/) do |dir|
                 e = dir.split("/").last
-                new_env[e] = base_dir.gsub("$environment", e)
+                new_env[e.to_sym] = base_dir.gsub("$environment", e)
               end
             end
           end
