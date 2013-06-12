@@ -24,6 +24,7 @@ module Proxy::DHCP
 
       execute(cmd, msg)
       subnet.delete(record)
+      clear_cache
     end
 
     def addRecord options={}
@@ -56,6 +57,7 @@ module Proxy::DHCP
         end
       end
 
+      clear_cache
       record
     end
 
@@ -221,15 +223,31 @@ module Proxy::DHCP
       raise Proxy::DHCP::Error.new("Unknown error while processing '#{msg}'")
     end
 
+    def clear_cache
+      dump_file = "#{name}.dump"
+      open_file_and_lock dump_file
+      @file.close
+      File.delete @filename
+      File.delete @lockfile
+    end
+
     def parse_options ip
       dump_file = "#{name}.dump"
-      if !File.exist?(dump_file) or Time.now > File.mtime(dump_file) + SETTINGS.dhcp_cache_period
+      dump = nil
+      if !File.exist?("#{Dir::tmpdir}/#{dump_file}") or Time.now > File.mtime("#{Dir::tmpdir}/#{dump_file}") + SETTINGS.dhcp_cache_period
         dump = execute("dump", "dummy message", false, true)
-        File.new("#{name}.dump", "w").puts(dump)
+        open_file_and_lock dump_file
+        @file.write dump
         @options_cache = {}
       end
       if @options_cache.empty?
-        dump = File.open("#{name}.dump").readlines
+        if dump.nil?
+          open_file_and_lock dump_file, "r"
+          dump = read_file_and_unlock
+        else
+          @file.close
+          File.delete @lockfile
+        end
         dump.each do |line|
           # Dhcp Server \\172.29.216.54 Scope 172.29.216.0 set reservedoptionvalue
           # 172.29.216.182 4 STRING vendor="Fire-V240" "/vol/s02/solgi_5.10/sol10_hw0910_sparc/Solaris_10/Tools/Boot"
