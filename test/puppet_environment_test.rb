@@ -39,6 +39,16 @@ class PuppetEnvironmentTest < Test::Unit::TestCase
     assert_array_equal env.map { |e| e.name }, ['production']
   end
 
+  def test_master_is_remapped_to_production_when_solo
+    config = {
+        :main => {},
+        :master => { :modulepath=>'./test/fixtures/environments/prod' }
+    }
+    Puppet.settings.stubs(:instance_variable_get).returns(config)
+    env = Proxy::Puppet::Environment.all
+    assert_array_equal env.map { |e| e.name }, ['production']
+  end
+
   def test_multiple_static_env
     config = {
         :main => {},

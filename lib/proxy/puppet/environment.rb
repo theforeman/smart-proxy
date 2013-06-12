@@ -40,6 +40,12 @@ module Proxy::Puppet
           env[:production] = conf[:main][:modulepath] || conf[:master][:modulepath] || '/etc/puppet/modules'
           logger.warn "No environments found - falling back to defaults (production - #{env[:production]})"
         end
+        if env.size == 1 and env.keys.first == :master and !env.values.first.include?('$environment')
+          # If we only have an entry in [master] it should really be called production
+          logger.warn "Re-writing single 'master' environment as 'production'"
+          env[:production] = env[:master]
+          env.delete :master
+        end
 
         new_env = env.clone
         # are we using dynamic puppet environments?
