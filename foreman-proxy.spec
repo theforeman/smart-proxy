@@ -11,7 +11,7 @@
 
 Name:           %{?scl_prefix}foreman-proxy
 Version:        1.2.9999
-Release:        1%{dist}
+Release:        2%{dist}
 Summary:        Restful Proxy for DNS, DHCP, TFTP, PuppetCA and Puppet
 
 Group:          Applications/System
@@ -177,6 +177,9 @@ fi
 
 
 %changelog
+* Wed Jun 13 2013 Lukas Zapletal <lzap+rpm[@]redhat.com> - 1.1.9999-2
+- fixed service file for systemd
+- /etc/sysconfig configuration is no longer in use for systemd
 * Thu May 16 2013 Martin Bačovský <mbacovsk@redhat.com> 1.1.9999-1
 - added support for building with tito
 * Mon Feb 4 2013 shk@redhat.com 1.1-1
