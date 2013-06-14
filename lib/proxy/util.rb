@@ -60,7 +60,7 @@ module Proxy::Util
     return false
   end
 
-  def self.escape_for_shell(command)
+  def escape_for_shell(command)
     # This is a backport for  using the core Shellwords#escape that's in 1.9.2
     # when using 1.8.7.
     if RUBY_VERSION < '1.9.2'
