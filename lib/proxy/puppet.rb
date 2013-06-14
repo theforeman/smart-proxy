@@ -16,5 +16,21 @@ module Proxy::Puppet
 
     protected
     attr_reader :nodes
+    
+    def shell_escaped_nodes
+      nodes.collect { |n| escape_for_shell(n) }
+    end
+    
+    def shell_command(cmd)
+      begin
+        c = IO.popen(cmd)
+        Process.wait(c.pid)
+      rescue Exception => e
+        logger.error("Exception '#{e}' when executing '#{cmd}'")
+        return false
+      end
+      logger.warn("Non-null exit code when executing '#{cmd}'") if $?.exitstatus != 0
+      $?.exitstatus == 0
+    end
   end
 end
