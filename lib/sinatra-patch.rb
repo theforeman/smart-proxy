@@ -2,6 +2,7 @@ require "sinatra/base"
 require "openssl"
 require "webrick/https"
 require "daemon" unless PLATFORM =~/mingw/
+
 module Sinatra
   class Base
     # Run the Sinatra app as a self-hosted server using
@@ -53,9 +54,9 @@ module Sinatra
   module MonkeyRequest
     # We need request.accept? method also in pre-1.3.0 versions. This is simplified
     # version of the method that only accept one parameter (mime type string).
-    def accept? type
+    def accept?(type)
       accept.include? type
     end
   end
-  Request.send :include, MonkeyRequest if not Request.method_defined? :accept?
+  Request.send :include, MonkeyRequest unless Request.method_defined?(:accept?)
 end
