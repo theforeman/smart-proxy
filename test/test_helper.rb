@@ -9,3 +9,4 @@ require "proxy"
 require "mocha/setup"
 require "rack/test"
 require 'sinatra'
+require 'sinatra-patch'
