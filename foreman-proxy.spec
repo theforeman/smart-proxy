@@ -178,7 +178,7 @@ fi
 
 %changelog
 * Thu Jun 20 2013 Dominic Cleal <dcleal@redhat.com> - 1.2.0-0.3.RC3
-- Release 1.2.0-RC2
+- Release 1.2.0-RC3
 - fixed service file for systemd (Lukas Zapletal)
 - /etc/sysconfig configuration is no longer in use for systemd (Lukas Zapletal)
 * Fri Jun 07 2013 Dominic Cleal <dcleal@redhat.com> 1.2.0-0.2.RC2
