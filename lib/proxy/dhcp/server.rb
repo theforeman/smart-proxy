@@ -76,7 +76,7 @@ module Proxy::DHCP
     def find_record record
       subnets.each do |s|
         s.records.each do |v|
-          return v if record.is_a?(String) and (v.ip == record or v.mac == record or v.options[:hostname] == record)
+          return v if record.is_a?(String) and (v.ip == record or v.mac == record)
           return v if record.is_a?(Proxy::DHCP::Record) and v == record
           return v if record.is_a?(IPAddr) and v.ip == record.to_s
         end

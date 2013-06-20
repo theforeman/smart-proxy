@@ -7,7 +7,6 @@ class DHCPServerTest < Test::Unit::TestCase
     @server = Proxy::DHCP::Server.new("testcase")
     @subnet = Proxy::DHCP::Subnet.new(@server, "192.168.0.0", "255.255.255.0")
     @record = Proxy::DHCP::Record.new(:subnet => @subnet, :ip => "192.168.0.11", :mac => "aa:bb:cc:dd:ee:ff")
-    @record = Proxy::DHCP::Record.new(:subnet => @subnet, :ip => "192.168.0.11", :mac => "aa:bb:cc:dd:ee:ff", :hostname => "test")
   end
 
   def test_should_provide_subnets
@@ -52,10 +51,6 @@ class DHCPServerTest < Test::Unit::TestCase
     assert_equal @record, @server.find_record(ip)
   end
 
-   def test_should_find_record_based_on_hostname
-     assert_equal @record, @server.find_record("test")
-   end
- 
   def test_should_retrun_nil_when_no_subnet
     subnet = @server.find_subnet IPAddr.new("1.20.76.0")
     assert_nil subnet
