@@ -1,3 +1,17 @@
+2013-06-20	Dominic Cleal <dcleal@redhat.com>
+	* Release 1.2.0-RC3
+
+2013-06-20	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* fixes #2673 - none/wildcard http 'accept' headers are being handled correctly now (cherry picked from commit c164bdd6e754a32d1923340bb9336c649ef8390a)
+	* fixes #2662 - Proxy
+
+2013-06-20	Greg Sutcliffe <gsutclif@redhat.com>
+	* Fixes #2659 - Use gsub in a non-destructive manner (cherry picked from commit 92a8bdeff4503f0160ec2580996415e749ca0c8f)
+	* Fixes #2654 - Rewrite master as production when only one environment is found (cherry picked from commit 1c60be634d26163cc7fe43f5adad1f9f75c3309d)
+
+2013-06-20	Lukas Zapletal <lzap+git@redhat.com>
+	* fixes #2652 - systemd service now working (cherry picked from commit 9923a7d9a2c37120cbdd49f0201f2d76963dbd40)
+
 2013-06-07	Dominic Cleal <dcleal@redhat.com>
 	* Release 1.2.0-RC2
 
