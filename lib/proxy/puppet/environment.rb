@@ -62,20 +62,45 @@ module Proxy::Puppet
             end
           end
 
+          # parting modulepath into static and dynamic paths
+          staticpath = modulepath.split(":")
+          dynamicpath = modulepath.split(":")
+
           modulepath.split(":").each do |base_dir|
             if base_dir.include?("$environment")
-              # remove this entry from the current env so that static paths are unaltered
-              temp_path = modulepath.split(':')
-              temp_path.delete base_dir
-              if temp_path.empty?
-                new_env.delete environment
-              else
-                new_env[environment] = temp_path.join(':')
-              end
+              # remove this entry from the static paths
+              staticpath.delete base_dir
+            else
+              # remove this entry from the dynamic paths
+              dynamicpath.delete base_dir
+            end
+          end
+
+          # remove or add static environment
+          if staticpath.empty?
+            new_env.delete environment
+          else
+            new_env[environment] = staticpath.join(':')
+          end
+
+          # create dynamic environments and modulepaths (array of hash)
+          unless dynamicpath.empty?
+            temp_environment = []
+
+            dynamicpath.each do |base_dir|
               # Dynamic environments - get every directory under the modulepath
               Dir.glob("#{base_dir.gsub(/\$environment(.*)/,"/")}/*").grep(/\/[A-Za-z0-9_]+$/) do |dir|
                 e = dir.split("/").last
-                new_env[e.to_sym] = base_dir.gsub("$environment", e)
+                temp_environment.push({e => base_dir.gsub("$environment", e)})
+              end
+            end
+
+            # group array of hashes, join values (modulepaths) and create dynamic environment => modulepath
+            dynamic_environment = temp_environment.group_by(&:keys).map{|k, v| {k.first => v.flatten.map(&:values).join(':')}}
+
+            dynamic_environment.each do |h|
+              h.each do |k,v|
+                new_env[k.to_sym] = v
               end
             end
           end
