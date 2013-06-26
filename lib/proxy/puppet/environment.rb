@@ -95,7 +95,7 @@ module Proxy::Puppet
           end
 
           # group array of hashes, join values (modulepaths) and create dynamic environment => modulepath
-          dynamic_environment = temp_environment.group_by(&:keys).map{|k, v| {k.first => v.flat_map(&:values).join(':')}}
+          dynamic_environment = temp_environment.group_by(&:keys).map{|k, v| {k.first => v.flatten.map(&:values).join(':')}}
 
           dynamic_environment.each do |h|
             h.each do |k,v|
