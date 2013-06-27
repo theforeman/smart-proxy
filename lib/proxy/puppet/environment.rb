@@ -84,22 +84,24 @@ module Proxy::Puppet
           end
 
           # create dynamic environments and modulepaths (array of hash)
-          temp_environment = []
+          unless dynamicpath.empty?
+            temp_environment = []
 
-          dynamicpath.each do |base_dir|
-            # Dynamic environments - get every directory under the modulepath
-            Dir.glob("#{base_dir.gsub(/\$environment(.*)/,"/")}/*").grep(/\/[A-Za-z0-9_]+$/) do |dir|
-              e = dir.split("/").last
-              temp_environment.push({e => base_dir.gsub("$environment", e)})
+            dynamicpath.each do |base_dir|
+              # Dynamic environments - get every directory under the modulepath
+              Dir.glob("#{base_dir.gsub(/\$environment(.*)/,"/")}/*").grep(/\/[A-Za-z0-9_]+$/) do |dir|
+                e = dir.split("/").last
+                temp_environment.push({e => base_dir.gsub("$environment", e)})
+              end
             end
-          end
 
-          # group array of hashes, join values (modulepaths) and create dynamic environment => modulepath
-          dynamic_environment = temp_environment.group_by(&:keys).map{|k, v| {k.first => v.flatten.map(&:values).join(':')}}
+            # group array of hashes, join values (modulepaths) and create dynamic environment => modulepath
+            dynamic_environment = temp_environment.group_by(&:keys).map{|k, v| {k.first => v.flatten.map(&:values).join(':')}}
 
-          dynamic_environment.each do |h|
-            h.each do |k,v|
-              new_env[k.to_sym] = v
+            dynamic_environment.each do |h|
+              h.each do |k,v|
+                new_env[k.to_sym] = v
+              end
             end
           end
         end
