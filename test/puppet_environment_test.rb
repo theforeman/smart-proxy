@@ -83,6 +83,30 @@ class PuppetEnvironmentTest < Test::Unit::TestCase
     assert_array_equal env_class_map, [["prod", "test"], ["dev", "test2"]]
   end
 
+  def test_multiple_modulepath_in_single_env_with_multiple_dynamic_path
+    config = {
+        :main => {},
+        :master => { :modulepath=>'./test/fixtures/multi_module/$environment/modules1:./test/fixtures/multi_module/$environment/modules2' }
+    }
+    Puppet.settings.stubs(:instance_variable_get).returns(config)
+    env = Proxy::Puppet::Environment.all
+    assert_array_equal env.map { |e| e.name }, ['dev','prod']
+    env_class_map = env.map { |e| [e.name, e.classes.map { |c| c.name }].flatten }
+    assert_array_equal env_class_map, [["prod", "test1"], ["prod", "test2"], ["dev", "test3"], ["dev", "test4"]]
+  end
+
+  def test_multiple_modulepath_in_single_env_with_multiple_dynamic_path_and_static_path
+    config = {
+        :main => {},
+        :master => { :modulepath=>'./test/fixtures/environments/prod:./test/fixtures/multi_module/$environment/modules1:./test/fixtures/multi_module/$environment/modules2' }
+    }
+    Puppet.settings.stubs(:instance_variable_get).returns(config)
+    env = Proxy::Puppet::Environment.all
+    assert_array_equal env.map { |e| e.name }, ['dev','prod']
+    env_class_map = env.map { |e| [e.name, e.classes.map { |c| c.name }].flatten }
+    assert_array_equal env_class_map, [["prod", "test"], ["prod", "test1"], ["prod", "test2"], ["dev", "test3"], ["dev", "test4"]]
+  end
+
   def test_multiple_modulepath_in_single_env_with_dynamic_path
     config = {
         :main => {},
