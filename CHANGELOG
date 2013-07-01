@@ -1,4 +1,11 @@
+2013-07-01	Dominic Cleal <dcleal@redhat.com>
+	* Release 1.2.0
+
+2013-07-01	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #2714 - corrected IO#popen parameter on ruby 1.8.7 (cherry picked from commit 61394852e191756fc5eea0a92d581cf1dca39f21)
+
 2013-06-20	Dominic Cleal <dcleal@redhat.com>
+	* Fix incorrect version number
 	* Release 1.2.0-RC3
 
 2013-06-20	Dmitri Dolguikh <dmitri@appliedlogic.ca>
