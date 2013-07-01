@@ -29,6 +29,7 @@ class SmartProxy < Sinatra::Base
 
   require "features_api"
   require "tftp_api"     if SETTINGS.tftp
+  require "template_api" if SETTINGS.templates
   require "puppet_api"   if SETTINGS.puppet
   require "puppetca_api" if SETTINGS.puppetca
   require "dns_api"      if SETTINGS.dns
