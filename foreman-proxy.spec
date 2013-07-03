@@ -11,7 +11,7 @@
 
 Name:           %{?scl_prefix}foreman-proxy
 Version:        1.2.9999
-Release:        2%{dist}
+Release:        3%{dist}
 Summary:        Restful Proxy for DNS, DHCP, TFTP, PuppetCA and Puppet
 
 Group:          Applications/System
@@ -37,6 +37,7 @@ Requires:       %{?scl_prefix}rubygem(rake) >= 0.8.3
 Requires:       %{?scl_prefix}rubygem(sinatra)
 Requires:       %{?scl_prefix}rubygem(json)
 Requires:       %{?scl_prefix}rubygem(rkerberos)
+Requires:       %{?scl_prefix}rubygem(rubyipmi)
 Requires:       sudo
 Requires:       wget
 Requires(pre):  shadow-utils
@@ -177,6 +178,8 @@ fi
 
 
 %changelog
+* Wed Jul 03 2013 Dominic Cleal <dcleal@redhat.com> - 1.2.9999-3
+- add rubyipmi dependency for BMC support
 * Wed Jun 13 2013 Lukas Zapletal <lzap+rpm[@]redhat.com> - 1.2.9999-2
 - fixed service file for systemd
 - /etc/sysconfig configuration is no longer in use for systemd
