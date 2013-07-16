@@ -4,11 +4,15 @@ class SmartProxy
     case SETTINGS.dns_provider
     when "nsupdate"
       require 'proxy/dns/nsupdate'
-      @server = Proxy::DNS::Nsupdate.new(opts.merge(:server => SETTINGS.dns_server))
+      @server = Proxy::DNS::Nsupdate.new(opts.merge(
+        :server => SETTINGS.dns_server,
+        :ttl => SETTINGS.dns_ttl
+      ))
     when "nsupdate_gss"
       require 'proxy/dns/nsupdate_gss'
       @server = Proxy::DNS::NsupdateGSS.new(opts.merge(
         :server => SETTINGS.dns_server,
+        :ttl => SETTINGS.dns_ttl,
         :tsig_keytab => SETTINGS.dns_tsig_keytab,
         :tsig_principal => SETTINGS.dns_tsig_principal
       ))
