@@ -4,6 +4,7 @@ require 'resolv'
 module Proxy::DNS
   class Nsupdate < Record
 
+    include Proxy::Log
     include Proxy::Util
     attr_reader :resolver
 
