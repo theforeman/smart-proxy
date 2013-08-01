@@ -5,6 +5,7 @@ module Proxy::DHCP
   require "proxy/dhcp/server"
   Standard = {
               :hostname              => {:code => 12, :kind => "String"    }, # The host's name
+              :PXEClient             => {:code => 60, :kind => "String"    }, # Needs to be empty for foreman to function
               :nextServer            => {:code => 66, :kind => "String"    }, # From where we download the pxeboot image via TFTP
               :filename              => {:code => 67, :kind => "String"    }  # The pxeboot image
              }
