@@ -8,6 +8,9 @@ class SmartProxy
     when "mcollective"
       require 'proxy/puppet/mcollective'
       @server = Proxy::Puppet::MCollective.new(opts)
+    when "puppetssh"
+      require 'proxy/puppet/puppet_ssh'
+      @server = Proxy::Puppet::PuppetSSH.new(opts)
     else
       log_halt 400, "Unrecognized or missing puppet_provider: #{SETTINGS.puppet_provider || "MISSING"}"
     end

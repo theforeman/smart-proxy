@@ -16,14 +16,18 @@ module Proxy::Puppet
 
     protected
     attr_reader :nodes
-    
+
     def shell_escaped_nodes
       nodes.collect { |n| escape_for_shell(n) }
     end
-    
-    def shell_command(cmd)
+
+    def shell_command(cmd, wait = true)
       begin
         c = popen(cmd)
+        unless wait
+          Process.detach(c.pid)
+          return 0
+        end
         Process.wait(c.pid)
       rescue Exception => e
         logger.error("Exception '#{e}' when executing '#{cmd}'")
@@ -32,7 +36,7 @@ module Proxy::Puppet
       logger.warn("Non-null exit code when executing '#{cmd}'") if $?.exitstatus != 0
       $?.exitstatus == 0
     end
-    
+
     def popen(cmd)
       RUBY_VERSION > "1.8.7" ? 
         IO.popen(cmd) :
