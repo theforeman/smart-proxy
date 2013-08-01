@@ -21,9 +21,13 @@ module Proxy::Puppet
       nodes.collect { |n| escape_for_shell(n) }
     end
     
-    def shell_command(cmd)
+    def shell_command(cmd, wait = true)
       begin
         c = popen(cmd)
+        unless wait
+          Process.detach(c.pid)
+          return 0
+        end
         Process.wait(c.pid)
       rescue Exception => e
         logger.error("Exception '#{e}' when executing '#{cmd}'")
