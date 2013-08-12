@@ -35,7 +35,6 @@ module Proxy::DHCP
       ignored_attributes = [:ip, :mac, :name, :subnet]
       options.delete_if{|k,v| ignored_attributes.include?(k.to_sym) }
       return if options.empty?  # This reservation is just for an IP and MAC
-      options["PXEClient"] = '""'
 
       # TODO: Refactor these execs into a popen
       alternate_vendor_name = nil
