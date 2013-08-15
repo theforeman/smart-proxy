@@ -45,7 +45,7 @@ class SmartProxy
     begin
       Proxy::PuppetCA.sign(certname)
     rescue => e
-      log_halt 406, "Failed to enable autosign for #{certname}: #{e}"
+      log_halt 406, "Failed to sign certificate(s) for #{certname}: #{e}"
     end
   end
   delete "/puppet/ca/:certname" do
