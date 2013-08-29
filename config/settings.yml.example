@@ -73,6 +73,7 @@
 #   puppetrun   (for puppetrun/kick, deprecated in Puppet 3)
 #   mcollective (uses mco puppet)
 #   puppetssh   (run puppet over ssh)
+#   salt        (uses salt puppet.run)
 :puppet_provider: puppetrun
 :puppet_conf: /etc/puppet/puppet.conf
 # whether to use sudo before the ssh command
