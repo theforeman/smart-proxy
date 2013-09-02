@@ -1,5 +1,5 @@
 module Proxy
-  MODULES = %w{dns dhcp tftp puppetca puppet bmc}
+  MODULES = %w{dns dhcp tftp puppetca puppet bmc templates}
   VERSION = "1.2-develop"
 
   require "checks"
@@ -13,6 +13,7 @@ module Proxy
   require "proxy/log"
   require "proxy/util"
   require "proxy/tftp"     if SETTINGS.tftp
+  require "proxy/template" if SETTINGS.templates
   require "proxy/puppetca" if SETTINGS.puppetca
   require "proxy/puppet"   if SETTINGS.puppet
   require "proxy/dns"      if SETTINGS.dns

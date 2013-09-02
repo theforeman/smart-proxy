@@ -2,12 +2,15 @@ require "proxy/settings"
 
 class Settings < OpenStruct
   module TestingSettings
-    DEFAULTS = { :tftp => true,
-                        :puppet => true,
-                        :puppetca => true,
-                        :bmc => true,
-                        :puppet_conf => File.join(File.dirname(__FILE__), 'fixtures', 'puppet.conf'),
-                        :log_file => File.join('logs', 'test.log') }
+    DEFAULTS = { :tftp        => true,
+                 :bmc         => true,
+                 :puppet      => true,
+                 :puppetca    => true,
+                 :puppet_conf => File.join(File.dirname(__FILE__), 'fixtures', 'puppet.conf'),
+                 :log_file    => File.join('logs', 'test.log'),
+                 :templates   => true,
+                 :foreman_url => 'http://127.0.0.1:3000'
+    }
   end
   DEFAULTS.merge!(TestingSettings::DEFAULTS)
 
