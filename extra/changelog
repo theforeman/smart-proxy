@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-cmd=`git log --pretty='format:%ci::%an <%ae>::%s'`
+cmd=`git log --pretty='format:%ci___%an <%ae>___%s'`
 
 list = {}
 list_order = []
@@ -9,7 +9,7 @@ changelog_file = "CHANGELOG"
 contributors_file = "Contributors"
 
 cmd.each_line do |l|
-  date, author, subject = l.chomp.split("::")
+  date, author, subject = l.chomp.split('___')
   date, time, zone = date.split(" ")
 
   id = "#{date}\t#{author}"
