@@ -31,7 +31,7 @@ module Proxy::DHCP
       cmd = "scope #{record.subnet.network} add reservedip #{record.ip} #{record.mac.gsub(/:/,"")} #{record.name}"
       execute(cmd, "Added DHCP reservation for #{record}")
 
-      options = record.options
+      options = {"PXEClient" => ""}.merge(record.options)
       ignored_attributes = [:ip, :mac, :name, :subnet]
       options.delete_if{|k,v| ignored_attributes.include?(k.to_sym) }
       return if options.empty?  # This reservation is just for an IP and MAC
@@ -43,7 +43,7 @@ module Proxy::DHCP
           vendor, attr = match[1,2].map(&:to_sym)
           msg = "set value for #{key}"
           begin
-            execute "scope #{record.subnet.network} set reservedoptionvalue #{record.ip} #{SUNW[attr][:code]} #{SUNW[attr][:kind]} vendor=#{alternate_vendor_name || vendor} #{value}", msg, true
+            execute "scope #{record.subnet.network} set reservedoptionvalue #{record.ip} #{SUNW[attr][:code]} #{SUNW[attr][:kind]} vendor=#{alternate_vendor_name || vendor} \"#{value}\"", msg, true
           rescue Proxy::DHCP::Error => e
             alternate_vendor_name = find_or_create_vendor_name vendor.to_s, e
             retry
@@ -51,7 +51,7 @@ module Proxy::DHCP
         else
           logger.debug "key: " + key.inspect
           k = Standard[key] || Standard[key.to_sym]
-          execute "scope #{record.subnet.network} set reservedoptionvalue #{record.ip} #{k[:code]} #{k[:kind]} #{value}", msg, true
+          execute "scope #{record.subnet.network} set reservedoptionvalue #{record.ip} #{k[:code]} #{k[:kind]} \"#{value}\"", msg, true
         end
       end
 
