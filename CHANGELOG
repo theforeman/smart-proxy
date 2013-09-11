@@ -1,4 +1,51 @@
+2013-09-02	Jeremy Kitchen <kitchen@kitchen.io>
+	* fixes #3009 - add Proxy
+
+2013-08-16	Sam Kottler <shk@redhat.com>
+	* Fixes #2941: don't mention autosigning when direct signing fails
+
+2013-07-19	Dominic Cleal <dcleal@redhat.com>
+	* fixes #2055 - add rubyipmi dependency for BMC support
+
+2013-07-19	Sam Kottler <shk@redhat.com>
+	* Fix #2807: Remove the SCL prefix from the name
+
+2013-07-17	Povilas Daukintis <povilas@daukintis.lt>
+	* Fixes #2790 - Optionally set DNS TTL value from settings.yml config file
+
+2013-07-04	Daniel Baeurer <daniel.baeurer@gmail.com>
+	* fixes #2738 - handle multiple dynamic modulepaths
+
+2013-06-27	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #2714 - corrected IO#popen parameter on ruby 1.8.7
+
+2013-06-19	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* fixes #2673 - none/wildcard http 'accept' headers are being handled correctly now
+
+2013-06-18	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* fixes #2662 - Proxy
+
+2013-06-14	Greg Sutcliffe <gsutclif@redhat.com>
+	* Fixes #2659 - Use gsub in a non-destructive manner
+	* Fixes #2654 - Rewrite master as production when only one environment is found
+
+2013-06-13	Lukas Zapletal <lzap+git@redhat.com>
+	* fixes #2652 - systemd service now working
+
+2013-06-07	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* fixes #2520 - defines default settings for dns and puppet
+
+2013-06-04	Kamil Winczek <kwinczek@gmail.com>
+	* fixes #2614 - log messages regarding puppetrun via mcollective
+
+2013-05-28	Greg Sutcliffe <gsutclif@redhat.com>
+	* Fixes #2119 - Properly support colon-separated modulepath
+
+2013-05-23	Dominic Cleal <dcleal@redhat.com>
+	* fixes #2547 - fix ruby-abi on non-SCL EL6
+
 2013-05-22	Dominic Cleal <dcleal@redhat.com>
+	* Add nonscl koji tags to build configuration
 	* Bump version to 1.2-develop
 	* fixes #2514 - lock minitest to 4.7
 	* fixes #2523 - add missing require

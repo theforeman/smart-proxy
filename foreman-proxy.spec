@@ -10,14 +10,14 @@
 %endif
 
 Name:           foreman-proxy
-Version:        1.2.9999
-Release:        3%{dist}
+Version:        1.3.0
+Release:        0.1.RC1%{dist}
 Summary:        Restful Proxy for DNS, DHCP, TFTP, PuppetCA and Puppet
 
 Group:          Applications/System
 License:        GPLv3+
 URL:            http://theforeman.org/projects/smart-proxy
-Source0:        http://theforeman.org/files/todo/%{name}-%{version}.tar.gz
+Source0:        %{name}-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildArch:      noarch
@@ -178,6 +178,8 @@ fi
 
 
 %changelog
+* Wed Sep 11 2013 Lukas Zapletal <lzap+rpm[@]redhat.com> - 1.3.0-0.1.RC1
+- release 1.3.0-RC1
 * Wed Jul 03 2013 Dominic Cleal <dcleal@redhat.com> - 1.2.9999-3
 - add rubyipmi dependency for BMC support
 * Wed Jun 13 2013 Lukas Zapletal <lzap+rpm[@]redhat.com> - 1.2.9999-2
