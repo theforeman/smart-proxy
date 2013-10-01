@@ -122,6 +122,9 @@ module Proxy::PuppetCA
       logger.debug "Found puppetca at #{@puppetca}"
       @puppetca << " cert" unless @puppetca.include?("puppetca")
 
+      # Tell puppetca to use the ssl dir that Foreman has been told to use
+      @puppetca << " --ssldir #{ssl_dir}"
+
       @sudo = which("sudo", "/usr/bin")
       unless File.exists?("#{@sudo}")
         logger.warn "unable to find sudo binary"
