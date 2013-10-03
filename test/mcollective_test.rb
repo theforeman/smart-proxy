@@ -14,6 +14,16 @@ class MCollectiveTest < Test::Unit::TestCase
     assert @mcollective.run
   end
 
+  def test_run_command_with_puppet_user_defined
+    @mcollective.stubs(:which).with("sudo", anything).returns("/usr/bin/sudo")
+    @mcollective.stubs(:which).with("mco", anything).returns("/usr/bin/mco")
+    SETTINGS.stubs(:puppet_user).returns("example")
+
+    @mcollective.expects(:shell_command).with(["/usr/bin/sudo", "-u", "example", "/usr/bin/mco", "puppet", "runonce", "-I", "host1", "host2"]).returns(true)
+
+    assert @mcollective.run
+  end
+
   def test_run_command_with_missing_sudo
     @mcollective.stubs(:which).with("sudo", anything).returns(false)
     @mcollective.stubs(:which).with("mco", anything).returns("/usr/bin/mco")

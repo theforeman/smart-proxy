@@ -5,6 +5,11 @@ module Proxy::Puppet
     def run
       cmd = []
       cmd.push(which("sudo", "/usr/bin"))
+
+      if SETTINGS.puppet_user
+        cmd.push("-u", SETTINGS.puppet_user)
+      end
+
       cmd.push(which("mco", ["/usr/bin", "/opt/puppet/bin"]))
 
       if cmd.include?(false)
