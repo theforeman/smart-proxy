@@ -80,4 +80,13 @@ module Proxy::Util
       Shellwords.escape(command)
     end
   end
+
+  def self.selinux_enforcing?
+    if File.exists?("/usr/sbin/getenforce")
+      if %w{ Enforcing Permissive }.include?(system("/usr/sbin/getenforce").to_s.chomp)
+        return true
+      end
+    end
+    false
+  end
 end

@@ -8,7 +8,7 @@ class ProxyUtilTest < Test::Unit::TestCase
 
   def test_util_shell_escape
     assert Proxy::Util.instance_methods.include? RUBY_VERSION =~ /^1\.8/ ? "escape_for_shell" : :escape_for_shell
-    
+
     test_class = eval "class ProxyUtilTestHelper; include Proxy::Util; end"
     assert_equal test_class.new.escape_for_shell("; rm -rf"), '\;\ rm\ -rf'
     assert_equal test_class.new.escape_for_shell("vm.test.com,physical.test.com"), "vm.test.com,physical.test.com"
@@ -27,5 +27,25 @@ class ProxyUtilTest < Test::Unit::TestCase
     # return code is not correct in Ruby<1.9 for open3 (http://redmine.ruby-lang.org/issues/show/1287)
     # ruby 1.9 seems to return nil for $? in open3
     assert_equal t.join, RUBY_VERSION =~ /1\.8\.\d+/  ? 0 : nil
+  end
+
+  def test_selinux_enforcing_when_enforcing
+    mock_selinux_mode("Enforcing")
+    assert_equal true, Proxy::Util.selinux_enforcing?
+  end
+
+  def test_selinux_enforcing_when_permissive
+    mock_selinux_mode("Permissive")
+    assert_equal true, Proxy::Util.selinux_enforcing?
+  end
+
+  def test_selinux_enforcing_when_disabled
+    mock_selinux_mode("Disabled")
+    assert_equal false, Proxy::Util.selinux_enforcing?
+  end
+
+  private
+  def mock_selinux_mode(mode)
+    Proxy::Util.expects(:system).with("/usr/sbin/getenforce").returns(mode)
   end
 end

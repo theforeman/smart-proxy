@@ -94,6 +94,11 @@ module Proxy::TFTP
 
       cmd = "wget --timeout=10 --tries=3 --no-check-certificate -nv -c #{src} -O \"#{destination}\""
       Proxy::Util::CommandTask.new(cmd)
+
+      if Proxy::Util.selinux_enforcing?
+        cmd = "/bin/chcon -t tftpdir_rw_t #{destination}"
+        Proxy::Util::CommandTask.new(cmd)
+      end
     end
   end
 end
