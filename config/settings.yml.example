@@ -82,8 +82,8 @@
 #:puppetssh_user: root
 #:puppetssh_keyfile: /etc/foreman-proxy/id_rsa
 
-# Which user to invoke sudo as to run mco commands
-#:puppet_mco_user: root
+# Which user to invoke sudo as to run puppet commands
+#:puppet_user: root
 
 # enable BMC management  (Bare metal power and bios controls)
 # Available providers:
