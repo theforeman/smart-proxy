@@ -15,6 +15,16 @@ class PuppetRunTest < Test::Unit::TestCase
     assert @puppetrun.run
   end
   
+  def test_command_line_with_puppet_and_puppet_user
+    @puppetrun.stubs(:which).with("sudo", anything).returns("/usr/bin/sudo")
+    @puppetrun.stubs(:which).with("puppet", anything).returns("/usr/sbin/puppet")
+    @puppetrun.stubs(:which).with("puppetrun", anything).returns(false)
+    SETTINGS.stubs(:puppet_user).returns("example")
+    
+    @puppetrun.expects(:shell_command).with(["/usr/bin/sudo", "-u", "example", "/usr/sbin/puppet", "kick", "--host", "host1", "--host", "host2"]).returns(true)
+    assert @puppetrun.run
+  end
+  
   def test_command_line_with_puppetrun
     @puppetrun.stubs(:which).with("sudo", anything).returns("/usr/bin/sudo")
     @puppetrun.stubs(:which).with("puppetrun", anything).returns("/usr/sbin/puppetrun")
@@ -23,7 +33,7 @@ class PuppetRunTest < Test::Unit::TestCase
     @puppetrun.expects(:shell_command).with(["/usr/bin/sudo", "/usr/sbin/puppetrun", "--host", "host1", "--host", "host2"]).returns(true)
     assert @puppetrun.run
   end
-  
+
   def test_missing_sudo
     @puppetrun.stubs(:which).with("sudo", anything).returns(false)
     @puppetrun.stubs(:which).with("puppetrun", anything).returns("/usr/sbin/puppetrun")
