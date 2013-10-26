@@ -20,4 +20,5 @@ class SmartProxy < Sinatra::Base
       halt code, message
     end
   end
+
 end

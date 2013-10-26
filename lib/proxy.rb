@@ -1,5 +1,5 @@
 module Proxy
-  MODULES = %w{dns dhcp tftp puppetca puppet bmc}
+  MODULES = %w{dns dhcp tftp puppetca puppet bmc chefproxy}
   VERSION = "1.3-develop"
 
   require "checks"
@@ -12,12 +12,13 @@ module Proxy
   require "rubygems" if USE_GEMS # required for testing
   require "proxy/log"
   require "proxy/util"
-  require "proxy/tftp"     if SETTINGS.tftp
-  require "proxy/puppetca" if SETTINGS.puppetca
-  require "proxy/puppet"   if SETTINGS.puppet
-  require "proxy/dns"      if SETTINGS.dns
-  require "proxy/dhcp"     if SETTINGS.dhcp
-  require "proxy/bmc"      if SETTINGS.bmc
+  require "proxy/tftp"       if SETTINGS.tftp
+  require "proxy/puppetca"   if SETTINGS.puppetca
+  require "proxy/puppet"     if SETTINGS.puppet
+  require "proxy/dns"        if SETTINGS.dns
+  require "proxy/dhcp"       if SETTINGS.dhcp
+  require "proxy/bmc"        if SETTINGS.bmc
+  require "proxy/chefproxy"  if SETTINGS.chefproxy
 
   def self.features
     MODULES.collect{|mod| mod if SETTINGS.send mod}.compact
