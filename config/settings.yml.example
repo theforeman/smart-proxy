@@ -12,6 +12,7 @@
 #:trusted_hosts:
 #- foreman.prod.domain
 #- foreman.dev.domain
+#:foreman_url: http://127.0.0.1:3000
 
 # enable the daemon to run in the background
 :daemon: true
@@ -84,6 +85,15 @@
 
 # Which user to invoke sudo as to run puppet commands
 #:puppet_user: root
+
+# enable Chef management
+:chefproxy: false
+# :chef_authenticate_nodes: true
+# :chef_server_url: "https://chef.example.net"
+# smart-proxy client node needs to have some admin right on chef-server
+# in order to retrive all nodes public keys
+# :chef_smartproxy_clientname: 'chef.fitzdsl.net'
+# :chef_smartproxy_privatekey: '/etc/chef/client.pem'
 
 # enable BMC management  (Bare metal power and bios controls)
 # Available providers:
