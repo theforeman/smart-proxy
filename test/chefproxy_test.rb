@@ -6,7 +6,7 @@ class ChefProxyTest < Test::Unit::TestCase
   def setup
     @foreman_url = 'https://foreman.example.com'
     SETTINGS.stubs(:foreman_url).returns(@foreman_url)
-    SETTINGS.stubs(:authenticate_nodes).returns(false)
+    SETTINGS.stubs(:chef_authenticate_nodes).returns(false)
   end
 
   def test_post_facts
@@ -24,5 +24,4 @@ class ChefProxyTest < Test::Unit::TestCase
 
     assert(result.is_a? Net::HTTPOK)
   end
-
 end

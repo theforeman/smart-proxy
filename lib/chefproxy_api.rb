@@ -12,7 +12,7 @@ class SmartProxy
 
   post "/facts" do
     Proxy::Authentication::Chef.new.authenticated(request) do |content|
-        Proxy::ChefProxy::Facts.new.post_facts(content)
+      Proxy::ChefProxy::Facts.new.post_facts(content)
     end
   end
 

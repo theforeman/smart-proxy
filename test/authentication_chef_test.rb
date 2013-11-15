@@ -10,9 +10,9 @@ class AuthenticationChefTest < Test::Unit::TestCase
     @chefauth = Proxy::Authentication::Chef.new
 
     #We set a few chef related settings
-    SETTINGS.stubs(:chefserver_url).returns('https://chef.example.com')
-    SETTINGS.stubs(:smartproxy_clientname).returns('testnode1')
-    SETTINGS.stubs(:smartproxy_privatekey).returns('test/fixtures/authentication/testnode1.priv')
+    SETTINGS.stubs(:chef_server_url).returns('https://chef.example.com')
+    SETTINGS.stubs(:chef_smartproxy_clientname).returns('testnode1')
+    SETTINGS.stubs(:chef_smartproxy_privatekey).returns('test/fixtures/authentication/testnode1.priv')
 
 
     testnode1_key_path = 'test/fixtures/authentication/testnode1'
@@ -45,7 +45,7 @@ class AuthenticationChefTest < Test::Unit::TestCase
   end
 
   def test_auth_disabled_should_always_success
-    SETTINGS.stubs(:authenticate_nodes).returns(false)
+    SETTINGS.stubs(:chef_authenticate_nodes).returns(false)
     s = StringIO.new('Hello')
     request = Sinatra::Request.new(env={'rack.input' => s})
     result = @chefauth.authenticated(request) do |content|
@@ -56,7 +56,7 @@ class AuthenticationChefTest < Test::Unit::TestCase
   end
 
   def test_auth_enable_without_headers_should_raise_an_error
-    SETTINGS.stubs(:authenticate_nodes).returns(true)
+    SETTINGS.stubs(:chef_authenticate_nodes).returns(true)
     s = StringIO.new('Hello')
     request = Sinatra::Request.new(env={'rack.input' => s})
     begin
@@ -66,6 +66,6 @@ class AuthenticationChefTest < Test::Unit::TestCase
     rescue Proxy::Error::Unauthorized => e
       assert(e.is_a? Proxy::Error::Unauthorized)
     end
-      assert_equal(nil,result)
+    assert_equal(nil,result)
   end
 end

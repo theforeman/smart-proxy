@@ -24,7 +24,7 @@ module Proxy::ChefProxy
         end
       end
 
-      req = Net::HTTP::Post.new("#{uri.path}#{path}")
+      req = Net::HTTP::Post.new(URI.join(uri, path).path)
       req.add_field('Accept', 'application/json,version=2')
       req.content_type = 'application/json'
       req.body         = body
@@ -32,16 +32,15 @@ module Proxy::ChefProxy
     end
   end
 
-  class Facts
+  class Facts < ForemanRequest
     def post_facts(facts)
-      ForemanRequest.new.send_request('/api/hosts/facts',facts)
+      send_request('/api/hosts/facts',facts)
     end
   end
 
-  class Reports
+  class Reports < ForemanRequest
     def post_report(report)
-      ForemanRequest.new.send_request('/api/reports',report)
+      send_request('/api/reports',report)
     end
   end
-
 end
