@@ -28,12 +28,13 @@ class SmartProxy < Sinatra::Base
   end
 
   require "features_api"
-  require "tftp_api"     if SETTINGS.tftp
-  require "puppet_api"   if SETTINGS.puppet
-  require "puppetca_api" if SETTINGS.puppetca
-  require "dns_api"      if SETTINGS.dns
-  require "dhcp_api"     if SETTINGS.dhcp
-  require "bmc_api"      if SETTINGS.bmc
+  require "tftp_api"      if SETTINGS.tftp
+  require "puppet_api"    if SETTINGS.puppet
+  require "puppetca_api"  if SETTINGS.puppetca
+  require "dns_api"       if SETTINGS.dns
+  require "dhcp_api"      if SETTINGS.dhcp
+  require "bmc_api"       if SETTINGS.bmc
+  require "chefproxy_api" if SETTINGS.chefproxy
 
   begin
     require "facter"
