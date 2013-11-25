@@ -122,7 +122,10 @@ module Proxy::Puppet
     end
 
     def classes
-      paths.map {|path| PuppetClass.scan_directory path}.flatten
+      conf = Puppet.settings.instance_variable_get(:@values)
+      eparser = conf[:master] && conf[:master][:parser] == 'future'
+
+      paths.map {|path| PuppetClass.scan_directory path, eparser}.flatten
     end
 
   end
