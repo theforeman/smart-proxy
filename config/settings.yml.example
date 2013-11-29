@@ -32,6 +32,7 @@
 # valid providers:
 #   nsupdate
 #   nsupdate_gss (for GSS-TSIG support)
+#   virsh (simple implementation for libvirt)
 :dns_provider: nsupdate
 #:dns_key: /etc/rndc.key
 # use this setting if you are managing a dns server which is not localhost though this proxy
@@ -45,7 +46,10 @@
 
 # Enable DHCP management
 :dhcp: false
-# The vendor can be either isc or native_ms
+# valid vendors:
+#   - isc
+#   - native_ms (Microsoft native implementation)
+#   - virsh (simple implementation for libvirt)
 :dhcp_vendor: isc
 # dhcp_subnets is a Native MS implementation setting. It restricts the subnets queried to a
 # subset, so as to reduce the query time.
@@ -61,6 +65,9 @@
 #:dhcp_leases: /var/lib/dhcpd/dhcpd.leases
 #:dhcp_key_name: secret_key_name
 #:dhcp_key_secret: secret_key
+
+# shared options for virsh DNS/DHCP provider
+:virsh_network: default
 
 # enable PuppetCA management
 :puppetca: false

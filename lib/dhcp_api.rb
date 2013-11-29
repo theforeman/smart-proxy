@@ -15,6 +15,9 @@ class SmartProxy < Sinatra::Base
     when "native_ms"
       require 'proxy/dhcp/server/native_ms'
       @server = Proxy::DHCP::NativeMS.new(:server => SETTINGS.dhcp_server ? SETTINGS.dhcp_server : "127.0.0.1")
+    when "virsh"
+      require 'proxy/dhcp/server/virsh'
+      @server = Proxy::DHCP::Virsh.new(:virsh_network => SETTINGS.virsh_network)
     else
       log_halt 400, "Unrecognized or missing DHCP vendor type: #{SETTINGS.dhcp_vendor.nil? ? "MISSING" : SETTINGS.dhcp_vendor}"
     end
