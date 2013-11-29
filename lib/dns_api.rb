@@ -16,6 +16,11 @@ class SmartProxy
         :tsig_keytab => SETTINGS.dns_tsig_keytab,
         :tsig_principal => SETTINGS.dns_tsig_principal
       ))
+    when "virsh"
+      require 'proxy/dns/virsh'
+      @server = Proxy::DNS::Virsh.new(opts.merge(
+        :virsh_network => SETTINGS.virsh_network
+      ))
     else
       log_halt 400, "Unrecognized or missing DNS provider: #{SETTINGS.dns_provider || "MISSING"}"
     end
