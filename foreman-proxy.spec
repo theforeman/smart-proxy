@@ -92,7 +92,7 @@ install -Dp -m0644 %{specdir}/%{name}.tmpfiles %{buildroot}%{_prefix}/lib/tmpfil
 install -Dp -m0644 %{specdir}/logrotate.systemd %{buildroot}%{_sysconfdir}/logrotate.d/%{name}
 %endif
 
-cp -p -r bin lib Rakefile %{buildroot}%{_datadir}/%{name}
+cp -p -r bin lib Rakefile config.ru %{buildroot}%{_datadir}/%{name}
 chmod a+x %{buildroot}%{_datadir}/%{name}/bin/smart-proxy
 rm -rf %{buildroot}%{_datadir}/%{name}/*.rb
 
@@ -126,6 +126,7 @@ rm -rf %{buildroot}
 %attr(-,%{name},%{name}) %{_localstatedir}/lib/%{name}
 %attr(-,%{name},%{name}) %{_localstatedir}/log/%{name}
 %attr(-,%{name},%{name}) %{_var}/run/%{name}
+%attr(-,%{name},root) %{_datadir}/%{name}/config.ru
 %if 0%{?rhel} == 6 || 0%{?fedora} < 17
 %{_initrddir}/%{name}
 %config(noreplace) %{_sysconfdir}/sysconfig/%{name}
