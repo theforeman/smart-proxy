@@ -4,8 +4,8 @@ module Proxy::Puppet
   class PuppetSSH < Runner
     def run
       cmd = []
-      cmd.push(which('sudo', '/usr/bin')) if SETTINGS.puppetssh_sudo
-      cmd.push(which('ssh', '/usr/bin'))
+      cmd.push(which('sudo')) if SETTINGS.puppetssh_sudo
+      cmd.push(which('ssh'))
       cmd.push("-l #{SETTINGS.puppetssh_user}") if SETTINGS.puppetssh_user
       if (file = SETTINGS.puppetssh_keyfile)
         if File.exists?(file)
@@ -20,7 +20,7 @@ module Proxy::Puppet
         return false
       end
 
-      ssh_command = escape_for_shell(SETTINGS.puppetssh_command || '/usr/bin/puppet agent --onetime --no-usecacheonfailure')
+      ssh_command = escape_for_shell(SETTINGS.puppetssh_command || 'puppet agent --onetime --no-usecacheonfailure')
       nodes.each do |node|
         shell_command(cmd + [escape_for_shell(node), ssh_command], false)
       end

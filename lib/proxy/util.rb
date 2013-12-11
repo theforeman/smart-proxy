@@ -49,6 +49,7 @@ module Proxy::Util
   # accepts a binary name and an array of paths to search first
   # if path is omitted will search only in user PATH
   def which(bin, *path)
+    path = path + ['/usr/bin', '/usr/sbin', '/usr/local/bin', '/usr/local/sbin']
     path += ENV['PATH'].split(File::PATH_SEPARATOR)
     path.flatten.uniq.each do |dir|
       dest = File.join(dir, bin)

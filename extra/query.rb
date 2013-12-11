@@ -1,4 +1,4 @@
-#!/usr/bin/ruby
+#!/usr/bin/env ruby
 # == Synopsis
 #
 # Queries a remote smart proxy via https

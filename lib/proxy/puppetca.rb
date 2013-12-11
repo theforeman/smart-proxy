@@ -105,9 +105,9 @@ module Proxy::PuppetCA
         raise "SSL/CA unavailable on this machine"
       end
 
-      # puppetca is the old method of using puppet cert which is new in puppet 2.6
-      default_path = ["/usr/sbin","/opt/puppet/bin", "/opt/puppet/sbin", "/usr/bin"]
+      default_path = ["/opt/puppet/bin", "/opt/puppet/sbin"]
 
+      # puppetca is the old method of using puppet cert which is new in puppet 2.6
       if Puppet::PUPPETVERSION.to_i < 3
         @puppetca = which("puppetca", default_path) || which("puppet", default_path)
       else
@@ -125,7 +125,7 @@ module Proxy::PuppetCA
       # Tell puppetca to use the ssl dir that Foreman has been told to use
       @puppetca << " --ssldir #{ssl_dir}"
 
-      @sudo = which("sudo", "/usr/bin")
+      @sudo = which("sudo")
       unless File.exists?("#{@sudo}")
         logger.warn "unable to find sudo binary"
         raise "Unable to find sudo"

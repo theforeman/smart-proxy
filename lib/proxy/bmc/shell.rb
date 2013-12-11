@@ -31,7 +31,7 @@ module Proxy
 
       def powercycle
         # search for sudo
-        sudo = which("sudo", "/usr/bin")
+        sudo = which("sudo")
 
         unless sudo
           logger.warn "sudo binary was not found - aborting"
