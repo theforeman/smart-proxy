@@ -1,6 +1,7 @@
 require 'time'
 module Proxy::DHCP
   class ISC < Server
+    include Proxy::Util
 
     def initialize options
       super(options[:name])
@@ -147,7 +148,8 @@ module Proxy::DHCP
 
     def omcmd cmd, msg=nil
       if cmd == "connect"
-        @om = IO.popen("/bin/sh -c '/usr/bin/omshell 2>&1'", "r+")
+        om_binary = which("omshell")
+        @om = IO.popen("/bin/sh -c '#{om_binary} 2>&1'", "r+")
         @om.puts "key #{SETTINGS.dhcp_key_name} \"#{SETTINGS.dhcp_key_secret}\"" if SETTINGS.dhcp_key_name and SETTINGS.dhcp_key_secret
         @om.puts "server #{name}"
         @om.puts "connect"

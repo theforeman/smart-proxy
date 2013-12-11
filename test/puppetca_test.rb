@@ -58,7 +58,7 @@ class ProxyTest < Test::Unit::TestCase
 
   def test_which_should_return_a_binary_path
     ENV.stubs(:[]).with('PATH').returns(['/foo', '/bin', '/usr/bin'].join(File::PATH_SEPARATOR))
-    { '/foo' => false, '/bin' => true, '/usr/bin' => false }.each do |p,r|
+    { '/foo' => false, '/bin' => true, '/usr/bin' => false, '/usr/sbin' => false, '/usr/local/bin' => false, '/usr/local/sbin' => false }.each do |p,r|
       FileTest.stubs(:file?).with("#{p}/ls").returns(r)
       FileTest.stubs(:executable?).with("#{p}/ls").returns(r)
     end

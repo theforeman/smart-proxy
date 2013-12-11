@@ -4,8 +4,8 @@ module Proxy::Puppet
   class Salt < Runner
     def run
       cmd = []
-      cmd.push(which('sudo', '/usr/bin'))
-      cmd.push(which('salt', '/usr/bin'))
+      cmd.push(which('sudo'))
+      cmd.push(which('salt'))
 
       if cmd.include?(false)
         logger.warn 'sudo or the salt binary is missing.'

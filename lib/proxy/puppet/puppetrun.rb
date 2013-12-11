@@ -4,10 +4,10 @@ module Proxy::Puppet
   class PuppetRun < Runner
     def run
       # Search in /opt/ for puppet enterprise users
-      default_path = ["/usr/sbin", "/usr/bin", "/opt/puppet/bin"]
+      default_path = "/opt/puppet/bin"
       # search for puppet for users using puppet 2.6+
       cmd = []
-      cmd.push(which("sudo", "/usr/bin"))
+      cmd.push(which("sudo"))
 
       if SETTINGS.puppet_user
         cmd.push("-u", SETTINGS.puppet_user)

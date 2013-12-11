@@ -4,13 +4,13 @@ module Proxy::Puppet
   class MCollective < Runner
     def run
       cmd = []
-      cmd.push(which("sudo", "/usr/bin"))
+      cmd.push(which("sudo"))
 
       if SETTINGS.puppet_user
         cmd.push("-u", SETTINGS.puppet_user)
       end
 
-      cmd.push(which("mco", ["/usr/bin", "/opt/puppet/bin"]))
+      cmd.push(which("mco", "/opt/puppet/bin"))
 
       if cmd.include?(false)
         logger.warn "sudo or the mco binary is missing."
