@@ -14,6 +14,9 @@ class SmartProxy
     when "salt"
       require 'proxy/puppet/salt'
       @server = Proxy::Puppet::Salt.new(opts)
+    when "customrun"
+      require 'proxy/puppet/customrun'
+      @server = Proxy::Puppet::CustomRun.new(opts)
     else
       log_halt 400, "Unrecognized or missing puppet_provider: #{SETTINGS.puppet_provider || "MISSING"}"
     end
