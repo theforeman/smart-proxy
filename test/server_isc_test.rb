@@ -38,4 +38,13 @@ class ServerIscTest < Test::Unit::TestCase
     post '/dhcp/192.168.122.10', data
     assert last_response.ok?, 'Last response was not ok'
   end
+
+  def test_ztp_quirks
+    dhcp = Proxy::DHCP::Server::ISC.new(:name => '192.168.122.1', :config => './test/dhcp.conf', :leases => './test/dhcp.leases')
+    assert_equal [], dhcp.send(:ztp_options_statements, {})
+    assert_equal [], dhcp.send(:ztp_options_statements, {:filename => 'foo.cfg'})
+
+    assert_equal ['option option-150 = c0:a8:7a:01;', 'option FM_ZTP.config-file-name = \\"ztp.cfg\\";'],
+      dhcp.send(:ztp_options_statements, {:filename => 'ztp.cfg', :nextServer => '192.168.122.1'})
+  end
 end

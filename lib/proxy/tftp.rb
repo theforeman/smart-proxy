@@ -83,6 +83,18 @@ module Proxy::TFTP
     end
   end
 
+  class Ztp < Tftp
+    def pxeconfig_dir
+      "#{path}/ztp.cfg"
+    end
+    def pxe_default
+      pxeconfig_dir
+    end
+    def pxeconfig_file mac
+      "#{pxeconfig_dir}/"+mac.gsub(/:/,"").upcase
+    end
+  end
+
   class << self
     def fetch_boot_file dst, src
       filename    = src.split("/")[-1]

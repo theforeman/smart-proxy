@@ -40,6 +40,7 @@ module Proxy::DHCP
       statements << "option host-name = \\\"#{record.name}\\\";" if record.name
 
       statements += solaris_options_statements(options)
+      statements += ztp_options_statements(options)
 
       omcmd "set statements = \"#{statements.join(" ")}\""      unless statements.empty?
       omcmd "create"
@@ -318,6 +319,18 @@ module Proxy::DHCP
           options[:jumpstart_server_path] = $1
       end
       options
+    end
+
+    # Quirk: Junos ZTP requires special DHCP options
+    def ztp_options_statements(options)
+      statements = []
+      if options[:filename] && options[:filename].match(/^ztp.cfg.*/i)
+        logger.debug "setting ZTP options"
+        opt150 = ip2hex validate_ip(options[:nextServer])
+        statements << "option option-150 = #{opt150};"
+        statements << "option FM_ZTP.config-file-name = \\\"#{options[:filename]}\\\";"
+      end
+      statements
     end
   end
 end
