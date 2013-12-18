@@ -74,7 +74,15 @@
 #   mcollective (uses mco puppet)
 #   puppetssh   (run puppet over ssh)
 #   salt        (uses salt puppet.run)
+#   customrun   (calls a custom command with args)
 :puppet_provider: puppetrun
+
+# customrun command details
+# The example below run for each host: /usr/local/bin/myscript.py -ay -f -s hostname
+:customrun:
+  :cmd: /usr/local/bin/myscript.py
+  :args: -ay -f -s
+
 :puppet_conf: /etc/puppet/puppet.conf
 # whether to use sudo before the ssh command
 :puppetssh_sudo: false
