@@ -78,10 +78,11 @@
 :puppet_provider: puppetrun
 
 # customrun command details
-# The example below run for each host: /usr/local/bin/myscript.py -ay -f -s hostname
-:customrun:
-  :cmd: /usr/local/bin/myscript.py
-  :args: -ay -f -s
+# Set :customrun_cmd to the full path of the script you want to run, instead of /bin/false
+:customrun_cmd: /bin/false
+# Set :customrun_args to any args you want to pass to your custom script. The hostname of the
+# system to run against will be appended after the custom commands.
+:customrun_args: -ay -f -s
 
 :puppet_conf: /etc/puppet/puppet.conf
 # whether to use sudo before the ssh command

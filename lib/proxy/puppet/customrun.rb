@@ -6,21 +6,13 @@ module Proxy::Puppet
 
     def run
 
-      begin
-        settings = YAML.load(File.read(Pathname.new(__FILE__).join("..","..","..","..","config","settings.yml")))
-      rescue Exception => e
-        logger.error "failed to load configuration #{e}"
-        return false
-      end
-
-      cmd = settings[:customrun][:cmd]
-
+      cmd = SETTINGS.customrun_cmd
       unless File.exists?( cmd )
         logger.warn "#{cmd} not found."
         return false
       end
 
-      shell_command( [ cmd, settings[:customrun][:args], shell_escaped_nodes ] )
+      shell_command( [ escape_for_shell(cmd), SETTINGS.customrun_args, shell_escaped_nodes ] )
     end
   end
 end
