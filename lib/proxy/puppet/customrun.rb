@@ -1,5 +1,4 @@
 require 'proxy/puppet'
-require 'yaml'
 
 module Proxy::Puppet
   class CustomRun < Runner
