@@ -38,6 +38,14 @@ module Proxy::DHCP
       statements << bootServer(options[:nextServer])             if options[:nextServer]
       statements << "option host-name = \\\"#{record.name}\\\";" if record.name
 
+      # Quirk: ZTP requires special DHCP options
+      if ( result = options[:filename].match(/^(ztp.cfg).*/i) )
+        logger.debug "setting ZTP options"
+        opt150 = ip2hex validate_ip(options[:nextServer])
+        statements << "option option-150 = #{opt150};"
+        statements << "option FM_ZTP.config-file-name = \\\"#{options[:filename]}\\\";"
+      end
+
       omcmd "set statements = \"#{statements.join(" ")}\""      unless statements.empty?
       omcmd "create"
       omcmd("disconnect", "Added DHCP reservation for #{record}")
