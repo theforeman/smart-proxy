@@ -39,11 +39,11 @@ class ServerIscTest < Test::Unit::TestCase
       "<SPARC-Enterprise-T5120>root_server_ip"=>"192.168.122.24",
       "<SPARC-Enterprise-T5120>install_path"=>"/Solaris/install/Solaris_5.10_sparc_hw0811"
     }
-    #Proxy::DHCP::Server::ISC.any_instance.stubs(:read_config).returns({})
     s=Proxy::DHCP::Server.new('192.168.122.1')
     sub=Proxy::DHCP::Subnet.new(s,'192.168.122.0','255.255.255.0')
     Proxy::DHCP::Server::ISC.any_instance.stubs(:find_subnet).returns(sub)
     post '/dhcp/192.168.122.10', data
-    assert last_response.ok?, 'Last response was not ok'
+
+    assert last_response.ok?, 'isc dhcp for sparc is broken'
   end
 end

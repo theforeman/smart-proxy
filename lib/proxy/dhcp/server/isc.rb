@@ -38,39 +38,7 @@ module Proxy::DHCP
       statements << bootServer(options[:nextServer])             if options[:nextServer]
       statements << "option host-name = \\\"#{record.name}\\\";" if record.name
 
-      # omapi
-      # options defined in app/models/operatingsystems/solaris.rb method jumpstart_params
-      # options example
-      # {"hostname"=>["itgsyddev910.macbank"], "mac"=>["00:21:28:6d:62:e8"], "ip"=>["10.229.11.38"], "network"=>["10.229.11.0"], "nextServer"=>["10.229.11.24"], "filename"=>["Solaris-5.10-hw0811-sun4v-inetboot"], "<SPARC-Enterprise-T5120>root_path_name"=>["/Solaris/install/Solaris_5.10_sparc_hw0811/Solaris_10/Tools/Boot"], "<SPARC-Enterprise-T5120>sysid_server_path"=>["10.229.11.24:/Solaris/jumpstart/sysidcfg/sysidcfg_primary"], "<SPARC-Enterprise-T5120>install_server_ip"=>["10.229.11.24"], "<SPARC-Enterprise-T5120>jumpstart_server_path"=>["10.229.11.24:/Solaris/jumpstart"], "<SPARC-Enterprise-T5120>install_server_name"=>["itgsyddev807.macbank"], "<SPARC-Enterprise-T5120>root_server_hostname"=>["itgsyddev807.macbank"], "<SPARC-Enterprise-T5120>root_server_ip"=>["10.229.11.24"], "<SPARC-Enterprise-T5120>install_path"=>["/Solaris/install/Solaris_5.10_sparc_hw0811"]}
-      #
-      options.each do |key, value|
-        next unless match = key.to_s.match(/^<([^>]+)>(.*)/)
-        vendor, attr = match[1,2].map(&:to_sym)
-        next unless vendor.to_s =~ /sun|solar|sparc/i
-        case attr
-        when :jumpstart_server_path
-          statements << "option SUNW.JumpStart-server \\\"#{value}\\\";"
-        when :sysid_server_path
-          statements << "option SUNW.sysid-config-file-server \\\"#{value}\\\";"
-        when :install_server_name
-          statements << "option SUNW.install-server-hostname \\\"#{value}\\\";"
-        when :install_server_ip
-          statements << "option SUNW.install-server-ip-address #{value};"
-        when :install_path
-          statements << "option SUNW.install-path \\\"#{value}\\\";"
-        when :root_server_hostname
-          statements << "option SUNW.root-server-hostname \\\"#{value}\\\";"
-        when :root_server_ip
-          statements << "option SUNW.root-server-ip-address #{value};"
-        when :root_path_name
-          statements << "option SUNW.root-path-name \\\"#{value}\\\";"
-        end
-      end
-
-      if statements.join(' ') =~ /SUNW/
-        statements << 'vendor-option-space SUNW;'
-      end
-      # end omapi
+      statements << solaris_options_statements(options)
 
       omcmd "set statements = \"#{statements.join(" ")}\""      unless statements.empty?
       omcmd "create"
@@ -118,6 +86,43 @@ module Proxy::DHCP
     end
 
     private
+
+    # options defined in app/models/operatingsystems/solaris.rb method jumpstart_params
+    # options example
+    # {"hostname"=>["itgsyddev910.macbank"], "mac"=>["00:21:28:6d:62:e8"], "ip"=>["10.229.11.38"], "network"=>["10.229.11.0"], "nextServer"=>["10.229.11.24"], "filename"=>["Solaris-5.10-hw0811-sun4v-inetboot"], "<SPARC-Enterprise-T5120>root_path_name"=>["/Solaris/install/Solaris_5.10_sparc_hw0811/Solaris_10/Tools/Boot"], "<SPARC-Enterprise-T5120>sysid_server_path"=>["10.229.11.24:/Solaris/jumpstart/sysidcfg/sysidcfg_primary"], "<SPARC-Enterprise-T5120>install_server_ip"=>["10.229.11.24"], "<SPARC-Enterprise-T5120>jumpstart_server_path"=>["10.229.11.24:/Solaris/jumpstart"], "<SPARC-Enterprise-T5120>install_server_name"=>["itgsyddev807.macbank"], "<SPARC-Enterprise-T5120>root_server_hostname"=>["itgsyddev807.macbank"], "<SPARC-Enterprise-T5120>root_server_ip"=>["10.229.11.24"], "<SPARC-Enterprise-T5120>install_path"=>["/Solaris/install/Solaris_5.10_sparc_hw0811"]}
+    #
+    def solaris_options_statements(options)
+      res = []
+      options.each do |key, value|
+        next unless match = key.to_s.match(/^<([^>]+)>(.*)/)
+        vendor, attr = match[1,2].map(&:to_sym)
+        next unless vendor.to_s =~ /sun|solar|sparc/i
+        case attr
+        when :jumpstart_server_path
+          res << "option SUNW.JumpStart-server \\\"#{value}\\\";"
+        when :sysid_server_path
+          res << "option SUNW.sysid-config-file-server \\\"#{value}\\\";"
+        when :install_server_name
+          res << "option SUNW.install-server-hostname \\\"#{value}\\\";"
+        when :install_server_ip
+          res << "option SUNW.install-server-ip-address #{value};"
+        when :install_path
+          res << "option SUNW.install-path \\\"#{value}\\\";"
+        when :root_server_hostname
+          res << "option SUNW.root-server-hostname \\\"#{value}\\\";"
+        when :root_server_ip
+          res << "option SUNW.root-server-ip-address #{value};"
+        when :root_path_name
+          res << "option SUNW.root-path-name \\\"#{value}\\\";"
+        end
+      end
+
+      if res.join(' ') =~ /SUNW/
+        res << 'vendor-option-space SUNW;'
+      end
+      res
+    end
+
     def loadSubnets
       super
       @config.each_line do |line|
