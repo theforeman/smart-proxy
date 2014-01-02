@@ -38,7 +38,7 @@ module Proxy::DHCP
       statements << bootServer(options[:nextServer])             if options[:nextServer]
       statements << "option host-name = \\\"#{record.name}\\\";" if record.name
 
-      statements << solaris_options_statements(options)
+      statements += solaris_options_statements(options)
 
       omcmd "set statements = \"#{statements.join(" ")}\""      unless statements.empty?
       omcmd "create"
