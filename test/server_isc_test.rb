@@ -14,7 +14,6 @@ class ServerIscTest < Test::Unit::TestCase
     user     ||= "user"
     pass     ||= "pass"
     @host    ||= "host"
-    provider ||= "ipmitool"
     authorize user, pass
   end
 
