@@ -19,6 +19,7 @@ module Proxy
   require "proxy/dhcp"       if SETTINGS.dhcp
   require "proxy/bmc"        if SETTINGS.bmc
   require "proxy/chefproxy"  if SETTINGS.chefproxy
+  require "proxy/puppetdb"   if SETTINGS.puppetdb
 
   def self.features
     MODULES.collect{|mod| mod if SETTINGS.send mod}.compact

@@ -1,0 +1,23 @@
+[
+    {
+    "name" : "node1.example.com",
+    "deactivated" : null,
+    "catalog_timestamp" : "2013-12-18T19:46:45.437Z",
+    "facts_timestamp" : "2013-12-18T19:45:41.945Z",
+    "report_timestamp" : "2013-12-18T19:47:07.592Z"
+    },
+    {
+    "name" : "node2.example.com",
+    "deactivated" : null,
+    "catalog_timestamp" : "2013-12-18T19:46:43.233Z",
+    "facts_timestamp" : "2013-12-18T19:45:45.673Z",
+    "report_timestamp" : "2013-12-18T19:47:09.307Z"
+    },
+    {
+    "name" : "node3.example.com",
+    "deactivated" : null,
+    "catalog_timestamp" : "2013-12-18T19:45:49.289Z",
+    "facts_timestamp" : "2013-12-18T19:45:17.621Z",
+    "report_timestamp" : "2013-12-18T19:46:15.324Z"
+    }
+]

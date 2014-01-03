@@ -112,6 +112,11 @@
 :bmc: false
 #:bmc_default_provider: freeipmi
 
+# enable puppetdb integration
+:puppetdb: false
+:puppetdb_host: http://puppetdb-host:8080
+:puppetdb_api_version: 3           # 1-3
+
 # Where our proxy log files are stored
 # filename or STDOUT
 :log_file: /var/log/foreman-proxy/proxy.log

@@ -7,4 +7,5 @@ group :test do
   gem 'rdoc'
   gem 'minitest', '~> 4.7', :platforms => :ruby_19
   gem 'webmock'
+  gem 'puppet'
 end
