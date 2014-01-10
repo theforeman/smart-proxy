@@ -11,10 +11,9 @@ module Proxy::Authentication
       #We need to retrieve node public key
       #to verify signature
       chefurl = SETTINGS.chef_server_url
-      client_name = SETTINGS.chef_smartproxy_clientname
+      chef_smartproxy_clientname = SETTINGS.chef_smartproxy_clientname
       key = SETTINGS.chef_smartproxy_privatekey
-
-      rest = ::Chef::REST.new(chefurl,client_name,key)
+      rest = ::Chef::REST.new(chefurl,chef_smartproxy_clientname,key)
       begin
         public_key = OpenSSL::PKey::RSA.new(rest.get_rest("/clients/#{client_name}").public_key)
       rescue Timeout::Error, Errno::EINVAL, Errno::ECONNRESET, EOFError,
