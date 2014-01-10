@@ -2,6 +2,12 @@ class SmartProxy
   def dns_setup(opts)
     raise "Smart Proxy is not configured to support DNS" unless SETTINGS.dns
     case SETTINGS.dns_provider
+    when "dnscmd"
+      require 'proxy/dns/dnscmd'
+      @server = Proxy::DNS::Dnscmd.new(opts.merge(
+        :server => SETTINGS.dns_server,
+        :ttl => SETTINGS.dns_ttl
+      ))
     when "nsupdate"
       require 'proxy/dns/nsupdate'
       @server = Proxy::DNS::Nsupdate.new(opts.merge(

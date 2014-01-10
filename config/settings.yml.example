@@ -30,6 +30,7 @@
 # Enable DNS management
 :dns: false
 # valid providers:
+#   dnscmd (Microsoft Windows native implementation)
 #   nsupdate
 #   nsupdate_gss (for GSS-TSIG support)
 #   virsh (simple implementation for libvirt)
