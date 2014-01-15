@@ -24,6 +24,7 @@ module Proxy::ChefProxy
         end
       end
 
+      path = [uri.path, path].join('/') unless uri.path.empty?
       req = Net::HTTP::Post.new(URI.join(uri.to_s, path).path)
       req.add_field('Accept', 'application/json,version=2')
       req.content_type = 'application/json'
