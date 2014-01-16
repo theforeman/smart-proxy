@@ -1,6 +1,6 @@
 module Proxy
   MODULES = %w{dns dhcp tftp puppetca puppet bmc chefproxy}
-  VERSION = "1.4-develop"
+  VERSION = "1.5-develop"
 
   require "checks"
   require "proxy/settings"
