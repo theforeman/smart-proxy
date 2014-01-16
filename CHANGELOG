@@ -1,3 +1,70 @@
+2014-01-16	Dominic Cleal <dcleal@redhat.com>
+	* Release 1.4.0-RC1
+
+2014-01-16	Marek Hulan <mhulan@redhat.com>
+	* refs #3699 - combine paths when running Foreman under a prefix
+
+2014-01-16	Romain Vrignaud <rvrignaud@gmail.com>
+	* refs #3699 - fix typo in chef_proxy's authentication, overriding wrong variable
+
+2014-01-15	Martin Matuska <martin.matuska@axelspringer.de>
+	* fixes #3991 - dnscmd provider for smart-proxy (Windows)
+
+2014-01-15	Romain Vrignaud <rvrignaud@gmail.com>
+	* fixes #3965 Change API endpoint for chef_proxy to be the same as Foreman's
+	* fixes #3966 Puppet is not listed as bundler dependency
+
+2014-01-15	Romain Vrignaud <romain.vrignaud@cloudwatt.com>
+	* refs #3699 - update settings.yml.example
+
+2014-01-03	Lukas Zapletal <lzap+git@redhat.com>
+	* fixes #3943 - add simple virsh providers for libvirt DNS/DHCP
+
+2014-01-03	Rickard von Essen <rickard.von.essen@gmail.com>
+	* fixes #2878 - Import Classes when using parser = future, on Puppet 3.2+
+
+2014-01-03	Frank Wall <fw@moov.de>
+	* fixes #3941 - Support for Junos ZTP
+
+2014-01-03	Michael Moll <kvedulv@kvedulv.de>
+	* fixes #3874 - extend paths for FreeBSD support
+
+2014-01-03	dima <pronix.service@gmail.com>
+	* fixes #3067 - add sparc solaris dhcp options for ISC
+
+2014-01-01	Glen Ogilvie <glen.ogilvie@oss.co.nz>
+	* fixes #3936 added a method of running a custom tool, to trigger puppet.
+
+2013-12-09	Ewoud Kohl van Wijngaarden <ewoud@kohlvanwijngaarden.nl>
+	* fixes #3833 - ship config.ru in RPMs for running under passenger
+
+2013-11-22	Dominic Cleal <dcleal@redhat.com>
+	* fixes #3712 - change develop versioning scheme to indicate next version
+
+2013-11-22	Francois Deppierraz <francois@ctrlaltdel.ch>
+	* fixes #3732 - Saltstack puppet provider, using 'salt host puppet.run'
+
+2013-11-20	Romain Vrignaud <rvrignaud@gmail.com>
+	* fixes #3699 - chefproxy feature, proxies facts and reports to Foreman
+
+2013-10-16	Greg Petras <greg.petras@nwea.org>
+	* fixes #3150 - adds ability to specify the user to invoke sudo as when calling mco/puppet kick
+
+2013-10-01	Aaron Stone <aaron@serendipity.cx>
+	* fixes #3173 - tell puppetca to use the configured ssl dir
+
+2013-09-08	Tomas Edwardsson <tommi@tommi.org>
+	* fixes #2870 - Always empty PXEClient on native_ms
+
+2013-09-08	Ohad Levy <ohadlevy@gmail.com>
+	* fixes #3048 - Add execution debug statement to the logs
+
+2013-09-08	Hannes Schaller <admin@cyberkov.at>
+	* fixes #3047 - added puppetrun over ssh support
+
+2013-09-05	Lukas Zapletal <lzap+git@redhat.com>
+	* Bump version to 1.3-develop
+
 2013-09-02	Jeremy Kitchen <kitchen@kitchen.io>
 	* fixes #3009 - add Proxy::Log to Proxy::DNS::Nsupdate class so 'logger.debug' works
 
