@@ -119,7 +119,7 @@ ln -sv %{_tmppath} %{buildroot}%{_datadir}/%{name}/tmp
 rm -rf %{buildroot}
 
 %files
-%doc README
+%doc README LICENSE
 %{_datadir}/%{name}
 %config(noreplace) %{_sysconfdir}/%{name}
 %config(noreplace) %{_sysconfdir}/logrotate.d/%{name}
