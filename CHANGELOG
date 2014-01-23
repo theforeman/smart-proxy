@@ -1,3 +1,9 @@
+2014-01-23	Dominic Cleal <dcleal@redhat.com>
+	* Release 1.4.0-RC2
+
+2014-01-23	Lukas Zapletal <lzap+git@redhat.com>
+	* fixes #4116 - added missing LICENSE file
+
 2014-01-16	Dominic Cleal <dcleal@redhat.com>
 	* Release 1.4.0-RC1
 
