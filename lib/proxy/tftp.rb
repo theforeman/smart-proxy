@@ -96,6 +96,7 @@ module Proxy::TFTP
   end
 
   class << self
+    include Proxy::Util
     def fetch_boot_file dst, src
       filename    = src.split("/")[-1]
       destination = Pathname.new("#{SETTINGS.tftproot}/#{dst}-#{filename}")
@@ -104,8 +105,9 @@ module Proxy::TFTP
       # as the dst might contain another sub directory
       FileUtils.mkdir_p destination.parent
 
-      cmd = "wget --timeout=10 --tries=3 --no-check-certificate -nv -c #{src} -O \"#{destination}\""
-      Proxy::Util::CommandTask.new(cmd)
+      wget = which("wget")
+      cmd = "#{wget} --timeout=10 --tries=3 --no-check-certificate -nv -c #{src} -O \"#{destination}\""
+      CommandTask.new(cmd)
     end
   end
 end
