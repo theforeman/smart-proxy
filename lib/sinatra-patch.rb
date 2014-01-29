@@ -17,8 +17,6 @@ module Sinatra
 
       puts "Starting Foreman Proxy on #{port} using #{handler_name}" unless handler_name =~/cgi/i
 
-      FileUtils.mkdir_p(File.join(APP_ROOT, 'tmp/pids'))
-
       # Create the PID's parent directory if it doesn't exist yet.
       if SETTINGS.daemon
         pid_path = SETTINGS.daemon_pid.gsub(/[^\/]+\/?$/, "")
@@ -28,6 +26,7 @@ module Sinatra
       if SETTINGS.daemon and PLATFORM !~ /mingw/
         Process.daemon(true)
         if SETTINGS.daemon_pid.nil?
+          FileUtils.mkdir_p(File.join(APP_ROOT, 'tmp/pids'))
           pid = "#{APP_ROOT}/tmp/pids/server.pid"
         else
           pid = "#{SETTINGS.daemon_pid}"
