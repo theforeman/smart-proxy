@@ -1,3 +1,9 @@
+2014-01-29	Dominic Cleal <dcleal@redhat.com>
+	* Release 1.4.0
+
+2014-01-29	Michael Moll <kvedulv@kvedulv.de>
+	* refs #3874 - add which to wget call
+
 2014-01-23	Dominic Cleal <dcleal@redhat.com>
 	* Release 1.4.0-RC2
 
