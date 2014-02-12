@@ -55,6 +55,9 @@
 # dhcp_subnets is a Native MS implementation setting. It restricts the subnets queried to a
 # subset, so as to reduce the query time.
 #:dhcp_subnets: [192.168.205.0/255.255.255.128, 192.168.205.128/255.255.255.128]
+# dhcp_cache_period is a Native MS implementation setting and sets the interval in seconds between DHCP option dumps. A
+# shorter period slows the whole system whilst a longer one will increase the possibility of using incorrrect data.
+:dhcp_cache_period: 300
 # Settings for Ubuntu ISC
 #:dhcp_config: /etc/dhcp3/dhcpd.conf
 #:dhcp_leases: /var/lib/dhcp3/dhcpd.leases

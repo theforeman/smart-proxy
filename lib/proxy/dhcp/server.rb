@@ -7,6 +7,7 @@ module Proxy::DHCP
     attr_reader :name
     alias_method :to_s, :name
 
+    include Proxy::DHCP::Fileop
     include Proxy::DHCP
     include Proxy::Log
     include Proxy::Validations

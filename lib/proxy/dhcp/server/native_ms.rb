@@ -9,6 +9,7 @@ module Proxy::DHCP
 
     def initialize(options = {})
       super options[:server]
+      @options_cache = {}
     end
 
     def delRecord subnet, record
@@ -23,6 +24,7 @@ module Proxy::DHCP
 
       execute(cmd, msg)
       subnet.delete(record)
+      clear_cache
     end
 
     def addRecord options={}
@@ -55,6 +57,7 @@ module Proxy::DHCP
         end
       end
 
+      clear_cache
       record
     end
 
@@ -129,7 +132,7 @@ module Proxy::DHCP
       cmd = "scope #{opts[:subnet].network} Show ReservedOptionValue #{opts[:ip]}"
       msg = "Queried #{opts[:ip]} options"
 
-      parse_options(execute(cmd, msg))
+      parse_options(opts[:ip])
     end
 
     def installVendorClass vendor_class
@@ -159,7 +162,7 @@ module Proxy::DHCP
       msg = "Enumerated the scopes on #{@name}"
 
       execute(cmd, msg).each do |line|
-        # 172.29.216.0   - 255.255.254.0  -Active        -DC BRS               -
+        # 192.29.216.0   - 255.255.254.0  -Active        -DC BRS               -
         if match = line.match(/^\s*([\d\.]+)\s*-\s*([\d\.]+)\s*-\s*(Active|Disabled)/)
           next if (managed_subnets = SETTINGS.dhcp_subnets) and !managed_subnets.include? "#{match[1]}/#{match[2]}"
 
@@ -168,8 +171,8 @@ module Proxy::DHCP
       end
     end
 
-    def execute cmd, msg=nil, error_only=false
-      tsecs = 5
+    def execute cmd, msg=nil, error_only=false, dumping=false
+      tsecs = 10
       response = nil
       interpreter = SETTINGS.x86_64 ? 'c:\windows\sysnative\cmd.exe' : 'c:\windows\system32\cmd.exe'
       command  = interpreter + ' /c c:\Windows\System32\netsh.exe -c dhcp ' + "server #{name} #{cmd}"
@@ -183,13 +186,13 @@ module Proxy::DHCP
           response += std_err.readlines
         end
       rescue TimeoutError
-        raise Proxy::DHCP::Error.new("Netsh did not respond within #{tsecs} seconds")
+        raise Proxy::DHCP::Error.new("'Netsh #{command}' did not respond within #{tsecs} seconds")
       ensure
         std_in.close  unless std_in.nil?
-        std_out.close unless std_in.nil?
-        std_err.close unless std_in.nil?
+        std_out.close unless std_out.nil?
+        std_err.close unless std_err.nil?
       end
-      report msg, response, error_only
+      report msg, response, error_only unless dumping
       response
     end
 
@@ -220,28 +223,46 @@ module Proxy::DHCP
       raise Proxy::DHCP::Error.new("Unknown error while processing '#{msg}'")
     end
 
-    def parse_options response
-      optionId = nil
-      options  = {}
-      response.each do |line|
-        line.chomp!
-        break if line.match(/^Command completed/)
+    def clear_cache
+      dump_file = "#{name}.dump"
+      open_file_and_lock dump_file
+      @file.close
+      File.delete @filename
+      File.delete @lockfile
+    end
 
-        case line
-        #TODO: this logic is broken, as the output reports only once the vendor type
-        # making it impossible to detect if its a standard option or a custom one.
-        when /For vendor class \[([^\]]+)\]:/
-          options[:vendor] = "<#{$1}>"
-        when /OptionId : (\d+)/
-          optionId = $1.to_i
-        when /Option Element Value = (\S+)/
-          #TODO move options to a class or something
-          opts = SUNW.update(Standard)
+    def parse_options ip
+      dump_file = "#{name}.dump"
+      dump = nil
+      if !File.exist?("#{Dir::tmpdir}/#{dump_file}") or Time.now > File.mtime("#{Dir::tmpdir}/#{dump_file}") + SETTINGS.dhcp_cache_period
+        dump = execute("dump", "dummy message", false, true)
+        open_file_and_lock dump_file
+        @file.write dump
+        @options_cache = {}
+      end
+      if @options_cache.empty?
+        if dump.nil?
+          open_file_and_lock dump_file, "r"
+          dump = read_file_and_unlock
+        else
+          @file.close
+          File.delete @lockfile
+        end
+        dump.each do |line|
+          # Dhcp Server \\192.29.216.54 Scope 192.29.216.0 set reservedoptionvalue
+          # 192.29.216.182 4 STRING vendor="Fire-V240" "/vol/s02/solgi_5.10/sol10_hw0910_sparc/Solaris_10/Tools/Boot"
+          next unless match = line.match(/^Dhcp.*?set reservedoptionvalue ([\d\.]+) (\d+) (\w+) (?:vendor="([^"]+)" )?"(.*?)"/)
+          options  = @options_cache[match[1]] || {}
+          optionId = match[2].to_i
+          options[:vendor] = "<#{match[4]}>" if match[4]
+          opts = match[4] ? SUNW : Standard
           title = opts.select {|k,v| v[:code] == optionId}.flatten[0]
           logger.debug "found option #{title}"
-          options[title] = $1
+          options[title] = match[5]
+          @options_cache[match[1]] = options
         end
       end
+      options = @options_cache[ip] || {}
       logger.debug options.inspect
       return options
     end

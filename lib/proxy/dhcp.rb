@@ -1,4 +1,5 @@
 module Proxy::DHCP
+  require "proxy/dhcp/fileop"
   require "proxy/dhcp/record"
   require "proxy/dhcp/record/lease"
   require "proxy/dhcp/record/reservation"
