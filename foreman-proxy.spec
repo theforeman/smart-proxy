@@ -40,6 +40,7 @@ Requires:       %{?scl_prefix}rubygem(rkerberos)
 Requires:       %{?scl_prefix}rubygem(rubyipmi)
 Requires:       sudo
 Requires:       wget
+Requires:       crontabs
 Requires(pre):  shadow-utils
 %if 0%{?rhel} == 6 || 0%{?fedora} < 17
 Requires(post): chkconfig
@@ -80,6 +81,7 @@ install -d -m0755 %{buildroot}%{_datadir}/%{name}/config
 install -d -m0755 %{buildroot}%{_sysconfdir}/%{name}
 install -d -m0755 %{buildroot}%{_localstatedir}/lib/%{name}
 install -d -m0750 %{buildroot}%{_localstatedir}/log/%{name}
+install -d -m0750 %{buildroot}%{_localstatedir}/spool/%{name}
 install -d -m0750 %{buildroot}%{_var}/run/%{name}
 
 %if 0%{?rhel} == 6 || 0%{?fedora} < 17
@@ -94,6 +96,7 @@ install -Dp -m0644 %{specdir}/logrotate.systemd %{buildroot}%{_sysconfdir}/logro
 
 cp -p -r bin lib Rakefile config.ru %{buildroot}%{_datadir}/%{name}
 chmod a+x %{buildroot}%{_datadir}/%{name}/bin/smart-proxy
+chmod a+x %{buildroot}%{_datadir}/%{name}/bin/smart-proxy-abrt-send
 rm -rf %{buildroot}%{_datadir}/%{name}/*.rb
 
 # remove all test units from productive release
@@ -102,6 +105,9 @@ find %{buildroot}%{_datadir}/%{name} -type d -name "test" |xargs rm -rf
 # Move config files to %{_sysconfdir}
 install -Dp -m0644 %{confdir}/settings.yml.example %{buildroot}%{_sysconfdir}/%{name}/settings.yml
 ln -sv %{_sysconfdir}/%{name}/settings.yml %{buildroot}%{_datadir}/%{name}/config/settings.yml
+
+# Cron file for smart-proxy-abrt-send
+install -Dp -m0640 %{specdir}/foreman-proxy-abrt-send.cron %{buildroot}%{_sysconfdir}/cron.d/%{name}
 
 # Put HTML %{_localstatedir}/lib/%{name}/public
 for x in public views; do
@@ -115,6 +121,9 @@ ln -sv %{_localstatedir}/log/%{name} %{buildroot}%{_datadir}/%{name}/logs
 # Link temp directory to system wide temp
 ln -sv %{_tmppath} %{buildroot}%{_datadir}/%{name}/tmp
 
+# Link spool directory to app root
+ln -sv %{_localstatedir}/spool/%{name} %{buildroot}%{_datadir}/%{name}/spool
+
 %clean
 rm -rf %{buildroot}
 
@@ -123,8 +132,10 @@ rm -rf %{buildroot}
 %{_datadir}/%{name}
 %config(noreplace) %{_sysconfdir}/%{name}
 %config(noreplace) %{_sysconfdir}/logrotate.d/%{name}
+%config(noreplace) %{_sysconfdir}/cron.d/%{name}
 %attr(-,%{name},%{name}) %{_localstatedir}/lib/%{name}
 %attr(-,%{name},%{name}) %{_localstatedir}/log/%{name}
+%attr(-,%{name},%{name}) %{_localstatedir}/spool/%{name}
 %attr(-,%{name},%{name}) %{_var}/run/%{name}
 %attr(-,%{name},root) %{_datadir}/%{name}/config.ru
 %if 0%{?rhel} == 6 || 0%{?fedora} < 17

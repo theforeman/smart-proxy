@@ -3,7 +3,7 @@ require 'net/https'
 require 'uri'
 
 
-module Proxy::ChefProxy
+module Proxy::Request
 
   class ForemanRequest
     def send_request(path, body)

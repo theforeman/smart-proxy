@@ -1,4 +1,4 @@
-require 'proxy/chefproxy'
+require 'proxy/request'
 require 'proxy/authentication'
 
 class SmartProxy
@@ -12,13 +12,13 @@ class SmartProxy
 
   post "/api/hosts/facts" do
     Proxy::Authentication::Chef.new.authenticated(request) do |content|
-      Proxy::ChefProxy::Facts.new.post_facts(content)
+      Proxy::Request::Facts.new.post_facts(content)
     end
   end
 
   post "/api/reports" do
     Proxy::Authentication::Chef.new.authenticated(request) do |content|
-      Proxy::ChefProxy::Reports.new.post_report(content)
+      Proxy::Request::Reports.new.post_report(content)
     end
   end
 end

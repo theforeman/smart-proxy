@@ -1,0 +1,2 @@
+# Send collected ABRT reports once every 10 minutes
+*/30 * * * * foreman-proxy /usr/share/foreman-proxy/bin/smart-proxy-abrt-send
