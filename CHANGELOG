@@ -1,3 +1,9 @@
+2014-02-19	Dominic Cleal <dcleal@redhat.com>
+	* Release 1.4.1
+
+2014-02-14	Martin Matuska <martin@matuska.org>
+	* Fixes #4215 smart-proxy needlessly creates tmp/pids directory
+
 2014-01-29	Dominic Cleal <dcleal@redhat.com>
 	* Release 1.4.0
 
