@@ -125,7 +125,7 @@ module Proxy::PuppetCA
       # Tell puppetca to use the ssl dir that Foreman has been told to use
       @puppetca << " --ssldir #{ssl_dir}"
 
-      use_rvmsudo == true ? @sudo = which("rvmsudo") : @sudo = which("sudo")
+      use_rvmsudo? == true ? @sudo = which("rvmsudo") : @sudo = which("sudo")
       unless File.exists?("#{@sudo}")
         logger.warn "unable to find sudo binary"
         raise "Unable to find sudo"
@@ -134,7 +134,7 @@ module Proxy::PuppetCA
 
     end
 
-    def use_rvmsudo
+    def use_rvmsudo?
       SETTINGS.use_rvmsudo || false
     end
 
