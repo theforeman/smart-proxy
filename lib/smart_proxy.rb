@@ -35,6 +35,7 @@ class SmartProxy < Sinatra::Base
   require "dhcp_api"      if SETTINGS.dhcp
   require "bmc_api"       if SETTINGS.bmc
   require "chefproxy_api" if SETTINGS.chefproxy
+  require "resolv"        if SETTINGS.trusted_hosts
 
   begin
     require "facter"
@@ -67,10 +68,17 @@ class SmartProxy < Sinatra::Base
 
   before do
     # If we are using certificates and we reach here then the peer is verified and cannot be spoofed. ALWAYS use certificates OR ELSE!!!
-    # If we are not using certificates then the hostname can be spoofed but this will still keep out most casual mischief.
-    if (SETTINGS.trusted_hosts and !SETTINGS.trusted_hosts.empty?) and
-      !SETTINGS.trusted_hosts.include?(request.env["REMOTE_HOST"].downcase)
-      log_halt 403, "Untrusted client #{request.env["REMOTE_HOST"].downcase} attempted to access #{request.path_info}. Check :trusted_hosts: in settings.yml"
+    # If we are not using certificates, and we've specified :trusted_hosts:, we'll check the reverse DNS entry of the remote IP, and ensure it's in our :trusted_hosts: array.
+    if (SETTINGS.trusted_hosts and !SETTINGS.trusted_hosts.empty?)
+      begin
+        remote_fqdn = Resolv.new.getname(request.env["REMOTE_ADDR"])
+      rescue Resolv::ResolvError => e
+        log_halt 403, "Unable to resolve hostname for connecting client - #{request.env["REMOTE_ADDR"]}. If it's to be a trusted host, ensure it has a reverse DNS entry."  +
+        "\n\n" + "#{e.message}"
+      end
+      if !SETTINGS.trusted_hosts.include?(remote_fqdn.downcase)
+        log_halt 403, "Untrusted client #{remote_fqdn.downcase} attempted to access #{request.path_info}. Check :trusted_hosts: in settings.yml"
+      end
     end
   end
 end
