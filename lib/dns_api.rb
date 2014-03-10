@@ -1,3 +1,5 @@
+require 'resolv'
+
 class SmartProxy
   def dns_setup(opts)
     raise "Smart Proxy is not configured to support DNS" unless SETTINGS.dns
@@ -34,6 +36,12 @@ class SmartProxy
     log_halt 400, e
   end
 
+  def get_rr_type record, type
+    Resolv::DNS.open do |dns|
+        dns.getresources record, type
+    end
+  end
+
   post "/dns/" do
     fqdn  = params[:fqdn]
     value = params[:value]
@@ -55,6 +63,9 @@ class SmartProxy
       value = params[:value]
     else
       fqdn = params[:value]
+      if not get_rr_type(fqdn, Resolv::DNS::Resource::IN::CNAME).empty?
+        type = 'CNAME'
+      end
     end
     begin
       dns_setup({:fqdn => fqdn, :value => value, :type => type})
