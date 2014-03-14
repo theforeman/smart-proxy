@@ -34,7 +34,7 @@ class PuppetEnvironmentTest < Test::Unit::TestCase
         :main => {},
         :production => { :modulepath=>'./test/fixtures/environments/prod' }
     }
-    Puppet.settings.stubs(:instance_variable_get).returns(config)
+    Proxy::Puppet::ConfigReader.any_instance.stubs(:get).returns(config)
     env = Proxy::Puppet::Environment.all
     assert_array_equal env.map { |e| e.name }, ['production']
   end
@@ -44,7 +44,7 @@ class PuppetEnvironmentTest < Test::Unit::TestCase
         :main => {},
         :master => { :modulepath=>'./test/fixtures/environments/prod' }
     }
-    Puppet.settings.stubs(:instance_variable_get).returns(config)
+    Proxy::Puppet::ConfigReader.any_instance.stubs(:get).returns(config)
     env = Proxy::Puppet::Environment.all
     assert_array_equal env.map { |e| e.name }, ['production']
   end
@@ -55,7 +55,7 @@ class PuppetEnvironmentTest < Test::Unit::TestCase
         :production  => { :modulepath=>'./test/fixtures/environments/prod' },
         :development => { :modulepath=>'./test/fixtures/environments/dev' }
     }
-    Puppet.settings.stubs(:instance_variable_get).returns(config)
+    Proxy::Puppet::ConfigReader.any_instance.stubs(:get).returns(config)
     env = Proxy::Puppet::Environment.all
     assert_array_equal env.map { |e| e.name }, ['development', 'production']
   end
@@ -65,7 +65,7 @@ class PuppetEnvironmentTest < Test::Unit::TestCase
         :main => {},
         :production  => { :modulepath=>'./test/fixtures/environments/dev:./test/fixtures/environments/prod' },
     }
-    Puppet.settings.stubs(:instance_variable_get).returns(config)
+    Proxy::Puppet::ConfigReader.any_instance.stubs(:get).returns(config)
     env = Proxy::Puppet::Environment.all
     assert_array_equal env.map { |e| e.name }, ['production']
     assert_array_equal env.first.classes.map { |c| c.name}, ['test','test2']
@@ -76,7 +76,7 @@ class PuppetEnvironmentTest < Test::Unit::TestCase
         :main => {},
         :master => { :modulepath=>'./test/fixtures/environments/$environment/' }
     }
-    Puppet.settings.stubs(:instance_variable_get).returns(config)
+    Proxy::Puppet::ConfigReader.any_instance.stubs(:get).returns(config)
     env = Proxy::Puppet::Environment.all
     assert_array_equal env.map { |e| e.name }, ['dev','prod']
     env_class_map = env.map { |e| [e.name, e.classes.map { |c| c.name }].flatten }
@@ -88,7 +88,7 @@ class PuppetEnvironmentTest < Test::Unit::TestCase
         :main => {},
         :master => { :modulepath=>'./test/fixtures/multi_module/$environment/modules1:./test/fixtures/multi_module/$environment/modules2' }
     }
-    Puppet.settings.stubs(:instance_variable_get).returns(config)
+    Proxy::Puppet::ConfigReader.any_instance.stubs(:get).returns(config)
     env = Proxy::Puppet::Environment.all
     assert_array_equal env.map { |e| e.name }, ['dev','prod']
     env_class_map = env.map { |e| [e.name, e.classes.map { |c| c.name }].flatten }
@@ -100,7 +100,7 @@ class PuppetEnvironmentTest < Test::Unit::TestCase
         :main => {},
         :master => { :modulepath=>'./test/fixtures/environments/prod:./test/fixtures/multi_module/$environment/modules1:./test/fixtures/multi_module/$environment/modules2' }
     }
-    Puppet.settings.stubs(:instance_variable_get).returns(config)
+    Proxy::Puppet::ConfigReader.any_instance.stubs(:get).returns(config)
     env = Proxy::Puppet::Environment.all
     assert_array_equal env.map { |e| e.name }, ['master','dev','prod']
     env_class_map = env.map { |e| [e.name, e.classes.map { |c| c.name }].flatten }
@@ -112,7 +112,7 @@ class PuppetEnvironmentTest < Test::Unit::TestCase
         :main => {},
         :master => { :modulepath=>'./test/fixtures/environments/$environment:./test/fixtures/modules_include' }
     }
-    Puppet.settings.stubs(:instance_variable_get).returns(config)
+    Proxy::Puppet::ConfigReader.any_instance.stubs(:get).returns(config)
     env = Proxy::Puppet::Environment.all
     assert_array_equal env.map { |e| e.name }, ['dev', 'prod', 'master']
   end
@@ -122,7 +122,7 @@ class PuppetEnvironmentTest < Test::Unit::TestCase
         :main => {},
         :master => { :modulepath=>'./no/such/$environment/modules:./test/fixtures/environments/prod' }
     }
-    Puppet.settings.stubs(:instance_variable_get).returns(config)
+    Proxy::Puppet::ConfigReader.any_instance.stubs(:get).returns(config)
     env = Proxy::Puppet::Environment.all
     assert_array_equal env.map { |e| e.name }, ['master']
   end

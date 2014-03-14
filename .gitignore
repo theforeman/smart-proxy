@@ -8,5 +8,5 @@ Gemfile.lock
 bundler.d/Gemfile.local.rb
 .rbenv*
 .rvmrc*
-.ruby-version
+.ruby-*
 .bundle
