@@ -54,14 +54,21 @@ module Proxy::Virsh
     raise Proxy::DNS::Error, "Failed to update DNS: #{e}"
   end
 
-  def virsh_update_dhcp command, mac, ip
+  def virsh_update_dhcp command, mac, ip, name
     mac = escape_for_shell(mac)
     ip = escape_for_shell(ip)
     net = escape_for_shell(network)
+
+    if name
+      name = escape_for_shell(name)
+      xml = "'<host mac=\"#{mac}\" name=\"#{name}\" ip=\"#{ip}\"/>'"
+    else
+      xml = "'<host mac=\"#{mac}\" ip=\"#{ip}\"/>'"
+    end
+
     virsh "net-update", net, command, "ip-dhcp-host",
-      "--xml", "'<host mac=\"#{mac}\" ip=\"#{ip}\"/>'",
-      "--live", "--config"
+      "--xml", xml, "--live", "--config"
   rescue Exception => e
-    raise Proxy::DHCP::Error, "Failed to update DNS: #{e}"
+    raise Proxy::DHCP::Error, "Failed to update DHCP: #{e}"
   end
 end
