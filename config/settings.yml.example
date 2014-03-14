@@ -12,7 +12,13 @@
 #:trusted_hosts:
 #- foreman.prod.domain
 #- foreman.dev.domain
+# Following is needed for communication with foreman initiated by the proxy.
 #:foreman_url: http://127.0.0.1:3000
+# SSL settings for client authentication against foreman. In most cases, these
+# will be the same as the ssl_* settings above.
+#:foreman_ssl_ca: ssl/certs/ca.pem
+#:foreman_ssl_cert: ssl/certs/fqdn.pem
+#:foreman_ssl_key: ssl/private_keys/fqdn.pem
 
 # enable the daemon to run in the background
 :daemon: true
@@ -112,6 +118,16 @@
 # in order to retrive all nodes public keys
 # :chef_smartproxy_clientname: 'host.example.net'
 # :chef_smartproxy_privatekey: '/etc/chef/client.pem'
+
+# enable ABRT uReport forwarding
+:abrtproxy: false
+# FAF server instance the reports will be forwarded to (optional)
+#:abrt_server_url: https://retrace.fedoraproject.org/faf
+# Set to true if FAF server uses self-signed certificate
+#:abrt_server_ssl_noverify: true
+# Following two options enable client authentication to FAF server
+#:abrt_server_ssl_cert: /etc/foreman-proxy/faf_client_cert.pem
+#:abrt_server_ssl_key: /etc/foreman-proxy/faf_cleint_key.pem
 
 # enable BMC management  (Bare metal power and bios controls)
 # Available providers:

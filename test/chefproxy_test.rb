@@ -1,5 +1,5 @@
 require 'test_helper'
-require 'proxy/chefproxy'
+require 'proxy/request'
 require 'webmock/test_unit'
 
 class ChefProxyTest < Test::Unit::TestCase
@@ -12,7 +12,7 @@ class ChefProxyTest < Test::Unit::TestCase
   def test_post_facts
     facts = {'fact' => "sample"}
     stub_request(:post,@foreman_url+'/api/hosts/facts')
-    result = Proxy::ChefProxy::Facts.new.post_facts(facts)
+    result = Proxy::Request::Facts.new.post_facts(facts)
 
     assert(result.is_a? Net::HTTPOK)
   end
@@ -20,7 +20,7 @@ class ChefProxyTest < Test::Unit::TestCase
   def test_post_reports
     report = {'report' => "sample"}
     stub_request(:post,@foreman_url+'/api/reports')
-    result = Proxy::ChefProxy::Reports.new.post_report(report)
+    result = Proxy::Request::Reports.new.post_report(report)
 
     assert(result.is_a? Net::HTTPOK)
   end
