@@ -74,6 +74,8 @@
 :puppetca: false
 #:ssldir: /var/lib/puppet/ssl
 #:puppetdir: /etc/puppet
+#:puppetca_use_sudo: true
+#:sudo_command: /usr/bin/sudo
 
 # enable Puppet management
 :puppet: false

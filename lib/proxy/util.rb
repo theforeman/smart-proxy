@@ -46,6 +46,12 @@ module Proxy::Util
     end
   end
 
+  # convert setting to boolean (with a default value)
+  def to_bool(value, default = false)
+    return default if value.nil?
+    !!(value =~ /^(true|t|yes|y|1)$/i)
+  end
+
   # searches for binaries in predefined directories and user PATH
   # accepts a binary name and an array of paths to search first
   # if path is omitted will search only in user PATH
