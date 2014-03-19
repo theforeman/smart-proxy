@@ -23,7 +23,7 @@ module Proxy::Puppet
 
       def puppet_environments
         Initializer.load
-        conf = ConfigReader.new(Puppet[:config]).get
+        conf = ConfigReader.new(Initializer.config).get
 
         env = { }
         # query for the environments variable
@@ -124,7 +124,7 @@ module Proxy::Puppet
 
     def classes
       Initializer.load
-      conf = ConfigReader.new(Puppet[:config]).get
+      conf = ConfigReader.new(Initializer.config).get
       eparser = conf[:master] && conf[:master][:parser] == 'future'
 
       paths.map {|path| PuppetClass.scan_directory path, eparser}.flatten
