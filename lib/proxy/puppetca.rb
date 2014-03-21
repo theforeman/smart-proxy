@@ -71,7 +71,7 @@ module Proxy::PuppetCA
     # list of all certificates and their state/fingerprint
     def list
       find_puppetca
-      command = "#{@sudo} -S #{@puppetca} --list --all"
+      command = "#{@sudo} #{@puppetca} --list --all"
       logger.debug "Executing #{command}"
       response = `#{command}`
       unless $? == 0
@@ -125,13 +125,17 @@ module Proxy::PuppetCA
       # Tell puppetca to use the ssl dir that Foreman has been told to use
       @puppetca << " --ssldir #{ssl_dir}"
 
-      @sudo = which("sudo")
-      unless File.exists?("#{@sudo}")
-        logger.warn "unable to find sudo binary"
-        raise "Unable to find sudo"
+      if to_bool(SETTINGS.puppetca_use_sudo, true)
+        @sudo = SETTINGS.sudo_command || which("sudo")
+        unless File.exists?(@sudo)
+          logger.warn "unable to find sudo binary"
+          raise "Unable to find sudo"
+        end
+        logger.debug "Found sudo at #{@sudo}"
+        @sudo = "#{@sudo} -S"
+      else
+        @sudo = ""
       end
-      logger.debug "Found sudo at #{@sudo}"
-
     end
 
     def ssldir
@@ -188,7 +192,7 @@ module Proxy::PuppetCA
       raise "Invalid mode #{mode}" unless mode =~ /^(clean|sign)$/
       find_puppetca
       certname.downcase!
-      command = "#{@sudo} -S #{@puppetca} --#{mode} #{certname}"
+      command = "#{@sudo} #{@puppetca} --#{mode} #{certname}"
       logger.debug "Executing #{command}"
       response = `#{command} 2>&1`
       if $?.success?

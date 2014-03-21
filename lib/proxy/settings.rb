@@ -26,6 +26,6 @@ class Settings < OpenStruct
   end
 
   def method_missing(symbol, *args)
-    false
+    nil
   end
 end
