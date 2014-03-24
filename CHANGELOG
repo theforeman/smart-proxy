@@ -1,3 +1,10 @@
+2014-03-24	Dominic Cleal <dcleal@redhat.com>
+	* Release 1.4.2
+	* fixes #4686 - don't rely on Puppet[:config] to store config file location
+
+2014-03-17	Dominic Cleal <dcleal@redhat.com>
+	* fixes #4658 - parse puppet.conf with augeas instead of puppet internals
+
 2014-02-19	Dominic Cleal <dcleal@redhat.com>
 	* Release 1.4.1
 
