@@ -1,6 +1,7 @@
 require 'test_helper'
 
 class ProxyUtilTest < Test::Unit::TestCase
+  class UtilClass; extend Proxy::Util; end
 
   def test_util_should_support_path
     assert Proxy::Util.instance_methods.include? RUBY_VERSION =~ /^1\.8/ ? "which" : :which
@@ -27,5 +28,9 @@ class ProxyUtilTest < Test::Unit::TestCase
     # return code is not correct in Ruby<1.9 for open3 (http://redmine.ruby-lang.org/issues/show/1287)
     # ruby 1.9 seems to return nil for $? in open3
     assert_equal t.join, RUBY_VERSION =~ /1\.8\.\d+/  ? 0 : nil
+  end
+
+  def test_strict_encode64
+    assert_equal "YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWE=", UtilClass.strict_encode64("a"*50)
   end
 end

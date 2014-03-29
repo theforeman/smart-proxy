@@ -38,6 +38,7 @@ Requires:       %{?scl_prefix}rubygem(sinatra)
 Requires:       %{?scl_prefix}rubygem(json)
 Requires:       %{?scl_prefix}rubygem(rkerberos)
 Requires:       %{?scl_prefix}rubygem(rubyipmi)
+Requires:       %{?scl_prefix}rubygem(gssapi)
 Requires:       sudo
 Requires:       wget
 Requires(pre):  shadow-utils
