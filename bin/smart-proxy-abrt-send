@@ -1,0 +1,78 @@
+#!/usr/bin/env ruby
+
+$LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
+
+require 'fileutils'
+require 'json'
+require 'smart_proxy'
+require "daemon" unless PLATFORM =~ /mingw/
+
+exit unless SETTINGS.abrtproxy == true
+
+# Override the log location
+SETTINGS.log_file = SETTINGS.abrt_log_file
+include Proxy::Log
+
+if !SETTINGS.foreman_url
+  logger.error "Foreman URL not configured"
+  exit false
+end
+
+begin
+  require 'satyr' if SETTINGS.abrt_aggregate_reports
+rescue LoadError
+  logger.error "The satyr gem required for report aggregation was not found. "\
+               "You need to either install it or disable the aggregation."
+end
+
+def send_reports_from_spool
+  reports_by_host = {}
+
+  # load reports from disk
+  reports = Proxy::AbrtProxy::HostReport.load_from_spool
+
+  # aggregate reports by host and by duplication hash if possible
+  reports.each do |report|
+    if reports_by_host.has_key? report.host
+      begin
+        reports_by_host[report.host].merge report
+      rescue StandardError => e
+        logger.error "Failed to merge #{report.files[0]} " \
+                     "into #{reports_by_host[report.host].files}: #{e}"
+      end
+    else
+      reports_by_host[report.host] = report
+    end
+  end
+
+  # send reports
+  reports_by_host.each_value do |hr|
+    begin
+      hr.send_to_foreman
+    rescue StandardError => e
+      logger.error "Unable to forward to Foreman server: #{e}"
+      next
+    end
+    begin
+      hr.unlink
+    rescue StandardError => e
+      logger.error "Cannot delete #{hr.files}: #{e}"
+    end
+  end
+end
+
+if ARGV[0] == "--daemon"
+  if PLATFORM =~ /mingw/
+    puts "Daemon mode is not supported on Windows."
+    exit false
+  end
+  Process.daemon true
+
+  sleep_interval = SETTINGS.abrt_send_period || 600
+  loop do
+    send_reports_from_spool
+    sleep sleep_interval
+  end
+else
+  send_reports_from_spool
+end
