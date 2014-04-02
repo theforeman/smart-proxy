@@ -1,0 +1,26 @@
+require 'puppet/runner'
+
+class Proxy::Puppet::PuppetRun < ::Proxy::Puppet::Runner
+  def run
+    # Search in /opt/ for puppet enterprise users
+    default_path = "/opt/puppet/bin"
+    # search for puppet for users using puppet 2.6+
+    cmd = []
+    cmd.push(which("sudo"))
+
+    if Proxy::Puppet::Plugin.settings.puppet_user
+      cmd.push("-u", Proxy::Puppet::Plugin.settings.puppet_user)
+    end
+
+    cmd.push(which("puppetrun", default_path) || which("puppet", default_path))
+
+    if cmd.include?(false)
+      logger.warn "sudo or puppetrun binary was not found - aborting"
+      return false
+    end
+
+    # Append kick to the puppet command if we are not using the old puppetca command
+    cmd.push("kick") if cmd.any? { |part| part.end_with?('puppet') }
+    shell_command(cmd + (shell_escaped_nodes.map {|n| ["--host", n] }).flatten)
+  end
+end

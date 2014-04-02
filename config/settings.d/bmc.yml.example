@@ -1,0 +1,6 @@
+---
+:enabled: false
+# Available providers:
+# - freeipmi / ipmitool - requires the appropriate package installed, and the rubyipmi gem
+# - shell - for local reboot control (requires sudo access to /sbin/shutdown for the proxy user)
+#:bmc_default_provider: freeipmi

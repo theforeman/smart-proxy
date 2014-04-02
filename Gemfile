@@ -1,7 +1,7 @@
 source 'http://rubygems.org'
 
 gem 'json'
-gem 'sinatra', '< 1.4.3'
+gem 'sinatra'
 
 Dir["#{File.dirname(__FILE__)}/bundler.d/*.rb"].each do |bundle|
  # puts "adding custom gem file #{bundle}"

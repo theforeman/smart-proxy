@@ -1,0 +1,8 @@
+---
+:enabled: false
+# :chef_authenticate_nodes: true
+# :chef_server_url: "https://chef.example.net"
+# smart-proxy client node needs to have some admin right on chef-server
+# in order to retrive all nodes public keys
+# :chef_smartproxy_clientname: 'host.example.net'
+# :chef_smartproxy_privatekey: '/etc/chef/client.pem'

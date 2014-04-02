@@ -1,0 +1,28 @@
+---
+:enabled: false
+# valid providers:
+#   puppetrun   (for puppetrun/kick, deprecated in Puppet 3)
+#   mcollective (uses mco puppet)
+#   puppetssh   (run puppet over ssh)
+#   salt        (uses salt puppet.run)
+#   customrun   (calls a custom command with args)
+#:puppet_provider: puppetrun
+
+# Customrun command details
+# Set :customrun_cmd to the full path of the script you want to run, instead of /bin/false
+:customrun_cmd: /bin/false
+# Set :customrun_args to any args you want to pass to your custom script. The hostname of the
+# system to run against will be appended after the custom commands.
+:customrun_args: -ay -f -s
+
+:puppet_conf: /etc/puppet/puppet.conf
+# whether to use sudo before the ssh command
+:puppetssh_sudo: false
+# the command which will be sent to the host
+:puppetssh_command: /usr/bin/puppet agent --onetime --no-usecacheonfailure
+# With which user should the proxy connect
+#:puppetssh_user: root
+#:puppetssh_keyfile: /etc/foreman-proxy/id_rsa
+
+# Which user to invoke sudo as to run puppet commands
+#:puppet_user: root

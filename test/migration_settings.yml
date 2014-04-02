@@ -1,0 +1,55 @@
+---
+# File for testing settings, has most things enabled and comments stripped
+#
+:ssl_ca_file: /var/lib/puppet/ssl/certs/ca.pem
+:ssl_certificate: /var/lib/puppet/ssl/certs/foo.bar.example.com.pem
+:ssl_private_key: /var/lib/puppet/ssl/private_keys/foo.bar.example.com.org.pem
+
+:trusted_hosts:
+- foreman.prod.domain
+- foreman.dev.domain
+
+:daemon: true
+:daemon_pid: /var/run/foreman-proxy/foreman-proxy.pid
+:port: 8443
+
+:tftp: true
+:tftproot: /srv/tftp
+:tftp_servername: 192.168.122.1
+
+:dns: true
+:dns_key: /etc/bind/rndc.key
+:dns_server: 127.0.0.1
+
+:dhcp: true
+:dhcp_vendor: isc
+:dhcp_config: /etc/dhcp3/dhcpd.conf
+:dhcp_leases: /var/lib/dhcp3/dhcpd.leases
+
+:puppetca: true
+:ssldir: /var/lib/puppet/ssl
+:puppetdir: /etc/puppet
+
+:puppet: true
+:puppet_conf: /etc/puppet/puppet.conf
+
+:bmc: true
+:bmc_default_provider: ipmitool
+
+:chefproxy: true
+:chef_authenticate_nodes: true
+:chef_server_url: "https://foreman.example.com"
+:chef_smartproxy_clientname: 'foreman_proxy'
+:chef_smartproxy_privatekey: '/etc/chef/foreman_proxy.pem'
+
+:realm: true
+:realm_provider: freeipa
+:realm_keytab: /etc/foreman-proxy/freeipa.keytab
+:realm_principal: realm-proxy@IPA.FM.EXAMPLE.NET
+:freeipa_remove_dns: true
+
+:log_file: /var/log/foreman-proxy/proxy.log
+:log_level: DEBUG
+
+# deliberate unknown option
+:foo: bar

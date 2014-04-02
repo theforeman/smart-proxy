@@ -1,31 +1,23 @@
-require "checks"
 require "yaml"
 require "ostruct"
 require "pathname"
 
-require 'proxy/dns/default_dns_settings'
-require 'proxy/puppet/default_puppet_settings'
+module Proxy::Settings
+  extend ::Proxy::Log
 
-class Settings < OpenStruct
-  DEFAULTS = [Proxy::DNS::DefaultSettings::DEFAULTS, Proxy::Puppet::DefaultSettings::DEFAULTS].inject({}) do |all, current|
-    all.merge!(current)
+  SETTINGS_PATH = Pathname.new(__FILE__).join("..","..","..","config","settings.yml")
+
+  def self.load_global_settings(settings_path = nil)
+    ::Proxy::Settings::Global.new(YAML.load(File.read(settings_path || SETTINGS_PATH)))
   end
 
-  def self.load_from_file(settings_path = Pathname.new(__FILE__).join("..", "..","..","config","settings.yml"))
-    settings = YAML.load(File.read(settings_path))
-    if PLATFORM =~ /mingw/
-      settings.delete :puppetca if settings.has_key? :puppetca
-      settings.delete :puppet   if settings.has_key? :puppet
-      settings[:x86_64] = File.exist?('c:\windows\sysnative\cmd.exe')
+  def self.load_plugin_settings(defaults, settings_file, settings_directory = nil)
+    settings = {}
+    begin
+      settings = YAML.load(File.read(File.join(settings_directory || ::Proxy::SETTINGS.settings_directory, settings_file)))
+    rescue Errno::ENOENT => e
+      logger.warn("Couldn't find settings file #{settings_directory || ::Proxy::SETTINGS.settings_directory}/#{settings_file}. Using default settings.")
     end
-    load(settings)
-  end
-
-  def self.load(ahash)
-    Settings.new(DEFAULTS.merge(ahash))
-  end
-
-  def method_missing(symbol, *args)
-    nil
+    ::Proxy::Settings::Plugin.new(defaults, settings)
   end
 end

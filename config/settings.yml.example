@@ -1,145 +1,40 @@
 ---
 # SSL Setup
-
 # If enabled, all communication would be verified via SSL
 # NOTE that both certificates need to be signed by the same CA in order for this to work
 # see http://theforeman.org/projects/smart-proxy/wiki/SSL for more information
 #:ssl_certificate: ssl/certs/fqdn.pem
 #:ssl_ca_file: ssl/certs/ca.pem
 #:ssl_private_key: ssl/private_keys/fqdn.key
-# the hosts which the proxy accepts connections from
+
+# Hosts which the proxy accepts connections from
 # commenting the following lines would mean every verified SSL connection allowed
 #:trusted_hosts:
 #- foreman.prod.domain
 #- foreman.dev.domain
+
 #:foreman_url: http://127.0.0.1:3000
 
-# Enable the daemon to run in the background
-:daemon: true
-:daemon_pid: /var/run/foreman-proxy/foreman-proxy.pid
+# by default smart_proxy runs in the foreground. To enable running as a daemon, uncomment 'daemon' setting
+#:daemon: true
+# Only used when 'daemon' is set to true.
+# Uncomment and modify if you want to change the default pid file '/var/run/foreman-proxy/foreman-proxy.pid'
+#:daemon_pid: /var/run/foreman-proxy/foreman-proxy.pid
 
-# Port used by the proxy
-:port: 8443
-
-# Enable TFTP management
-:tftp: false
-:tftproot: /var/lib/tftpboot
-# Defines the TFTP Servername to use, overrides the name in the subnet declaration
-#:tftp_servername: tftp.domain.com
-
-# Enable DNS management
-:dns: false
-# valid providers:
-#   dnscmd (Microsoft Windows native implementation)
-#   nsupdate
-#   nsupdate_gss (for GSS-TSIG support)
-#   virsh (simple implementation for libvirt)
-:dns_provider: nsupdate
-#:dns_key: /etc/rndc.key
-# use this setting if you are managing a dns server which is not localhost though this proxy
-#:dns_server: dns.domain.com
-# use this setting if you want to override default TTL setting (86400)
-#:dns_ttl: 86400
-# use dns_tsig_* for GSS-TSIG updates using Kerberos.  Required for Windows MS DNS with
-# Secure Dynamic Updates, or BIND as used in FreeIPA.  Set dns_provider to nsupdate_gss.
-#:dns_tsig_keytab: /usr/share/foreman-proxy/dns.keytab
-#:dns_tsig_principal: DNS/host.example.com@EXAMPLE.COM
-
-# Enable DHCP management
-:dhcp: false
-# valid vendors:
-#   - isc
-#   - native_ms (Microsoft native implementation)
-#   - virsh (simple implementation for libvirt)
-:dhcp_vendor: isc
-# dhcp_subnets is an ISC &  Native MS implementation setting. It restricts the subnets queried to a
-# subset, so as to reduce the query time.
-#:dhcp_subnets: [192.168.205.0/255.255.255.128, 192.168.205.128/255.255.255.128]
-# Settings for Ubuntu ISC
-#:dhcp_config: /etc/dhcp3/dhcpd.conf
-#:dhcp_leases: /var/lib/dhcp3/dhcpd.leases
-# Settings for Redhat ISC
-# Redhat 5
-#:dhcp_config: /etc/dhcpd.conf
-# Redhat 6
-#:dhcp_config: /etc/dhcp/dhcpd.conf
-#:dhcp_leases: /var/lib/dhcpd/dhcpd.leases
-#:dhcp_key_name: secret_key_name
-#:dhcp_key_secret: secret_key
+# HTTP ports configuration
+# http is disabled by default. To enable, uncomment 'http_port' setting
+#:http_port: 8000
+# https is enabled if certificate, CA certificate, and private key are present in locations specifed by
+# ssl_certificate, ssl_ca_file, and ssl_private_key correspondingly
+# default values for https_port is 8443
+#:https_port: 8443
 
 # Shared options for virsh DNS/DHCP provider
 :virsh_network: default
 
-# Enable PuppetCA management
-:puppetca: false
-#:ssldir: /var/lib/puppet/ssl
-#:puppetdir: /etc/puppet
-#:puppetca_use_sudo: true
-#:sudo_command: /usr/bin/sudo
-
-# Enable Puppet management
-:puppet: false
-# valid providers:
-#   puppetrun   (for puppetrun/kick, deprecated in Puppet 3)
-#   mcollective (uses mco puppet)
-#   puppetssh   (run puppet over ssh)
-#   salt        (uses salt puppet.run)
-#   customrun   (calls a custom command with args)
-:puppet_provider: puppetrun
-
-# Customrun command details
-# Set :customrun_cmd to the full path of the script you want to run, instead of /bin/false
-:customrun_cmd: /bin/false
-# Set :customrun_args to any args you want to pass to your custom script. The hostname of the
-# system to run against will be appended after the custom commands.
-:customrun_args: -ay -f -s
-
-:puppet_conf: /etc/puppet/puppet.conf
-# whether to use sudo before the ssh command
-:puppetssh_sudo: false
-# the command which will be sent to the host
-:puppetssh_command: /usr/bin/puppet agent --onetime --no-usecacheonfailure
-# With which user should the proxy connect
-#:puppetssh_user: root
-#:puppetssh_keyfile: /etc/foreman-proxy/id_rsa
-
-# Which user to invoke sudo as to run puppet commands
-#:puppet_user: root
-
-# Enable Chef management
-:chefproxy: false
-# :chef_authenticate_nodes: true
-# :chef_server_url: "https://chef.example.net"
-# smart-proxy client node needs to have some admin right on chef-server
-# in order to retrive all nodes public keys
-# :chef_smartproxy_clientname: 'host.example.net'
-# :chef_smartproxy_privatekey: '/etc/chef/client.pem'
-
-# enable BMC management  (Bare metal power and bios controls)
-# Available providers:
-# - freeipmi / ipmitool - requires the appropriate package installed, and the rubyipmi gem
-# - shell - for local reboot control (requires sudo access to /sbin/shutdown for the proxy user)
-:bmc: false
-#:bmc_default_provider: freeipmi
-
-# Manage joining realms e.g. FreeIPA
-:realm: false
-
-# Available providers:
-#   freeipa
-:realm_provider: freeipa
-
-# Authentication for Kerberos-based Realms
-:realm_keytab: /etc/foreman-proxy/freeipa.keytab
-:realm_principal: realm-proxy@EXAMPLE.COM
-
-# FreeIPA specific settings
-# Remove from DNS when deleting the FreeIPA entry
-:freeipa_remove_dns: true
-
-# Where our proxy log files are stored
-# filename or STDOUT
-:log_file: /var/log/foreman-proxy/proxy.log
-# valid options are
+# Log configuration
+# Uncomment and modify if you want to change the location of the log file or use STDOUT
+#:log_file: /var/log/foreman-proxy/proxy.log
+# Uncomment and modify if you want to change the log level
 # WARN, DEBUG, ERROR, FATAL, INFO, UNKNOWN
-:log_level: ERROR
+#:log_level: ERROR

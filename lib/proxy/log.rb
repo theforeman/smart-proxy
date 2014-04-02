@@ -1,18 +1,32 @@
-module Proxy::Log
-  @@logger = nil
-  def logger
-    return @@logger if @@logger
+require 'logger'
 
-    # If we are running as a library in a rails app then use the provided logger
-    if defined?(RAILS_DEFAULT_LOGGER)
-      @@logger = RAILS_DEFAULT_LOGGER
-    else
-      # We must make our own ruby based logger if we are a standalone proxy server
-      require 'logger'
-      # We keep the last 6 10MB log files
-      @@logger = Logger.new(SETTINGS.log_file, 6, 1024*1024*10)
-      @@logger.level = Logger.const_get(SETTINGS.log_level.upcase) if SETTINGS.log_level
+Logger.class_eval { alias_method :write, :'<<' } # ::Rack::CommonLogger expects loggers to implement 'write' method
+
+module Proxy
+  module Log
+    @@logger = nil
+
+    def logger
+      return @@logger if @@logger
+      @@logger = ::Proxy::Log.logger
     end
-    @@logger
+
+    def self.logger
+      # We keep the last 6 10MB log files
+      logger = ::Logger.new(::Proxy::SETTINGS.log_file, 6, 1024*1024*10)
+      logger.level = ::Logger.const_get(::Proxy::SETTINGS.log_level.upcase)
+      logger
+    end
+  end
+
+  class LoggerMiddleware
+    def initialize(app)
+      @app = app
+    end
+
+    def call(env)
+      env['rack.logger'] = ::Proxy::Log.logger
+      @app.call(env)
+    end
   end
 end
