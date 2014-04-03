@@ -30,6 +30,8 @@ class SmartProxy < Sinatra::Base
     begin
       content_type :json
       @realm.delete params[:realm], params[:hostname]
+    rescue Proxy::Realm::NotFound => e
+      log halt 404, "#{e}"
     rescue Exception => e
       log_halt 400, e
     end

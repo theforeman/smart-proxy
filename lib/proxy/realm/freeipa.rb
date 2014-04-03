@@ -60,6 +60,16 @@ module Proxy::Realm
       raise Proxy::Realm::Error.new "Unknown realm #{realm}" unless realm.casecmp(@realm_name).zero?
     end
 
+    def find hostname 
+      @ipa.call("host_show", [hostname])
+    rescue XMLRPC::FaultException => e
+      if e.message =~ /not found/
+        nil
+      else
+        raise
+      end
+    end
+
     def create realm, params
       check_realm realm
 
@@ -71,20 +81,20 @@ module Proxy::Realm
       end
 
       # Determine if we're updating a host or creating a new one
-      if @ipa.call("host_find", [params[:hostname]])["count"].zero?
+      host = find params[:hostname]
+      if host.nil?
         options.merge!(:random => 1, :force => 1)
         operation = "host_add"
       else
-        # If the host is being rebuilt, disable it in order to revoke existing certs, keytabs, etc.
         if params[:rebuild] == "true"
-          begin
+          options.merge!(:random => 1)
+          # If the host is being rebuilt and is already enrolled, then
+          # disable it in order to revoke existing certs, keytabs, etc.
+          if host["result"]["has_keytab"]
             logger.info "Attempting to disable host #{params[:hostname]} in FreeIPA"
             @ipa.call("host_disable", [params[:hostname]])
-          rescue => e
-            logger.info "Disabling failed for host #{params[:hostname]}: #{e}.  Continuing anyway."
           end
         end
-        options.merge!(:random => 1)
         operation = "host_mod"
       end
 
@@ -103,7 +113,19 @@ module Proxy::Realm
 
     def delete realm, hostname
       check_realm realm
-      JSON.pretty_generate(@ipa.call("host_del", [hostname], {"updatedns" => SETTINGS.freeipa_remove_dns}))
+      raise Proxy::Realm::NotFound, "Host #{hostname} not found in realm!" unless find hostname
+      begin
+        result = @ipa.call("host_del", [hostname], {"updatedns" => SETTINGS.freeipa_remove_dns})
+      rescue => e
+        if SETTINGS.freeipa_remove_dns
+          # If the host doesn't have a DNS record (e.g. deleting a system in Foreman before it's built)
+          # the above call will fail.  Try again with updatedns => false
+          result = @ipa.call("host_del", [hostname], {"updatedns" => false})
+        else
+          raise
+        end
+      end  
+      JSON.pretty_generate(result)
     end
   end
 end
