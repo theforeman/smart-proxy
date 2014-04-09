@@ -155,11 +155,11 @@ module Proxy::DHCP
           stored_index = get_index_and_lock("foreman-proxy_#{network}_#{cidr}.tmp")
 
           free_ips.rotate(stored_index).each do |ip|
-            logger.debug "Searching for free ip - pinging #{ip}"
+            logger.debug "Searching for free IP - pinging #{ip}"
             if tcp_pingable?(ip) or icmp_pingable?(ip)
               logger.info "Found a pingable IP(#{ip}) address which does not have a Proxy::DHCP record"
             else
-              logger.debug "Found free ip #{ip} out of a total of #{free_ips.size} free ips"
+              logger.debug "Found free IP #{ip} out of a total of #{free_ips.size} free IPs"
               @index = free_ips.index(ip)+1
               return ip
             end
@@ -177,7 +177,7 @@ module Proxy::DHCP
 
     def delete record
       if @records.delete_if{|k,v| v == record}.nil?
-        raise Proxy::DHCP::Error, "Removing a Proxy::DHCP Record which doesn't exists"
+        raise Proxy::DHCP::Error, "Removing a Proxy::DHCP Record which doesn't exist"
       end
     end
 
@@ -187,7 +187,7 @@ module Proxy::DHCP
         raise Proxy::DHCP::Error, "Range does not belong to provided subnet" unless self.include?(from) and self.include?(to)
         from = IPAddr.new(from)
         to   = IPAddr.new(to)
-        raise Proxy::DHCP::Error, "#{from} can't be lower IP adderss then #{to} - chage the order?" if from > to
+        raise Proxy::DHCP::Error, "#{from} can't be lower IP address then #{to} - change the order?" if from > to
         from..to
       else
         IPAddr.new(to_s).to_range
