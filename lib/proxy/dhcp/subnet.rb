@@ -139,7 +139,7 @@ module Proxy::DHCP
     def unused_ip args = {}
       # first check if we already have a record for this host
       # if we do, we can simply reuse the same ip address.
-      if args[:mac] and r=has_mac?(args[:mac])
+      if args[:mac] and r=has_mac?(args[:mac]) and valid_range(args).include?(r.ip)
         logger.debug "Found an existing dhcp record #{r}, reusing..."
         return r.ip
       end
