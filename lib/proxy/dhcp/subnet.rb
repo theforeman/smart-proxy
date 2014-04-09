@@ -177,7 +177,7 @@ module Proxy::DHCP
 
     def delete record
       if @records.delete_if{|k,v| v == record}.nil?
-        raise Proxy::DHCP::Error, "Removing a Proxy::DHCP Record which doesn't exists"
+        raise Proxy::DHCP::Error, "Removing a Proxy::DHCP Record which doesn't exist"
       end
     end
 
@@ -187,7 +187,7 @@ module Proxy::DHCP
         raise Proxy::DHCP::Error, "Range does not belong to provided subnet" unless self.include?(from) and self.include?(to)
         from = IPAddr.new(from)
         to   = IPAddr.new(to)
-        raise Proxy::DHCP::Error, "#{from} can't be lower IP adderss then #{to} - chage the order?" if from > to
+        raise Proxy::DHCP::Error, "#{from} can't be lower IP address than #{to} - change the order?" if from > to
         from..to
       else
         IPAddr.new(to_s).to_range
