@@ -177,7 +177,7 @@ module Proxy::DHCP
 
     def delete record
       if @records.delete_if{|k,v| v == record}.nil?
-        raise Proxy::DHCP::Error, "Removing a Proxy::DHCP Record which doesn't exists"
+        raise Proxy::DHCP::Error, "Removing a Proxy::DHCP Record which doesn't exist"
       end
     end
 
