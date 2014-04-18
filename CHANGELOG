@@ -1,3 +1,41 @@
+2014-04-17	Dominic Cleal <dcleal@redhat.com>
+	* Release 1.5.0-RC1
+
+2014-04-10	Matt Jarvis <matt.jarvis@datacentred.co.uk>
+	* fixes #5123 - corrected string typos
+
+2014-04-10	Sean Handley <sean.handley@gmail.com>
+	* fixes #5123 - IP only from the same subnet and range
+
+2014-04-02	Lukas Zapletal <lzap+git@redhat.com>
+	* fixes #5019 - puppet cert sudo command now configurable and optional
+
+2014-04-02	Stephen Benjamin <stephen@bitbin.de>
+	* fixes #1809 - freeipa integration to smartproxy
+
+2014-03-21	Dominic Cleal <dcleal@redhat.com>
+	* fixes #4686 - don't rely on Puppet[:config] to store config file location
+
+2014-03-21	Riley Shott <rileyshott@gmail.com>
+	* Fixes #2259 - trusted hosts work with passenger
+
+2014-03-14	Dominic Cleal <dcleal@redhat.com>
+	* fixes #4661 - store hostname with virsh DHCP reservations
+	* fixes #4660 - stub omshell during DHCP tests
+	* fixes #4658 - parse puppet.conf with augeas instead of puppet internals
+
+2014-02-04	Martin Matuska <martin@matuska.org>
+	* Fixes #4215 smart-proxy needlessly creates tmp/pids directory
+
+2014-01-29	Michael Moll <kvedulv@kvedulv.de>
+	* refs #3874 - add which to wget call
+
+2014-01-22	Lukas Zapletal <lzap+git@redhat.com>
+	* fixes #4116 - added missing LICENSE file
+
+2014-01-16	Dominic Cleal <dcleal@redhat.com>
+	* Bump version to 1.5-develop
+
 2014-01-16	Marek Hulan <mhulan@redhat.com>
 	* refs #3699 - combine paths when running Foreman under a prefix
 
