@@ -1,7 +1,7 @@
 ---
 # SSL Setup
 
-# if enabled, all communication would be verfied via SSL
+# If enabled, all communication would be verified via SSL
 # NOTE that both certificates need to be signed by the same CA in order for this to work
 # see http://theforeman.org/projects/smart-proxy/wiki/SSL for more information
 #:ssl_certificate: ssl/certs/fqdn.pem
@@ -14,11 +14,11 @@
 #- foreman.dev.domain
 #:foreman_url: http://127.0.0.1:3000
 
-# enable the daemon to run in the background
+# Enable the daemon to run in the background
 :daemon: true
 :daemon_pid: /var/run/foreman-proxy/foreman-proxy.pid
 
-# port used by the proxy
+# Port used by the proxy
 :port: 8443
 
 # Enable TFTP management
@@ -67,17 +67,17 @@
 #:dhcp_key_name: secret_key_name
 #:dhcp_key_secret: secret_key
 
-# shared options for virsh DNS/DHCP provider
+# Shared options for virsh DNS/DHCP provider
 :virsh_network: default
 
-# enable PuppetCA management
+# Enable PuppetCA management
 :puppetca: false
 #:ssldir: /var/lib/puppet/ssl
 #:puppetdir: /etc/puppet
 #:puppetca_use_sudo: true
 #:sudo_command: /usr/bin/sudo
 
-# enable Puppet management
+# Enable Puppet management
 :puppet: false
 # valid providers:
 #   puppetrun   (for puppetrun/kick, deprecated in Puppet 3)
@@ -87,7 +87,7 @@
 #   customrun   (calls a custom command with args)
 :puppet_provider: puppetrun
 
-# customrun command details
+# Customrun command details
 # Set :customrun_cmd to the full path of the script you want to run, instead of /bin/false
 :customrun_cmd: /bin/false
 # Set :customrun_args to any args you want to pass to your custom script. The hostname of the
@@ -106,7 +106,7 @@
 # Which user to invoke sudo as to run puppet commands
 #:puppet_user: root
 
-# enable Chef management
+# Enable Chef management
 :chefproxy: false
 # :chef_authenticate_nodes: true
 # :chef_server_url: "https://chef.example.net"
