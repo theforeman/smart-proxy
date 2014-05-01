@@ -38,6 +38,30 @@ class PuppetEnvironmentTest < Test::Unit::TestCase
     Proxy::Puppet::Environment.send(:puppet_environments)
   end
 
+  def test_classes_calls_scan_directory
+    Proxy::Puppet::ConfigReader.any_instance.stubs(:get).returns({})
+    env = Proxy::Puppet::Environment.new(:name => 'production', :paths => ['/etc/puppet/modules', '/etc/puppet/production'])
+    Proxy::Puppet::PuppetClass.expects(:scan_directory).with('/etc/puppet/modules', nil)
+    Proxy::Puppet::PuppetClass.expects(:scan_directory).with('/etc/puppet/production', nil)
+    env.classes
+  end
+
+  def test_classes_calls_scan_directory_with_eparser_master
+    Proxy::Puppet::ConfigReader.any_instance.stubs(:get).returns({:master => {:parser => 'future'}})
+    env = Proxy::Puppet::Environment.new(:name => 'production', :paths => ['/etc/puppet/modules', '/etc/puppet/production'])
+    Proxy::Puppet::PuppetClass.expects(:scan_directory).with('/etc/puppet/modules', true)
+    Proxy::Puppet::PuppetClass.expects(:scan_directory).with('/etc/puppet/production', true)
+    env.classes
+  end
+
+  def test_classes_calls_scan_directory_with_eparser_main
+    Proxy::Puppet::ConfigReader.any_instance.stubs(:get).returns({:main => {:parser => 'future'}})
+    env = Proxy::Puppet::Environment.new(:name => 'production', :paths => ['/etc/puppet/modules', '/etc/puppet/production'])
+    Proxy::Puppet::PuppetClass.expects(:scan_directory).with('/etc/puppet/modules', true)
+    Proxy::Puppet::PuppetClass.expects(:scan_directory).with('/etc/puppet/production', true)
+    env.classes
+  end
+
   def test_single_static_env
     config = {
         :main => {},
