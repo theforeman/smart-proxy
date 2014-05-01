@@ -72,6 +72,12 @@ if Puppet::PUPPETVERSION.to_f >= 3.2
         end
       end
 
+      def find_Program o
+        if o.body
+          do_find(o.body)
+        end
+      end
+
       def find_Object o
         #puts "Unhandled object:#{o}"
       end
@@ -115,7 +121,7 @@ if Puppet::PUPPETVERSION.to_f >= 3.2
               ast_to_value_new value.expr
             when Puppet::Pops::Model::VariableExpression
               "${#{ast_to_value_new value.expr}}"
-            when Puppet::Pops::Model::TypeReference
+            when (Puppet::Pops::Model::TypeReference rescue nil)
               value.value
             when Puppet::Pops::Model::LiteralUndef
               ""
