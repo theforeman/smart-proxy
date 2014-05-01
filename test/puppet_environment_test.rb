@@ -32,9 +32,9 @@ class PuppetEnvironmentTest < Test::Unit::TestCase
   def test_uses_puppet_config
     config_reader = mock('config')
     config_reader.expects(:get).returns({:main => {}, :master => {}})
+    Proxy::Puppet::Initializer.expects(:load)
     Proxy::Puppet::Initializer.expects(:config).returns('/foo/puppet.conf').at_least_once
     Proxy::Puppet::ConfigReader.expects(:new).with('/foo/puppet.conf').returns(config_reader)
-    File.expects(:exist?).with('/foo/puppet.conf').returns(true).at_least_once
     Proxy::Puppet::Environment.send(:puppet_environments)
   end
 
