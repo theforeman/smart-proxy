@@ -37,6 +37,7 @@ class SmartProxy < Sinatra::Base
   require "chefproxy_api" if SETTINGS.chefproxy
   require "resolv"        if SETTINGS.trusted_hosts
   require "realm_api"     if SETTINGS.realm
+  require "pulp_api"      if SETTINGS.pulp
 
   begin
     require "facter"
