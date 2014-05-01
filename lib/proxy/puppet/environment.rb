@@ -125,7 +125,7 @@ module Proxy::Puppet
     def classes
       Initializer.load
       conf = ConfigReader.new(Initializer.config).get
-      eparser = conf[:master] && conf[:master][:parser] == 'future'
+      eparser = (conf[:main] && conf[:main][:parser] == 'future') || (conf[:master] && conf[:master][:parser] == 'future')
 
       paths.map {|path| PuppetClass.scan_directory path, eparser}.flatten
     end
