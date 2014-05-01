@@ -28,4 +28,17 @@ class PuppetClassTest < Test::Unit::TestCase
     klass = Proxy::Puppet::PuppetClass.new "foreman_proxy::install"
     assert_kind_of Proxy::Puppet::PuppetClass, klass
   end
+
+  def test_scan_directory_loads_scanner
+    Proxy::Puppet::Initializer.expects(:load)
+    Proxy::Puppet::ClassScanner.expects(:scan_directory).with('/foo')
+    Proxy::Puppet::PuppetClass.scan_directory('/foo', nil)
+  end
+
+  def test_scan_directory_loads_eparser_scanner
+    return unless Puppet::PUPPETVERSION.to_f >= 3.2
+    Proxy::Puppet::Initializer.expects(:load)
+    Proxy::Puppet::ClassScannerEParser.expects(:scan_directory).with('/foo')
+    Proxy::Puppet::PuppetClass.scan_directory('/foo', true)
+  end
 end
