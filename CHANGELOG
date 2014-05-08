@@ -1,3 +1,7 @@
+2014-05-08	Dominic Cleal <dcleal@redhat.com>
+	* Release 1.4.4
+	* fixes #5239 - update for Puppet 3.5 future parser changes
+
 2014-03-24	Dominic Cleal <dcleal@redhat.com>
 	* Release 1.4.2
 	* fixes #4686 - don't rely on Puppet[:config] to store config file location
