@@ -33,8 +33,8 @@ class PuppetSshTest < Test::Unit::TestCase
     @puppetssh.stubs(:which).with("sudo", anything).returns("/usr/bin/sudo")
     @puppetssh.stubs(:which).with("ssh", anything).returns("/usr/bin/ssh")
 
-    @puppetssh.expects(:shell_command).with(["/usr/bin/ssh", "-i /root/.ssh/id_rsa", "host1", "/bin/true"], false).returns(true)
-    @puppetssh.expects(:shell_command).with(["/usr/bin/ssh", "-i /root/.ssh/id_rsa", "host2", "/bin/true"], false).returns(true)
+    @puppetssh.expects(:shell_command).with(["/usr/bin/ssh", "-i", "/root/.ssh/id_rsa", "host1", "/bin/true"], false).returns(true)
+    @puppetssh.expects(:shell_command).with(["/usr/bin/ssh", "-i", "/root/.ssh/id_rsa", "host2", "/bin/true"], false).returns(true)
     assert @puppetssh.run
   end
 
@@ -56,8 +56,8 @@ class PuppetSshTest < Test::Unit::TestCase
     @puppetssh.stubs(:which).with("sudo", anything).returns("/usr/bin/sudo")
     @puppetssh.stubs(:which).with("ssh", anything).returns("/usr/bin/ssh")
 
-    @puppetssh.expects(:shell_command).with(["/usr/bin/ssh", "-l root", "host1", "/bin/true"], false).returns(true)
-    @puppetssh.expects(:shell_command).with(["/usr/bin/ssh", "-l root", "host2", "/bin/true"], false).returns(true)
+    @puppetssh.expects(:shell_command).with(["/usr/bin/ssh", "-l", "root", "host1", "/bin/true"], false).returns(true)
+    @puppetssh.expects(:shell_command).with(["/usr/bin/ssh", "-l", "root", "host2", "/bin/true"], false).returns(true)
     assert @puppetssh.run
   end
 
