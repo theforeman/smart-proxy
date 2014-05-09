@@ -6,6 +6,7 @@ class DHCPServerTest < Test::Unit::TestCase
   def setup
     @server = Proxy::DHCP::Server.new("testcase")
     @subnet = Proxy::DHCP::Subnet.new(@server, "192.168.0.0", "255.255.255.0")
+    @subnet.load
     @record = Proxy::DHCP::Record.new(:subnet => @subnet, :ip => "192.168.0.11", :mac => "aa:bb:cc:dd:ee:ff")
   end
 
