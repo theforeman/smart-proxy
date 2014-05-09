@@ -22,7 +22,7 @@ module Proxy::DHCP
       @network   = validate_ip network
       @netmask   = validate_ip netmask
       @options   = {}
-      @records   = {}
+      @records   = []
       @timestamp = Time.now
       @loaded    = false
       raise Proxy::DHCP::Error, "Unable to Add Subnet" unless @server.add_subnet(self)
@@ -46,7 +46,7 @@ module Proxy::DHCP
     end
 
     def clear
-      @records = {}
+      @records = []
       @loaded  = false
     end
 
@@ -55,7 +55,7 @@ module Proxy::DHCP
     end
 
     def size
-      records.size
+      @records.size
     end
 
     def load
@@ -73,7 +73,7 @@ module Proxy::DHCP
 
     def records
       self.load if not loaded?
-      @records.values
+      @records
     end
 
     def [] record
@@ -91,23 +91,23 @@ module Proxy::DHCP
     end
 
     def has_mac? mac
-      records.each {|r| return r if r.mac == mac.downcase }
+      r = records.reverse_each {|r| return r if r.mac == mac.downcase}
       return false
     end
 
     def has_ip? ip
-      @records[ip] ? @records[ip] : false
+      r = records.reverse_each {|r| return r if r.ip == ip}
+      return false
     end
 
     # adds a record to a subnet
     def add_record record
-      unless has_mac?(record.mac) or has_ip?(record.ip)
-        @records[record.ip] = record
-        logger.debug "Added #{record} to #{to_s}"
-        return true
-      end
-      logger.warn "Record #{record} already exists in #{to_s} - can't add again"
-      return false
+      # Record all leases, since the definition of a duplicate depends on whether we
+      # are searching by ip or mac. Arrays have fixed sort order so we can rely on this
+      # being the order they were read from the file
+      @records.push record
+      logger.debug "Added #{record} to #{to_s}"
+      return true
     end
 
     def get_index_and_lock filename
@@ -176,7 +176,7 @@ module Proxy::DHCP
     end
 
     def delete record
-      if @records.delete_if{|k,v| v == record}.nil?
+      if @records.delete(record).nil?
         raise Proxy::DHCP::Error, "Removing a Proxy::DHCP Record which doesn't exist"
       end
     end

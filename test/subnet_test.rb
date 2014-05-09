@@ -8,6 +8,7 @@ class Proxy::DHCPSubnetTest < Test::Unit::TestCase
     @netmask = "255.255.255.0"
     @server = Proxy::DHCP::Server.new("testcase")
     @subnet = Proxy::DHCP::Subnet.new @server, @network, @netmask
+    @subnet.load
   end
 
   def test_subnet_should_have_a_server
@@ -67,27 +68,16 @@ class Proxy::DHCPSubnetTest < Test::Unit::TestCase
     assert_equal @subnet.range, "192.168.0.1-192.168.0.254"
   end
 
-  def add_record
-    ip = "192.168.0.50"
-    mac = "aa:bb:cc:dd:ee:Ff"
-    @subnet.add_record Proxy::DHCP::Record.new(:subnet =>@subnet, :ip => ip, :mac => mac)
+  def add_record opts = {}
+    ip = opts[:ip] || "192.168.0.50"
+    mac = opts[:mac] || "aa:bb:cc:dd:ee:ff"
+    Proxy::DHCP::Record.new(:subnet =>@subnet, :ip => ip, :mac => mac)
   end
 
   def test_should_add_records
     counter = @subnet.size
     add_record
     assert_equal @subnet.size, counter+1
-  end
-
-  def test_should_not_import_the_same_record_twice
-    begin
-      add_record
-    rescue
-       nil
-    end
-    counter = @subnet.size
-    add_record
-    assert_equal @subnet.size, counter
   end
 
   def test_should_clear_records
@@ -106,6 +96,11 @@ class Proxy::DHCPSubnetTest < Test::Unit::TestCase
   def test_it_should_be_possible_to_find_subnet_record_based_on_ip
     add_record
     assert_kind_of Proxy::DHCP::Record, @subnet["192.168.0.50"]
+  end
+
+  def test_it_should_be_possible_to_find_subnet_record_based_on_mac
+    add_record
+    assert_kind_of Proxy::DHCP::Record, @subnet["aa:bb:cc:dd:ee:ff"]
   end
 
   def test_should_remove_records
