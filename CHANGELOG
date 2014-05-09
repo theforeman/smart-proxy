@@ -1,3 +1,13 @@
+2014-05-09	Dominic Cleal <dcleal@redhat.com>
+	* Release 1.5.0
+
+2014-05-09	Alyssa Hardy <alyssa@marketo.com>
+	* fixes #5561 pass arguments correctly in run puppet over ssh
+
+2014-05-08	Dominic Cleal <dcleal@redhat.com>
+	* fixes #5522 - future parser can be set in puppet.conf [main]
+	* fixes #5239 - update for Puppet 3.5 future parser changes
+
 2014-04-28	Dominic Cleal <dcleal@redhat.com>
 	* Release 1.5.0-RC2
 
