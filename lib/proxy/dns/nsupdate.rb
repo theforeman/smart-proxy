@@ -9,7 +9,7 @@ module Proxy::DNS
     attr_reader :resolver
 
     def initialize options = {}
-      raise "Unable to find Key file - check your dns_key settings" unless SETTINGS.dns_key == false or File.exists?(SETTINGS.dns_key)
+      raise "Unable to find Key file - check your dns_key settings" unless SETTINGS.dns_key.nil? or File.exists?(SETTINGS.dns_key)
       super(options)
     end
 
