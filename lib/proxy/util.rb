@@ -49,6 +49,7 @@ module Proxy::Util
   # convert setting to boolean (with a default value)
   def to_bool(value, default = false)
     return default if value.nil?
+    return value if value.is_a?(TrueClass) || value.is_a?(FalseClass)
     !!(value =~ /^(true|t|yes|y|1)$/i)
   end
 
