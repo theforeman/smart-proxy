@@ -45,4 +45,13 @@ class ProxyUtilTest < Test::Unit::TestCase
   def test_to_bool_default_true
     assert UtilClass.to_bool(nil, true)
   end
+
+  def test_to_bool_true_bool
+    assert UtilClass.to_bool true
+  end
+
+  def test_to_bool_false_bool
+    assert UtilClass.to_bool(false) == false
+  end
+
 end
