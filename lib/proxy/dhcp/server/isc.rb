@@ -92,6 +92,8 @@ module Proxy::DHCP
       super
       @config.each_line do |line|
         if line =~ /^\s*subnet\s+([\d\.]+)\s+netmask\s+([\d\.]+)/
+          next if (managed_subnets = SETTINGS.dhcp_subnets) and !managed_subnets.include? "#{$1}/#{$2}"
+
           Proxy::DHCP::Subnet.new(self, $1, $2)
         end
       end
