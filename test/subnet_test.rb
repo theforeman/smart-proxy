@@ -103,6 +103,18 @@ class Proxy::DHCPSubnetTest < Test::Unit::TestCase
     assert_kind_of Proxy::DHCP::Record, @subnet["aa:bb:cc:dd:ee:ff"]
   end
 
+  def test_it_should_be_possible_to_find_subnet_reservations_when_subsequent_records_exist
+    Proxy::DHCP::Reservation.new(:subnet =>@subnet, :ip => '192.168.0.50', :mac => 'aa:bb:cc:dd:ee:ff', :hostname => "foo.com")
+    add_record
+    assert_equal 'reservation', @subnet.reservation_for("aa:bb:cc:dd:ee:ff").kind
+  end
+
+  def test_it_should_be_possible_to_find_subnet_leases_when_subsequent_records_exist
+    Proxy::DHCP::Lease.new(:subnet =>@subnet, :ip => '192.168.0.50', :mac => 'aa:bb:cc:dd:ee:ff', :state => "active")
+    add_record
+    assert_equal 'lease', @subnet.lease_for("aa:bb:cc:dd:ee:ff").kind
+  end
+
   def test_should_remove_records
     add_record
     counter = @subnet.size
@@ -129,7 +141,7 @@ class Proxy::DHCPSubnetTest < Test::Unit::TestCase
     @subnet.stubs(:icmp_pingable?)
     @subnet.stubs(:tcp_pingable?)
     params = {:mac => '0', :from => '192.168.0.1', :to => '192.168.0.30'}
-    assert_not_equal '192.168.0.250', @subnet.unused_ip(params)  
+    assert_not_equal '192.168.0.250', @subnet.unused_ip(params)
   end
 
 end
