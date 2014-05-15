@@ -77,26 +77,30 @@ module Proxy::DHCP
     end
 
     def [] record
-      self.load if not loaded?
-      begin
-        return has_mac?(record) if validate_mac(record)
-      rescue
-        nil
-      end
-      begin
-        return has_ip?(record) if validate_ip(record)
-      rescue
-        nil
-      end
+      records_for record, :all
     end
 
-    def has_mac? mac
-      r = records.reverse_each {|r| return r if r.mac == mac.downcase}
+    def has_mac? mac, type
+      r = case type
+          when :reservation
+            reservations
+          when :lease
+            leases
+          else
+            records
+          end.reverse_each {|r| return r if r.mac == mac.downcase}
       return false
     end
 
-    def has_ip? ip
-      r = records.reverse_each {|r| return r if r.ip == ip}
+    def has_ip? ip, type
+      r = case type
+          when :reservation
+            reservations
+          when :lease
+            leases
+          else
+            records
+          end.reverse_each {|r| return r if r.ip == ip}
       return false
     end
 
@@ -205,6 +209,20 @@ module Proxy::DHCP
 
     def leases
       records.collect{|r| r if r.kind == "lease"}.compact
+    end
+
+    def records_for record, type
+      self.load if not loaded?
+      return has_mac?(record, type) if (validate_mac(record) rescue nil)
+      return has_ip?(record, type)  if (validate_ip(record) rescue nil)
+    end
+
+    def reservation_for record
+      records_for record, :reservation
+    end
+
+    def lease_for record
+      records_for record, :lease
     end
 
     def <=> other
