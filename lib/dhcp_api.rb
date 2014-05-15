@@ -104,7 +104,7 @@ class SmartProxy < Sinatra::Base
   # delete a record from a network
   delete "/dhcp/:network/:record" do
     begin
-      record = load_subnet[params[:record]]
+      record = load_subnet.reservation_for(params[:record])
       log_halt 404, "Record #{params[:network]}/#{params[:record]} not found" unless record
       @server.delRecord @subnet, record
       if request.accept? 'application/json'
