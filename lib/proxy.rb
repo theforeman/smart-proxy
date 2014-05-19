@@ -1,6 +1,6 @@
 module Proxy
   MODULES = %w{dns dhcp tftp puppetca puppet bmc chefproxy realm}
-  VERSION = "1.6-develop"
+  VERSION = File.read(File.join(File.dirname(__FILE__), '../VERSION')).chomp
 
   require "checks"
   require "proxy/settings"

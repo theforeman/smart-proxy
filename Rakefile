@@ -5,6 +5,7 @@ require 'rdoc/task'
 require 'rubygems/package_task'
 load 'tasks/proxy_tasks.rake'
 load 'tasks/jenkins.rake'
+load 'tasks/pkg.rake'
 
 # Test for 1.9
 if (RUBY_VERSION.split('.').map{|s|s.to_i} <=> [1,9,0]) > 0 then

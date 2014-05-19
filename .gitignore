@@ -10,3 +10,4 @@ bundler.d/Gemfile.local.rb
 .rvmrc*
 .ruby-*
 .bundle
+pkg/
