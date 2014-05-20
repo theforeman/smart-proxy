@@ -137,6 +137,10 @@
 # Remove from DNS when deleting the FreeIPA entry
 :freeipa_remove_dns: true
 
+# Pulp settings
+:pulp: false
+:pulp_url: http://localhost/pulp
+
 # Where our proxy log files are stored
 # filename or STDOUT
 :log_file: /var/log/foreman-proxy/proxy.log
