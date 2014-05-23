@@ -20,11 +20,7 @@ module Proxy::Puppet
         logger.info "Initializing from Puppet config file: #{config}"
 
         if Puppet::PUPPETVERSION.to_i >= 3
-          # Initializing Puppet directly and not via the Faces API, so indicate
-          # the run mode to parse [master].  Don't use --run_mode=master or
-          # bug #17492 is hit and Puppet can't parse it.
-          Puppet.settings.initialize_global_settings(['--config', config, '--run_mode', 'master'])
-          Puppet.settings.initialize_app_defaults(Puppet::Settings.app_defaults_for_run_mode(Puppet::Util::RunMode['master']))
+          Puppet.initialize_settings
         else
           Puppet.parse_config
         end
