@@ -96,4 +96,10 @@ class ProxyMigrationTest < Test::Unit::TestCase
     assert_nil output[:settings][:https_port]
   end
 
+  def test_migration_idempotence
+    output2, unknown2 = migrate(@output[:settings].dup)
+    # Matches the test used inside the script for its exit value
+    assert_equal @output[:settings], output2[:settings]
+  end
+
 end
