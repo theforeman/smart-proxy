@@ -20,7 +20,12 @@ module Proxy::Puppet
         return false
       end
 
-      ssh_command = escape_for_shell(SETTINGS.puppetssh_command || 'puppet agent --onetime --no-usecacheonfailure')
+
+      ssh_command = begin
+        command = SETTINGS.puppetssh_command || 'puppet agent --onetime --no-usecacheonfailure'
+        (RUBY_VERSION <= '1.8.7') ? escape_for_shell(command) : command
+      end
+
       nodes.each do |node|
         shell_command(cmd + [escape_for_shell(node), ssh_command], false)
       end

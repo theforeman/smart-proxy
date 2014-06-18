@@ -39,7 +39,7 @@ module Proxy::Puppet
 
     def popen(cmd)
       # 1.8.7 note: this assumes that cli options are space-separated
-      cmd = cmd.join(' ') unless RUBY_VERSION > '1.8.7'
+      cmd = cmd.join(' ') if RUBY_VERSION <= '1.8.7'
       logger.debug("about to execute: #{cmd}")
       IO.popen(cmd)
     end
