@@ -21,7 +21,7 @@ module Proxy::DHCP
         line.chomp
         break if line.match(/^Command completed/)
 
-        # 172.29.216.0   - 255.255.254.0  -Active        -DC BRS               -
+        # 192.29.216.0   - 255.255.254.0  -Active        -DC BRS               -
         if line =~ /^\s*([\d\.]+)\s*-\s*([\d\.]+)\s*-\s*(Active|Disabled)/
           network = $1
           netmask = $2
@@ -43,7 +43,7 @@ module Proxy::DHCP
       response.each do |line|
         line.chomp
         break if line.match(/^Command completed/)
-        #     172.29.216.6      -    00-a0-e7-21-41-00-
+        #     192.29.216.6      -    00-a0-e7-21-41-00-
         if line =~ /^\s+([\w\.]+)\s+-\s+([-a-f\d]+)/
           ip = $1
           mac = $2.gsub(/-/,":").match(/^(.*?).$/)[1]

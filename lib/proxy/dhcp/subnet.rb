@@ -14,6 +14,7 @@ module Proxy::DHCP
     attr_accessor :options
 
     include Proxy::DHCP
+    include Proxy::DHCP::Fileop
     include Proxy::Log
     include Proxy::Validations
 
@@ -112,30 +113,6 @@ module Proxy::DHCP
       @records.push record
       logger.debug "Added #{record} to #{to_s}"
       return true
-    end
-
-    def get_index_and_lock filename
-      # Store for use in the unlock method
-      @filename = "#{Dir::tmpdir}/#{filename}"
-      @lockfile = "#{@filename}.lock"
-
-      # Loop if the file is locked
-      Timeout::timeout(30) { sleep 0.1 while File.exists? @lockfile }
-
-      # Touch the lock the file
-      File.open(@lockfile, "w") {}
-
-      @file = File.new(@filename,'r+') rescue File.new(@filename,'w+')
-
-      # this returns the index in the file
-      return @file.readlines.first.to_i rescue 0
-    end
-
-    def set_index_and_unlock index
-      @file.reopen(@filename,'w')
-      @file.write index
-      @file.close
-      File.delete @lockfile
     end
 
     # returns the next unused IP Address in a subnet
