@@ -33,6 +33,8 @@ module Proxy::DNS
           else
             nsupdate "update add #{@value}.  #{@ttl} IN #{@type} #{@fqdn}"
           end
+        when "CNAME"
+          nsupdate "update add #{@fqdn}.  #{@ttl} #{@type} #{@value}"
       end
       nsupdate "disconnect"
     ensure
@@ -43,7 +45,7 @@ module Proxy::DNS
     def remove
       nsupdate "connect"
       case @type
-      when "A"
+      when "A", "CNAME"
         nsupdate "update delete #{@fqdn} #{@type}"
       when "PTR"
         nsupdate "update delete #{@value} #{@type}"
