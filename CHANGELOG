@@ -1,3 +1,21 @@
+2014-06-18	Dominic Cleal <dcleal@redhat.com>
+	* Release 1.5.1
+
+2014-06-18	Greg Sutcliffe <gsutclif@redhat.com>
+	* Fixes #6086 - stop remote command execution and path exploit in TFTP API (CVE-2014-0007)
+
+2014-06-10	Jimmi Dyson <jimmi.dyson@specsavers.com>
+	* Fixes #5712: Limit DHCP subnets for ISC if necessary
+
+2014-06-10	Dominic Cleal <dcleal@redhat.com>
+	* fixes #5856 - use public initializer for Puppet settings
+	* fixes #5677 - handle booleans from settings.yml as bools
+
+2014-06-10	Greg Sutcliffe <gsutclif@redhat.com>
+	* Fixes #5907 - Look at all records when suggesting IPs
+	* Fixes #5739 - Only look at reservations when deleting a DHCP record
+	* Fixes #5648 - Match the DHCP specification of last-lease-wins
+
 2014-05-09	Dominic Cleal <dcleal@redhat.com>
 	* Release 1.5.0
 
