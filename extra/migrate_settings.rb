@@ -25,6 +25,8 @@ def known_options
     :virsh_network      => :settings,
     :foreman_url        => :settings,
     :settings_directory => :settings,
+    :http_port          => :settings,
+    :https_port         => :settings,
     :puppetca_use_sudo  => :puppetca,
     :puppetdir          => :puppetca,
     :ssldir             => :puppetca,
@@ -97,8 +99,8 @@ if __FILE__ == $0 then
   orig_file = ARGV[0] || '/etc/foreman-proxy/settings.yml'
   data      = YAML.load_file(orig_file)
 
-  output,unknown = migrate(data)
-  exit(1) if data == output[:settings] # it looks like we already have the new style settings 
+  output,unknown = migrate(data.dup)
+  exit(1) if data == output[:settings] # it looks like we already have the new style settings
   write_to_files(output,unknown)
   exit(0)
 end
