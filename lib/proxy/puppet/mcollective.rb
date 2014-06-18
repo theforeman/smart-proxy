@@ -4,10 +4,12 @@ module Proxy::Puppet
   class MCollective < Runner
     def run
       cmd = []
-      cmd.push(which("sudo"))
+      unless ENV['USER'] == SETTINGS.puppet_user
+        cmd.push(which("sudo"))
 
-      if SETTINGS.puppet_user
-        cmd.push("-u", SETTINGS.puppet_user)
+        if SETTINGS.puppet_user
+          cmd.push("-u", SETTINGS.puppet_user)
+        end
       end
 
       cmd.push(which("mco", "/opt/puppet/bin"))
