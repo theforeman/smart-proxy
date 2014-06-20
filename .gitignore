@@ -1,6 +1,7 @@
 tags
 .idea/
 config/settings.yml
+config/settings.d/*.yml
 .idea
 logs
 *swp
