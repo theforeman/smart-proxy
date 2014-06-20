@@ -106,6 +106,17 @@
 # Which user to invoke sudo as to run puppet commands
 #:puppet_user: root
 
+# URL of the puppet master itself for API requests
+#:puppet_url: https://puppet.example.com:8140
+# SSL certificates used to access the puppet master API
+#:puppet_ssl_ca: /var/lib/puppet/ssl/certs/ca.pem
+#:puppet_ssl_cert: /var/lib/puppet/ssl/certs/puppet.example.com.pem
+#:puppet_ssl_key: /var/lib/puppet/ssl/private_keys/puppet.example.com.pem
+
+# Override use of Puppet's API to list environments, by default it will use only if
+# environmentpath is given in puppet.conf, else will look for environments in puppet.conf
+#:puppet_use_environment_api: true
+
 # enable Chef management
 :chefproxy: false
 # :chef_authenticate_nodes: true

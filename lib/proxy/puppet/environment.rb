@@ -3,15 +3,26 @@ module Proxy::Puppet
   require 'proxy/puppet/initializer'
   require 'proxy/puppet/config_reader'
   require 'proxy/puppet/puppet_class'
+  require 'proxy/puppet/api_request'
+  require 'proxy/util'
   require 'puppet'
 
   class Environment
     extend Proxy::Log
 
     class << self
+      include Proxy::Util
+
       # return a list of all puppet environments
       def all
-        puppet_environments.map { |env, path| new(:name => env, :paths => path.split(":")) }
+        Proxy::Puppet::Initializer.load
+        conf = Proxy::Puppet::ConfigReader.new(Proxy::Puppet::Initializer.config).get
+
+        if use_environment_api?(conf)
+          api_environments.map { |env, path| new(:name => env, :paths => path) }
+        else
+          config_environments(conf).map { |env, path| new(:name => env, :paths => path.split(":")) }
+        end
       end
 
       def find name
@@ -21,10 +32,22 @@ module Proxy::Puppet
 
       private
 
-      def puppet_environments
-        Initializer.load
-        conf = ConfigReader.new(Initializer.config).get
+      def use_environment_api?(conf)
+        force = to_bool(SETTINGS.puppet_use_environment_api, nil)
+        return force unless force.nil?
+        !!([:main, :master].find { |s| (conf[s] && conf[s][:environmentpath] && !conf[s][:environmentpath].empty?) })
+      end
 
+      def api_environments
+        response = Proxy::Puppet::EnvironmentsApi.new.find_environments
+        raise Proxy::Puppet::DataError.new("No environments list in Puppet API response") unless response['environments']
+        response['environments'].inject({}) do |envs, item|
+          envs[item.first] = item.last['settings']['modulepath'] if item.last && item.last['settings'] && item.last['settings']['modulepath']
+          envs
+        end
+      end
+
+      def config_environments(conf)
         env = { }
         # query for the environments variable
         if conf[:main][:environments].nil?

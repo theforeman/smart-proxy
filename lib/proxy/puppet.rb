@@ -6,6 +6,10 @@ module Proxy::Puppet
   require 'proxy/puppet/puppet_class'
   require 'proxy/puppet/environment'
 
+  class ApiError < ::StandardError; end
+  class ConfigurationError < ::StandardError; end
+  class DataError < ::StandardError; end
+
   class Runner
     include Proxy::Log
     include Proxy::Util

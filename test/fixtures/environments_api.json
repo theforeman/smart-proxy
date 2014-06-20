@@ -1,0 +1,48 @@
+{
+  "search_paths": [
+    "file:///etc/puppet/environments",
+    "data:text/plain,internal"
+  ],
+  "environments": {
+    "production": {
+      "settings": {
+        "manifest": "/etc/puppet/environments/production/manifests",
+        "modulepath": [
+          "/etc/puppet/environments/production/modules",
+          "/etc/puppet/modules",
+          "/usr/share/puppet/modules"
+        ]
+      }
+    },
+    "example_env": {
+      "settings": {
+        "manifest": "/etc/puppet/environments/example_env/manifests",
+        "modulepath": [
+          "/etc/puppet/environments/example_env/modules",
+          "/etc/puppet/modules",
+          "/usr/share/puppet/modules"
+        ]
+      }
+    },
+    "development": {
+      "settings": {
+        "manifest": "/etc/puppet/environments/development/manifests",
+        "modulepath": [
+          "/etc/puppet/environments/development/modules",
+          "/etc/puppet/modules",
+          "/usr/share/puppet/modules"
+        ]
+      }
+    },
+    "common": {
+      "settings": {
+        "manifest": "/etc/puppet/environments/common/manifests",
+        "modulepath": [
+          "/etc/puppet/environments/common/modules",
+          "/etc/puppet/modules",
+          "/usr/share/puppet/modules"
+        ]
+      }
+    }
+  }
+}

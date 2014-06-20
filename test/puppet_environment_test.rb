@@ -8,7 +8,7 @@ class PuppetEnvironmentTest < Test::Unit::TestCase
   end
 
   def test_should_provide_puppet_envs
-    env = Proxy::Puppet::Environment.send(:puppet_environments)
+    env = Proxy::Puppet::Environment.send(:config_environments, {:main => {}, :master => {}})
     assert env.keys.include?(:production)
   end
 
@@ -35,7 +35,9 @@ class PuppetEnvironmentTest < Test::Unit::TestCase
     Proxy::Puppet::Initializer.expects(:load)
     Proxy::Puppet::Initializer.expects(:config).returns('/foo/puppet.conf').at_least_once
     Proxy::Puppet::ConfigReader.expects(:new).with('/foo/puppet.conf').returns(config_reader)
-    Proxy::Puppet::Environment.send(:puppet_environments)
+    Proxy::Puppet::Environment.expects(:use_environment_api?).returns(false)
+    Proxy::Puppet::Environment.expects(:config_environments).with({:main => {}, :master => {}}).returns({})
+    Proxy::Puppet::Environment.all
   end
 
   def test_classes_calls_scan_directory
@@ -160,10 +162,66 @@ class PuppetEnvironmentTest < Test::Unit::TestCase
     assert_array_equal env.map { |e| e.name }, ['master']
   end
 
+  def test_use_environment_api_with_environmentpath_set_main
+    assert Proxy::Puppet::Environment.send(:use_environment_api?, {:main => {:environmentpath => '/etc'}})
+  end
+
+  def test_use_environment_api_with_environmentpath_set_master
+    assert Proxy::Puppet::Environment.send(:use_environment_api?, {:master => {:environmentpath => '/etc'}})
+  end
+
+  def test_use_environment_api_with_no_environmentpath
+    assert !Proxy::Puppet::Environment.send(:use_environment_api?, {})
+  end
+
+  def test_use_environment_api_override_false
+    SETTINGS.stubs(:puppet_use_environment_api).returns(false)
+    assert !Proxy::Puppet::Environment.send(:use_environment_api?, {:main => {:environmentpath => '/etc'}})
+  end
+
+  def test_use_environment_api_override_true
+    SETTINGS.stubs(:puppet_use_environment_api).returns(true)
+    assert Proxy::Puppet::Environment.send(:use_environment_api?, {})
+  end
+
+  def test_all_calls_config_environments
+    Proxy::Puppet::ConfigReader.any_instance.stubs(:get).returns({})
+    Proxy::Puppet::Environment.expects(:use_environment_api?).returns(false)
+    Proxy::Puppet::Environment.expects(:config_environments).returns({})
+    Proxy::Puppet::Environment.all
+  end
+
+  def test_all_calls_api_environments
+    Proxy::Puppet::ConfigReader.any_instance.stubs(:get).returns({})
+    Proxy::Puppet::Environment.expects(:use_environment_api?).returns(true)
+    Proxy::Puppet::Environment.expects(:api_environments).returns({})
+    Proxy::Puppet::Environment.all
+  end
+
+  def test_api_environments
+    api = mock('EnvironmentsApi')
+    api.expects(:find_environments).returns(JSON.load(File.read('./test/fixtures/environments_api.json')))
+    Proxy::Puppet::EnvironmentsApi.expects(:new).returns(api)
+
+    envs = Proxy::Puppet::Environment.send(:api_environments)
+    assert_equal ['production', 'example_env', 'development', 'common'].sort, envs.keys.sort
+    ['production', 'example_env', 'development', 'common'].each do |e|
+      assert_equal ["/etc/puppet/environments/#{e}/modules", "/etc/puppet/modules", "/usr/share/puppet/modules"], envs[e]
+    end
+  end
+
+  def test_should_provide_puppet_envs_from_api
+    Proxy::Puppet::ConfigReader.any_instance.stubs(:get).returns({})
+    Proxy::Puppet::Environment.expects(:use_environment_api?).returns(true)
+    Proxy::Puppet::Environment.expects(:api_environments).returns({'production' => ['/etc/puppet/environments/production/modules', '/etc/puppet/modules']})
+    env = Proxy::Puppet::Environment.all
+    assert_array_equal env.map { |e| e.name }, ['production']
+  end
+
   private
 
   def mock_puppet_env
-    Proxy::Puppet::Environment.stubs(:puppet_environments).returns({:production => "./test/fixtures/environments/prod"})
+    Proxy::Puppet::Environment.stubs(:config_environments).with(is_a(Hash)).returns({:production => "./test/fixtures/environments/prod"})
     Proxy::Puppet::Environment.all
   end
 
