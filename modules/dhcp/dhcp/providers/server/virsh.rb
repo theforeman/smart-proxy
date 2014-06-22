@@ -18,8 +18,15 @@ module Proxy::DHCP
         doc = REXML::Document.new xml = dump_xml
         doc.elements.each("network/ip") do |e|
           next if e.attributes["family"] == "ipv6"
-          netmask = e.attributes["netmask"]
           gateway = e.attributes["address"]
+
+          if e.attributes["netmask"].nil? then
+            # converts a prefix/cidr notation to octets
+            netmask = IPAddr.new(gateway).mask(e.attributes["prefix"]).to_mask
+          else
+            netmask = e.attributes["netmask"]
+          end
+
           network = IPAddr.new(gateway).mask(netmask).to_s
           subnet = Proxy::DHCP::Subnet.new(self, network, netmask)
         end

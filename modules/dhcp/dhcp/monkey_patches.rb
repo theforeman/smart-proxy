@@ -1,6 +1,11 @@
 require 'ipaddr'
 
 class IPAddr
+  # Returns a dot-decimal netmask representation
+  def to_mask
+    return _to_string(@mask_addr)
+  end
+
   # Returns the successor to the ipaddr.
   def succ
     return self.clone.set(@addr + 1, @family)
