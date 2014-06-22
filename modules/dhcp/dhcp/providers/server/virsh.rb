@@ -43,7 +43,7 @@ module Proxy::DHCP
       begin
         doc = REXML::Document.new xml = dump_xml
         REXML::XPath.each(doc, "//network/ip[not(@family) or @family='ipv4']/dhcp/host") do |e|
-          Proxy::DHCP::Record.new(:subnet => subnet,
+          Proxy::DHCP::Reservation.new(:subnet => subnet,
                                   :ip => e.attributes["ip"],
                                   :mac => e.attributes["mac"],
                                   :hostname => e.attributes["name"])
