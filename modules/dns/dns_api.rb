@@ -28,7 +28,7 @@ module Proxy::Dns
       when "virsh"
         require 'dns/providers/virsh'
         @server = Proxy::Dns::Virsh.new(opts.merge(
-          :virsh_network => Proxy::Dns::Plugin.settings.virsh_network
+          :virsh_network => Proxy::SETTINGS.virsh_network
         ))
       else
         log_halt 400, "Unrecognized or missing DNS provider: #{Proxy::Dns::Plugin.settings.dns_provider || "MISSING"}"
