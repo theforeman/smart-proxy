@@ -1,14 +1,16 @@
 require 'tftp/server'
+require 'proxy/validations'
 
 module Proxy::TFTP
   class Api < ::Sinatra::Base
     include ::Proxy::Log
     helpers ::Proxy::Helpers
+    include ::Proxy::Validations
 
     helpers do
       def instantiate variant, mac=nil
         # Filenames must end in a hex representation of a mac address but only if mac is not empty
-        log_halt 403, "Invalid MAC address: #{mac}"                  unless mac =~ /^(?:[\da-f][\da-f][:-]?){6}$/i or mac.nil?
+        log_halt 403, "Invalid MAC address: #{mac}"                  unless valid_mac?(mac)
         log_halt 403, "Unrecognized pxeboot config type: #{variant}" unless defined? variant.capitalize
         eval "Proxy::TFTP::#{variant.capitalize}.new"
       end
