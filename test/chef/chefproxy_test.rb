@@ -1,6 +1,6 @@
 require 'test_helper'
-require 'chef/chef_plugin'
-require 'chef/chef_request'
+require 'chef_proxy/chef_plugin'
+require 'chef_proxy/chef_request'
 require 'webmock/test_unit'
 
 class ChefProxyTest < Test::Unit::TestCase

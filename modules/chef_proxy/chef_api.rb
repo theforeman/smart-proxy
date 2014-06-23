@@ -1,5 +1,5 @@
-require 'chef/chef_request'
-require 'chef/authentication'
+require 'chef_proxy/chef_request'
+require 'chef_proxy/authentication'
 
 module Proxy::Chef
   class Api < ::Sinatra::Base

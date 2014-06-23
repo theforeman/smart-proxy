@@ -1,7 +1,7 @@
 require 'test_helper'
 require 'webmock/test_unit'
-require 'chef/chef_plugin'
-require 'chef/authentication'
+require 'chef_proxy/chef_plugin'
+require 'chef_proxy/authentication'
 require 'net/https'
 require 'sinatra'
 

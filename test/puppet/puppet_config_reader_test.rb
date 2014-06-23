@@ -1,5 +1,5 @@
 require 'test_helper'
-require 'puppet/config_reader'
+require 'puppet_proxy/config_reader'
 
 class PuppetConfigReaderTest < Test::Unit::TestCase
   def setup

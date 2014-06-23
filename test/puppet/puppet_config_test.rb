@@ -1,5 +1,5 @@
 require 'test_helper'
-require 'puppet/puppet_plugin'
+require 'puppet_proxy/puppet_plugin'
 
 class PuppetConfigTest < Test::Unit::TestCase
   def test_omitted_settings_have_default_values

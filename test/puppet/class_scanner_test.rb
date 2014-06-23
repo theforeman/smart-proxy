@@ -1,7 +1,7 @@
 require 'test_helper'
-require 'puppet/puppet_plugin'
-require 'puppet/initializer'
-require 'puppet/class_scanner'
+require 'puppet_proxy/puppet_plugin'
+require 'puppet_proxy/initializer'
+require 'puppet_proxy/class_scanner'
 
 class ClassScannerTest < Test::Unit::TestCase
 

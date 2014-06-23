@@ -1,7 +1,7 @@
 require 'puppet'
-require 'puppet/initializer'
-require 'puppet/config_reader'
-require 'puppet/puppet_class'
+require 'puppet_proxy/initializer'
+require 'puppet_proxy/config_reader'
+require 'puppet_proxy/puppet_class'
 
 class Proxy::Puppet::Environment
   extend Proxy::Log
