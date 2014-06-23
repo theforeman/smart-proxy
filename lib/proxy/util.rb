@@ -3,46 +3,37 @@ require 'shellwords'
 require 'base64'
 
 module Proxy::Util
-
   class CommandTask
     include Proxy::Log
-
-    # track all threads in the class variable
-    @@tasks = []
 
     # create new task and spawn new thread logging all the cmd
     # output to the proxy log. only the process' output is connected
     # stderr is redirected to proxy error log, stdout to proxy debug log
-    def initialize(cmd)
-      # clean finished tasks from the array
-      @@tasks = @@tasks.collect { |t| nil unless t.is_a? String }.compact
-
+    def initialize(cmd, &blk)
       # run the task in its own thread
-      logger.debug "Starting task (total: #{@@tasks.size}): #{cmd}"
+      logger.debug "Starting task: #{cmd}"
       @task = Thread.new(cmd) do |cmd|
-        Open3::popen3(cmd) do |stdin,stdout,stderr,thr|
-          # PIDs are not available under Ruby 1.8
-          pid = thr.nil? ? rand(9999) : thr.pid
-          stdout.each do |line|
-            logger.debug "[#{pid}] #{line}"
+        begin
+          Open3::popen3(cmd) do |stdin,stdout,stderr,thr|
+            # PIDs are not available under Ruby 1.8
+            pid = thr.nil? ? rand(9999) : thr.pid
+            stdout.each do |line|
+              logger.debug "[#{pid}] #{line}"
+            end
+            stderr.each do |line|
+              logger.debug "[#{pid}] #{line}"
+            end
           end
-          stderr.each do |line|
-            logger.error "[#{pid}] #{line}"
-          end
+          $?
+        ensure
+          yield if block_given?
         end
-        $?
       end
-      @@tasks << @task
     end
 
     # wait for the task to finish and get the subprocess return code
     def join
       @task.value
-    end
-
-    # wait for all tasks to finish
-    def self.join_all
-      @@tasks.each { |aThread| aThread.join }
     end
   end
 

@@ -1,6 +1,5 @@
 require 'fileutils'
 require 'pathname'
-require "proxy/util"
 
 module Proxy::TFTP
   class Server
@@ -93,21 +92,16 @@ module Proxy::TFTP
     end
   end
 
-  class << self
-    include Proxy::Util
-    def fetch_boot_file dst, src
-      filename    = dst + '-' + src.split("/")[-1]
-      destination = Pathname.new(File.expand_path(filename, Proxy::TFTP::Plugin.settings.tftproot)).cleanpath
-      tftproot    = Pathname.new(Proxy::TFTP::Plugin.settings.tftproot).cleanpath
-      raise "TFTP destination outside of tftproot" unless destination.to_s.start_with?(tftproot.to_s)
+  def self.fetch_boot_file dst, src
+    filename    = dst + '-' + src.split("/")[-1]
+    destination = Pathname.new(File.expand_path(filename, Proxy::TFTP::Plugin.settings.tftproot)).cleanpath
+    tftproot    = Pathname.new(Proxy::TFTP::Plugin.settings.tftproot).cleanpath
+    raise "TFTP destination outside of tftproot" unless destination.to_s.start_with?(tftproot.to_s)
 
-      # Ensure that our image directory exists
-      # as the dst might contain another sub directory
-      FileUtils.mkdir_p destination.parent
+    # Ensure that our image directory exists
+    # as the dst might contain another sub directory
+    FileUtils.mkdir_p destination.parent
 
-      wget = which("wget")
-      cmd = "#{wget} --timeout=10 --tries=3 --no-check-certificate -nv -c \"#{escape_for_shell(src.to_s)}\" -O \"#{escape_for_shell(destination.to_s)}\""
-      CommandTask.new(cmd)
-    end
+    ::Proxy::HttpDownloads.start_download(src.to_s, destination.to_s)
   end
 end
