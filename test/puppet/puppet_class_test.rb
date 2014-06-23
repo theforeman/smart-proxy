@@ -1,6 +1,6 @@
 require 'test_helper'
-require 'puppet/puppet_class'
-require 'puppet/initializer'
+require 'puppet_proxy/puppet_class'
+require 'puppet_proxy/initializer'
 
 class PuppetClassTest < Test::Unit::TestCase
   def test_should_parse_modulename_correctly

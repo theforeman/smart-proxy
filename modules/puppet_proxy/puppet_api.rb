@@ -1,4 +1,4 @@
-require 'puppet/environment'
+require 'puppet_proxy/environment'
 
 class Proxy::Puppet::Api < ::Sinatra::Base
   helpers ::Proxy::Helpers
@@ -7,19 +7,19 @@ class Proxy::Puppet::Api < ::Sinatra::Base
     raise "Smart Proxy is not configured to support Puppet runs" unless Proxy::Puppet::Plugin.settings.enabled
     case Proxy::Puppet::Plugin.settings.puppet_provider
     when "puppetrun"
-      require 'proxy/puppet/puppetrun'
+      require 'puppet_proxy/puppetrun'
       @server = Proxy::Puppet::PuppetRun.new(opts)
     when "mcollective"
-      require 'proxy/puppet/mcollective'
+      require 'puppet_proxy/mcollective'
       @server = Proxy::Puppet::MCollective.new(opts)
     when "puppetssh"
-      require 'proxy/puppet/puppet_ssh'
+      require 'puppet_proxy/puppet_ssh'
       @server = Proxy::Puppet::PuppetSSH.new(opts)
     when "salt"
-      require 'proxy/puppet/salt'
+      require 'puppet_proxy/salt'
       @server = Proxy::Puppet::Salt.new(opts)
     when "customrun"
-      require 'proxy/puppet/customrun'
+      require 'puppet_proxy/customrun'
       @server = Proxy::Puppet::CustomRun.new(opts)
     else
       log_halt 400, "Unrecognized or missing puppet_provider: #{Proxy::Puppet::Plugin.settings.puppet_provider || "MISSING"}"

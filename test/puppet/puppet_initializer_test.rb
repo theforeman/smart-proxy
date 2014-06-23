@@ -1,6 +1,6 @@
 require 'test_helper'
-require 'puppet/puppet_plugin'
-require 'puppet/initializer'
+require 'puppet_proxy/puppet_plugin'
+require 'puppet_proxy/initializer'
 
 class PuppetInitializerTest < Test::Unit::TestCase
   def setup

@@ -49,7 +49,7 @@ class ServerIscTest < Test::Unit::TestCase
     Proxy::DHCP::Server::ISC.any_instance.stubs(:find_subnet).returns(sub)
     Proxy::DHCP::Server::ISC.any_instance.stubs(:omcmd)
     post '/192.168.122.10', sparc_attrs
-    assert last_response.ok?, 'Last response was not ok'
+    assert last_response.ok?, "Last response was not ok: #{last_response.body}"
   end
 
   def test_sparc_host_quirks

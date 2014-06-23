@@ -1,6 +1,6 @@
 require 'test_helper'
-require 'puppet/puppet_plugin'
-require 'puppet/puppetrun'
+require 'puppet_proxy/puppet_plugin'
+require 'puppet_proxy/puppetrun'
 
 class PuppetRunTest < Test::Unit::TestCase
   def setup

@@ -1,4 +1,4 @@
-require 'puppet/puppet_class'
+require 'puppet_proxy/puppet_class'
 
 module Proxy::Puppet
   class ClassScanner

@@ -2,9 +2,14 @@ require 'test_helper'
 require 'json'
 require 'ostruct'
 require 'sinatra'
-require 'puppet/puppet_api'
+require 'puppet_proxy/puppet_plugin'
+require 'puppet_proxy/puppet_api'
 
 ENV['RACK_ENV'] = 'test'
+
+class Proxy::Puppet::Api
+  attr_reader :server
+end
 
 class PuppetApiTest < Test::Unit::TestCase
   include Rack::Test::Methods
@@ -55,5 +60,18 @@ class PuppetApiTest < Test::Unit::TestCase
     assert_equal "apache", data[0]["apache::class"]["module"]
     assert data[0]["apache::class"]["params"].include? "ensure"
     assert data[0]["apache::class"]["params"]["enable"]
+  end
+
+  def test_puppet_setup
+    setups = { "puppetrun" => "Proxy::Puppet::PuppetRun", "mcollective" => "Proxy::Puppet::MCollective",
+      "puppetssh" => "Proxy::Puppet::PuppetSSH", "salt" => "Proxy::Puppet::Salt", "customrun" => "Proxy::Puppet::CustomRun" }
+
+    Proxy::Puppet::Plugin.settings.stubs(:enabled).returns(true)
+
+    setups.each do |k, v|
+      Proxy::Puppet::Plugin.settings.stubs(:puppet_provider).returns(k)
+      (api = Proxy::Puppet::Api.new!).puppet_setup
+      assert_equal v, api.server.class.to_s
+    end
   end
 end

@@ -1,4 +1,4 @@
-require 'puppet/puppet_class'
+require 'puppet_proxy/puppet_class'
 require 'puppet'
 
 if Puppet::PUPPETVERSION.to_f >= 3.2

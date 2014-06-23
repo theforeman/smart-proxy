@@ -1,6 +1,6 @@
 require 'test_helper'
-require 'puppet/puppet_plugin'
-require 'puppet/puppet_ssh'
+require 'puppet_proxy/puppet_plugin'
+require 'puppet_proxy/puppet_ssh'
 
 class PuppetSshTest < Test::Unit::TestCase
   def setup

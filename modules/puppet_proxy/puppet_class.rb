@@ -1,5 +1,5 @@
-require 'puppet/class_scanner'
-require 'puppet/class_scanner_eparser'
+require 'puppet_proxy/class_scanner'
+require 'puppet_proxy/class_scanner_eparser'
 
 class Proxy::Puppet::PuppetClass
   class << self

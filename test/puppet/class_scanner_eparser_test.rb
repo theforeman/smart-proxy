@@ -1,5 +1,5 @@
 require 'test_helper'
-require 'puppet/class_scanner_eparser'
+require 'puppet_proxy/class_scanner_eparser'
 
 class ClassScannerEParserTest < Test::Unit::TestCase
   def test_should_find_class_in_a_manifest

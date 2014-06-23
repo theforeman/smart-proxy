@@ -1,4 +1,4 @@
-require 'puppet/runner'
+require 'puppet_proxy/runner'
 
 class Proxy::Puppet::MCollective < Proxy::Puppet::Runner
   def run
