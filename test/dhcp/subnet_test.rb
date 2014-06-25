@@ -122,6 +122,14 @@ class Proxy::DHCPSubnetTest < Test::Unit::TestCase
     assert_equal @subnet.size, counter-1
   end
 
+  def test_should_raise_remove_nonexistent_record
+    counter = @subnet.size
+    assert_raise Proxy::DHCP::InvalidRecord do
+      @server.delRecord @subnet, "1.2.3.4"
+    end
+    assert_equal @subnet.size, counter
+  end
+
   def test_should_reuse_ip_if_from_same_subnet
     @subnet.stubs(:has_mac?).returns(stub(:ip => '192.168.0.10'))
     @subnet.stubs(:icmp_pingable?)
