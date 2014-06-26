@@ -61,7 +61,8 @@ module Proxy::DHCP
             opts.merge!(parse_record_options(data))
           end
           if opts[:deleted]
-            subnet.delete find_record_by_hostname(subnet, hostname)
+            record = find_record_by_hostname(subnet, hostname)
+            subnet.delete record if record
             next
           end
         end
@@ -194,8 +195,8 @@ module Proxy::DHCP
     end
 
     def find_record_by_hostname subnet, hostname
-      subnet.records.each do |v|
-        return v if v.options[:hostname] == hostname
+      subnet.records.find do |v|
+        v.options[:hostname] == hostname
       end
     end
 
