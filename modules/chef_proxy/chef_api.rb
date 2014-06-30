@@ -1,4 +1,4 @@
-require 'chef_proxy/chef_request'
+require 'proxy/request'
 require 'chef_proxy/authentication'
 
 module Proxy::Chef
@@ -15,13 +15,13 @@ module Proxy::Chef
 
     post "/hosts/facts" do
       Proxy::Chef::Authentication.new.authenticated(request) do |content|
-        Proxy::Chef::Facts.new.post_facts(content)
+        Proxy::HttpRequest::Facts.new.post_facts(content)
       end
     end
 
     post "/reports" do
       Proxy::Chef::Authentication.new.authenticated(request) do |content|
-        Proxy::Chef::Reports.new.post_report(content)
+        Proxy::HttpRequest::Reports.new.post_report(content)
       end
     end
   end
