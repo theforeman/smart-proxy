@@ -1,9 +1,8 @@
 APP_ROOT = "#{File.dirname(__FILE__)}/.."
 
 require 'proxy'
-require 'bundler_helper'
-Proxy::BundlerHelper.require_groups(:default)
 
+require 'sinatra'
 require 'rack-patch' if Rack.release < "1.3"
 require 'sinatra-patch'
 require 'fileutils'
@@ -22,6 +21,8 @@ require 'proxy/helpers'
 require 'proxy/plugin'
 require 'proxy/error'
 
+require 'bundler_helper'
+Proxy::BundlerHelper.require_groups(:default)
 
 module Proxy
   SETTINGS = Settings.load_global_settings
