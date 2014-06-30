@@ -15,6 +15,13 @@
 
 #:foreman_url: http://127.0.0.1:3000
 
+# SSL settings for client authentication against Foreman. If undefined, the values
+# from general SSL options are used instead. Mainly useful when Foreman uses
+# different certificates for its web UI and for smart-proxy requests.
+#:foreman_ssl_ca: ssl/certs/ca.pem
+#:foreman_ssl_cert: ssl/certs/fqdn.pem
+#:foreman_ssl_key: ssl/private_keys/fqdn.pem
+
 # by default smart_proxy runs in the foreground. To enable running as a daemon, uncomment 'daemon' setting
 #:daemon: true
 # Only used when 'daemon' is set to true.
