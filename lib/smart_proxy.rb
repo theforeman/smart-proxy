@@ -2,9 +2,6 @@ APP_ROOT = "#{File.dirname(__FILE__)}/.."
 
 require 'proxy'
 
-require 'sinatra'
-require 'rack-patch' if Rack.release < "1.3"
-require 'sinatra-patch'
 require 'fileutils'
 require 'pathname'
 require 'checks'
@@ -23,6 +20,9 @@ require 'proxy/error'
 
 require 'bundler_helper'
 Proxy::BundlerHelper.require_groups(:default)
+
+require 'rack-patch' if Rack.release < "1.3"
+require 'sinatra-patch'
 
 module Proxy
   SETTINGS = Settings.load_global_settings
