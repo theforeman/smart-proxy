@@ -114,7 +114,7 @@ class Proxy::DhcpApi < ::Sinatra::Base
         redirect "/dhcp/#{params[:network]}"
       end
     rescue Proxy::DHCP::InvalidRecord
-      # Record doesn't exist, no need to do anything
+      log_halt 404, "Record #{params[:network]}/#{params[:record]} not found"
     rescue Exception => e
       log_halt 400, e
     end
