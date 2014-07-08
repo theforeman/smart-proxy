@@ -1,8 +1,6 @@
 require 'rake'
 require 'rake/testtask'
-require 'rake/packagetask'
 require 'rdoc/task'
-require 'rubygems/package_task'
 load 'tasks/proxy_tasks.rake'
 load 'tasks/jenkins.rake'
 load 'tasks/pkg.rake'
@@ -37,31 +35,4 @@ Rake::RDocTask.new(:rdoc) do |rdoc|
   rdoc.options << '--line-numbers' << '--inline-source'
   rdoc.rdoc_files.include('README')
   rdoc.rdoc_files.include('lib/**/*.rb')
-end
-
-spec = Gem::Specification.new do |s|
-  s.name = "foreman_proxy"
-  s.version = "1.1RC1"
-  s.author = "Ohad Levy"
-  s.email = "ohadlevy@gmail.com"
-  s.homepage = "http://theforeman.org/"
-  s.platform = Gem::Platform::RUBY
-  s.summary = "Foreman Proxy Agent, manage remote DHCP, DNS, TFTP and Puppet servers"
-  s.files = FileList["{bin,public,config,views,lib}/**/*"].to_a
-  s.default_executable = 'bin/smart_proxy.rb'
-  s.require_path = "lib"
-  s.test_files = FileList["{test}/**/*test.rb"].to_a
-  s.has_rdoc = true
-  s.extra_rdoc_files = ["README"]
-  s.add_dependency 'json'
-  s.add_dependency 'sinatra'
-  s.rubyforge_project = 'rake'
-  s.description = <<EOF
-Foreman Proxy is used via The Foreman Project, it allows Foreman to manage
-Remote DHCP, DNS, TFTP and Puppet servers via a REST API
-EOF
-end
-
-Gem::PackageTask.new(spec) do |pkg|
-    pkg.need_tar_gz = true
 end
