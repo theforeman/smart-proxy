@@ -16,10 +16,15 @@ class ProxyUtilTest < Test::Unit::TestCase
     assert_equal test_class.new.escape_for_shell("vm.test.com physical.test.com"), 'vm.test.com\ physical.test.com'
   end
 
-  def test_commandtask_with_echo_exec
-    t = Proxy::Util::CommandTask.new('echo test')
-    # ruby 1.9 seems to return nil for $? in open3
-    assert_equal t.join, RUBY_VERSION =~ /1\.8\.\d+/  ? 0 : nil
+  def test_commandtask_with_exit_0
+    t = Proxy::Util::CommandTask.new('true')
+    assert_equal t.join, 0
+  end
+
+  def test_commandtask_with_exit_1
+    t = Proxy::Util::CommandTask.new('false')
+    # In Ruby 1.8, the return code is always 0
+    assert_equal t.join, RUBY_VERSION =~ /^1\.8/ ? 0 : 1
   end
 
   def test_strict_encode64
