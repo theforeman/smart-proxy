@@ -14,17 +14,21 @@ module Proxy::Util
       logger.debug "Starting task: #{cmd}"
       @task = Thread.new(cmd) do |cmd|
         begin
+          status = nil
           Open3::popen3(cmd) do |stdin,stdout,stderr,thr|
             # PIDs are not available under Ruby 1.8
-            pid = thr.nil? ? rand(9999) : thr.pid
+            pid = thr.nil? ? '(unknown)' : thr.pid
             stdout.each do |line|
               logger.debug "[#{pid}] #{line}"
             end
             stderr.each do |line|
               logger.debug "[#{pid}] #{line}"
             end
+            # In Ruby 1.8, popen3 always reports an error code of 0 in $?.
+            # In Ruby >= 1.9, call thr.value to wait for a Process::Status object.
+            status = thr.value unless thr.nil?
           end
-          $?
+          status ? status.exitstatus : $?
         ensure
           yield if block_given?
         end
