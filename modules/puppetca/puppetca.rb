@@ -24,7 +24,7 @@ module Proxy::PuppetCa
       raise "No such file #{autosign_file}" unless File.exists?(autosign_file)
 
       found = false
-      entries = open(autosign_file, File::RDONLY).readlines.collect do |l|
+      entries = File.open(autosign_file, File::RDONLY).readlines.collect do |l|
         if l.chomp != certname
           l
         else
@@ -33,7 +33,7 @@ module Proxy::PuppetCa
         end
       end.uniq.compact
       if found
-        autosign = open(autosign_file, File::TRUNC|File::RDWR)
+        autosign = File.open(autosign_file, File::TRUNC|File::RDWR)
         autosign.write entries.join("\n")
         autosign.write "\n"
         autosign.close
@@ -49,7 +49,7 @@ module Proxy::PuppetCa
     def autosign certname
       FileUtils.touch(autosign_file) unless File.exist?(autosign_file)
 
-      autosign = open(autosign_file, File::RDWR)
+      autosign = File.open(autosign_file, File::RDWR)
       # Check that we don't have that host already
       found = autosign.readlines.find { |line| line.chomp == certname }
       autosign.puts certname unless found
