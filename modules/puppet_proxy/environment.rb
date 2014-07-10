@@ -13,8 +13,7 @@ class Proxy::Puppet::Environment
     end
 
     def find name
-      all.each { |e| return e if e.name == name }
-      nil
+      all.find { |e| e.name == name }
     end
 
     private

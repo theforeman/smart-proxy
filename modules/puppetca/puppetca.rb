@@ -51,9 +51,8 @@ module Proxy::PuppetCa
 
       autosign = open(autosign_file, File::RDWR)
       # Check that we don't have that host already
-      found = false
-      autosign.each_line { |line| found = true if line.chomp == certname }
-      autosign.puts certname if found == false
+      found = autosign.readlines.find { |line| line.chomp == certname }
+      autosign.puts certname unless found
       autosign.close
       logger.info "Added #{certname} to autosign"
     end
