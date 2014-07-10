@@ -38,8 +38,8 @@ class ServerIscTest < Test::Unit::TestCase
     Proxy::DhcpPlugin.load_test_settings(
       :enabled => true,
       :dhcp_vendor => 'isc',
-      :dhcp_config => './test/dhcp/dhcp.conf',
-      :dhcp_leases => './test/dhcp/dhcp.leases',
+      :dhcp_config => './test/fixtures/dhcp/dhcp.conf',
+      :dhcp_leases => './test/fixtures/dhcp/dhcp.leases',
       :dhcp_subnets => '192.168.122.0/255')
   end
 
@@ -53,7 +53,7 @@ class ServerIscTest < Test::Unit::TestCase
   end
 
   def test_sparc_host_quirks
-    dhcp = Proxy::DHCP::Server::ISC.new(:name => '192.168.122.1', :config => './test/dhcp/dhcp.conf', :leases => './test/dhcp/dhcp.leases')
+    dhcp = Proxy::DHCP::Server::ISC.new(:name => '192.168.122.1', :config => './test/fixtures/dhcp/dhcp.conf', :leases => './test/fixtures/dhcp/dhcp.leases')
     assert_equal [], dhcp.send(:solaris_options_statements, {})
 
     assert_equal [
@@ -70,7 +70,7 @@ class ServerIscTest < Test::Unit::TestCase
   end
 
   def test_ztp_quirks
-    dhcp = Proxy::DHCP::Server::ISC.new(:name => '192.168.122.1', :config => './test/dhcp/dhcp.conf', :leases => './test/dhcp/dhcp.leases')
+    dhcp = Proxy::DHCP::Server::ISC.new(:name => '192.168.122.1', :config => './test/fixtures/dhcp/dhcp.conf', :leases => './test/fixtures/dhcp/dhcp.leases')
     assert_equal [], dhcp.send(:ztp_options_statements, {})
     assert_equal [], dhcp.send(:ztp_options_statements, {:filename => 'foo.cfg'})
 
