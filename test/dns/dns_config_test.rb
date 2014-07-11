@@ -4,6 +4,7 @@ require 'dns/providers/nsupdate'
 
 class DnsConfigTest < Test::Unit::TestCase
   def test_omitted_settings_have_default_values
+    Proxy::Dns::Plugin.load_test_settings({})
     assert_equal 'nsupdate', Proxy::Dns::Plugin.settings.dns_provider
   end
 
