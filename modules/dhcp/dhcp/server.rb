@@ -88,13 +88,29 @@ module Proxy::DHCP
       self
     end
 
+    # addRecord options can take a params hash from the API layer, which behaves
+    # like a HashWithIndifferentAccess to symbol and string keys.
+    # Delete keys with string names before adding them back with symbol names,
+    # otherwise there will be duplicate information.
     def addRecord options = {}
-      ip = validate_ip options[:ip]
-      mac = validate_mac options[:mac]
-      name = options[:hostname] || raise(Proxy::DHCP::Error, "Must provide hostname")
+      # dup the hash before modifying it locally
+      options = options.dup
+      options.delete("captures")
+      options.delete("splat")
+
+      ip = validate_ip options.delete("ip")
+      mac = validate_mac options.delete("mac")
+
+      name = options.delete("name")
+      hostname = options.delete("hostname")
+      raise(Proxy::DHCP::Error, "Must provide hostname") unless hostname || name
+
+      options.delete("subnet") # Not a valid key; remove it to prevent conflict with :subnet
       net = options.delete("network")
       subnet = find_subnet(net) || raise(Proxy::DHCP::Error, "No Subnet detected for: #{net.inspect}")
       raise(Proxy::DHCP::Error, "DHCP implementation does not support Vendor Options") if vendor_options_included?(options) and !vendor_options_supported?
+
+      options.merge!({:hostname => hostname || name, :subnet => subnet, :ip => ip, :mac => mac})
 
       # try to figure out if we already have this record
       record = find_record(ip) || find_record(mac)
@@ -110,7 +126,7 @@ module Proxy::DHCP
           raise Proxy::DHCP::Collision, "Record #{net}/#{ip} already exists"
         end
       end
-      Proxy::DHCP::Reservation.new(options.merge({:subnet => subnet, :ip => ip, :mac => mac}))
+      Proxy::DHCP::Reservation.new(options)
     end
 
     def delRecord subnet, record
