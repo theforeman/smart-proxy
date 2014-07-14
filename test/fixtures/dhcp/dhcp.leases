@@ -1,0 +1,11 @@
+lease 192.168.122.2 {
+  starts 6 2014/07/12 10:08:29;
+  binding state active;
+  next binding state free;
+  hardware ethernet 00:aa:bb:cc:dd:ee;
+}
+
+# This is a little bit unorthodox because the real ISC DHCP doesn't
+# include from its leases file, but is a useful testing convenience here
+include "test/tmp/dhcp_extra_leases.tmp";
+
