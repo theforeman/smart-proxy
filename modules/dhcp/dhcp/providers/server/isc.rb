@@ -6,7 +6,7 @@ module Proxy::DHCP
     def initialize options
       super(options[:name])
       @config = read_config(options[:config]).join("")
-      @leases = options[:leases]
+      @leases = read_config(options[:leases], true).join("")
     end
 
     def delRecord subnet, record
@@ -50,7 +50,13 @@ module Proxy::DHCP
 
     def loadSubnetData subnet
       super
-      conf = format((@config+@leases).split("\n"))
+
+      # Config will have host blocks,
+      # Leases will have host and lease blocks.
+      # Scan both together, in order, because host delete and lease end
+      # events are appended linearly to the leases file.
+      conf = @config + @leases
+
       # scan for host statements
       conf.scan(/host\s+(\S+\s*\{[^}]+\})/) do |host|
         if match = host[0].match(/^(\S+)\s*\{([^\}]+)/)
@@ -89,22 +95,15 @@ module Proxy::DHCP
     end
 
     private
+
     def loadSubnets
       super
-      @config.each_line do |line|
-        if line =~ /^\s*subnet\s+([\d\.]+)\s+netmask\s+([\d\.]+)/
-          next if (managed_subnets = Proxy::DhcpPlugin.settings.dhcp_subnets) and !managed_subnets.include? "#{$1}/#{$2}"
+      @config.scan(/subnet\s+([\d\.]+)\s+netmask\s+([\d\.]+)/) do |match|
+        next if (managed_subnets = Proxy::DhcpPlugin.settings.dhcp_subnets) and !managed_subnets.include? "#{match[0]}/#{match[1]}"
 
-          Proxy::DHCP::Subnet.new(self, $1, $2)
-        end
+        Proxy::DHCP::Subnet.new(self, match[0], match[1])
       end
       "Enumerated the scopes on #{@name}"
-    end
-
-    #prepare text for parsing
-    def format text
-      text.delete_if {|line| line.strip.index("#") == 0}
-      return text.map{|l| l.strip.chomp}.join("")
     end
 
     def parse_record_options text
@@ -230,21 +229,29 @@ module Proxy::DHCP
       logger.debug log
     end
 
-    def read_config file
+    def read_config file, ignore_includes=false
       logger.debug "Reading config file #{file}"
       config = []
       File.readlines(file).each do |line|
-        if /^include\s+"(.*)"\s*;/ =~ line.strip
+
+        line.strip! # remove left and right whitespace
+        next if line.start_with?("#") # remove comments
+        next if line.empty? # remove blank lines
+
+        if /^include\s+"(.*)"\s*;/ =~ line
           conf = $1
           unless File.exist?(conf)
+            next if ignore_includes
             raise "Unable to find the included DHCP configuration file: #{conf}"
           end
-          config << read_config(conf)
+          # concat modifies the receiver rather than creating a new array
+          # and does not create a multidimensional array
+          config.concat(read_config(conf, ignore_includes))
         else
           config << line
         end
       end
-      return config
+      config
     end
 
     def vendor_options_supported?

@@ -14,7 +14,7 @@ class Proxy::DhcpApi < ::Sinatra::Base
         end
         @server = Proxy::DHCP::ISC.new({:name => "127.0.0.1",
                                         :config => Proxy::DhcpPlugin.settings.dhcp_config,
-                                        :leases => File.read(Proxy::DhcpPlugin.settings.dhcp_leases)})
+                                        :leases => Proxy::DhcpPlugin.settings.dhcp_leases})
       when "native_ms"
         require 'dhcp/providers/server/native_ms'
         @server = Proxy::DHCP::NativeMS.new(:server => Proxy::DhcpPlugin.settings.dhcp_server ? Proxy::DhcpPlugin.settings.dhcp_server : "127.0.0.1")
