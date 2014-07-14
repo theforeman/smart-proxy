@@ -99,7 +99,7 @@ module Proxy::DHCP
     def loadSubnets
       super
       @config.scan(/subnet\s+([\d\.]+)\s+netmask\s+([\d\.]+)/) do |match|
-        next if (managed_subnets = Proxy::DhcpPlugin.settings.dhcp_subnets) and !managed_subnets.include? "#{match[0]}/#{match[1]}"
+        next unless managed_subnet? "#{match[0]}/#{match[1]}"
 
         Proxy::DHCP::Subnet.new(self, match[0], match[1])
       end

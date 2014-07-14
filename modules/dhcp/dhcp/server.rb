@@ -141,5 +141,12 @@ module Proxy::DHCP
       false
     end
 
+    # Default: manage any subnet. If specified: manage only specified subnets.
+    def managed_subnet? subnet
+      managed_subnets = Proxy::DhcpPlugin.settings.dhcp_subnets
+      return true unless managed_subnets
+      managed_subnets.include? subnet
+    end
+
   end
 end
