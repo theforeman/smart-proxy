@@ -38,7 +38,7 @@ class Proxy::DhcpApi < ::Sinatra::Base
     end
   end
 
-  get "/" do
+  get "/?" do
     begin
       if request.accept? 'application/json'
         content_type :json

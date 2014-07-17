@@ -1,7 +1,7 @@
 class Proxy::FactsApi < Sinatra::Base
   helpers ::Proxy::Helpers
 
-  get "/" do
+  get "/?" do
     begin
       content_type :json
       Facter.clear

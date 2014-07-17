@@ -2,7 +2,7 @@ module Proxy::PuppetCa
   class Api < ::Sinatra::Base
     helpers ::Proxy::Helpers
 
-    get "/" do
+    get "/?" do
       content_type :json
       begin
         Proxy::PuppetCa.list.to_json

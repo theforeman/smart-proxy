@@ -37,7 +37,7 @@ module Proxy::Dns
       log_halt 400, e
     end
 
-    post "/" do
+    post "/?" do
       fqdn  = params[:fqdn]
       value = params[:value]
       type  = params[:type]
