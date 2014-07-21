@@ -52,6 +52,12 @@ class TftpApiTest < Test::Unit::TestCase
     assert_equal "Invalid MAC address: aa:bb:cc:00:11:zz", last_response.body
   end
 
+  def test_api_can_create_default
+    params = { :menu => "foobar" }
+    Proxy::TFTP::Syslinux.any_instance.expects(:create_default).with(params[:menu])
+    post "/create_default", params
+  end
+
   private
   attr_reader :args
 
