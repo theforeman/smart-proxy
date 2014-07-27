@@ -9,9 +9,17 @@ module Proxy::Puppet
 
         parser = Puppet::Parser::Parser.new Puppet::Node::Environment.new
 
-        Dir.glob("#{directory}/*/manifests/**/*.pp").map do |filename|
-          scan_manifest File.read(filename), parser, filename
-        end.compact.flatten
+        # include modules by their name_schema
+        if Proxy::Puppet::Plugin.settings.puppet_include_modules
+          Dir.glob("#{directory}/#{Proxy::Puppet::Plugin.settings.puppet_include_modules}/manifests/**/*.pp").map do |filename|
+            scan_manifest File.read(filename), parser, filename
+          end.compact.flatten
+        else
+          Dir.glob("#{directory}/*/manifests/**/*.pp").map do |filename|
+            scan_manifest File.read(filename), parser, filename
+          end.compact.flatten
+        end
+
       end
 
       def scan_manifest manifest, parser, filename = ''
