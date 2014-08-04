@@ -1,6 +1,7 @@
 require 'test_helper'
 require 'dns/dns'
 require 'dns/providers/nsupdate'
+require 'dns/providers/nsupdate_gss'
 
 class DnsConfigTest < Test::Unit::TestCase
   def test_omitted_settings_have_default_values
@@ -17,6 +18,18 @@ class DnsConfigTest < Test::Unit::TestCase
     Proxy::Dns::Plugin.settings.stubs(:dns_key).returns('./no-such-key')
     assert_raise RuntimeError do
       Proxy::Dns::Nsupdate.new(:fqdn => 'example.com')
+    end
+  end
+
+  def test_initialize_nsupdate_gss_succeeds
+    File.expects(:exist?).with('./key').returns(true)
+    assert Proxy::Dns::NsupdateGSS.new(:fqdn => 'example.com', :tsig_keytab => './key', :tsig_principal => 'a@B')
+  end
+
+  def test_initialize_nsupdate_gss_returns_error_with_missing_keykey_file
+    File.expects(:exist?).with('./key').returns(false)
+    assert_raise RuntimeError do
+      Proxy::Dns::NsupdateGSS.new(:fqdn => 'example.com', :tsig_keytab => './key', :tsig_principal => 'a@B')
     end
   end
 end

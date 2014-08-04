@@ -1,5 +1,5 @@
 require 'dns/providers/nsupdate'
-require 'kerberos'
+require 'proxy/kerberos'
 
 module Proxy::Dns
   class NsupdateGSS < Nsupdate
