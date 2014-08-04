@@ -31,7 +31,7 @@ class AuthenticationChefTest < Test::Unit::TestCase
   def test_signing_and_checking_with_same_key_sould_work
     # We need to mock chef-server response
     response = '{"public_key":"'+@testnode1_pubkey+'","name":"testnode1","admin":false,"validator":false,"json_class":"Chef::ApiClient","chef_type":"client"}'
-    stub_request(:get, 'https://chef.example.com//clients/testnode1').to_return(:body => response.to_s, :headers => {'content-type' => 'application/json'} )
+    stub_request(:get, 'https://chef.example.com/clients/testnode1').to_return(:body => response.to_s, :headers => {'content-type' => 'application/json'} )
 
     assert(@chefauth.verify_signature_request('testnode1',@signature,@mybody), "Signing and checking with same key should pass")
   end
@@ -39,7 +39,7 @@ class AuthenticationChefTest < Test::Unit::TestCase
   def test_signing_and_checking_with_2_different_keys_sould_not_work
     # We mock chef-server response but with a wrong publick key to make signature check fail
     response = '{"public_key":"'+@testnode2_pubkey+'","name":"testnode1","admin":false,"validator":false,"json_class":"Chef::ApiClient","chef_type":"client"}'
-    stub_request(:get, 'https://chef.example.com//clients/testnode1').to_return(:body => response.to_s, :headers => {'content-type' => 'application/json'} )
+    stub_request(:get, 'https://chef.example.com/clients/testnode1').to_return(:body => response.to_s, :headers => {'content-type' => 'application/json'} )
 
     assert_equal(false,@chefauth.verify_signature_request('testnode1',@signature,@mybody), "Signing and checking with different keys should not pass")
   end

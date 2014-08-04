@@ -32,7 +32,7 @@ class PuppetApiRequestTest < Test::Unit::TestCase
     SETTINGS.expects(:puppet_ssl_ca).at_least_once.returns(File.join(fixtures, 'puppet_ca.pem'))
     SETTINGS.expects(:puppet_ssl_cert).at_least_once.returns(File.join(fixtures, 'foreman.example.com.cert'))
     SETTINGS.expects(:puppet_ssl_key).at_least_once.returns(File.join(fixtures, 'foreman.example.com.key'))
-    stub_request(:get, 'https://puppet.example.com:8140/v2.0/environments')
+    stub_request(:get, 'https://puppet.example.com:8140/v2.0/environments').to_return(:body => '{}')
     Proxy::Puppet::EnvironmentsApi.new.find_environments
   end
 
