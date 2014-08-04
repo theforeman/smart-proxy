@@ -1,5 +1,6 @@
 class Proxy::RootApi < Sinatra::Base
   helpers ::Proxy::Helpers
+  authorize_with_trusted_hosts
 
   get "/features" do
     begin

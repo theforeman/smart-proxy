@@ -1,5 +1,6 @@
 class Proxy::DhcpApi < ::Sinatra::Base
   helpers ::Proxy::Helpers
+  authorize_with_trusted_hosts
   use Rack::MethodOverride
 
   before do
