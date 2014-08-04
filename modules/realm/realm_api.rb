@@ -1,6 +1,7 @@
 module Proxy::Realm
   class Api < Sinatra::Base
     helpers ::Proxy::Helpers
+    authorize_with_trusted_hosts
 
     def realm_setup
       raise "Smart Proxy is not configured to support Realm" unless Proxy::Realm::Plugin.settings.enabled

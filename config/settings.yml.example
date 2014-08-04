@@ -12,6 +12,8 @@
 #:trusted_hosts:
 #- foreman.prod.domain
 #- foreman.dev.domain
+#to deny access to all hosts use:
+#:trusted_hosts: []
 
 #:foreman_url: http://127.0.0.1:3000
 

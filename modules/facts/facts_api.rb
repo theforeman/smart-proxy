@@ -1,5 +1,6 @@
 class Proxy::FactsApi < Sinatra::Base
   helpers ::Proxy::Helpers
+  authorize_with_trusted_hosts
 
   get "/?" do
     begin

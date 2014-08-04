@@ -2,6 +2,7 @@ require 'puppet_proxy/environment'
 
 class Proxy::Puppet::Api < ::Sinatra::Base
   helpers ::Proxy::Helpers
+  authorize_with_trusted_hosts
 
   def puppet_setup(opts = {})
     raise "Smart Proxy is not configured to support Puppet runs" unless Proxy::Puppet::Plugin.settings.enabled

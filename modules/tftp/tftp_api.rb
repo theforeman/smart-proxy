@@ -4,8 +4,9 @@ require 'proxy/validations'
 module Proxy::TFTP
   class Api < ::Sinatra::Base
     include ::Proxy::Log
-    helpers ::Proxy::Helpers
     include ::Proxy::Validations
+    helpers ::Proxy::Helpers
+    authorize_with_trusted_hosts
 
     helpers do
       def instantiate variant, mac=nil

@@ -4,6 +4,7 @@ require 'chef_proxy/authentication'
 module Proxy::Chef
   class Api < ::Sinatra::Base
     helpers ::Proxy::Helpers
+    authorize_with_trusted_hosts
 
     error Proxy::Error::BadRequest do
       log_halt(400, "Bad request : " + env['sinatra.error'].message )
