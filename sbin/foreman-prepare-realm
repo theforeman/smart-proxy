@@ -1,0 +1,56 @@
+#!/bin/bash
+# Creates an IPA user with the minimum set of permissions
+# needed for the Foreman FreeIPA Smart Proxy
+
+usage() { cat <<EOF
+Usage: $0 <admin username> <realm proxy user>
+
+Foreman prepare realm prepares a FreeIPA or Red Hat Identity Management server
+for use with the Foreman Smart Proxy.  It creates a dedicated role with the
+permissions needed for Foreman, creates a user with that role, and retrieves
+the keytab file.
+EOF
+
+exit 1
+
+}
+
+die()   { echo "$@" 1>&2; exit 1; }
+
+#[ -e /usr/bin/ipa ] || die "ipa-admintools not found." 
+#[ -e /etc/ipa/default.conf ] || die "/etc/ipa/default.conf not found: please register system using ipa-client-install" 
+[ ! -z $1 ] || usage
+[ ! -z $2 ] || usage
+
+SERVER=$(grep server /etc/ipa/default.conf | cut -f2 -d"=")
+
+if [ -z $SERVER ];
+then
+  SERVER=$(grep host /etc/ipa/default.conf | cut -f2 -d"=")
+fi
+
+kinit $1 || die "Could not get kerberos credentials" 
+
+ipa permission-add 'modify host password' --permissions='write' --type='host' --attrs='userpassword'
+ipa permission-add 'write host certificate' --permissions='write' --type='host' --attrs='usercertificate'
+ipa permission-add 'modify host userclass' --permissions='write' --type='host' --attrs='userclass'
+
+ipa privilege-add 'Smart Proxy Host Management' --desc='Smart Proxy Host Management'
+ipa privilege-add-permission 'Smart Proxy Host Management' --permission='add hosts' \
+ --permission='remove hosts' --permission='modify host password' --permission='modify host userclass' \
+ --permission='modify hosts' --permission="revoke certificate" --permission="manage host keytab" \
+ --permission='write host certificate' --permissions='retrieve certificates from the ca' \
+ --permissions='modify services' --permissions='manage service keytab' --permission="read dns entries" \
+ --permission="remove dns entries" --permission="add dns entries" --permission="update dns entries" 
+
+ipa role-add 'Smart Proxy Host Manager' --desc='Smart Proxy management'
+ipa role-add-privilege 'Smart Proxy Host Manager' --privilege='Smart Proxy Host Management'
+
+ipa user-add $2 --first Smart --last Proxy
+ipa role-add-member 'Smart Proxy Host Manager' --users=$2
+
+ipa-getkeytab -s $SERVER -p $2 -k freeipa.keytab
+
+echo "Realm Proxy User:    $2" 
+echo "Realm Proxy Keytab:  `pwd`/freeipa.keytab" 
+
