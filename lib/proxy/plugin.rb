@@ -1,3 +1,5 @@
+require 'bundler_helper'
+
 class ::Proxy::PluginNotFound < ::StandardError; end
 class ::Proxy::PluginVersionMismatch < ::StandardError; end
 
@@ -5,8 +7,8 @@ class ::Proxy::Dependency
   attr_reader :name, :version
 
   def initialize(aname, aversion)
-    @name = name.to_sym
-    @version = version
+    @name = aname.to_sym
+    @version = aversion
   end
 end
 
@@ -19,7 +21,7 @@ class ::Proxy::Plugins
   end
 
   def self.configure_loaded_plugins
-    @@loaded.each { |plugin| eval(plugin[:class]).new.configure_plugin }
+    @@loaded.each { |plugin| plugin[:class].new.configure_plugin }
   end
 
   def self.plugin_enabled(plugin_name, instance)
@@ -31,7 +33,8 @@ class ::Proxy::Plugins
   end
 
   def self.find_plugin(plugin_name)
-    @@enabled[plugin_name.to_sym]
+    p = @@loaded.find { |plugin| plugin[:name].to_s == plugin_name.to_s }
+    return p[:class] if p
   end
 
   def self.enabled_plugins
@@ -76,7 +79,7 @@ class ::Proxy::Plugin
     end
 
     def requires(plugin_name, version_spec)
-      self.dependencies += [::Proxy::Dependency.new(plugin_name, version_spec)]
+      self.dependencies << ::Proxy::Dependency.new(plugin_name, version_spec)
     end
 
     def bundler_group(name)
@@ -105,8 +108,8 @@ class ::Proxy::Plugin
 
     def plugin(plugin_name, aversion)
       @plugin_name = plugin_name.to_sym
-      @version = aversion
-      ::Proxy::Plugins.plugin_loaded(@plugin_name, @version, self.name)
+      @version = aversion.chomp('-develop')
+      ::Proxy::Plugins.plugin_loaded(@plugin_name, @version, self)
     end
   end
 
@@ -145,7 +148,8 @@ class ::Proxy::Plugin
   def configure_plugin
     if settings.enabled
       logger.info("'#{plugin_name}' settings were initialized with default values: %s" % log_used_default_settings) unless settings.used_defaults.empty?
-      ::Proxy::Plugins.plugin_enabled(plugin_name, self) 
+      validate_dependencies!(self.class.dependencies)
+      ::Proxy::Plugins.plugin_enabled(plugin_name, self)
       ::Proxy::BundlerHelper.require_groups(:default, bundler_group)
       after_activation
     else
@@ -163,9 +167,9 @@ class ::Proxy::Plugin
   def validate_dependencies!(dependencies)
     dependencies.each do |dep|
       plugin = ::Proxy::Plugins.find_plugin(dep.name)
-      raise ::Proxy::PluginNotFound "Plugin '#{dep.name}' required by plugin '#{plugin_name}' could not be found." unless plugin
-      unless ::Gem::Dependency.new('', dep.version).match?('', version)
-        raise ::Proxy::PluginVersionMismatch "Available version '#{version}' of plugin '#{dep.name}' doesn't match version '#{dep.version}' required by plugin '#{plugin_name}'"
+      raise ::Proxy::PluginNotFound, "Plugin '#{dep.name}' required by plugin '#{plugin_name}' could not be found." unless plugin
+      unless ::Gem::Dependency.new('', dep.version).match?('', plugin.version)
+        raise ::Proxy::PluginVersionMismatch, "Available version '#{plugin.version}' of plugin '#{dep.name}' doesn't match version '#{dep.version}' required by plugin '#{plugin_name}'"
       end
     end
   end
