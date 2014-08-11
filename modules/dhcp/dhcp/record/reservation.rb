@@ -17,7 +17,7 @@ module Proxy::DHCP
     end
 
     def to_json(*options)
-      Hash[[:hostname, :ip, :mac].map{|s| [s, send(s)]}].to_json(options)
+      Hash[[:hostname, :ip, :mac].map{|s| [s, send(s)]}].to_json(*options)
     end
 
   end
