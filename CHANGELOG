@@ -1,3 +1,132 @@
+2014-08-11	Dominic Cleal <dcleal@redhat.com>
+	* fixes #7015 - to_json passes options through correctly, remove array wrapping
+
+2014-08-08	Dominic Cleal <dcleal@redhat.com>
+	* fixes #6722 - correct require for kerberos utilities
+	* fixes #6589 - add trusted_hosts check back
+
+2014-08-07	Dominic Cleal <dcleal@redhat.com>
+	* fixes #6956 - rack 1.1 minimum required for Rack::Server#start
+
+2014-08-06	Stephen Benjamin <stbenjam@redhat.com>
+	* fixes #6542 - ship freeipa users script with the smart proxy
+
+2014-08-06	Martin Milata <mmilata@redhat.com>
+	* fixes #6522 - move request code out of chef module
+
+2014-08-06	Aaron Stone <aaron@serendipity.cx>
+	* Fixes #6743 - Common code for manage_subnet? in ISC and Native MS
+	* Fixes #6744 - Avoid nested arrays and extra array copies in the ISC DHCP config parser
+	* Fixes #6745 - Clean up the params input to the DHCP::Server.addRecord method
+	* Fixes #6742 - Add a unit test suite for the DHCP API
+
+2014-08-06	Dmitri Dolguikh <witlessbird@gmail.com>
+	* Merge pull request #194 from domcleal/6908-request-tests
+
+2014-08-04	Dominic Cleal <dcleal@redhat.com>
+	* fixes #6908 - update request tests for latest Chef release
+
+2014-07-28	Aaron Stone <aaron@serendipity.cx>
+	* Fixes #6790: Restrict ci_reporter gem to less than 2.0.0 to fix CI.
+
+2014-07-24	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #6772: added support for testing of plugins
+
+2014-07-23	Dominic Cleal <dcleal@redhat.com>
+	* fixes #4699 - support Puppet environments API for directory envs
+
+2014-07-22	Trey Dockendorf <treydock@gmail.com>
+	* Fixes #6689 - Allow nil mac address for TFTP API calls that do not require a MAC
+
+2014-07-21	Aaron Stone <aaron@serendipity.cx>
+	* fixes #6700 - tests for Proxy::Puppet::Runner shell methods
+
+2014-07-17	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* fixes #6661: trailing slash is not required in urls
+
+2014-07-11	Dominic Cleal <dcleal@redhat.com>
+	* fixes #6588 - don't load user settings when testing default settings
+
+2014-07-11	Aaron Stone <aaron@serendipity.cx>
+	* fixes #6585 - Update Proxy::Util::CommandTask to handle Ruby 1.8 and 1.9+
+	* fixes #6584 - Replace Kernel#open with File.open
+	* fixes #6583 - Use Enumerable#find instead of each where possible
+
+2014-07-11	David Swift <dswift@brightroll.com>
+	* Fixes #6412: Trying to remove a DHCP record fails due to an invalid subnet check
+	* Fixes #6396: an error removing a DHCP record (record doesn't exist) stops the delete process for a host
+
+2014-07-09	Dominic Cleal <dcleal@redhat.com>
+	* fixes #6275 - idempotence needs clone of original data and to handle *_port
+
+2014-07-07	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* fixes #6289: avoids concurrent downloads of files with the same name and destination dir.
+
+2014-07-04	Vincent Kramar <vincent@kramar.me>
+	* fixes #6377 - incorrect dhcp providers server virsh.rb loadSubnetData
+	* fixes #6085 - fixed virsh dhcp provider netmask interpretation
+
+2014-07-02	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* fixes #6474: smart-proxy relies on Bundler to load sinatra dependency
+	* fixes #6306: removed possible namespace collisions with puppet and chef
+	* fixes #6436: plugins are now being loaded after core modules
+
+2014-07-02	Trey Dockendorf <treydock@gmail.com>
+	* fixes #6341 - Add support for 64-bit MAC addresses
+
+2014-06-23	Dominic Cleal <dcleal@redhat.com>
+	* fixes #6334 - pass virsh_network to virsh DNS provider
+
+2014-06-20	Lukas Zapletal <lzap+git@redhat.com>
+	* refs #4866 - Added config/settings.d/*yml to gitignore
+
+2014-06-18	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #4866: Breaking up monolithic smart-proxy into modules
+
+2014-06-18	Greg Sutcliffe <gsutclif@redhat.com>
+	* Fixes #6086 - stop remote command execution and path exploit in TFTP API (CVE-2014-0007)
+
+2014-06-11	Dominic Cleal <dcleal@redhat.com>
+	* fixes #5675 - expect dns_key setting to be nil if not set
+
+2014-06-09	Dominic Cleal <dcleal@redhat.com>
+	* fixes #5856 - use public initializer for Puppet settings
+
+2014-06-02	Dominic Cleal <dcleal@redhat.com>
+	* refs #5987 - remove unused packaging files
+
+2014-05-30	Greg Sutcliffe <gsutclif@redhat.com>
+	* Fixes #5907 - Look at all records when suggesting IPs
+
+2014-05-27	Dominic Cleal <dcleal@redhat.com>
+	* fixes #5677 - handle booleans from settings.yml as bools
+	* refs #5793 - add pkg:generate_source rake task to create tar.bz2
+
+2014-05-20	Greg Sutcliffe <gsutclif@redhat.com>
+	* Fixes #5739 - Only look at reservations when deleting a DHCP record
+	* Fixes #5648 - Match the DHCP specification of last-lease-wins
+
+2014-05-20	Jimmi Dyson <jimmi.dyson@specsavers.com>
+	* Fixes #5712: Limit DHCP subnets for ISC if necessary
+
+2014-05-09	Alyssa Hardy <alyssa@marketo.com>
+	* fixes #5561 pass arguments correctly in run puppet over ssh
+
+2014-05-08	Dominic Cleal <dcleal@redhat.com>
+	* fixes #5522 - future parser can be set in puppet.conf [main]
+
+2014-05-07	Dominic Cleal <dcleal@redhat.com>
+	* fixes #5239 - update for Puppet 3.5 future parser changes
+
+2014-04-25	Stephen Benjamin <stephen@bitbin.de>
+	* fixes #5054 - Minor bug fixes to FreeIPA Smart Proxy
+
+2014-04-25	Félix Barbeira <fbarbeira@gmail.com>
+	* Small symantic changes.
+
+2014-04-16	Dominic Cleal <dcleal@redhat.com>
+	* Bump version to 1.6-develop
+
 2014-04-10	Matt Jarvis <matt.jarvis@datacentred.co.uk>
 	* fixes #5123 - corrected string typos
 
