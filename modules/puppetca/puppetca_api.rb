@@ -1,3 +1,5 @@
+require 'puppetca/puppetca_main'
+
 module Proxy::PuppetCa
   class Api < ::Sinatra::Base
     helpers ::Proxy::Helpers
