@@ -3,6 +3,7 @@ require 'tempfile'
 require 'fileutils'
 
 require 'puppetca/puppetca'
+require 'puppetca/puppetca_main'
 
 class ProxyTest < Test::Unit::TestCase
   ## Helper for autosign files.
