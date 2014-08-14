@@ -135,18 +135,16 @@ class ::Proxy::Plugin
   end
 
   def log_used_default_settings
-    unless settings.used_defaults.empty?
-      as_string = settings.defaults.select {|k,v| settings.used_defaults.include?(k)}.
-        sort.
-        collect {|c| ":#{c[0]}: #{c[1]}"}.
-        join(", ")
-      logger.info("'#{plugin_name}' settings were initialized with default values: #{as_string}")
-    end
+    settings.defaults.select {|k,v| settings.used_defaults.include?(k)}.
+      inject({}) {|acc, c| acc[c[0].to_s] = c[1]; acc}.
+      sort.
+      collect {|c| ":#{c[0]}: #{c[1]}"}.
+      join(", ")
   end
 
   def configure_plugin
     if settings.enabled
-      log_used_default_settings
+      logger.info("'#{plugin_name}' settings were initialized with default values: %s" % log_used_default_settings) unless settings.used_defaults.empty?
       ::Proxy::Plugins.plugin_enabled(plugin_name, self) 
       ::Proxy::BundlerHelper.require_groups(:default, bundler_group)
       after_activation
