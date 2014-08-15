@@ -102,7 +102,8 @@ module Proxy::PuppetCa
         raise "SSL/CA unavailable on this machine"
       end
 
-      default_path = ["/opt/puppet/bin", "/opt/puppet/sbin"]
+      # prefer selinux wrappers or enterprise binaries
+      default_path = ["/usr/bin/start-puppet-ca", "/usr/bin/puppetca", "/opt/puppet/bin", "/opt/puppet/sbin"]
 
       # puppetca is the old method of using puppet cert which is new in puppet 2.6
       if Puppet::PUPPETVERSION.to_i < 3
