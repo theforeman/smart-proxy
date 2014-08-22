@@ -6,4 +6,3 @@ class Array
     self[n..-1]+self[0...n]
   end
 end
-

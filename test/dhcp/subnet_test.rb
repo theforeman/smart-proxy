@@ -1,5 +1,8 @@
 require 'test_helper'
 require "dhcp/dhcp"
+require 'dhcp/server'
+require 'dhcp/subnet'
+require 'dhcp/record/reservation'
 
 class Proxy::DHCPSubnetTest < Test::Unit::TestCase
 

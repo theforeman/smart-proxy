@@ -1,6 +1,5 @@
 require 'test_helper'
 require 'json'
-require 'sinatra'
 require 'bmc/bmc_plugin'
 require 'bmc/bmc_api'
 
