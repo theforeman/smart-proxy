@@ -114,14 +114,12 @@ module Proxy
       end
     end
 
-    def self.launch
+    def launch
       ::Proxy::Plugins.configure_loaded_plugins
 
-      launcher = Launcher.new
-
-      launcher.create_pid_dir
-      http_app = launcher.http_app
-      https_app = launcher.https_app
+      create_pid_dir
+      http_app = http_app()
+      https_app = https_app()
 
       if http_app.nil? && https_app.nil?
         logger.error("Both http and https are disabled, unable to start.")
