@@ -7,8 +7,7 @@ module Proxy
     @@logger = nil
 
     def logger
-      return @@logger if @@logger
-      @@logger = ::Proxy::Log.logger
+      @@logger ||= ::Proxy::Log.logger
     end
 
     def self.logger
@@ -20,12 +19,14 @@ module Proxy
   end
 
   class LoggerMiddleware
+    include Log
+
     def initialize(app)
       @app = app
     end
 
     def call(env)
-      env['rack.logger'] = ::Proxy::Log.logger
+      env['rack.logger'] = logger
       @app.call(env)
     end
   end
