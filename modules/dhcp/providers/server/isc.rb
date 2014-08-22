@@ -1,4 +1,9 @@
 require 'time'
+require 'dhcp/subnet'
+require 'dhcp/record/reservation'
+require 'dhcp/record/lease'
+require 'dhcp/server'
+
 module Proxy::DHCP
   class ISC < Server
     include Proxy::Util

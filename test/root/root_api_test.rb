@@ -1,6 +1,5 @@
 require 'test_helper'
 require 'json'
-require 'sinatra'
 require 'root/root_plugin'
 require 'root/root_api'
 

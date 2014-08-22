@@ -1,6 +1,5 @@
 require 'test_helper'
 require 'json'
-require 'sinatra'
 require 'bmc/bmc_api'
 
 ENV['RACK_ENV'] = 'test'
