@@ -1,11 +1,4 @@
-$LOAD_PATH.unshift File.expand_path("../", __FILE__)
-
 require 'dhcp/dhcp_plugin'
-
-require "dhcp/record"
-require "dhcp/record/lease"
-require "dhcp/record/reservation"
-require "dhcp/server"
 
 module Proxy::DHCP
   Standard = {

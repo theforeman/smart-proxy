@@ -1,3 +1,7 @@
+require 'dhcp/subnet'
+require 'dhcp/record'
+require 'dhcp/server'
+
 module Proxy::DHCP
   # Represents Microsoft DHCP Server
   # requires the help of a CGI like script running on a MS IIS Server

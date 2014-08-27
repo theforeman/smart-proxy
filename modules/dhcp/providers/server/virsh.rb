@@ -1,5 +1,8 @@
 require 'proxy/virsh'
 require 'ipaddr'
+require 'dhcp/subnet'
+require 'dhcp/record/reservation'
+require 'dhcp/server'
 
 module Proxy::DHCP
   class Virsh < Server

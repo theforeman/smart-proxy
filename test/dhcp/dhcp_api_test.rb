@@ -1,8 +1,10 @@
 require 'test_helper'
 require 'json'
 require 'ostruct'
-require 'sinatra'
-require 'dhcp/dhcp/dhcp_api'
+
+require 'dhcp/dhcp'
+require 'dhcp/dhcp_api'
+require 'dhcp/providers/server/isc'
 
 ENV['RACK_ENV'] = 'test'
 
@@ -64,6 +66,9 @@ class DhcpApiTest < Test::Unit::TestCase
   end
 
   def test_api_03_get_network_unused_ip
+    Proxy::DHCP::Subnet.any_instance.stubs(:tcp_pingable?).returns(false)
+    Proxy::DHCP::Subnet.any_instance.stubs(:icmp_pingable?).returns(false)
+
     get "/192.168.122.0/unused_ip"
     assert last_response.ok?, "Last response was not ok: #{last_response.status} #{last_response.body}"
     data = JSON.parse(last_response.body)
@@ -75,6 +80,9 @@ class DhcpApiTest < Test::Unit::TestCase
   end
 
   def test_api_04_get_network_unused_ip_again
+    Proxy::DHCP::Subnet.any_instance.stubs(:tcp_pingable?).returns(false)
+    Proxy::DHCP::Subnet.any_instance.stubs(:icmp_pingable?).returns(false)
+
     get "/192.168.122.0/unused_ip"
     assert last_response.ok?, "Last response was not ok: #{last_response.status} #{last_response.body}"
     data = JSON.parse(last_response.body)

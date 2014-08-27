@@ -1,3 +1,5 @@
+require 'dhcp/record'
+
 module Proxy::DHCP
   # represent a DHCP Record
   class Reservation < Record

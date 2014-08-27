@@ -1,7 +1,6 @@
 require 'test_helper'
 require 'json'
 require 'ostruct'
-require 'sinatra'
 require 'puppet_proxy/puppet_plugin'
 require 'puppet_proxy/puppet_api'
 

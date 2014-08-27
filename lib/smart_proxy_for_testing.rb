@@ -16,6 +16,8 @@ require 'sinatra/trusted_hosts'
 Proxy::SETTINGS = ::Proxy::Settings::Global.new(:log_file => './logs/test.log', :log_level => 'DEBUG')
 Proxy::VERSION = File.read(File.join(File.dirname(__FILE__), '../VERSION')).chomp
 
+::Sinatra::Base.set :run, false
+
 class ::Proxy::Plugin
   ::Sinatra::Base.register ::Sinatra::TrustedHosts
 

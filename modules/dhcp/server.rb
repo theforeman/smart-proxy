@@ -1,5 +1,6 @@
 require "dhcp/subnet"
 require "dhcp/record"
+require "dhcp/record/lease"
 
 module Proxy::DHCP
   # represents a DHCP Server

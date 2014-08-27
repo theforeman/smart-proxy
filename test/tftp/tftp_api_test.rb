@@ -1,6 +1,5 @@
 require 'test_helper'
 require 'json'
-require 'sinatra'
 require 'tftp/tftp_plugin'
 require 'tftp/tftp_api'
 
