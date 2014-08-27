@@ -29,6 +29,11 @@ class DhcpApiTest < Test::Unit::TestCase
     Proxy::DHCP::Server::ISC.any_instance.stubs(:omcmd)
   end
 
+  # Date formats change between Ruby versions and JSON libraries & versions
+  def date_format(date)
+    JSON.load([Time.parse(date)].to_json).first
+  end
+
   def test_api_01_get_root
     get "/"
     assert last_response.ok?, "Last response was not ok: #{last_response.status} #{last_response.body}"
@@ -50,7 +55,7 @@ class DhcpApiTest < Test::Unit::TestCase
       "leases"       => [ {
         "ip"         => "192.168.122.2",
         "mac"        => "00:aa:bb:cc:dd:ee",
-        "starts"     => RUBY_VERSION =~ /^1\.8/ ? "Sat Jul 12 10:08:29 UTC 2014" : "2014-07-12 10:08:29 UTC",
+        "starts"     => date_format("Sat Jul 12 10:08:29 UTC 2014"),
         "ends"       => nil,
         "state"      => "active",
       } ]
@@ -164,7 +169,7 @@ class DhcpApiTest < Test::Unit::TestCase
       "leases"       => [ {
         "ip"         => "192.168.122.2",
         "mac"        => "00:aa:bb:cc:dd:ee",
-        "starts"     => RUBY_VERSION =~ /^1\.8/ ? "Sat Jul 12 10:08:29 UTC 2014" : "2014-07-12 10:08:29 UTC",
+        "starts"     => date_format("Sat Jul 12 10:08:29 UTC 2014"),
         "ends"       => nil,
         "state"      => "active",
       } ]
