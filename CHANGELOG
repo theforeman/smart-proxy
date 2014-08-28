@@ -1,3 +1,16 @@
+2014-08-28	Dominic Cleal <dcleal@redhat.com>
+	* Release 1.6.0-RC2
+	* fixes #7274 - generate date format expectation in tests to handle Ruby/JSON differences
+
+2014-08-28	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* fixes #7240: puppetca now loads correctly if puppet module is disabled
+	* fixes #7080: symbols are no longer being sorted
+	* fixes #7060: puppet gem is no longer required if puppetca is disabled.
+	* fixes #7062: facts module uses correct path for 'requires'
+
+2014-08-13	Dominic Cleal <dcleal@redhat.com>
+	* Release 1.6.0-RC1
+
 2014-08-11	Dominic Cleal <dcleal@redhat.com>
 	* fixes #7015 - to_json passes options through correctly, remove array wrapping
 
