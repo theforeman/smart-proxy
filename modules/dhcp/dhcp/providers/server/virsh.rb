@@ -1,4 +1,5 @@
 require 'proxy/virsh'
+require 'rexml/document'
 require 'ipaddr'
 
 module Proxy::DHCP
@@ -66,5 +67,24 @@ module Proxy::DHCP
       super(subnet, record)
       virsh_update_dhcp 'delete', record.mac, record.ip, record[:hostname]
     end
+
+    def virsh_update_dhcp command, mac, ip, name
+      mac = escape_for_shell(mac)
+      ip = escape_for_shell(ip)
+      net = escape_for_shell(network)
+
+      if name
+        name = escape_for_shell(name)
+        xml = "'<host mac=\"#{mac}\" name=\"#{name}\" ip=\"#{ip}\"/>'"
+      else
+        xml = "'<host mac=\"#{mac}\" ip=\"#{ip}\"/>'"
+      end
+
+      virsh "net-update", net, command, "ip-dhcp-host",
+        "--xml", xml, "--live", "--config"
+    rescue Proxy::Virsh::Error => e
+      raise Proxy::DHCP::Error, "Failed to update DHCP: #{e}"
+    end
+
   end
 end
