@@ -123,11 +123,11 @@ class ::Proxy::Plugin
   end
 
   def http_rackup
-    File.read(self.class.get_http_rackup_path) unless self.class.get_http_rackup_path.nil?
+    self.class.get_http_rackup_path.nil? ? "" : File.read(self.class.get_http_rackup_path)
   end
 
   def https_rackup
-    File.read(self.class.get_https_rackup_path) unless self.class.get_https_rackup_path.nil?
+    self.class.get_https_rackup_path.nil? ? "" : File.read(self.class.get_https_rackup_path)
   end
 
   def settings
