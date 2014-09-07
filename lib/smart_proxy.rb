@@ -50,7 +50,6 @@ module Proxy
   require 'puppetca/puppetca'
   require 'puppet_proxy/puppet'
   require 'bmc/bmc'
-  require 'chef_proxy/chef'
   require "realm/realm"
 
   def self.version
