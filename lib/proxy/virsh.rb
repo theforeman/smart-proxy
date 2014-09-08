@@ -17,12 +17,12 @@ module Proxy::Virsh
         return e.parent.attributes["ip"]
       end
     end
-    raise Proxy::DNS::Error.new("Cannot find DNS entry for #{host}")
+    raise Proxy::Dns::NotFound.new("Cannot find DNS entry for #{host}")
   rescue Exception => e
-    msg = "DNS virsh provider error: unable to retrive virsh info: #{e}"
+    msg = "DNS virsh provider error: unable to retrieve virsh info: #{e}"
     logger.error msg
     logger.debug xml if defined?(xml)
-    raise Proxy::DNS::Error, msg
+    raise Proxy::Dns::Error, msg
   end
 
   def virsh *params
@@ -51,7 +51,7 @@ module Proxy::Virsh
       "--xml", "'<host ip=\"#{ip}\"><hostname>#{hostname}</hostname></host>'",
       "--live", "--config"
   rescue Exception => e
-    raise Proxy::DNS::Error, "Failed to update DNS: #{e}"
+    raise Proxy::Dns::Error, "Failed to update DNS: #{e}"
   end
 
   def virsh_update_dhcp command, mac, ip, name
