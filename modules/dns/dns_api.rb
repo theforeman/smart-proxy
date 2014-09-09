@@ -63,6 +63,8 @@ module Proxy::Dns
       begin
         dns_setup({:fqdn => fqdn, :value => value, :type => type})
         @server.remove
+      rescue Proxy::Dns::NotFound => e
+        log_halt 404, e
       rescue => e
         log_halt 400, e
       end
