@@ -1,3 +1,9 @@
+2014-09-10	Dominic Cleal <dcleal@redhat.com>
+	* Release 1.6.0
+
+2014-09-09	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* fixes #7351: plugins no longer crash smart-proxy if they are missing either of rackup paths
+
 2014-08-28	Dominic Cleal <dcleal@redhat.com>
 	* Release 1.6.0-RC2
 	* fixes #7274 - generate date format expectation in tests to handle Ruby/JSON differences
