@@ -2,7 +2,22 @@
 :enabled: false
 # :chef_authenticate_nodes: true
 # :chef_server_url: "https://chef.example.net"
-# smart-proxy client node needs to have some admin right on chef-server
+
+# smart-proxy client node needs to have admin rights on chef-server
 # in order to retrive all nodes public keys
 # :chef_smartproxy_clientname: 'host.example.net'
 # :chef_smartproxy_privatekey: '/etc/chef/client.pem'
+
+# by default ssl verification of request to you chef server is enabled,
+# you're supposed to install CA certificate yourself
+# this usually consist of two steps
+#   download the CA cert to /etc/pki/tls/certs/, e.g. ca-cert-root.pem
+#   ln -s ca-cert-root.pem $( openssl x509 -hash -noout -in ca-cert-root.pem )".0"
+# you can use self-signed certificate (see below) or disable verification
+# which is definitely not recommended for production
+# :chef_ssl_verify: true
+
+# if you're using self-signed certificate for you chef server, you can specify
+# the certificate file here or leave it empty (default)
+# :chef_ssl_pem_file: '/etc/chef/chef.example.com.pem'
+
