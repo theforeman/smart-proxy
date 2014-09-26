@@ -72,7 +72,7 @@ module Proxy::DHCP
         # Try a heuristic to find an alternative vendor class
         classes = loadVendorClasses
         short_vendor = vendor.gsub(/^sun-/i, "")
-        if short_vendor != vendor and !(short_vendor = classes.grep(/#{short_vendor}/i)).empty?
+        if short_vendor != vendor && !(short_vendor = classes.grep(/#{short_vendor}/i)).empty?
           short_vendor = short_vendor[0]
         else
           # OK. There does not appear to be a class with an abbreviated vendor name so lets try
@@ -104,7 +104,7 @@ module Proxy::DHCP
             opts.merge!(loadRecordOptions(opts))
             logger.debug opts.inspect
             if opts.include? :hostname
-              Proxy::DHCP::Reservation.new opts.merge({:deleteable => true})
+              Proxy::DHCP::Reservation.new opts.merge(:deleteable => true)
             else
               # this is not a lease, rather reservation
               # but we require option 12(hostname) to be defined for our leases
@@ -166,8 +166,7 @@ module Proxy::DHCP
         # 172.29.216.0   - 255.255.254.0  -Active        -DC BRS               -
         if match = line.match(/^\s*([\d\.]+)\s*-\s*([\d\.]+)\s*-\s*(Active|Disabled)/)
           next unless managed_subnet? "#{match[1]}/#{match[2]}"
-
-          subnet = Proxy::DHCP::Subnet.new(self, match[1], match[2])
+          Proxy::DHCP::Subnet.new(self, match[1], match[2])
         end
       end
     end
@@ -208,11 +207,11 @@ module Proxy::DHCP
         msg.sub! /Added/,      "add"
         msg.sub! /Enumerated/, "enumerate"
         msg.sub! /Queried/,    "query"
-        match = ""
         msg  = "Failed to #{msg}"
         msg += "Vendor class not found" if response.grep /class name being used is unknown/
         msg += ": No entry found" if response.grep(/not a reserved client/).size > 0
-        msg += ": #{match}" if (match = response.grep(/used by another client/)).size > 0
+        match = response.grep(/used by another client/)
+        msg += ": #{match}" if match.size > 0
         raise Proxy::DHCP::Error.new(msg)
       else
         logger.info msg unless error_only

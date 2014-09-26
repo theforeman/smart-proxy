@@ -9,10 +9,10 @@ module Proxy::Util
     # create new task and spawn new thread logging all the cmd
     # output to the proxy log. only the process' output is connected
     # stderr is redirected to proxy error log, stdout to proxy debug log
-    def initialize(cmd, &blk)
+    def initialize(acommand, &blk)
       # run the task in its own thread
-      logger.debug "Starting task: #{cmd}"
-      @task = Thread.new(cmd) do |cmd|
+      logger.debug "Starting task: #{acommand}"
+      @task = Thread.new(acommand) do |cmd|
         begin
           status = nil
           Open3::popen3(cmd) do |stdin,stdout,stderr,thr|
@@ -56,7 +56,7 @@ module Proxy::Util
     path += ENV['PATH'].split(File::PATH_SEPARATOR)
     path.flatten.uniq.each do |dir|
       dest = File.join(dir, bin)
-      return dest if FileTest.file? dest and FileTest.executable? dest
+      return dest if FileTest.file?(dest) && FileTest.executable?(dest)
     end
     return false
   rescue StandardError => e

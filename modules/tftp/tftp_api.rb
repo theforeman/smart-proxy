@@ -11,7 +11,7 @@ module Proxy::TFTP
     helpers do
       def instantiate variant, mac=nil
         # Filenames must end in a hex representation of a mac address but only if mac is not empty
-        log_halt 403, "Invalid MAC address: #{mac}"                  unless valid_mac?(mac) or mac.nil?
+        log_halt 403, "Invalid MAC address: #{mac}"                  unless valid_mac?(mac) || mac.nil?
         log_halt 403, "Unrecognized pxeboot config type: #{variant}" unless defined? variant.capitalize
         eval "Proxy::TFTP::#{variant.capitalize}.new"
       end

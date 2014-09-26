@@ -6,7 +6,7 @@ require 'dhcp/providers/server/native_ms'
 class DHCPServerMicrosoftTest < Test::Unit::TestCase
 
   def setup
-    @server = Proxy::DHCP::Server::NativeMS.new({:server => "1.2.3.4"})
+    @server = Proxy::DHCP::Server::NativeMS.new(:server => "1.2.3.4")
     @server.stubs(:execute).with("show scope", "Enumerated the scopes on 1.2.3.4").returns('
 ==============================================================================
  Scope Address  - Subnet Mask    - State        - Scope Name          -  Comment
@@ -149,7 +149,7 @@ Command completed successfully.
     assert @server.subnets.size > 0
   end
 
-    def test_should_load_subnet_records
+  def test_should_load_subnet_records
     find_subnet
     assert @subnet.records.size > 0
   end
@@ -165,7 +165,7 @@ Command completed successfully.
     @server.loadSubnetOptions @subnet
     error = false
     @subnet.options.each do |o,v|
-      error = true if o.nil? or o.empty? or v.nil? or o.empty?
+      error = true if o.nil? || o.empty? || v.nil? || o.empty?
     end
     assert error == false
   end
@@ -182,14 +182,13 @@ Command completed successfully.
     record = @subnet.records.first
     @server.loadRecordOptions record
     error = false
-    record.options.each { |o,v| error = true if o.nil? or o.empty? or v.nil? or v.empty? }
+    record.options.each { |o,v| error = true if o.nil? || o.empty? || v.nil? || v.empty? }
     assert error == false
   end
 
   def test_should_find_unused_ip
     find_subnet
-    ip = @subnet.unused_ip
-    assert ip =! nil
+    assert !@subnet.unused_ip
   end
 
 end

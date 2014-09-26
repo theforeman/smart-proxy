@@ -65,12 +65,12 @@ module Proxy
 
     def create_pid_dir
       if SETTINGS.daemon
-        FileUtils.mkdir_p(File.dirname(pid_path)) unless File.exists?(pid_path)
+        FileUtils.mkdir_p(File.dirname(pid_path)) unless File.exist?(pid_path)
       end
     end
 
     def https_enabled?
-      SETTINGS.ssl_private_key and SETTINGS.ssl_certificate and SETTINGS.ssl_ca_file
+      SETTINGS.ssl_private_key && SETTINGS.ssl_certificate && SETTINGS.ssl_ca_file
     end
 
     def http_app

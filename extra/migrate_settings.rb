@@ -61,9 +61,9 @@ def migrate(data)
       output[option][:enabled] = value
       data.delete(option)
     else
-      modules.each do |m|
-        next unless option.to_s =~ /^#{m.to_s}/
-        output[m][option] = value
+      modules.each do |mod|
+        next unless option.to_s =~ /^#{mod.to_s}/
+        output[mod][option] = value
         data.delete(option)
       end
     end
@@ -84,7 +84,7 @@ end
 def write_to_files(output,unknown)
   modules.each do |m|
     next if output[m] == {}
-    File.open("#{m.to_s}.yml",'w') do |f|
+    File.open("#{m}.yml",'w') do |f|
       f.write(output[m].to_yaml)
       if m == :settings && unknown != {}
         f.write "\n# Unparsed options, please review\n"

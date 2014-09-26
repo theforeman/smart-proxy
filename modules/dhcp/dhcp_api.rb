@@ -9,13 +9,13 @@ class Proxy::DhcpApi < ::Sinatra::Base
       case Proxy::DhcpPlugin.settings.dhcp_vendor.downcase
       when "isc"
         require 'dhcp/providers/server/isc'
-        unless Proxy::DhcpPlugin.settings.dhcp_config and Proxy::DhcpPlugin.settings.dhcp_leases \
-          and File.exist?(Proxy::DhcpPlugin.settings.dhcp_config) and File.exist?(Proxy::DhcpPlugin.settings.dhcp_leases)
+        unless Proxy::DhcpPlugin.settings.dhcp_config && Proxy::DhcpPlugin.settings.dhcp_leases \
+          && File.exist?(Proxy::DhcpPlugin.settings.dhcp_config) && File.exist?(Proxy::DhcpPlugin.settings.dhcp_leases)
           log_halt 400, "Unable to find the DHCP configuration or lease files"
         end
-        @server = Proxy::DHCP::ISC.new({:name => "127.0.0.1",
-                                        :config => Proxy::DhcpPlugin.settings.dhcp_config,
-                                        :leases => Proxy::DhcpPlugin.settings.dhcp_leases})
+        @server = Proxy::DHCP::ISC.new(:name => "127.0.0.1",
+                                       :config => Proxy::DhcpPlugin.settings.dhcp_config,
+                                       :leases => Proxy::DhcpPlugin.settings.dhcp_leases)
       when "native_ms"
         require 'dhcp/providers/server/native_ms'
         @server = Proxy::DHCP::NativeMS.new(:server => Proxy::DhcpPlugin.settings.dhcp_server ? Proxy::DhcpPlugin.settings.dhcp_server : "127.0.0.1")
@@ -95,7 +95,7 @@ class Proxy::DhcpApi < ::Sinatra::Base
       @server.addRecord(params)
     rescue Proxy::DHCP::Collision => e
       log_halt 409, e
-    rescue Proxy::DHCP::AlreadyExists
+    rescue Proxy::DHCP::AlreadyExists # rubocop:disable Lint/HandleExceptions
       # no need to do anything
     rescue => e
       log_halt 400, e

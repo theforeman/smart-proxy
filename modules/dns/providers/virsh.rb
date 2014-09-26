@@ -61,8 +61,8 @@ module Proxy::Dns
       ip = escape_for_shell(ip)
       net = escape_for_shell(network)
       virsh "net-update", net, command, "dns-host",
-        "--xml", "'<host ip=\"#{ip}\"><hostname>#{hostname}</hostname></host>'",
-        "--live", "--config"
+            "--xml", "'<host ip=\"#{ip}\"><hostname>#{hostname}</hostname></host>'",
+            "--live", "--config"
     rescue Proxy::Virsh::Error => e
       raise Proxy::Dns::Error, "Failed to update DNS: #{e}"
     end

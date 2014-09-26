@@ -42,7 +42,7 @@ module Proxy::DHCP
 
     def range
       r=valid_range
-      "#{r.first.to_s}-#{r.last.to_s}"
+      "#{r.first}-#{r.last}"
     end
 
     def clear
@@ -63,7 +63,7 @@ module Proxy::DHCP
       return false if loaded?
       @loaded = true
       server.loadSubnetData self
-      logger.debug "Lazy loaded #{to_s} records"
+      logger.debug "Lazy loaded #{self} records"
     end
 
     def reload
@@ -81,26 +81,28 @@ module Proxy::DHCP
     end
 
     def has_mac? mac, type
-      r = case type
-          when :reservation
-            reservations
-          when :lease
-            leases
-          else
-            records
-          end.reverse_each {|r| return r if r.mac == mac.downcase}
+      case type
+      when :reservation
+        reservations
+      when :lease
+        leases
+      else
+        records
+      end.reverse_each {|r| return r if r.mac == mac.downcase}
+
       return false
     end
 
     def has_ip? ip, type
-      r = case type
-          when :reservation
-            reservations
-          when :lease
-            leases
-          else
-            records
-          end.reverse_each {|r| return r if r.ip == ip}
+      case type
+      when :reservation
+        reservations
+      when :lease
+        leases
+      else
+        records
+      end.reverse_each {|r| return r if r.ip == ip}
+
       return false
     end
 
@@ -110,7 +112,7 @@ module Proxy::DHCP
       # are searching by ip or mac. Arrays have fixed sort order so we can rely on this
       # being the order they were read from the file
       @records.push record
-      logger.debug "Added #{record} to #{to_s}"
+      logger.debug "Added #{record} to #{self}"
       return true
     end
 
@@ -120,7 +122,7 @@ module Proxy::DHCP
       @lockfile = "#{@filename}.lock"
 
       # Loop if the file is locked
-      Timeout::timeout(30) { sleep 0.1 while File.exists? @lockfile }
+      Timeout::timeout(30) { sleep 0.1 while File.exist? @lockfile }
 
       # Touch the lock the file
       File.open(@lockfile, "w") {}
@@ -131,7 +133,7 @@ module Proxy::DHCP
       return @file.readlines.first.to_i rescue 0
     end
 
-    def set_index_and_unlock index
+    def write_index_and_unlock index
       @file.reopen(@filename,'w')
       @file.write index
       @file.close
@@ -143,14 +145,14 @@ module Proxy::DHCP
     def unused_ip args = {}
       # first check if we already have a record for this host
       # if we do, we can simply reuse the same ip address.
-      if args[:mac] and r=has_mac?(args[:mac], :all) and valid_range(args).include?(r.ip)
+      if args[:mac] && (r = has_mac?(args[:mac], :all)) && valid_range(args).include?(r.ip)
         logger.debug "Found an existing dhcp record #{r}, reusing..."
         return r.ip
       end
 
-      free_ips = valid_range(args) - records.collect{|r| r.ip}
+      free_ips = valid_range(args) - records.collect{|record| record.ip}
       if free_ips.empty?
-        logger.warn "No free IPs at #{to_s}"
+        logger.warn "No free IPs at #{self}"
         return nil
       else
         @index = 0
@@ -160,7 +162,7 @@ module Proxy::DHCP
 
           free_ips.rotate(stored_index).each do |ip|
             logger.debug "Searching for free IP - pinging #{ip}"
-            if tcp_pingable?(ip) or icmp_pingable?(ip)
+            if tcp_pingable?(ip) || icmp_pingable?(ip)
               logger.info "Found a pingable IP(#{ip}) address which does not have a Proxy::DHCP record"
             else
               logger.debug "Found free IP #{ip} out of a total of #{free_ips.size} free IPs"
@@ -168,12 +170,12 @@ module Proxy::DHCP
               return ip
             end
           end
-          logger.warn "No free IPs at #{to_s}"
+          logger.warn "No free IPs at #{self}"
         rescue Exception => e
           logger.debug e.message
         ensure
           # ensure we unlock the storage file
-          set_index_and_unlock @index
+          write_index_and_unlock @index
         end
         nil
       end
@@ -187,8 +189,8 @@ module Proxy::DHCP
 
     def valid_range args = {}
       logger.debug "trying to find an ip address, we got #{args.inspect}"
-      if args[:from] and (from=validate_ip(args[:from])) and args[:to] and (to=validate_ip(args[:to]))
-        raise Proxy::DHCP::Error, "Range does not belong to provided subnet" unless self.include?(from) and self.include?(to)
+      if args[:from] && (from=validate_ip(args[:from])) && args[:to] && (to=validate_ip(args[:to]))
+        raise Proxy::DHCP::Error, "Range does not belong to provided subnet" unless self.include?(from) && self.include?(to)
         from = IPAddr.new(from)
         to   = IPAddr.new(to)
         raise Proxy::DHCP::Error, "#{from} can't be lower IP address than #{to} - change the order?" if from > to
@@ -246,7 +248,7 @@ module Proxy::DHCP
       tcp            = nil
 
       begin
-        Timeout.timeout(@timeout){
+        Timeout.timeout(@timeout) do
           begin
             tcp = TCPSocket.new(ip, @port)
           rescue Errno::ECONNREFUSED => err
@@ -260,7 +262,7 @@ module Proxy::DHCP
           else
             bool = true
           end
-        }
+        end
       rescue Timeout::Error => err
         @exception = err
       ensure
@@ -282,7 +284,7 @@ module Proxy::DHCP
     end
 
     def privileged_user
-      (PLATFORM =~ /linux/i and Process.uid == 0) or PLATFORM =~ /mingw/
+      (PLATFORM =~ /linux/i && Process.uid == 0) || PLATFORM =~ /mingw/
     end
   end
 end

@@ -19,7 +19,7 @@ module Proxy::PuppetCa
 
     #remove certname from autosign if exists
     def disable certname
-      raise "No such file #{autosign_file}" unless File.exists?(autosign_file)
+      raise "No such file #{autosign_file}" unless File.exist?(autosign_file)
 
       found = false
       entries = File.open(autosign_file, File::RDONLY).readlines.collect do |l|
@@ -58,11 +58,11 @@ module Proxy::PuppetCa
     # list of hosts which are now allowed to be installed via autosign
     def autosign_list
       return [] unless File.exist?(autosign_file)
-      File.read(autosign_file).split("\n").reject { |v|
+      File.read(autosign_file).split("\n").reject do |v|
         v =~ /^\s*#.*|^$/ ## Remove comments and empty lines
-      }.map { |v|
+      end.map do |v|
         v.chomp ## Strip trailing spaces
-      }
+      end
     end
 
     # list of all certificates and their state/fingerprint
@@ -111,7 +111,7 @@ module Proxy::PuppetCa
         @puppetca = which("puppet", default_path)
       end
 
-      unless File.exists?("#{@puppetca}")
+      unless File.exist?("#{@puppetca}")
         logger.warn "unable to find puppetca binary"
         raise "unable to find puppetca"
       end
@@ -124,7 +124,7 @@ module Proxy::PuppetCa
 
       if to_bool(::Proxy::PuppetCa::Plugin.settings.puppetca_use_sudo, true)
         @sudo = ::Proxy::PuppetCa::Plugin.settings.sudo_command || which("sudo")
-        unless File.exists?(@sudo)
+        unless File.exist?(@sudo)
           logger.warn "unable to find sudo binary"
           raise "Unable to find sudo"
         end
@@ -162,7 +162,7 @@ module Proxy::PuppetCa
 
     def ca_inventory
       inventory = Pathname.new(ssldir).join("ca","inventory.txt")
-      raise "Unable to find CA inventory file at #{inventory}" unless File.exists?(inventory)
+      raise "Unable to find CA inventory file at #{inventory}" unless File.exist?(inventory)
       hash = {}
       # 0x005a 2011-04-16T07:12:46GMT 2016-04-14T07:12:46GMT /CN=uuid
       File.read(inventory).each_line do |cert|
@@ -179,7 +179,7 @@ module Proxy::PuppetCa
 
     def revoked_serials
       crl = Pathname.new(ssldir).join("ca","ca_crl.pem")
-      raise "Unable to find CRL" unless File.exists?(crl)
+      raise "Unable to find CRL" unless File.exist?(crl)
 
       crl = OpenSSL::X509::CRL.new(File.read(crl))
       crl.revoked.collect {|r| r.serial}
@@ -197,7 +197,7 @@ module Proxy::PuppetCa
       else
         # Later versions of puppetca return OK even if the certificate is not present
         # However we can report this condition for 0.24 and not flag an error to foreman
-        if response =~ /Could not find client certificate/ or $?.exitstatus == 24
+        if response =~ /Could not find client certificate/ || $?.exitstatus == 24
           logger.info "Attempt to remove nonexistant client certificate for #{certname}"
           raise NotPresent, "Attempt to remove nonexistant client certificate for #{certname}"
         else

@@ -75,7 +75,7 @@ class DhcpApiTest < Test::Unit::TestCase
     expected = {"ip"=>"192.168.122.3"}
     assert_equal expected, data
 
-    assert_equal true, File.exists?('test/tmp/foreman-proxy_192.168.122.0_24.tmp')
+    assert_equal true, File.exist?('test/tmp/foreman-proxy_192.168.122.0_24.tmp')
     assert_equal '1', File.read('test/tmp/foreman-proxy_192.168.122.0_24.tmp')
   end
 
@@ -89,7 +89,7 @@ class DhcpApiTest < Test::Unit::TestCase
     expected = {"ip"=>"192.168.122.4"}
     assert_equal expected, data
 
-    assert_equal true, File.exists?('test/tmp/foreman-proxy_192.168.122.0_24.tmp')
+    assert_equal true, File.exist?('test/tmp/foreman-proxy_192.168.122.0_24.tmp')
     assert_equal '2', File.read('test/tmp/foreman-proxy_192.168.122.0_24.tmp')
   end
 

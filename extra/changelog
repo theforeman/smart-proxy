@@ -10,7 +10,7 @@ contributors_file = "Contributors"
 
 cmd.each_line do |l|
   date, author, subject = l.chomp.split('___')
-  date, time, zone = date.split(" ")
+  date, _, _ = date.split(" ")
 
   id = "#{date}\t#{author}"
   if not list[id]

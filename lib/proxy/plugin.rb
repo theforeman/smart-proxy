@@ -161,7 +161,7 @@ class ::Proxy::Plugin
   end
 
   def after_activation
-    (instance_eval &self.class.after_activation_blk) if self.class.after_activation_blk
+    instance_eval(&self.class.after_activation_blk) if self.class.after_activation_blk
   end
 
   def validate_dependencies!(dependencies)

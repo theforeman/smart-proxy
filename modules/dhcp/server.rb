@@ -67,9 +67,9 @@ module Proxy::DHCP
 
     def find_subnet value
       subnets.each do |s|
-        return s if value.is_a?(String) and s.network == value
-        return s if value.is_a?(Proxy::DHCP::Record) and s.include?(value.ip)
-        return s if value.is_a?(IPAddr) and s.include?(value)
+        return s if value.is_a?(String) && s.network == value
+        return s if value.is_a?(Proxy::DHCP::Record) && s.include?(value.ip)
+        return s if value.is_a?(IPAddr) && s.include?(value)
       end
       return nil
     end
@@ -77,9 +77,9 @@ module Proxy::DHCP
     def find_record record
       subnets.each do |s|
         s.records.each do |v|
-          return v if record.is_a?(String) and (v.ip == record or v.mac == record)
-          return v if record.is_a?(Proxy::DHCP::Record) and v == record
-          return v if record.is_a?(IPAddr) and v.ip == record.to_s
+          return v if record.is_a?(String) && (v.ip == record || v.mac == record)
+          return v if record.is_a?(Proxy::DHCP::Record) && v == record
+          return v if record.is_a?(IPAddr) && v.ip == record.to_s
         end
       end
       return nil
@@ -109,13 +109,13 @@ module Proxy::DHCP
       options.delete("subnet") # Not a valid key; remove it to prevent conflict with :subnet
       net = options.delete("network")
       subnet = find_subnet(net) || raise(Proxy::DHCP::Error, "No Subnet detected for: #{net.inspect}")
-      raise(Proxy::DHCP::Error, "DHCP implementation does not support Vendor Options") if vendor_options_included?(options) and !vendor_options_supported?
+      raise(Proxy::DHCP::Error, "DHCP implementation does not support Vendor Options") if vendor_options_included?(options) && !vendor_options_supported?
 
-      options.merge!({:hostname => hostname || name, :subnet => subnet, :ip => ip, :mac => mac})
+      options.merge!(:hostname => hostname || name, :subnet => subnet, :ip => ip, :mac => mac)
 
       # try to figure out if we already have this record
       record = find_record(ip) || find_record(mac)
-      unless record.nil? or record.is_a?(Proxy::DHCP::Lease)
+      unless record.nil? || record.is_a?(Proxy::DHCP::Lease)
         if Record.compare_options(record.options, options)
           # we already got this record, no need to do anything
           logger.debug "We already got the same DHCP record - skipping"
