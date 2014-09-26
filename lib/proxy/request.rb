@@ -33,7 +33,8 @@ module Proxy::HttpRequest
       req.add_field('Accept', 'application/json,version=2')
       req.content_type = 'application/json'
       req.body         = body
-      response         = http.request(req)
+
+      http.request(req)
     end
   end
 

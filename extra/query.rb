@@ -64,7 +64,7 @@ for opt, arg in opts
   end
 end
 
-unless key and cert and ca
+unless key && cert && ca
   if PLATFORM =~ /mingw/
     origin = Pathname.new(__FILE__).dirname.parent.join "config"
     key    = origin.join "private.pem" unless key
@@ -82,7 +82,7 @@ url = ARGV.shift
 if url !~ /^https:\/\/.*:4567/
   puts "Malformed or missing URL:           " + (url.nil? ? "MISSING" : url.to_s)
   puts "It should look something like this: " + 'https://brssa009.brs.someware.com:4567/dhcp/192.168.11.0'
-  exit -1
+  exit(-1)
 end
 
 puts "#{$0} --verb #{verb} --key #{key} --cert #{cert} --ca #{ca} #{json ? "--json" : ""} --verbose #{url}" if verbose

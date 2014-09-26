@@ -24,7 +24,7 @@ module Proxy::Puppet
         hostclasses = ast.respond_to?(:instantiate) ? ast.instantiate('') : ast.hostclasses.values
         hostclasses.each do |klass|
           # Only look at classes
-          if klass.type == :hostclass and not already_seen.include? klass.namespace
+          if klass.type == :hostclass && !already_seen.include?(klass.namespace)
             params = {}
             # Get parameters and eventual default values
             klass.arguments.each do |name, value|
@@ -52,7 +52,7 @@ module Proxy::Puppet
               value.to_a
             # Stringified
             when Regexp # /(?:stringified)/
-              "/#{value.to_s}/"
+              "/#{value}/"
             when Symbol # stringified
               value.to_s
             else
@@ -84,7 +84,7 @@ module Proxy::Puppet
             when Puppet::Parser::AST::Type
               value.value
             when Puppet::Parser::AST::Name
-              (Puppet::Parser::Scope.number?(value.value) or value.value)
+              (Puppet::Parser::Scope.number?(value.value) || value.value)
             when Puppet::Parser::AST::Undef # equivalent of nil, but optional
               ""
             # Depends on content

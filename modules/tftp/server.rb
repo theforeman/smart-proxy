@@ -6,7 +6,7 @@ module Proxy::TFTP
     include Proxy::Log
     # Creates TFTP pxeconfig file
     def set mac, config
-      raise "Invalid parameters received" if mac.nil? or config.nil?
+      raise "Invalid parameters received" if mac.nil? || config.nil?
 
       FileUtils.mkdir_p pxeconfig_dir
 
@@ -17,7 +17,7 @@ module Proxy::TFTP
     # Removes pxeconfig files
     def del mac
       file = pxeconfig_file(mac)
-      if File.exists?(file)
+      if File.exist?(file)
         FileUtils.rm_f file
         logger.debug "TFTP: entry for #{mac} removed successfully"
       else
@@ -28,7 +28,7 @@ module Proxy::TFTP
     # Gets the contents of a pxeconfig file
     def get mac
       file = pxeconfig_file(mac)
-      if File.exists?(file)
+      if File.exist?(file)
         config = File.open(pxeconfig_file(mac), 'r') {|f| f.readlines }
         logger.debug "TFTP: entry for #{mac} read successfully"
       else

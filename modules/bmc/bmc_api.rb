@@ -173,10 +173,12 @@ module Proxy::BMC
               when /disk/
                 { :action => params[:action], :result => @bmc.bootdisk(params[:reboot], params[:persistent]) }.to_json
               else
+                # TODO: this appears to be deadcode; the only supported bootdevices are pxe, cdrom, bios, and disk
                 if @bmc.bootdevices.include?(params[:action])
-                  { :action => params[:action], :result => @bmc.bootdevice({ :device     => params[:action],
-                                                                             :reboot     => params[:reboot],
-                                                                             :persistent => params[:persistent] }) }.to_json
+                  { :action => params[:action],
+                    :result => @bmc.bootdevice = {:device => params[:action], :reboot => params[:reboot],
+                                                  :persistent => params[:persistent]}
+                  }.to_json
                 else
                   { :error => "#{params[:action]} is not a valid boot device" }.to_json
                 end

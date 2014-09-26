@@ -78,7 +78,7 @@ module Proxy::DHCP
           end
         end
         begin
-          Proxy::DHCP::Reservation.new(opts.merge({:subnet => subnet})) if subnet.include? opts[:ip]
+          Proxy::DHCP::Reservation.new(opts.merge(:subnet => subnet)) if subnet.include? opts[:ip]
         rescue Exception => e
           logger.warn "skipped #{hostname} - #{e}"
         end
@@ -92,8 +92,8 @@ module Proxy::DHCP
           body.split(";").each do |data|
             opts.merge! parse_record_options(data)
           end
-          next if opts[:state] == "free" or opts[:state] == "abandoned" or opts[:mac].nil?
-          Proxy::DHCP::Lease.new(opts.merge({:subnet => subnet, :ip => ip})) if subnet.include? ip
+          next if opts[:state] == "free" || opts[:state] == "abandoned" || opts[:mac].nil?
+          Proxy::DHCP::Lease.new(opts.merge(:subnet => subnet, :ip => ip)) if subnet.include? ip
         end
       end
       report "Enumerated hosts on #{subnet.network}"
@@ -158,7 +158,7 @@ module Proxy::DHCP
       if cmd == "connect"
         om_binary = which("omshell")
         @om = IO.popen("/bin/sh -c '#{om_binary} 2>&1'", "r+")
-        @om.puts "key #{Proxy::DhcpPlugin.settings.dhcp_key_name} \"#{Proxy::DhcpPlugin.settings.dhcp_key_secret}\"" if Proxy::DhcpPlugin.settings.dhcp_key_name and Proxy::DhcpPlugin.settings.dhcp_key_secret
+        @om.puts "key #{Proxy::DhcpPlugin.settings.dhcp_key_name} \"#{Proxy::DhcpPlugin.settings.dhcp_key_secret}\"" if Proxy::DhcpPlugin.settings.dhcp_key_name && Proxy::DhcpPlugin.settings.dhcp_key_secret
         @om.puts "server #{name}"
         @om.puts "connect"
         @om.puts "new host"
@@ -175,15 +175,15 @@ module Proxy::DHCP
     end
 
     def report msg, response=""
-      if response.nil? or (!response.empty? and !response.grep(/can't|no more|not connected|Syntax error/).empty?)
+      if response.nil? || (!response.empty? && !response.grep(/can't|no more|not connected|Syntax error/).empty?)
         logger.error "Omshell failed:\n" + (response.nil? ? "No response from DHCP server" : response.join(", "))
-        msg.sub! /Removed/,    "remove"
-        msg.sub! /Added/,      "add"
-        msg.sub! /Enumerated/, "enumerate"
+        msg.sub!(/Removed/, "remove")
+        msg.sub!(/Added/, "add")
+        msg.sub!(/Enumerated/, "enumerate")
         msg  = "Failed to #{msg}"
-        msg += ": Entry already exists" if response and response.grep(/object: already exists/).size > 0
-        msg += ": No response from DHCP server" if response.nil? or response.grep(/not connected/).size > 0
-        raise Proxy::DHCP::Collision, "Hardware address conflict." if response and response.grep(/object: key conflict/).size > 0
+        msg += ": Entry already exists" if response && response.grep(/object: already exists/).size > 0
+        msg += ": No response from DHCP server" if response.nil? || response.grep(/not connected/).size > 0
+        raise Proxy::DHCP::Collision, "Hardware address conflict." if response && response.grep(/object: key conflict/).size > 0
         raise Proxy::DHCP::Error.new(msg)
       else
         logger.info msg
@@ -228,7 +228,7 @@ module Proxy::DHCP
 
     def filter_log log
       secret = Proxy::DhcpPlugin.settings.dhcp_key_secret
-      if secret.is_a?(String) and not secret.empty?
+      if secret.is_a?(String) && !secret.empty?
         log.gsub!(Proxy::DhcpPlugin.settings.dhcp_key_secret,"[filtered]")
       end
       logger.debug log
