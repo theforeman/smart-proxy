@@ -1,1 +1,41 @@
 inherit_from: .rubocop_todo.yml
+
+# Offense count: 11
+Lint/AmbiguousRegexpLiteral:
+  Enabled: false
+
+# Offense count: 14
+# Configuration parameters: AllowSafeAssignment.
+Lint/AssignmentInCondition:
+  Enabled: false
+
+# Offense count: 3
+Lint/Eval:
+  Enabled: false
+
+# Offense count: 13
+# Cop supports --auto-correct.
+Lint/RescueException:
+  Enabled: false
+
+# Offense count: 9
+# Cop supports --auto-correct.
+Lint/StringConversionInInterpolation:
+  Enabled: true
+
+# Offense count: 9
+# Cop supports --auto-correct.
+Lint/UnusedBlockArgument:
+  Enabled: false
+
+# Offense count: 18
+# Cop supports --auto-correct.
+Lint/UnusedMethodArgument:
+  Enabled: false
+
+# Offense count: 5
+Metrics/BlockNesting:
+  Max: 4
+
+Style/SymbolProc:
+  Enabled: false

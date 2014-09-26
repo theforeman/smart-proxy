@@ -137,14 +137,14 @@ class Proxy::DHCPSubnetTest < Test::Unit::TestCase
     @subnet.stubs(:has_mac?).returns(stub(:ip => '192.168.0.10'))
     @subnet.stubs(:icmp_pingable?)
     @subnet.stubs(:tcp_pingable?)
-    assert_equal '192.168.0.10', @subnet.unused_ip({:mac => '0'})
+    assert_equal '192.168.0.10', @subnet.unused_ip(:mac => '0')
   end
 
   def test_should_not_reuse_ip_if_from_other_subnet
     @subnet.stubs(:has_mac?).returns(stub(:ip => '10.0.0.10'))
     @subnet.stubs(:icmp_pingable?)
     @subnet.stubs(:tcp_pingable?)
-    assert_equal false, @subnet.unused_ip({:mac => '0'}).include?("10.0.0")
+    assert_equal false, @subnet.unused_ip(:mac => '0').include?("10.0.0")
   end
 
   def test_should_not_reuse_ip_if_from_outside_range

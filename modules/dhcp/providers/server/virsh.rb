@@ -32,7 +32,7 @@ module Proxy::DHCP
           end
 
           network = IPAddr.new(gateway).mask(netmask).to_s
-          subnet = Proxy::DHCP::Subnet.new(self, network, netmask)
+          Proxy::DHCP::Subnet.new(self, network, netmask)
         end
       rescue Exception => e
         msg = "DHCP virsh provider error: unable to retrive virsh info: #{e}"
@@ -47,10 +47,8 @@ module Proxy::DHCP
       begin
         doc = REXML::Document.new xml = dump_xml
         REXML::XPath.each(doc, "//network/ip[not(@family) or @family='ipv4']/dhcp/host") do |e|
-          Proxy::DHCP::Reservation.new(:subnet => subnet,
-                                  :ip => e.attributes["ip"],
-                                  :mac => e.attributes["mac"],
-                                  :hostname => e.attributes["name"])
+          Proxy::DHCP::Reservation.new(:subnet => subnet, :ip => e.attributes["ip"],
+                                       :mac => e.attributes["mac"], :hostname => e.attributes["name"])
         end
       rescue Exception => e
         msg = "DHCP virsh provider error: unable to retrive virsh info: #{e}"
@@ -83,8 +81,7 @@ module Proxy::DHCP
         xml = "'<host mac=\"#{mac}\" ip=\"#{ip}\"/>'"
       end
 
-      virsh "net-update", net, command, "ip-dhcp-host",
-        "--xml", xml, "--live", "--config"
+      virsh "net-update", net, command, "ip-dhcp-host", "--xml", xml, "--live", "--config"
     rescue Proxy::Virsh::Error => e
       raise Proxy::DHCP::Error, "Failed to update DHCP: #{e}"
     end

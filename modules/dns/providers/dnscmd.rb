@@ -82,7 +82,6 @@ module Proxy::Dns
         logger.error "Dnscmd failed:\n" + response.join("\n")
         msg.sub! /Removed/,    "remove"
         msg.sub! /Added/,      "add"
-        match = ""
         msg  = "Failed to #{msg}"
         raise Proxy::Dns::Error.new(msg)
       else

@@ -1,6 +1,6 @@
 require 'rake'
 
-spec = Gem::Specification.new do |s|
+Gem::Specification.new do |s|
   s.name = "smart_proxy"
   s.version = File.read(File.join(File.dirname(__FILE__), 'VERSION')).chomp.gsub('-', '.')
   s.author = "Ohad Levy"

@@ -15,8 +15,8 @@ module Proxy::Chef
       begin
         public_key = OpenSSL::PKey::RSA.new(rest.get_rest("/clients/#{client_name}").public_key)
       rescue Timeout::Error, Errno::EINVAL, Errno::ECONNRESET, EOFError,
-        Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError, Net::ProtocolError,
-        Errno::ECONNREFUSED, OpenSSL::SSL::SSLError => e
+             Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError, Net::ProtocolError,
+             Errno::ECONNREFUSED, OpenSSL::SSL::SSLError => e
         raise Proxy::Error::Unauthorized, "Failed to authenticate node : "+e.message
       end
 
@@ -34,7 +34,7 @@ module Proxy::Chef
         client_name = request.env['HTTP_X_FOREMAN_CLIENT']
         signature   = request.env['HTTP_X_FOREMAN_SIGNATURE']
 
-        raise Proxy::Error::Unauthorized, "Failed to authenticate node #{client_name}. Missing some headers" if client_name.nil? or signature.nil?
+        raise Proxy::Error::Unauthorized, "Failed to authenticate node #{client_name}. Missing some headers" if client_name.nil? || signature.nil?
         auth = verify_signature_request(client_name,signature,content)
       end
 

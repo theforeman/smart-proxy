@@ -30,7 +30,7 @@ class PuppetSshTest < Test::Unit::TestCase
   def test_command_line_with_ssh_keyfile
     Proxy::Puppet::Plugin.settings.stubs(:puppetssh_keyfile).returns('/root/.ssh/id_rsa')
     Proxy::Puppet::Plugin.settings.stubs(:puppetssh_command).returns('/bin/true')
-    File.stubs(:exists?).returns(true)
+    File.stubs(:exist?).returns(true)
     @puppetssh.stubs(:which).with("sudo", anything).returns("/usr/bin/sudo")
     @puppetssh.stubs(:which).with("ssh", anything).returns("/usr/bin/ssh")
 

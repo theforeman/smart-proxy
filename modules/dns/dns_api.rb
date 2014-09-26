@@ -43,7 +43,7 @@ module Proxy::Dns
       value = params[:value]
       type  = params[:type]
       begin
-        dns_setup({:fqdn => fqdn, :value => value, :type => type})
+        dns_setup(:fqdn => fqdn, :value => value, :type => type)
         @server.create
       rescue Proxy::Dns::Collision => e
         log_halt 409, e
@@ -61,7 +61,7 @@ module Proxy::Dns
         fqdn = params[:value]
       end
       begin
-        dns_setup({:fqdn => fqdn, :value => value, :type => type})
+        dns_setup(:fqdn => fqdn, :value => value, :type => type)
         @server.remove
       rescue => e
         log_halt 400, e

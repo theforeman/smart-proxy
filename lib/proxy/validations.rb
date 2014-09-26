@@ -8,7 +8,7 @@ module Proxy::Validations
 
   def valid_mac? mac
     return false if mac.nil?
-    return true if mac =~ MAC_REGEXP_48BIT or mac =~ MAC_REGEXP_64BIT
+    return true if mac =~ MAC_REGEXP_48BIT || mac =~ MAC_REGEXP_64BIT
     false
   end
 

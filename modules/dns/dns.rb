@@ -13,7 +13,7 @@ module Proxy::Dns
       @type   = options[:type]   || "A"
       @value  = options[:value]
 
-      raise("Must define FQDN or Value") if @fqdn.nil? and @value.nil?
+      raise("Must define FQDN or Value") if @fqdn.nil? && @value.nil?
     end
   end
 end

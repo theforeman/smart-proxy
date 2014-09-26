@@ -21,7 +21,7 @@ class TftpApiTest < Test::Unit::TestCase
     Proxy::Util::CommandTask.stubs(:new).returns(true)
     FileUtils.stubs(:mkdir_p).returns(true)
     Proxy::TFTP.expects(:fetch_boot_file).with('/some/root/boot/file','http://localhost/file').returns(true)
-    post "/fetch_boot_file", {:prefix => '/some/root/boot/file', :path => 'http://localhost/file'}
+    post "/fetch_boot_file", :prefix => '/some/root/boot/file', :path => 'http://localhost/file'
     assert last_response.ok?
   end
 

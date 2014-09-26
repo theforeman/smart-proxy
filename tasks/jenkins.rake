@@ -21,7 +21,7 @@ begin
       exit($?.exitstatus)
     end
   end
-rescue LoadError
+rescue LoadError # rubocop:disable Lint/HandleExceptions
   # ci/reporter/rake/rspec not present, skipping this definition
 end
 
