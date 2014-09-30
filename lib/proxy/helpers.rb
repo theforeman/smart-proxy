@@ -1,4 +1,6 @@
 module Proxy::Helpers
+  include Proxy::Log
+
   # Accepts a html error code and a message, which is then returned to the caller after adding to the proxy log
   # OR  a block which is executed and its errors handled in a similar way.
   # If no code is supplied when the block is declared then the html error used is 400.
