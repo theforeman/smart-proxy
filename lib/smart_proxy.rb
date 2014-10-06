@@ -82,4 +82,6 @@ class SmartProxy < Sinatra::Base
       end
     end
   end
+
+  require 'sinatra/ssl_client_verification'
 end
