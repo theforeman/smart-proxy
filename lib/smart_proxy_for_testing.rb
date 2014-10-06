@@ -11,6 +11,7 @@ require 'proxy/plugin'
 require 'proxy/error'
 
 require 'sinatra/base'
+require 'sinatra/ssl_client_verification'
 require 'sinatra/trusted_hosts'
 
 Proxy::SETTINGS = ::Proxy::Settings::Global.new(:log_file => './logs/test.log', :log_level => 'DEBUG')
