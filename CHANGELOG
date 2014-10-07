@@ -1,3 +1,11 @@
+2014-10-07	Dominic Cleal <dcleal@redhat.com>
+	* Release 1.6.1
+	* fixes #7297 - corrected name of DNS namespace in virsh error handlers
+	* fixes #7596 - validate plugin dependencies when loading, various fixes
+
+2014-10-07	Marek Hulan <mhulan@redhat.com>
+	* Fixes #7749 - allow using logger in log_halt helper
+
 2014-09-10	Dominic Cleal <dcleal@redhat.com>
 	* Release 1.6.0
 
