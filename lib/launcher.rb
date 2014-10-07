@@ -8,24 +8,40 @@ module Proxy
   class Launcher
     include ::Proxy::Log
 
+    attr_reader :settings
+
+    def initialize(settings = SETTINGS)
+      @settings = settings
+    end
+
     def pid_path
-      SETTINGS.daemon_pid
+      settings.daemon_pid
     end
 
     def http_enabled?
-      !SETTINGS.http_port.nil?
+      !settings.http_port.nil?
     end
 
     def https_enabled?
-      SETTINGS.ssl_private_key && SETTINGS.ssl_certificate && SETTINGS.ssl_ca_file
+      settings.ssl_private_key && settings.ssl_certificate && settings.ssl_ca_file
     end
 
-    def http_app(http_port)
+    def plugins
+      ::Proxy::Plugins.instance.select { |p| p[:state] == :running }
+    end
+
+    def http_plugins
+      plugins.select { |p| p[:http_enabled] }.map { |p| p[:class] }
+    end
+
+    def https_plugins
+      plugins.select { |p| p[:https_enabled] }.map { |p| p[:class] }
+    end
+
+    def http_app(http_port, plugins = http_plugins)
       return nil unless http_enabled?
       app = Rack::Builder.new do
-        ::Proxy::Plugins.instance.select {|p| p[:state] == :running && p[:http_enabled]}.each do |p|
-          instance_eval(p[:class].http_rackup)
-        end
+        plugins.each { |p| instance_eval(p.http_rackup) }
       end
 
       {
@@ -39,16 +55,14 @@ module Proxy
       }
     end
 
-    def https_app(https_port)
+    def https_app(https_port, plugins = https_plugins)
       unless https_enabled?
         logger.warn "Missing SSL setup, https is disabled."
         return nil
       end
 
       app = Rack::Builder.new do
-        ::Proxy::Plugins.instance.select {|p| p[:state] == :running && p[:https_enabled]}.each do |p|
-          instance_eval(p[:class].https_rackup)
-        end
+        plugins.each { |p| instance_eval(p.https_rackup) }
       end
 
       ssl_options = OpenSSL::SSL::SSLContext::DEFAULT_PARAMS[:options]
@@ -67,9 +81,9 @@ module Proxy
         :ServerSoftware => '',
         :SSLEnable => true,
         :SSLVerifyClient => OpenSSL::SSL::VERIFY_PEER,
-        :SSLPrivateKey => load_ssl_private_key(SETTINGS.ssl_private_key),
-        :SSLCertificate => load_ssl_certificate(SETTINGS.ssl_certificate),
-        :SSLCACertificateFile => SETTINGS.ssl_ca_file,
+        :SSLPrivateKey => load_ssl_private_key(settings.ssl_private_key),
+        :SSLCertificate => load_ssl_certificate(settings.ssl_certificate),
+        :SSLCACertificateFile => settings.ssl_ca_file,
         :SSLOptions => ssl_options,
         :daemonize => false
       }
@@ -130,7 +144,7 @@ module Proxy
     def launch
       raise Exception.new("Both http and https are disabled, unable to start.") unless http_enabled? || https_enabled?
 
-      if SETTINGS.daemon
+      if settings.daemon
         check_pid
         Process.daemon
         write_pid
@@ -138,12 +152,12 @@ module Proxy
 
       ::Proxy::PluginInitializer.new(::Proxy::Plugins.instance).initialize_plugins
 
-      http_app = http_app(SETTINGS.http_port)
-      https_app = https_app(SETTINGS.https_port)
+      http_app = http_app(settings.http_port)
+      https_app = https_app(settings.https_port)
       install_webrick_callback!(http_app, https_app)
 
-      t1 = Thread.new { webrick_server(https_app, SETTINGS.bind_host, SETTINGS.https_port).start } unless https_app.nil?
-      t2 = Thread.new { webrick_server(http_app, SETTINGS.bind_host, SETTINGS.http_port).start } unless http_app.nil?
+      t1 = Thread.new { webrick_server(https_app, settings.bind_host, settings.https_port).start } unless https_app.nil?
+      t2 = Thread.new { webrick_server(http_app, settings.bind_host, settings.http_port).start } unless http_app.nil?
 
       Proxy::SignalHandler.install_traps
 
