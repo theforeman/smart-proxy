@@ -7,4 +7,5 @@ group :test do
   gem 'rdoc'
   gem 'minitest', '~> 4.7', :platforms => :ruby_19
   gem 'webmock'
+  gem 'mixlib-shellout', '< 1.6.0'
 end
