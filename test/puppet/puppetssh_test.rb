@@ -11,8 +11,19 @@ class PuppetSshTest < Test::Unit::TestCase
     @puppetssh.stubs(:which).with("sudo", anything).returns("/usr/bin/sudo")
     @puppetssh.stubs(:which).with("ssh", anything).returns("/usr/bin/ssh")
 
-    @puppetssh.expects(:shell_command).with(["/usr/bin/ssh", "host1", "puppet\\ agent\\ --onetime\\ --no-usecacheonfailure"], false).returns(true)
-    @puppetssh.expects(:shell_command).with(["/usr/bin/ssh", "host2", "puppet\\ agent\\ --onetime\\ --no-usecacheonfailure"], false).returns(true)
+    command = if RUBY_VERSION <= '1.8.7'
+                "puppet\\ agent\\ --onetime\\ --no-usecacheonfailure"
+              else
+                "puppet agent --onetime --no-usecacheonfailure"
+              end
+    @puppetssh.
+        expects(:shell_command).
+        with(["/usr/bin/ssh", "host1", command], false).
+        returns(true)
+    @puppetssh.
+        expects(:shell_command).
+        with(["/usr/bin/ssh", "host2", command], false).
+        returns(true)
     assert @puppetssh.run
   end
 

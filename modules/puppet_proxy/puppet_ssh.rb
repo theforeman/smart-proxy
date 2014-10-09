@@ -19,7 +19,8 @@ class Proxy::Puppet::PuppetSSH < Proxy::Puppet::Runner
       return false
     end
 
-    ssh_command = escape_for_shell(Proxy::Puppet::Plugin.settings.puppetssh_command || 'puppet agent --onetime --no-usecacheonfailure')
+    ssh_command = Proxy::Puppet::Plugin.settings.puppetssh_command || 'puppet agent --onetime --no-usecacheonfailure'
+    ssh_command = escape_for_shell(ssh_command) if RUBY_VERSION <= '1.8.7'
     nodes.each do |node|
       shell_command(cmd + [escape_for_shell(node), ssh_command], false)
     end
