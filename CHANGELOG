@@ -1,3 +1,10 @@
+2014-10-09	Dominic Cleal <dcleal@redhat.com>
+	* Release 1.6.2
+
+2014-10-08	Dominic Cleal <dcleal@redhat.com>
+	* fixes #7822 - forbid HTTPS requests with no client SSL certificate
+	* fixes #7850 - pin mixlib-shellout for Ruby 1.8 compatibility
+
 2014-10-07	Dominic Cleal <dcleal@redhat.com>
 	* Release 1.6.1
 	* fixes #7297 - corrected name of DNS namespace in virsh error handlers
