@@ -1,9 +1,18 @@
-2014-07-28	Aaron Stone <aaron@serendipity.cx>
-	* Fixes #6790: Restrict ci_reporter gem to less than 2.0.0 to fix CI.
+2014-10-09	Dominic Cleal <dcleal@redhat.com>
+	* Release 1.5.4
+
+2014-10-08	Dominic Cleal <dcleal@redhat.com>
+	* fixes #7822 - forbid HTTPS requests with no client SSL certificate
+	* fixes #7850 - pin mixlib-shellout for Ruby 1.8 compatibility
+	* fixes #6908 - update request tests for latest Chef release
 
 2014-07-28	Dominic Cleal <dcleal@redhat.com>
+	* Release 1.5.2
 	* fixes #4699 - support Puppet environments API for directory envs
 	* fixes #5675 - expect dns_key setting to be nil if not set
+
+2014-07-28	Aaron Stone <aaron@serendipity.cx>
+	* Fixes #6790: Restrict ci_reporter gem to less than 2.0.0 to fix CI.
 
 2014-07-28	David Swift <dswift@brightroll.com>
 	* Fixes #6412: Trying to remove a DHCP record fails due to an invalid subnet check
