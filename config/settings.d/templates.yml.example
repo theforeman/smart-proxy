@@ -1,0 +1,14 @@
+# Set this to true if the Proxy should handle template requests on behalf of Foreman
+:enabled: false
+
+# This plugin also requires that :foreman_url: be set in the main settings.yml
+# This lets the plugin know how to obtain the templates from foreman.
+
+# This allows the proxy to define how hosts that are being provisioned where to
+# obtain the templates from.
+# The default protocol is http on port 80 unless otherwise specified in the url.
+# Examples:
+# smart-proxy.example.com:8080
+# https://smart-proxy.example.com
+# http://1.2.3.4:3000
+#:template_url: https://smart-proxy.example.com:8443
