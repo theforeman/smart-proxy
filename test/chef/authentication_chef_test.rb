@@ -44,7 +44,7 @@ class AuthenticationChefTest < Test::Unit::TestCase
   def test_auth_disabled_should_always_success
     Proxy::Chef::Plugin.settings.stubs(:chef_authenticate_nodes).returns(false)
     s = StringIO.new('Hello')
-    request = Sinatra::Request.new(env={'rack.input' => s})
+    request = Sinatra::Request.new('rack.input' => s)
     result = @chefauth.authenticated(request) do |content|
       true
     end
@@ -55,7 +55,7 @@ class AuthenticationChefTest < Test::Unit::TestCase
   def test_auth_enable_without_headers_should_raise_an_error
     Proxy::Chef::Plugin.settings.stubs(:chef_authenticate_nodes).returns(true)
     s = StringIO.new('Hello')
-    request = Sinatra::Request.new(env={'rack.input' => s})
+    request = Sinatra::Request.new('rack.input' => s)
     begin
       result = @chefauth.authenticated(request) do |content|
         true

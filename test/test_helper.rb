@@ -3,7 +3,7 @@ $: << File.join(File.dirname(__FILE__), '..', 'lib')
 $: << File.join(File.dirname(__FILE__), '..', 'modules')
 
 logdir = File.join(File.dirname(__FILE__), '..', 'logs')
-FileUtils.mkdir_p(logdir) unless File.exists?(logdir)
+FileUtils.mkdir_p(logdir) unless File.exist?(logdir)
 
 # Make sure that tests put their temp files in a controlled location
 # Clear temp file before each test run

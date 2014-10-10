@@ -61,7 +61,7 @@ class Proxy::Puppet::Environment
         env[:production] = conf[:main][:modulepath] || conf[:master][:modulepath] || '/etc/puppet/modules'
         logger.warn "No environments found - falling back to defaults (production - #{env[:production]})"
       end
-      if env.size == 1 and env.keys.first == :master and !env.values.first.include?('$environment')
+      if env.size == 1 && env.keys.first == :master && !env.values.first.include?('$environment')
         # If we only have an entry in [master] it should really be called production
         logger.warn "Re-writing single 'master' environment as 'production'"
         env[:production] = env[:master]
@@ -112,7 +112,7 @@ class Proxy::Puppet::Environment
             # Dynamic environments - get every directory under the modulepath
             Dir.glob("#{base_dir.gsub(/\$environment(.*)/,"/")}/*").grep(/\/[A-Za-z0-9_]+$/) do |dir|
               e = dir.split("/").last
-              temp_environment.push({e => base_dir.gsub("$environment", e)})
+              temp_environment.push(e => base_dir.gsub("$environment", e))
             end
           end
 
@@ -127,7 +127,7 @@ class Proxy::Puppet::Environment
         end
       end
 
-      new_env.reject { |k, v| k.nil? or v.nil? }
+      new_env.reject { |k, v| k.nil? || v.nil? }
     end
   end
 

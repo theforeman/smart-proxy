@@ -21,9 +21,9 @@ else
 
   puts "This service must run as a user with permission to execute the netsh dhcp script"
   puts 'The acount can be local or a domain account. If it is a domain account then use the domain\account syntax'
-  user  = ask("Run this service as this user? ") {|user| user.default = default_user}
-  pass1 = ask("Enter the user's password ") {|pass1| pass1.echo = "x"}
-  pass2 = ask("Reenter the password "){|pass2| pass2.echo = "x"}
+  user  = ask("Run this service as this user? ") {|u| u.default = default_user}
+  pass1 = ask("Enter the user's password ") {|p| p.echo = "x"}
+  pass2 = ask("Reenter the password "){|p| p.echo = "x"}
   unless pass1 == pass2
     print "Passwords did not match!"
     exit 1

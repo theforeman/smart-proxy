@@ -114,12 +114,12 @@ module Proxy::Realm
       check_realm realm
       raise Proxy::Realm::NotFound, "Host #{hostname} not found in realm!" unless find hostname
       begin
-        result = @ipa.call("host_del", [hostname], {"updatedns" => Proxy::Realm::Plugin.settings.freeipa_remove_dns})
-      rescue => e
+        result = @ipa.call("host_del", [hostname], "updatedns" => Proxy::Realm::Plugin.settings.freeipa_remove_dns)
+      rescue
         if Proxy::Realm::Plugin.settings.freeipa_remove_dns
           # If the host doesn't have a DNS record (e.g. deleting a system in Foreman before it's built)
           # the above call will fail.  Try again with updatedns => false
-          result = @ipa.call("host_del", [hostname], {"updatedns" => false})
+          result = @ipa.call("host_del", [hostname], "updatedns" => false)
         else
           raise
         end

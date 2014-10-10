@@ -95,7 +95,7 @@ if Puppet::PUPPETVERSION.to_f >= 3.2
               value.to_a
             # Stringified
             when Regexp # /(?:stringified)/
-              "/#{value.to_s}/"
+              "/#{value}/"
             when Symbol # stringified
               value.to_s
             else
@@ -106,7 +106,7 @@ if Puppet::PUPPETVERSION.to_f >= 3.2
           case value
             # Supported with exact JSON equivalent
             when Puppet::Pops::Model::BooleanExpression, Puppet::Pops::Model::LiteralString, Puppet::Pops::Model::LiteralNumber, Puppet::Pops::Model::QualifiedName
-              (Puppet::Parser::Scope.number?(value.value) or value.value)
+              (Puppet::Parser::Scope.number?(value.value) || value.value)
             when Puppet::Pops::Model::UnaryMinusExpression
               - ast_to_value_new(value.expr)
             when Puppet::Pops::Model::ArithmeticExpression

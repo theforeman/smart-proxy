@@ -8,7 +8,7 @@ module Proxy::Dns
     attr_reader :resolver
 
     def initialize options = {}
-      raise "Unable to find Key file - check your dns_key settings" unless Proxy::Dns::Plugin.settings.dns_key.nil? or File.exists?(Proxy::Dns::Plugin.settings.dns_key)
+      raise "Unable to find Key file - check your dns_key settings" unless Proxy::Dns::Plugin.settings.dns_key.nil? || File.exist?(Proxy::Dns::Plugin.settings.dns_key)
       super(options)
     end
 
@@ -35,7 +35,7 @@ module Proxy::Dns
       end
       nsupdate "disconnect"
     ensure
-      @om.close unless @om.nil? or @om.closed?
+      @om.close unless @om.nil? || @om.closed?
     end
 
     # remove({ :fqdn => "node01.lab", :value => "192.168.100.2"}
@@ -75,7 +75,7 @@ module Proxy::Dns
         @om.close
         @om = nil # we cannot serialize an IO object, even if closed.
         # TODO Parse output for errors!
-        if !status.empty? and status[1] !~ /status: NOERROR/
+        if !status.empty? && status[1] !~ /status: NOERROR/
           logger.debug "nsupdate: errors\n" + status.join("\n")
           raise Proxy::Dns::Error.new("Update errors: #{status.join("\n")}")
         end
@@ -89,7 +89,7 @@ module Proxy::Dns
 
     def find_nsupdate
       @nsupdate = which("nsupdate")
-      unless File.exists?("#{@nsupdate}")
+      unless File.exist?("#{@nsupdate}")
         logger.warn "unable to find nsupdate binary, maybe missing bind-utils package?"
         raise "unable to find nsupdate binary"
       end

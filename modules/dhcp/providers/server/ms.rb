@@ -29,7 +29,7 @@ module Proxy::DHCP
         if line =~ /^\s*([\d\.]+)\s*-\s*([\d\.]+)\s*-\s*(Active|Disabled)/
           network = $1
           netmask = $2
-          subnet = Proxy::DHCP::Subnet.new(self, network, netmask)
+          Proxy::DHCP::Subnet.new(self, network, netmask)
         end
       end
     end
@@ -51,7 +51,7 @@ module Proxy::DHCP
         if line =~ /^\s+([\w\.]+)\s+-\s+([-a-f\d]+)/
           ip = $1
           mac = $2.gsub(/-/,":").match(/^(.*?).$/)[1]
-          Proxy::DHCP::Record.new(subnet, ip, mac) unless ip.nil? or mac.nil?
+          Proxy::DHCP::Record.new(subnet, ip, mac) unless ip.nil? || mac.nil?
         end
       end
       super subnet
@@ -83,7 +83,7 @@ module Proxy::DHCP
       entry  = "ScopeIpAddress=#{subnet.network}&ReservedIP=#{record.ip}"
       cmd = "DeleteReservation&#{entry}&MAC_Address=#{mac}"
 
-      response = query cmd
+      query cmd
       logger.info "removed Proxy::DHCP reservation for #{entry}/#{mac}"
       subnet.delete(record)
     end

@@ -63,7 +63,8 @@ class PuppetApiTest < Test::Unit::TestCase
 
   def test_puppet_setup
     setups = { "puppetrun" => "Proxy::Puppet::PuppetRun", "mcollective" => "Proxy::Puppet::MCollective",
-      "puppetssh" => "Proxy::Puppet::PuppetSSH", "salt" => "Proxy::Puppet::Salt", "customrun" => "Proxy::Puppet::CustomRun" }
+               "puppetssh" => "Proxy::Puppet::PuppetSSH", "salt" => "Proxy::Puppet::Salt",
+               "customrun" => "Proxy::Puppet::CustomRun" }
 
     Proxy::Puppet::Plugin.settings.stubs(:enabled).returns(true)
 

@@ -14,7 +14,7 @@ module Proxy
           begin
             require 'rubygems' rescue nil
             require 'bundler_ext'
-          rescue LoadError => e
+          rescue LoadError
             puts "`bundler_ext` gem is required to run smart_proxy"
             exit 1
           end

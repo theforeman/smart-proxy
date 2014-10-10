@@ -54,7 +54,7 @@ module Proxy::Puppet
       path = [uri.path, path].join('/') unless uri.path.empty?
       req = Net::HTTP::Get.new(URI.join(uri.to_s, path).path)
       req.add_field('Accept', 'application/json')
-      response = http.request(req)
+      http.request(req)
     end
   end
 
