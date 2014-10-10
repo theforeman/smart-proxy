@@ -1,4 +1,6 @@
 require "test/unit"
+require 'fileutils'
+
 $: << File.join(File.dirname(__FILE__), '..', 'lib')
 $: << File.join(File.dirname(__FILE__), '..', 'modules')
 

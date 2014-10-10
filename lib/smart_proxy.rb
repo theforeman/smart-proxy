@@ -44,6 +44,7 @@ module Proxy
   require 'root/root'
   require 'facts/facts'
   require 'dns/dns'
+  require 'templates/templates'
   require 'tftp/tftp'
   require 'dhcp/dhcp'
   require 'puppetca/puppetca'
@@ -76,7 +77,9 @@ module Proxy
     def http_app
       return nil if SETTINGS.http_port.nil?
       app = Rack::Builder.new do
-        ::Proxy::Plugins.enabled_plugins.each {|p| instance_eval(p.http_rackup)}
+        ::Proxy::Plugins.enabled_plugins.each do |p|
+          instance_eval(p.http_rackup)
+        end
       end
 
       Rack::Server.new(
