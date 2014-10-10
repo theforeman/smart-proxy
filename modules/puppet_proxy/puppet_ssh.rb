@@ -21,7 +21,7 @@ class Proxy::Puppet::PuppetSSH < Proxy::Puppet::Runner
 
     ssh_command = escape_for_shell(Proxy::Puppet::Plugin.settings.puppetssh_command || 'puppet agent --onetime --no-usecacheonfailure')
     nodes.each do |node|
-      shell_command(cmd + [escape_for_shell(node), ssh_command], false)
+      shell_command(cmd + [escape_for_shell(node), ssh_command], Proxy::Puppet::Plugin.settings.puppetssh_wait || false)
     end
   end
 end

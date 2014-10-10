@@ -72,6 +72,17 @@ class PuppetSshTest < Test::Unit::TestCase
     assert @puppetssh.run
   end
 
+  def test_command_line_with_puppetssh_wait
+    Proxy::Puppet::Plugin.settings.stubs(:puppetssh_command).returns('/bin/true')
+    Proxy::Puppet::Plugin.settings.stubs(:puppetssh_wait).returns(true)
+    @puppetssh.stubs(:which).with("sudo", anything).returns("/usr/bin/sudo")
+    @puppetssh.stubs(:which).with("ssh", anything).returns("/usr/bin/ssh")
+
+    @puppetssh.expects(:shell_command).with(["/usr/bin/ssh", "host1", "/bin/true"], true).returns(true)
+    @puppetssh.expects(:shell_command).with(["/usr/bin/ssh", "host2", "/bin/true"], true).returns(true)
+    assert @puppetssh.run
+  end
+
   def test_missing_sudo
     Proxy::Puppet::Plugin.settings.stubs(:puppetssh_sudo).returns(true)
     @puppetssh.stubs(:which).with("sudo", anything).returns(false)
