@@ -7,7 +7,25 @@ require 'uri'
 module Proxy::HttpRequest
   class ForemanRequest
     def send_request(path, body)
-      uri              = URI.parse(Proxy::SETTINGS.foreman_url.to_s)
+      path = [uri.path, path].join('/') unless uri.path.empty?
+      req = Net::HTTP::Post.new(URI.join(uri.to_s, path).path)
+      req.add_field('Accept', 'application/json,version=2')
+      req.content_type = 'application/json'
+      req.body         = body
+
+      http.request(req)
+    end
+
+    def uri
+      @uri ||= URI.parse(Proxy::SETTINGS.foreman_url.to_s)
+    end
+
+    def http
+      @http ||= http_init
+    end
+
+    private
+    def http_init
       http             = Net::HTTP.new(uri.host, uri.port)
       http.use_ssl     = uri.scheme == 'https'
       http.verify_mode = OpenSSL::SSL::VERIFY_NONE
@@ -27,14 +45,7 @@ module Proxy::HttpRequest
           http.key  = OpenSSL::PKey::RSA.new(File.read(private_key), nil)
         end
       end
-
-      path = [uri.path, path].join('/') unless uri.path.empty?
-      req = Net::HTTP::Post.new(URI.join(uri.to_s, path).path)
-      req.add_field('Accept', 'application/json,version=2')
-      req.content_type = 'application/json'
-      req.body         = body
-
-      http.request(req)
+      return http
     end
   end
 
