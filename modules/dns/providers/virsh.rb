@@ -42,18 +42,20 @@ module Proxy::Dns
     private
 
     def find_ip_for_host host
-      doc = REXML::Document.new xml = dump_xml
-      doc.elements.each("network/dns/host/hostname") do |e|
-        if e.text == host
-          return e.parent.attributes["ip"]
+      begin
+        doc = REXML::Document.new xml = dump_xml
+        doc.elements.each("network/dns/host/hostname") do |e|
+          if e.text == host
+            return e.parent.attributes["ip"]
+          end
         end
+      rescue Exception => e
+        msg = "DNS virsh provider error: unable to retrieve virsh info: #{e}"
+        logger.error msg
+        logger.debug xml if defined?(xml)
+        raise Proxy::Dns::Error, msg
       end
-      raise Proxy::Dns::Error.new("Cannot find DNS entry for #{host}")
-    rescue Exception => e
-      msg = "DNS virsh provider error: unable to retrive virsh info: #{e}"
-      logger.error msg
-      logger.debug xml if defined?(xml)
-      raise Proxy::Dns::Error, msg
+      raise Proxy::Dns::NotFound.new("Cannot find DNS entry for #{host}")
     end
 
     def virsh_update_dns command, hostname, ip

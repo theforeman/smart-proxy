@@ -40,11 +40,15 @@ module Proxy::Dns
 
     # remove({ :fqdn => "node01.lab", :value => "192.168.100.2"}
     def remove
+      @resolver = Resolv::DNS.new(:nameserver => @server)
+
       nsupdate "connect"
       case @type
       when "A"
+        raise Proxy::Dns::NotFound.new("Cannot find DNS entry for #{@fqdn}") unless dns_find(@fqdn)
         nsupdate "update delete #{@fqdn} #{@type}"
       when "PTR"
+        raise Proxy::Dns::NotFound.new("Cannot find DNS entry for #{@value}") unless dns_find(@value)
         nsupdate "update delete #{@value} #{@type}"
       end
       nsupdate "disconnect"
