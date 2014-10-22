@@ -58,7 +58,7 @@ class Proxy::Puppet::Environment
       end
       if env.values.compact.size == 0
         # fall back to defaults - we probably don't use environments
-        env[:production] = conf[:main][:modulepath] || conf[:master][:modulepath] || '/etc/puppet/modules'
+        env[:production] = conf[:main][:modulepath] || conf[:master][:modulepath] || '/etc/puppet/modules:/usr/share/puppet/modules'
         logger.warn "No environments found - falling back to defaults (production - #{env[:production]})"
       end
       if env.size == 1 && env.keys.first == :master && !env.values.first.include?('$environment')
