@@ -39,14 +39,17 @@ module Proxy::Dns
     # remove({ :fqdn => "node01.lab", :value => "192.168.100.2"}
     # remove({ :fqdn => "node01.lab", :value => "3.100.168.192.in-addr.arpa"}
     def remove
+      @resolver = Resolv::DNS.new(:nameserver => @server)
       case @type
       when "A"
+        raise Proxy::Dns::NotFound.new("Cannot find DNS entry for #{@fqdn}") unless dns_find(@fqdn)
         zone = @fqdn.sub(/[^.]+./,'')
         msg = "Removed DNS entry #{@fqdn} => #{@value}"
         cmd = "/RecordDelete #{zone} #{@fqdn}. A /f"
         execute(cmd, msg)
       when "PTR"
         # TODO: determine reverse zone names, #4025
+        raise Proxy::Dns::NotFound.new("Cannot find DNS entry for #{@value}") unless dns_find(@value)
         return true
       end
     end

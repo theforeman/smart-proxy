@@ -2,6 +2,7 @@ require 'dns/dns_plugin'
 
 module Proxy::Dns
   class Error < RuntimeError; end
+  class NotFound < RuntimeError; end
   class Collision < RuntimeError; end
   class Record
     include Proxy::Log
