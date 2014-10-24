@@ -12,8 +12,13 @@ module Proxy
     end
 
     def self.logger
-      # We keep the last 6 10MB log files
-      logger = ::Logger.new(::Proxy::SETTINGS.log_file, 6, 1024*1024*10)
+      log_file = ::Proxy::SETTINGS.log_file
+      if log_file.upcase == 'STDOUT'
+        logger = ::Logger.new(STDOUT)
+      else
+        # We keep the last 6 10MB log files
+        logger = ::Logger.new(log_file, 6, 1024*1024*10)
+      end
       logger.level = ::Logger.const_get(::Proxy::SETTINGS.log_level.upcase)
       logger
     end
