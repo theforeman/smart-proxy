@@ -1,3 +1,61 @@
+2014-10-22	Lukas Zapletal <lzap+git@redhat.com>
+	* Fixes #7859 - puppetssh run works on Ruby 1.9+
+
+2014-10-22	Šimon Lukašík <slukasik@redhat.com>
+	* Fixes #7922 - promote uri and http to instance property
+
+2014-10-20	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* fixes #7660: fixes first bunch of rubocop warnings
+
+2014-10-17	David Davis <daviddavis@redhat.com>
+	* Fixes #7862 - Upgrade rubocop version
+
+2014-10-10	Thomas Kuther <tom@kuther.net>
+	* Fixes #7860 - added puppetssh_wait option
+
+2014-10-08	Dominic Cleal <dcleal@redhat.com>
+	* fixes #7822 - forbid HTTPS requests with no client SSL certificate
+	* fixes #7850 - pin mixlib-shellout for Ruby 1.8 compatibility
+
+2014-10-02	Marek Hulan <mhulan@redhat.com>
+	* Fixes #7749 - allow using logger in log_halt helper
+
+2014-09-24	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #7181: added initial support for rubocop
+
+2014-09-24	Dominic Cleal <dcleal@redhat.com>
+	* fixes #7596 - validate plugin dependencies when loading, various fixes
+
+2014-09-15	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #7438: moved facter loading into the facter plugin descriptor
+
+2014-09-11	Dominic Cleal <dcleal@redhat.com>
+	* fixes #7297 - corrected name of DNS namespace in virsh error handlers
+
+2014-09-05	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* fixes #7351: plugins no longer crash smart-proxy if they are missing either of rackup paths
+
+2014-08-29	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* fixes #7235: dhcp tests are now order-independent
+
+2014-08-27	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* fixes #7225: logger is now being correctly initialized during launch
+	* fixes #7240: puppetca now loads correctly if puppet module is disabled
+
+2014-08-27	Dominic Cleal <dcleal@redhat.com>
+	* fixes #7274 - generate date format expectation in tests to handle Ruby/JSON differences
+
+2014-08-15	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* fixes #7080: symbols are no longer being sorted
+
+2014-08-13	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* fixes #7060: puppet gem is no longer required if puppetca is disabled.
+	* fixes #7062: facts module uses correct path for 'requires'
+
+2014-08-11	Dominic Cleal <dcleal@redhat.com>
+	* fixes #7015 - to_json passes options through correctly, remove array wrapping
+	* Bump version to 1.7-develop
+
 2014-08-08	Dominic Cleal <dcleal@redhat.com>
 	* fixes #6722 - correct require for kerberos utilities
 	* fixes #6589 - add trusted_hosts check back
