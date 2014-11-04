@@ -1,0 +1,35 @@
+foreman\-prepare\-realm(8)
+==========================
+:man source:  foreman-prepare-realm
+:man manual:  Foreman Proxy Manual
+
+NAME
+----
+foreman-prepare-realm - Foreman tool for creating FreeIPA principals needed for
+the realm proxy
+
+SYNOPSIS
+--------
+foreman-prepare-realm [OPTIONS]
+
+foreman-prepare-realm admin realm-proxy
+
+DESCRIPTION
+-----------
+
+foreman-prepare-realm prepares a FreeIPA or Red Hat Identity Management server
+for use with the Foreman Smart Proxy. It creates a dedicated role with the
+permissions needed for Foreman, creates a user with that role, and retrieves
+the keytab file.
+
+OPTIONS
+-------
+
+foreman-prepare-realm <admin user> <realm proxy user>
+
+GETTING HELP
+------------
+
+For support, please see http://theforeman.org/support.html, the
+foreman-users@googlegroups.com mailing list or #theforeman on Freenode.
+
