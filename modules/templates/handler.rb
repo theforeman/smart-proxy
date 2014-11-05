@@ -7,8 +7,12 @@ module Proxy::Templates
   class Handler < ::Proxy::HttpRequest::ForemanRequest
     extend Proxy::Log
 
-    def get_template(kind, token)
-      request = request_factory.create_get("/unattended/#{kind}", :token=> token)
+    def get_template(kind, token, static = false)
+      opts = { :token => token,
+               :url   => Proxy::Templates::Plugin.settings.template_url
+      }
+      opts[:static] = static if static
+      request = request_factory.create_get("/unattended/#{kind}", opts)
       res = send_request(request)
 
       # You get a 201 from the 'built' URL
@@ -17,9 +21,9 @@ module Proxy::Templates
       res.body
     end
 
-    def self.get_template kind, token
+    def self.get_template kind, token, static = false
       @handler ||= Handler.new
-      @handler.get_template(kind,token)
+      @handler.get_template(kind,token, static)
     end
   end
 
