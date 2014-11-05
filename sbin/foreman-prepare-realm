@@ -17,12 +17,19 @@ exit 1
 
 die()   { echo "$@" 1>&2; exit 1; }
 
-#[ -e /usr/bin/ipa ] || die "ipa-admintools not found."
-#[ -e /etc/ipa/default.conf ] || die "/etc/ipa/default.conf not found: please register system using ipa-client-install"
+[ -e /usr/bin/ipa ] || die "ipa-admintools not found."
+[ -e /etc/ipa/default.conf ] || die "/etc/ipa/default.conf not found: please register system using ipa-client-install"
 [ ! -z $1 ] || usage
 [ ! -z $2 ] || usage
 
 SERVER=$(grep server /etc/ipa/default.conf | cut -f2 -d"=")
+
+if ipa --version 2>&1 | grep -q 'VERSION'
+then
+  PERMISSION_SYSTEM=v2
+else
+  PERMISSION_SYSTEM=v1
+fi
 
 if [ -z $SERVER ];
 then
@@ -31,17 +38,29 @@ fi
 
 kinit $1 || die "Could not get kerberos credentials"
 
-ipa permission-add 'modify host password' --permissions='write' --type='host' --attrs='userpassword'
-ipa permission-add 'write host certificate' --permissions='write' --type='host' --attrs='usercertificate'
-ipa permission-add 'modify host userclass' --permissions='write' --type='host' --attrs='userclass'
-
 ipa privilege-add 'Smart Proxy Host Management' --desc='Smart Proxy Host Management'
-ipa privilege-add-permission 'Smart Proxy Host Management' --permission='add hosts' \
- --permission='remove hosts' --permission='modify host password' --permission='modify host userclass' \
- --permission='modify hosts' --permission="revoke certificate" --permission="manage host keytab" \
- --permission='write host certificate' --permissions='retrieve certificates from the ca' \
- --permissions='modify services' --permissions='manage service keytab' --permission="read dns entries" \
- --permission="remove dns entries" --permission="add dns entries" --permission="update dns entries"
+
+if [ "$PERMISSION_SYSTEM" == "v1" ];
+then
+  ipa permission-add 'modify host password' --permissions='write' --type='host' --attrs='userpassword'
+  ipa permission-add 'write host certificate' --permissions='write' --type='host' --attrs='usercertificate'
+  ipa permission-add 'modify host userclass' --permissions='write' --type='host' --attrs='userclass'
+
+  ipa privilege-add-permission 'Smart Proxy Host Management' --permission='modify host password' --permission='write host certificate' \
+    --permission='modify host userclass' --permission='add hosts' --permission='remove hosts' --permission='modify host password' \
+    --permission='modify host userclass' --permission='modify hosts' --permission='revoke certificate' \
+    --permission='manage host keytab' --permission='write host certificate' --permission='retrieve certificates from the ca' \
+    --permission='modify services' --permission='manage service keytab' --permission='read dns entries' \
+    --permission='remove dns entries' --permission='add dns entries' --permission='update dns entries'
+else
+  ipa permission-add 'Add Host Enrollment Password' --permission='add' --type='host' --attrs='userpassword'
+
+  ipa privilege-add-permission 'Smart Proxy Host Management' --permission='System: Manage Host Enrollment Password' \
+    --permission='System: Manage Host Certificates' --permission='System: Modify Hosts' --permission='System: Remove Hosts' \
+    --permission='System: Manage Host Keytab' --permission='Retrieve Certificates from the CA' --permission='System: Modify Services' \
+    --permission='System: Manage Service Keytab' --permission='System: Add DNS Entries' --permission='System: Update DNS Entries' \
+    --permission='System: Remove DNS Entries' --permission='Add Host Enrollment Password'
+fi
 
 ipa role-add 'Smart Proxy Host Manager' --desc='Smart Proxy management'
 ipa role-add-privilege 'Smart Proxy Host Manager' --privilege='Smart Proxy Host Management'
