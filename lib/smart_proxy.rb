@@ -26,6 +26,7 @@ require 'rack-patch' if Rack.release < "1.3"
 require 'sinatra-patch'
 require 'sinatra/ssl_client_verification'
 require 'sinatra/trusted_hosts'
+require 'poodles-fix'
 
 module Proxy
   SETTINGS = Settings.load_global_settings
