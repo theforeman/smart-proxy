@@ -15,7 +15,7 @@ class TemplateTest < Test::Unit::TestCase
 
   def test_template_requests_return_data
     @expected_body = "my template"
-    stub_request(:get, @foreman_url+'/unattended/provision?token=test-token').to_return(:status => 200, :message => "OK", :body => @expected_body)
+    stub_request(:get, @foreman_url+'/unattended/provision?token=test-token').to_return(:status => [200, "OK"], :body => @expected_body)
     result =  Proxy::Templates::Handler.get_template('provision', 'test-token')
     assert_equal(@expected_body, result)
   end
