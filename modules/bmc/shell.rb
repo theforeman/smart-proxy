@@ -30,25 +30,35 @@ module Proxy
       end
 
       def powercycle
-        # search for sudo
-        sudo = which("sudo")
+        sudo = which('sudo')
+        shutdown = which('shutdown')
 
         unless sudo
-          logger.warn "sudo binary was not found - aborting"
+          logger.warn "sudo binary was not found - aborting reboot"
           return false
         end
 
-        cycle_cmd = [sudo,"shutdown","-r","now","foreman_proxy initiated shutdown via BMC shell api"]
-
-        # Returns a boolean with whether or not the command executed successfully.
-        stdout = `#{cycle_cmd.join(' ')}`
-        if $? == 0
-          logger.info "Shutdown command successful"
-          return true
-        else
-          logger.warn "The attempted shutdown failed: \n#{stdout}"
+        unless shutdown
+          logger.warn "shutdown binary was not found - aborting reboot"
           return false
         end
+
+        # because we are actually terminating the server, we do not care about the return code -
+        # we actually must not care because there is no time to wait (we need to finish the request
+        # as soon as possible)
+        Thread.start do
+          # give the http server some time to flush the buffers
+          sleep 5
+          # and see you next time
+          exitcode = system sudo, "shutdown", "-r", "now", "Foreman BMC API"
+          # only report errors
+          if exitcode != 0
+            logger.warn "The attempted shutdown failed with code #{exitcode}"
+          end
+        end
+
+        # let's return true and finish the request
+        return true
       end
 
     end
