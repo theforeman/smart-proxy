@@ -41,3 +41,8 @@
 # Override use of Puppet's API to list environments, by default it will use only if
 # environmentpath is given in puppet.conf, else will look for environments in puppet.conf
 #:puppet_use_environment_api: true
+
+# Cache options
+#:use_cache: true
+# default location of cache is relative to the installation dir
+#:cache_location: '/var/lib/smart-proxy/cache'

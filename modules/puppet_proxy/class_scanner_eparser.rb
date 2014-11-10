@@ -1,28 +1,26 @@
 require 'puppet_proxy/puppet_class'
 require 'puppet'
+require 'puppet_proxy/class_scanner_base'
 
 if Puppet::PUPPETVERSION.to_f >= 3.2
   require 'puppet/pops'
 
   module Proxy::Puppet
-    class ClassScannerEParser
+    class ClassScannerEParser < ClassScannerBase
       class << self
+
         # scans a given directory and its sub directory for puppet classes
         # returns an array of PuppetClass objects.
-        def scan_directory directory
-
-          parser = Puppet::Pops::Parser::Parser.new
-          Dir.glob("#{directory}/*/manifests/**/*.pp").map do |filename|
-            scan_manifest File.read(filename), parser, filename
-          end.compact.flatten
+        def scan_directory directory, environment
+          super directory, environment
         end
 
-        def scan_manifest manifest, parser, filename = ''
+        def scan_manifest manifest, filename = ''
           klasses = []
 
           already_seen = Set.new
           already_seen << '' # Prevent the toplevel "main" class from matching
-          ast = parser.parse_string manifest
+          ast = Puppet::Pops::Parser::Parser.new.parse_string manifest
           class_finder = ClassFinder.new
 
           class_finder.do_find ast.current

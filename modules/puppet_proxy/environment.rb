@@ -147,6 +147,6 @@ class Proxy::Puppet::Environment
     conf = ::Proxy::Puppet::ConfigReader.new(::Proxy::Puppet::Initializer.config).get
     eparser = (conf[:main] && conf[:main][:parser] == 'future') || (conf[:master] && conf[:master][:parser] == 'future')
 
-    paths.map {|path| ::Proxy::Puppet::PuppetClass.scan_directory path, eparser}.flatten
+    paths.map {|path| ::Proxy::Puppet::PuppetClass.scan_directory path, name, eparser}.flatten
   end
 end
