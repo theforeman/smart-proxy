@@ -15,7 +15,7 @@ class HttpDownloadsTest < Test::Unit::TestCase
   end
 
   def test_should_skip_download_if_one_is_in_progress
-    locked = Proxy::HttpDownloads.try_locking("another_destination")
+    locked = Proxy::FileLock.try_locking("another_destination")
     assert !(Proxy::HttpDownloads.start_download 'another_source', 'another_destination')
   ensure
     File.delete(locked.path)

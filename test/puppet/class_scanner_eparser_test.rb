@@ -1,7 +1,12 @@
 require 'test_helper'
+require 'puppet_proxy/puppet_plugin'
 require 'puppet_proxy/class_scanner_eparser'
 
 class ClassScannerEParserTest < Test::Unit::TestCase
+  def setup
+    Proxy::Puppet::Plugin.load_test_settings(:use_cache => false)
+  end
+
   def test_should_find_class_in_a_manifest
     return unless Puppet::PUPPETVERSION.to_f >= 3.2
     manifest = <<-EOF
@@ -10,7 +15,7 @@ class ClassScannerEParserTest < Test::Unit::TestCase
     }
     EOF
     require 'puppet/pops'
-    klasses =  Proxy::Puppet::ClassScannerEParser.scan_manifest(manifest, Puppet::Pops::Parser::Parser.new)
+    klasses =  Proxy::Puppet::ClassScannerEParser.scan_manifest(manifest)
     assert_kind_of Array, klasses
     assert_equal 1, klasses.size
 
@@ -25,7 +30,7 @@ class ClassScannerEParserTest < Test::Unit::TestCase
     manifest = <<-EOF
       include 'x::y'
     EOF
-    klasses =  Proxy::Puppet::ClassScannerEParser.scan_manifest(manifest, Puppet::Pops::Parser::Parser.new)
+    klasses =  Proxy::Puppet::ClassScannerEParser.scan_manifest(manifest)
     assert klasses.empty?
   end
 
@@ -40,7 +45,7 @@ class ClassScannerEParserTest < Test::Unit::TestCase
     }
 
     EOF
-    klasses =  Proxy::Puppet::ClassScannerEParser.scan_manifest(manifest, Puppet::Pops::Parser::Parser.new)
+    klasses =  Proxy::Puppet::ClassScannerEParser.scan_manifest(manifest)
     assert_kind_of Array, klasses
     assert_equal 2, klasses.size
     klasses.sort! { |k1,k2| k1.name <=> k2.name }
@@ -58,7 +63,7 @@ class ClassScannerEParserTest < Test::Unit::TestCase
 
   def test_should_scan_a_dir
     return unless Puppet::PUPPETVERSION.to_f >= 3.2
-    klasses =  Proxy::Puppet::ClassScannerEParser.scan_directory('/tmp/no_such_dir')
+    klasses =  Proxy::Puppet::ClassScannerEParser.scan_directory('/tmp/no_such_dir', "example_env")
     assert_kind_of Array, klasses
     assert klasses.empty?
   end
@@ -69,7 +74,7 @@ class ClassScannerEParserTest < Test::Unit::TestCase
     class foreman::install {
     }
     EOF
-    klasses = Proxy::Puppet::ClassScannerEParser.scan_manifest(manifest, Puppet::Pops::Parser::Parser.new)
+    klasses = Proxy::Puppet::ClassScannerEParser.scan_manifest(manifest)
     assert_kind_of Array, klasses
     assert_equal 1, klasses.size
     klass = klasses.first
@@ -82,7 +87,7 @@ class ClassScannerEParserTest < Test::Unit::TestCase
     class foreman::install () {
     }
     EOF
-    klasses = Proxy::Puppet::ClassScannerEParser.scan_manifest(manifest, Puppet::Pops::Parser::Parser.new)
+    klasses = Proxy::Puppet::ClassScannerEParser.scan_manifest(manifest)
     assert_kind_of Array, klasses
     assert_equal 1, klasses.size
     klass = klasses.first
@@ -95,7 +100,7 @@ class ClassScannerEParserTest < Test::Unit::TestCase
     class foreman::install ($mandatory) {
     }
     EOF
-    klasses = Proxy::Puppet::ClassScannerEParser.scan_manifest(manifest, Puppet::Pops::Parser::Parser.new)
+    klasses = Proxy::Puppet::ClassScannerEParser.scan_manifest(manifest)
     assert_kind_of Array, klasses
     assert_equal 1, klasses.size
     klass = klasses.first
@@ -121,7 +126,7 @@ class ClassScannerEParserTest < Test::Unit::TestCase
     ) {
     }
     EOF
-    klasses = Proxy::Puppet::ClassScannerEParser.scan_manifest(manifest, Puppet::Pops::Parser::Parser.new)
+    klasses = Proxy::Puppet::ClassScannerEParser.scan_manifest(manifest)
     assert_kind_of Array, klasses
     assert_equal 1, klasses.size
     klass = klasses.first
@@ -141,18 +146,39 @@ class ClassScannerEParserTest < Test::Unit::TestCase
     }, klass.params)
   end
 
-  def test_should_handle_import_in_a_manifest
+  def test_should_handle_import_in_a_manifest_without_cache
     return unless Puppet::PUPPETVERSION.to_f >= 3.2
-    klasses =  Proxy::Puppet::ClassScannerEParser.scan_directory('./test/fixtures/modules_include')
-    assert_kind_of Array, klasses
+    Proxy::Puppet::Plugin.load_test_settings(:use_cache => false)
+
+    klasses =  Proxy::Puppet::ClassScannerEParser.scan_directory('./test/fixtures/modules_include', "example_env")
     assert_equal 2, klasses.size
 
     klass = klasses.find {|k| k.name == "sub::foo" }
     assert klass
     assert_equal "testinclude", klass.module
 
-    klass = klasses.find {|k| k.name == "testinclude" }
+    assert klasses.any? {|k| k.name == "testinclude" }
+  end
+
+  def test_should_handle_import_in_a_manifest_with_cache
+    return unless Puppet::PUPPETVERSION.to_f >= 3.2
+    Proxy::Puppet::Plugin.load_test_settings(:use_cache => true)
+
+    Proxy::Puppet::PuppetCache.stubs(:read_from_cache).returns('./test/fixtures/modules_include' =>
+                                                                     { 'testinclude' =>
+                                                                     { :timestamp => Time.now,
+                                                                       :manifest => [[Proxy::Puppet::PuppetClass.new('testinclude')],
+                                                                                     [Proxy::Puppet::PuppetClass.new('testinclude::check::cache')]] }})
+    Proxy::Puppet::PuppetCache.stubs(:write_to_cache)
+
+    klasses =  Proxy::Puppet::ClassScannerEParser.scan_directory('./test/fixtures/modules_include', "example_env")
+    assert_equal 2, klasses.size
+
+    klass = klasses.find {|k| k.name == "check::cache" }
     assert klass
+    assert_equal "testinclude", klass.module
+
+    assert klasses.any? {|k| k.name == "testinclude" }
   end
 
   #TODO add scans to a real puppet directory with modules

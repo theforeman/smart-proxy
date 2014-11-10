@@ -5,14 +5,14 @@ class Proxy::Puppet::PuppetClass
   class << self
     # scans a given directory and its sub directory for puppet classes
     # returns an array of PuppetClass objects.
-    def scan_directory directory, eparser = false
+    def scan_directory directory, environment, eparser = false
       # Get a Puppet Parser to parse the manifest source
       Proxy::Puppet::Initializer.load
 
       if eparser
-        Proxy::Puppet::ClassScannerEParser.scan_directory directory
+        Proxy::Puppet::ClassScannerEParser.scan_directory directory, environment
       else
-        Proxy::Puppet::ClassScanner.scan_directory directory
+        Proxy::Puppet::ClassScanner.scan_directory directory, environment
       end
     end
   end

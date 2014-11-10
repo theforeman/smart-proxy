@@ -27,6 +27,8 @@ def known_options
     :settings_directory => :settings,
     :http_port          => :settings,
     :https_port         => :settings,
+    :use_cache          => :settings,
+    :cache_location     => :settings,
     :puppetca_use_sudo  => :puppetca,
     :puppetdir          => :puppetca,
     :ssldir             => :puppetca,
