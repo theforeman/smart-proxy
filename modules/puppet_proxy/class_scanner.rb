@@ -9,7 +9,7 @@ module Proxy::Puppet
 
         parser = Puppet::Parser::Parser.new Puppet::Node::Environment.new
 
-        Dir.glob("#{directory}/*/manifests/**/*.pp").map do |filename|
+        Dir.glob("#{directory}/**/manifests/**/*.pp").map do |filename|
           scan_manifest File.read(filename), parser, filename
         end.compact.flatten
       end
