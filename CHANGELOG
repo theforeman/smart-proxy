@@ -1,3 +1,16 @@
+2014-11-25	Dominic Cleal <dcleal@redhat.com>
+	* Release 1.7.0-RC2
+
+2014-11-24	Stephen Benjamin <stbenjam@redhat.com>
+	* fixes #7197 - add man page for foreman-prepare-realm
+	* fixes #8278 - update foreman-prepare-realm for freeipa 4
+
+2014-11-24	Ori Rabin <orabin@redhat.com>
+	* Fixes #8347 - facts feature should not be enabled by default
+
+2014-11-24	Lukas Zapletal <lzap+git@redhat.com>
+	* Fixes #8320 - shutdown shell provider threading fixed
+
 2014-11-11	Dominic Cleal <dcleal@redhat.com>
 	* Release 1.7.0-RC1
 
