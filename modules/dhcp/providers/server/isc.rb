@@ -72,13 +72,23 @@ module Proxy::DHCP
             opts.merge!(parse_record_options(data))
           end
           if opts[:deleted]
-            record = find_record_by_hostname(subnet, hostname)
+            record = find_record_by_hostname(subnet, hostname, 'reservation')
             subnet.delete record if record
             next
           end
         end
         begin
-          Proxy::DHCP::Reservation.new(opts.merge(:subnet => subnet)) if subnet.include? opts[:ip]
+          if subnet.include?(opts[:ip])
+            # delete possible duplicities 
+            if dupe = subnet.has_mac?(opts[:mac], :reservation)
+              subnet.delete(dupe)
+            end
+            if dupe = subnet.has_ip?(opts[:ip], :reservation)
+              subnet.delete(dupe)
+            end
+            # and add the record
+            Proxy::DHCP::Reservation.new(opts.merge(:subnet => subnet))
+          end
         rescue Exception => e
           logger.warn "skipped #{hostname} - #{e}"
         end
@@ -92,8 +102,24 @@ module Proxy::DHCP
           body.split(";").each do |data|
             opts.merge! parse_record_options(data)
           end
-          next if opts[:state] == "free" || opts[:state] == "abandoned" || opts[:mac].nil?
-          Proxy::DHCP::Lease.new(opts.merge(:subnet => subnet, :ip => ip)) if subnet.include? ip
+          next if opts[:mac].nil?
+          # delete expired (explicitly) expired leases
+          if opts[:state] == "free" || (opts[:next_state] == "free" && opts[:ends] && opts[:ends] < Time.now)
+            record = find_record_by_ip(subnet, ip, 'lease')
+            subnet.delete record if record
+            next
+          end
+          if subnet.include? ip
+            # delete possible duplicities 
+            if dupe = subnet.has_mac?(opts[:mac], :lease)
+              subnet.delete(dupe)
+            end
+            if dupe = subnet.has_ip?(ip, :lease)
+              subnet.delete(dupe)
+            end
+            # and add the record
+            Proxy::DHCP::Lease.new(opts.merge(:subnet => subnet, :ip => ip))
+          end
         end
       end
       report "Enumerated hosts on #{subnet.network}"
@@ -126,6 +152,8 @@ module Proxy::DHCP
         # Lease options
       when /^binding\s+state\s+(\S+)/
         options[:state] = $1
+      when /^next\s+binding\s+state\s+(\S+)/
+        options[:next_state] = $1
       when /^starts\s+\d+\s+(.*)/
         options[:starts] = parse_time($1)
       when /^ends\s+\d+\s+(.*)/
@@ -198,15 +226,21 @@ module Proxy::DHCP
       hex.split(":").map{|h| h.to_i(16).to_s}.join(".")
     end
 
-    def find_record_by_hostname subnet, hostname
+    def find_record_by_hostname subnet, hostname, kind
       subnet.records.find do |v|
-        v.options[:hostname] == hostname
+        v.options[:hostname] == hostname && v.kind == kind
+      end
+    end
+
+    def find_record_by_ip subnet, ip, kind
+      subnet.records.find do |v|
+        v.options[:ip] == ip && v.kind == kind
       end
     end
 
     # ISC stores timestamps in UTC, therefor forcing the time to load from GMT/UTC TZ
     def parse_time str
-      Time.parse(str +" UTC")
+      Time.parse(str + " UTC")
     rescue => e
       logger.warn "Unable to parse time #{e}"
       raise "Unable to parse time #{e}"

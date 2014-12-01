@@ -1,11 +1,161 @@
+# Basic examples
 lease 192.168.122.2 {
   starts 6 2014/07/12 10:08:29;
   binding state active;
   next binding state free;
   hardware ethernet 00:aa:bb:cc:dd:ee;
 }
+host ten.example.com {
+  dynamic;
+  hardware ethernet 10:10:10:10:10:10;
+  fixed-address 192.168.122.10;
+  supersede host-name = "ten.example.com";
+}
 
-# This is a little bit unorthodox because the real ISC DHCP doesn't
-# include from its leases file, but is a useful testing convenience here
-include "test/tmp/dhcp_extra_leases.tmp";
+# Reservation that is deleted
+host deleteme.example.com {
+  dynamic;
+  hardware ethernet 10:10:10:10:20:20;
+  fixed-address 192.168.122.20;
+  supersede host-name = "deleteme.example.com";
+}
+host deleteme.example.com {
+  dynamic;
+  hardware ethernet 10:10:10:10:20:20;
+  fixed-address 192.168.122.20;
+  supersede host-name = "deleteme.example.com";
+  deleted;
+}
 
+# The following six leases are from booting a real-world DELL hardware with
+# PXE using Foreman Discovery. Fist, a BIOS/UEFI DHCP request is sent along
+# with an UID:
+lease 192.168.122.81 {
+  starts 4 2014/10/16 10:14:40;
+  ends 4 2014/10/16 10:24:40;
+  tstp 4 2014/10/16 10:24:40;
+  cltt 4 2014/10/16 10:14:40;
+  binding state free;
+  hardware ethernet ec:f4:bb:c6:ca:fe;
+}
+lease 192.168.122.81 {
+  starts 4 2014/10/16 12:53:16;
+  ends 4 2014/10/16 13:03:16;
+  cltt 4 2014/10/16 12:53:16;
+  binding state active;
+  next binding state free;
+  hardware ethernet ec:f4:bb:c6:ca:fe;
+  uid "\000DELLX\000\020W\200L\310\300O022";
+}
+# And it is released by the client.
+lease 192.168.122.81 {
+  starts 4 2014/10/16 12:53:16;
+  ends 4 2014/10/16 12:54:03;
+  tstp 4 2014/10/16 12:54:03;
+  cltt 4 2014/10/16 12:53:16;
+  binding state free;
+  hardware ethernet ec:f4:bb:c6:ca:fe;
+  uid "\000DELLX\000\020W\200L\310\300O022";
+}
+# Then Dracut acquires another lease, now without the UID:
+lease 192.168.122.88 {
+  starts 4 2014/10/16 12:54:03;
+  ends 4 2014/10/16 13:04:03;
+  cltt 4 2014/10/16 12:54:03;
+  binding state active;
+  next binding state free;
+  hardware ethernet ec:f4:bb:c6:ca:fe;
+}
+# And then OS acquires another lease, now without the UID but with
+# a client-hostname set:
+lease 192.168.122.89 {
+  starts 4 2014/10/16 12:55:22;
+  ends 4 2014/10/16 13:05:22;
+  cltt 4 2014/10/16 12:55:22;
+  binding state active;
+  next binding state free;
+  hardware ethernet ec:f4:bb:c6:ca:fe;
+  client-hostname "localhost";
+}
+lease 192.168.122.89 {
+  starts 4 2014/10/16 12:59:40;
+  ends 4 2199/01/01 00:00:01;
+  cltt 4 2014/10/16 12:59:40;
+  binding state active;
+  next binding state free;
+  hardware ethernet ec:f4:bb:c6:ca:fe;
+  client-hostname "localhost";
+}
+# This section should be parsed as follows:
+# .81 - free
+# .88 - free (still active, but expired to this date)
+# .89 - active (very long lease set with expiration in 2199)
+
+# Another real-world example when multiple leases overlap each other.
+# This must be loaded as one lease. The one that ends later wins.
+lease 192.168.122.7 {
+  starts 2 2014/12/09 14:20:25;
+  ends 2 2114/12/09 14:30:25;
+  cltt 2 2014/12/09 14:20:25;
+  binding state active;
+  next binding state free;
+  rewind binding state free;
+  hardware ethernet 44:1e:a1:73:39:91;
+  client-hostname "localhost";
+}
+lease 192.168.122.7 {
+  starts 2 2014/12/09 14:25:02;
+  ends 2 2114/12/09 14:35:02;
+  cltt 2 2014/12/09 14:25:02;
+  binding state active;
+  next binding state free;
+  rewind binding state free;
+  hardware ethernet 44:1e:a1:73:39:91;
+  client-hostname "localhost";
+}
+lease 192.168.122.7 {
+  starts 2 2014/12/09 14:29:01;
+  ends 2 2114/12/09 14:39:01;
+  cltt 2 2014/12/09 14:29:01;
+  binding state active;
+  next binding state free;
+  rewind binding state free;
+  hardware ethernet 44:1e:a1:73:39:91;
+  client-hostname "localhost";
+}
+
+# The same for reservations, we just need to skip dupes.
+host mac441ea173366b.example.com {
+  dynamic;
+  hardware ethernet 44:1e:a1:73:36:6b;
+  fixed-address 192.168.122.44;
+        supersede server.filename = "pxelinux.0";
+        supersede server.next-server = c0:a8:00:01;
+        supersede host-name = "mac441ea173366b.example.com";
+}
+host mac441ea173366b.example.com {
+  dynamic;
+  hardware ethernet 44:1e:a1:73:36:6b;
+  fixed-address 192.168.122.44;
+        supersede server.filename = "pxelinux.0";
+        supersede server.next-server = c0:a8:00:01;
+        supersede host-name = "mac441ea173366b.example.com";
+}
+
+# Prevent deletion of a reserved record via expired lease
+host quux.example.org {
+  dynamic;
+  hardware ethernet 52:54:00:31:a3:97;
+  fixed-address 192.168.122.53;
+        supersede server.filename = "pxelinux.0";
+        supersede server.next-server = ac:14:0a:01;
+        supersede host-name = "quux.example.org";
+}
+lease 192.168.122.53 {
+  starts 0 2010/04/06 15:01:31;
+  ends 0 2010/04/06 16:00:09;
+  tstp 0 2010/04/06 16:00:09;
+  cltt 0 2010/04/06 15:01:31;
+  binding state free;
+  hardware ethernet 00:1d:60:a5:b1:2a;
+}
