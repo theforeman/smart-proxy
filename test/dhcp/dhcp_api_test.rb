@@ -53,14 +53,39 @@ class DhcpApiTest < Test::Unit::TestCase
         "hostname"   => "test.example.com",
         "ip"         => "192.168.122.1",
         "mac"        => "00:11:bb:cc:dd:ee",
-      } ],
-      "leases"       => [ {
-        "ip"         => "192.168.122.2",
-        "mac"        => "00:aa:bb:cc:dd:ee",
-        "starts"     => date_format("Sat Jul 12 10:08:29 UTC 2014"),
-        "ends"       => nil,
-        "state"      => "active",
-      } ]
+      }, {
+        "hostname"   => "ten.example.com",
+        "ip"         => "192.168.122.10",
+        "mac"        => "10:10:10:10:10:10",
+      }, {
+        "hostname"   => "mac441ea173366b.example.com",
+        "ip"         => "192.168.122.44",
+        "mac"        => "44:1e:a1:73:36:6b",
+      }, {
+        "hostname"   => "quux.example.org",
+        "ip"         => "192.168.122.53",
+        "mac"        => "52:54:00:31:a3:97",
+      }],
+      "leases" => [
+        {
+          "ip"     => "192.168.122.2",
+          "mac"    => "00:aa:bb:cc:dd:ee",
+          "starts" => date_format("Sat Jul 12 10:08:29 UTC 2014"),
+          "ends"   => nil,
+          "state"  => "active"
+        },{
+          "ip"     => "192.168.122.89",
+          "mac"    => "ec:f4:bb:c6:ca:fe",
+          "starts" => date_format("2014-10-16 12:59:40 UTC"),
+          "ends"   => date_format("2199-01-01 00:00:01 UTC"),
+          "state"  => "active"
+        }, {
+          "ip"     => "192.168.122.7",
+          "mac"    => "44:1e:a1:73:39:91",
+          "starts" => date_format("2014-12-09 14:29:01 UTC"),
+          "ends"   => date_format("2114-12-09 14:39:01 UTC"),
+          "state"  => "active"
+        }]
     }
     assert_equal expected, data
   end
@@ -147,42 +172,6 @@ class DhcpApiTest < Test::Unit::TestCase
     assert last_response.ok?, "Last response was not ok: #{last_response.status} #{last_response.body}"
     expected = ''
     assert_equal expected, last_response.body
-
-    # We stubbed out the real omcmd, so fake it:
-    File.open("test/tmp/dhcp_extra_leases.tmp", File::RDWR|File::CREAT) do |f|
-      f.puts <<-EOF
-        host ten.example.com {
-          dynamic;
-          hardware ethernet 10:10:10:10:10:10;
-          fixed-address 192.168.122.10;
-          supersede host-name = "ten.example.com";
-        }
-      EOF
-    end
-
-    # Repeat the load subnet test, make sure the new entry is in there
-    get "/192.168.122.0"
-    assert last_response.ok?, "Last response was not ok: #{last_response.status} #{last_response.body}"
-    data = JSON.parse(last_response.body)
-    expected = {
-      "reservations" => [ {
-        "hostname"   => "test.example.com",
-        "ip"         => "192.168.122.1",
-        "mac"        => "00:11:bb:cc:dd:ee",
-      }, {
-        "hostname"   => "ten.example.com",
-        "ip"         => "192.168.122.10",
-        "mac"        => "10:10:10:10:10:10",
-      } ],
-      "leases"       => [ {
-        "ip"         => "192.168.122.2",
-        "mac"        => "00:aa:bb:cc:dd:ee",
-        "starts"     => date_format("Sat Jul 12 10:08:29 UTC 2014"),
-        "ends"       => nil,
-        "state"      => "active",
-      } ]
-    }
-    assert_equal expected, data
   end
 
   def test_api_09_delete_record
