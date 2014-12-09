@@ -3,7 +3,7 @@ module Proxy::Puppet
     http_rackup_path File.expand_path("http_config.ru", File.expand_path("../", __FILE__))
     https_rackup_path File.expand_path("http_config.ru", File.expand_path("../", __FILE__))
   
-    default_settings :puppet_provider => 'puppetrun', :puppetdir => '/etc/puppet'
+    default_settings :puppet_provider => 'puppetrun', :puppetdir => '/etc/puppet', :salt_puppetrun_cmd => 'puppet.run'
     plugin :puppet, ::Proxy::VERSION
   end
 end

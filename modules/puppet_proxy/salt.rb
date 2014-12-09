@@ -13,7 +13,8 @@ class Proxy::Puppet::Salt < Proxy::Puppet::Runner
 
     cmd.push('-L')
     cmd.push(shell_escaped_nodes.join(','))
-    cmd.push('puppet.run')
+    salt_puppetrun_cmd = Proxy::Puppet::Plugin.settings.salt_puppetrun_cmd
+    cmd.push(salt_puppetrun_cmd)
 
     shell_command(cmd)
   end
