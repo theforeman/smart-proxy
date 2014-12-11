@@ -41,3 +41,13 @@
 # Override use of Puppet's API to list environments, by default it will use only if
 # environmentpath is given in puppet.conf, else will look for environments in puppet.conf
 #:puppet_use_environment_api: true
+
+# Filter puppet class import and include only modules matching the
+# puppet_include_modules expression
+#:puppet_include_modules: "role_*"
+# Filter puppet class import and exclude directories from module path listed
+# in puppet_ignore_modulefolder.
+#:puppet_ignore_modulefolder:
+# - services
+# - modules
+

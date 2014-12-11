@@ -88,6 +88,17 @@ class Proxy::Puppet::Environment
         dynamicpath = modulepath.split(":")
 
         modulepath.split(":").each do |base_dir|
+          # remove excluded modulefolders
+          if Proxy::Puppet::Plugin.settings.puppet_ignore_modulefolder
+            Proxy::Puppet::Plugin.settings.puppet_ignore_modulefolder.each do |exclude_folder|
+              if base_dir.include?(exclude_folder)
+                staticpath.delete base_dir
+                dynamicpath.delete base_dir
+              end
+            end
+          end
+
+          # remove dynamic paths from static paths an vice versa
           if base_dir.include?("$environment")
             # remove this entry from the static paths
             staticpath.delete base_dir
