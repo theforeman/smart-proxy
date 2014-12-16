@@ -1,3 +1,9 @@
+2014-12-16	Dominic Cleal <dcleal@redhat.com>
+	* Release 1.7.1
+
+2014-12-15	Lukas Zapletal <lzap+git@redhat.com>
+	* Fixes #8538 - Fixed ISC DHCP states and duplicities
+
 2014-12-02	Dominic Cleal <dcleal@redhat.com>
 	* Release 1.7.0
 
