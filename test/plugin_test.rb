@@ -68,4 +68,18 @@ class PluginTest < Test::Unit::TestCase
     Proxy::Plugins.expects(:disable_plugin).never
     plugin.configure_plugin
   end
+
+  class TestPlugin10 < Proxy::Plugin; plugin :test10, '1.0'; end
+  def test_enable_of_only_http_is_successful
+    TestPlugin10.settings = ::Proxy::Settings::Plugin.new({:enabled => 'http'}, {})
+    assert TestPlugin10.http_enabled?
+    assert !TestPlugin10.https_enabled?
+  end
+
+  class TestPlugin11 < Proxy::Plugin; plugin :test11, '1.0'; end
+  def test_enable_of_only_https_is_successful
+    TestPlugin11.settings = ::Proxy::Settings::Plugin.new({:enabled => 'https'}, {})
+    assert TestPlugin11.https_enabled?
+    assert !TestPlugin11.http_enabled?
+  end
 end

@@ -66,12 +66,20 @@ class ::Proxy::Plugin
       @after_activation_blk = blk
     end
 
+    def http_enabled?
+      [true,'http'].include?(self.settings.enabled)
+    end
+
     def http_rackup_path(path)
-      @get_http_rackup_path = path
+      @get_http_rackup_path = path if http_enabled?
+    end
+
+    def https_enabled?
+      [true,'https'].include?(self.settings.enabled)
     end
 
     def https_rackup_path(path)
-      @get_https_rackup_path = path
+      @get_https_rackup_path = path if https_enabled?
     end
 
     def dependencies
