@@ -1,4 +1,6 @@
-# Set this to true if the Proxy should handle template requests on behalf of Foreman
+---
+# Enable this if the Proxy should handle template requests on behalf of Foreman
+# Can be true, false, or http/https to enable just one of the protocols
 :enabled: false
 
 # This plugin also requires that :foreman_url: be set in the main settings.yml

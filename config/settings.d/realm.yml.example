@@ -1,4 +1,5 @@
 ---
+# Can be true, false, or http/https to enable just one of the protocols
 :enabled: false
 
 # Available providers:
