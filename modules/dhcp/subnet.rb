@@ -277,7 +277,13 @@ module Proxy::DHCP
 
     def icmp_pingable? ip
       # Always shell to ping, instead of using net-ping
+    if PLATFORM =~ /mingw/
+      # Windows uses different options for ping and does not have /dev/null
+      system("ping -n 1 -w 1 #{ip} > NUL")
+    else
+      # Default to Linux ping options and send to /dev/null
       system("ping -c 1 -W 1 #{ip} > /dev/null")
+    end
     rescue
       # We failed to check this address so we should not use it
       true
