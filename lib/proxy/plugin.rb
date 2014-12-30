@@ -71,7 +71,7 @@ class ::Proxy::Plugin
     end
 
     def http_rackup_path(path)
-      @get_http_rackup_path = path if http_enabled?
+      @get_http_rackup_path = path
     end
 
     def https_enabled?
@@ -79,7 +79,7 @@ class ::Proxy::Plugin
     end
 
     def https_rackup_path(path)
-      @get_https_rackup_path = path if https_enabled?
+      @get_https_rackup_path = path
     end
 
     def dependencies
@@ -134,11 +134,11 @@ class ::Proxy::Plugin
   end
 
   def http_rackup
-    self.class.get_http_rackup_path.nil? ? "" : File.read(self.class.get_http_rackup_path)
+    (self.class.http_enabled? && self.class.get_http_rackup_path) ? File.read(self.class.get_http_rackup_path) : ""
   end
 
   def https_rackup
-    self.class.get_https_rackup_path.nil? ? "" : File.read(self.class.get_https_rackup_path)
+    (self.class.https_enabled? && self.class.get_https_rackup_path) ? File.read(self.class.get_https_rackup_path) : ""
   end
 
   def settings
