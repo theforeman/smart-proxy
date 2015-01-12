@@ -37,7 +37,9 @@
 # Uncomment and modify if you want to change the default pid file '/var/run/foreman-proxy/foreman-proxy.pid'
 #:daemon_pid: /var/run/foreman-proxy/foreman-proxy.pid
 
-# HTTP ports configuration
+# host and ports configuration
+# host to bind ports to (possible values: *, localhost, 0.0.0.0)
+#:bind_host: '*'
 # http is disabled by default. To enable, uncomment 'http_port' setting
 #:http_port: 8000
 # https is enabled if certificate, CA certificate, and private key are present in locations specifed by
