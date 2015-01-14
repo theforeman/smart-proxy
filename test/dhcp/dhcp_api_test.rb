@@ -11,11 +11,6 @@ ENV['RACK_ENV'] = 'test'
 class DhcpApiTest < Test::Unit::TestCase
   include Rack::Test::Methods
 
-  # Run tests in alphabetical order for this file
-  def self.test_order
-    :sorted # default is random order
-  end
-
   def app
     Proxy::DhcpApi.new
   end
