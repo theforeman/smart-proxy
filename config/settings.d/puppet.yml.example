@@ -10,6 +10,11 @@
 #   customrun   (calls a custom command with args)
 #:puppet_provider: puppetrun
 
+# Custom salt puppet.run command
+# Set :salt_puppetrun_cmd to 'puppet.run agent no-noop' to run in no-noop mode.
+# Default command is puppet.run.
+#:salt_puppetrun_cmd: puppet.run
+
 # Customrun command details
 # Set :customrun_cmd to the full path of the script you want to run, instead of /bin/false
 :customrun_cmd: /bin/false
