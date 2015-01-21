@@ -9,11 +9,18 @@
 
 # Hosts which the proxy accepts connections from
 # commenting the following lines would mean every verified SSL connection allowed
+# HTTPS: test the certificate CN
+# HTTP: test the reverse DNS entry of the remote IP
 #:trusted_hosts:
 #- foreman.prod.domain
 #- foreman.dev.domain
 #to deny access to all hosts use:
 #:trusted_hosts: []
+
+# verify a DNS reverse lookup against it's forward lookup
+# 1.1.1.1 -> foreman.mycompany.com -> 1.1.1.1
+# (default: true)
+#:forward_verify: true
 
 #:foreman_url: http://127.0.0.1:3000
 

@@ -6,7 +6,8 @@ module ::Proxy::Settings
       :log_file => "/var/log/foreman-proxy/proxy.log",
       :log_level => "ERROR",
       :daemon => false,
-      :daemon_pid => "/var/run/foreman-proxy/foreman-proxy.pid"
+      :daemon_pid => "/var/run/foreman-proxy/foreman-proxy.pid",
+      :forward_verify => true
     }
 
     attr_reader :used_defaults
