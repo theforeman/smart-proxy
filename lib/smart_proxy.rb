@@ -85,6 +85,7 @@ module Proxy
       Rack::Server.new(
         :app => app, 
         :server => :webrick,
+        :Host => SETTINGS.bind_host,
         :Port => SETTINGS.http_port,
         :daemonize => false,
         :pid => (SETTINGS.daemon && !https_enabled?) ? pid_path : nil)
@@ -103,6 +104,7 @@ module Proxy
           Rack::Server.new(
             :app => app,
             :server => :webrick,
+            :Host => SETTINGS.bind_host,
             :Port => SETTINGS.https_port,
             :SSLEnable => true,
             :SSLVerifyClient => OpenSSL::SSL::VERIFY_PEER,
