@@ -1,3 +1,12 @@
+2015-01-27	Dominic Cleal <dcleal@redhat.com>
+	* Release 1.7.2
+
+2015-01-27	zjherner <zjherner@gmail.com>
+	* Fixes #8788 - DHCP not detecting pingable addresses on Windows
+
+2015-01-27	Mathieu Parent <math.parent@gmail.com>
+	* Fixes #8853 - Actually redirect stderr to proxy error log
+
 2014-12-16	Dominic Cleal <dcleal@redhat.com>
 	* Release 1.7.1
 
