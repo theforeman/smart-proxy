@@ -1,4 +1,4 @@
-require 'openssl/x509'
+require 'openssl'
 require 'resolv'
 
 module Proxy::Helpers
