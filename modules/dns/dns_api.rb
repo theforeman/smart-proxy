@@ -2,6 +2,7 @@ module Proxy::Dns
   class Api < ::Sinatra::Base
     helpers ::Proxy::Helpers
     authorize_with_trusted_hosts
+    authorize_with_ssl_client
 
     def dns_setup(opts)
       raise "Smart Proxy is not configured to support DNS" unless Proxy::Dns::Plugin.settings.enabled

@@ -1,5 +1,5 @@
 module Sinatra
-  module TrustedHosts
+  module Authorization
     def authorize_with_trusted_hosts
       helpers ::Proxy::Helpers
 
@@ -24,6 +24,22 @@ module Sinatra
 
         end
       end
+    end
+
+    def authorize_with_ssl_client
+      helpers ::Proxy::Helpers
+      helpers ::Proxy::Log
+
+      before do
+        if ['yes', 'on', '1'].include? request.env['HTTPS'].to_s
+          if request.env['SSL_CLIENT_CERT'].to_s.empty?
+            log_halt 403, "No client SSL certificate supplied"
+          end
+        else
+          logger.debug('require_ssl_client_verification: skipping, non-HTTPS request')
+        end
+      end
+
     end
   end
 end
