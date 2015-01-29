@@ -29,6 +29,8 @@ class SSLClientVerificationTest < Test::Unit::TestCase
   end
 
   class TestApp < ::Sinatra::Base
+    authorize_with_ssl_client
+
     get '/test' do
       'success'
     end

@@ -2,6 +2,7 @@ module Proxy::BMC
   class Api < ::Sinatra::Base
     helpers ::Proxy::Helpers
     authorize_with_trusted_hosts
+    authorize_with_ssl_client
 
     # All GET requests will only read ipmi data, no changes
     # All PUT requests will update information on the bmc device
