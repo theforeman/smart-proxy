@@ -38,6 +38,9 @@
 # Which user to invoke sudo as to run puppet commands
 #:puppet_user: root
 
+# If you want to override the puppet_user above just for mco commands
+#:mcollective_user: peadmin
+
 # URL of the puppet master itself for API requests
 #:puppet_url: https://puppet.example.com:8140
 # SSL certificates used to access the puppet master API
