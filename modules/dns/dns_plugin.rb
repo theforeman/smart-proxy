@@ -3,7 +3,7 @@ module Proxy::Dns
     http_rackup_path File.expand_path("http_config.ru", File.expand_path("../", __FILE__))
     https_rackup_path File.expand_path("http_config.ru", File.expand_path("../", __FILE__))
   
-    default_settings :dns_provider => 'nsupdate'
+    default_settings :dns_provider => 'dns_nsupdate'
     plugin :dns, ::Proxy::VERSION
   end
 end

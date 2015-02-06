@@ -5,11 +5,11 @@ class ProxyMigrationTest < Test::Unit::TestCase
 
   def setup
     @old_config = YAML.load_file(File.join(File.dirname(__FILE__),'./migration_settings.yml'))
-    @output, @unknown = migrate(@old_config)
+    @output, @unknown = migrate_main_configuration(@old_config)
   end
 
   def test_output_has_multiple_blocks
-    assert_equal modules.size, @output.keys.size
+    assert_equal((modules-[:dns_virsh]).size, @output.keys.size)
   end
 
   def test_output_has_correct_general_settings
@@ -35,8 +35,27 @@ class ProxyMigrationTest < Test::Unit::TestCase
   def test_output_has_correct_dns_settings
     assert_equal @output[:dns],
                  :enabled    => true,
-                 :dns_key    => "/etc/bind/rndc.key",
-                 :dns_server => "127.0.0.1"
+                 :dns_key    => "/etc/bind/rndc.key"
+  end
+
+  def test_output_has_correct_dns_nsupdate_settings
+    assert_equal @output[:dns_nsupdate],
+                 :dns_server => '127.0.0.1',
+                 :dns_ttl    => 86_400
+  end
+
+  def test_output_has_correct_dns_nsupdate_gss_settings
+    assert_equal @output[:dns_nsupdate_gss],
+                 :dns_server => '127.0.0.1',
+                 :dns_ttl    => 86_400,
+                 :dns_tsig_keytab => '/usr/share/foreman-proxy/dns.keytab',
+                 :dns_tsig_principal => 'DNS/host.example.com@EXAMPLE.COM'
+  end
+
+  def test_output_has_correct_dns_dnscmd_settings
+    assert_equal @output[:dns_nsupdate],
+                 :dns_server => '127.0.0.1',
+                 :dns_ttl    => 86_400
   end
 
   def test_output_has_correct_dhcp_settings
@@ -91,13 +110,13 @@ class ProxyMigrationTest < Test::Unit::TestCase
   def test_migration_correctly_uses_http_when_ssl_disabled
     config = YAML.load_file(File.join(File.dirname(__FILE__),'./migration_settings.yml'))
     config.delete(:ssl_certificate)
-    output, _ = migrate(config)
+    output, _ = migrate_main_configuration(config)
     assert_equal 8443, output[:settings][:http_port]
     assert_nil output[:settings][:https_port]
   end
 
   def test_migration_idempotence
-    output2, _ = migrate(@output[:settings].dup)
+    output2, _ = migrate_main_configuration(@output[:settings].dup)
     # Matches the test used inside the script for its exit value
     assert_equal @output[:settings], output2[:settings]
   end

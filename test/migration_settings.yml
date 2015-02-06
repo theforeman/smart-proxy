@@ -20,6 +20,9 @@
 :dns: true
 :dns_key: /etc/bind/rndc.key
 :dns_server: 127.0.0.1
+:dns_ttl: 86400
+:dns_tsig_keytab: /usr/share/foreman-proxy/dns.keytab
+:dns_tsig_principal: DNS/host.example.com@EXAMPLE.COM
 
 :dhcp: true
 :dhcp_vendor: isc

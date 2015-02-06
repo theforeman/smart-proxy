@@ -1,11 +1,17 @@
 require "proxy/virsh"
 require 'rexml/document'
 
-module Proxy::Dns
-  class Virsh < Record
+module Proxy::Dns::Virsh
+  class Record < ::Proxy::Dns::Record
     include Proxy::Log
     include Proxy::Util
     include Proxy::Virsh
+
+    def self.record(attrs = {})
+      main_settings = ::Proxy::Dns::Virsh::Plugin.main_module_settings
+      new(attrs.merge(:virsh_network => main_settings.virsh_network))
+    end
+
 
     def initialize options = {}
       @network = options[:virsh_network]
