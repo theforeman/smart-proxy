@@ -1,11 +1,16 @@
 require 'resolv'
 require 'win32/open3'
 
-module Proxy::Dns
-  class Dnscmd < Record
+module Proxy::Dns::Dnscmd
+  class Record < ::Proxy::Dns::Record
     include Proxy::Log
     include Proxy::Util
     attr_reader :resolver
+
+    def self.record(attrs = {})
+      new(attrs.merge(:server => ::Proxy::Dns::Dnscmd::Plugin.settings.dns_server,
+                      :ttl => ::Proxy::Dns::Plugin.settings.dns_ttl))
+    end
 
     def initialize options = {}
       super(options)
@@ -17,22 +22,22 @@ module Proxy::Dns
     def create
       @resolver = Resolv::DNS.new(:nameserver => @server)
       case @type
-      when "A"
-        if ip = dns_find(@fqdn)
-          raise(Proxy::Dns::Collision, "#{@fqdn} is already used by #{ip}") unless ip == @value
-        else
-          zone = @fqdn.sub(/[^.]+./,'')
-          msg = "Added DNS entry #{@fqdn} => #{@value}"
-          cmd = "/RecordAdd #{zone} #{@fqdn}. A #{@value}"
-          execute(cmd, msg)
-        end
-      when "PTR"
-        if name = dns_find(@value)
-          raise(Proxy::Dns::Collision, "#{@value} is already used by #{name}") unless name == @fqdn
-        else
-          # TODO: determine reverse zone names, #4025
-          return true
-        end
+        when "A"
+          if ip = dns_find(@fqdn)
+            raise(Proxy::Dns::Collision, "#{@fqdn} is already used by #{ip}") unless ip == @value
+          else
+            zone = @fqdn.sub(/[^.]+./,'')
+            msg = "Added DNS entry #{@fqdn} => #{@value}"
+            cmd = "/RecordAdd #{zone} #{@fqdn}. A #{@value}"
+            execute(cmd, msg)
+          end
+        when "PTR"
+          if name = dns_find(@value)
+            raise(Proxy::Dns::Collision, "#{@value} is already used by #{name}") unless name == @fqdn
+          else
+            # TODO: determine reverse zone names, #4025
+            true
+          end
       end
     end
 
@@ -41,16 +46,16 @@ module Proxy::Dns
     def remove
       @resolver = Resolv::DNS.new(:nameserver => @server)
       case @type
-      when "A"
-        raise Proxy::Dns::NotFound.new("Cannot find DNS entry for #{@fqdn}") unless dns_find(@fqdn)
-        zone = @fqdn.sub(/[^.]+./,'')
-        msg = "Removed DNS entry #{@fqdn} => #{@value}"
-        cmd = "/RecordDelete #{zone} #{@fqdn}. A /f"
-        execute(cmd, msg)
-      when "PTR"
-        # TODO: determine reverse zone names, #4025
-        raise Proxy::Dns::NotFound.new("Cannot find DNS entry for #{@value}") unless dns_find(@value)
-        return true
+        when "A"
+          raise Proxy::Dns::NotFound.new("Cannot find DNS entry for #{@fqdn}") unless dns_find(@fqdn)
+          zone = @fqdn.sub(/[^.]+./,'')
+          msg = "Removed DNS entry #{@fqdn} => #{@value}"
+          cmd = "/RecordDelete #{zone} #{@fqdn}. A /f"
+          execute(cmd, msg)
+        when "PTR"
+          # TODO: determine reverse zone names, #4025
+          raise Proxy::Dns::NotFound.new("Cannot find DNS entry for #{@value}") unless dns_find(@value)
+          true
       end
     end
 

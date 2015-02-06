@@ -102,4 +102,58 @@ class PluginTest < Test::Unit::TestCase
     assert_equal plugin.http_rackup, ''
     assert_equal plugin.https_rackup, "require 'test12/test12_api'"
   end
+
+  class TestPlugin13 < Proxy::Plugin; end
+  class TestPlugin14 < Proxy::Plugin; end
+  def test_build_configuration_order
+    loaded = [{ :name => :test_plugin_13, :version => "1.0", :class => TestPlugin13 },
+              { :name => :test_plugin_14, :version => "1.0", :class => TestPlugin14 }]
+    order = Proxy::Plugins.build_configuration_order(loaded)
+    assert_equal loaded, order
+  end
+
+  class TestPlugin15 < Proxy::Plugin; end
+  class TestPlugin16 < Proxy::Plugin; initialize_after :test_plugin_17; end
+  class TestPlugin17 < Proxy::Plugin; end
+  def test_build_configuration_order_with_prerequisites
+    loaded = [{ :name => :test_plugin_15, :version => "1.0", :class => TestPlugin15 },
+              { :name => :test_plugin_16, :version => "1.0", :class => TestPlugin16 },
+              { :name => :test_plugin_17, :version => "1.0", :class => TestPlugin17 }]
+    order = Proxy::Plugins.build_configuration_order(loaded)
+    assert_equal [{ :name => :test_plugin_15, :version => "1.0", :class => TestPlugin15 },
+                  { :name => :test_plugin_17, :version => "1.0", :class => TestPlugin17 },
+                  { :name => :test_plugin_16, :version => "1.0", :class => TestPlugin16 }],
+                 order
+  end
+
+  class TestPlugin18 < Proxy::Plugin; end
+  class TestPlugin19 < Proxy::Plugin; initialize_after :test_plugin_20; end
+  class TestPlugin20 < Proxy::Plugin; end
+  class TestPlugin21 < Proxy::Plugin; initialize_after :test_plugin_20; end
+  def test_build_configuration_order_repeated_prerequisites
+    loaded = [{ :name => :test_plugin_18, :version => "1.0", :class => TestPlugin18 },
+              { :name => :test_plugin_19, :version => "1.0", :class => TestPlugin19 },
+              { :name => :test_plugin_20, :version => "1.0", :class => TestPlugin20 },
+              { :name => :test_plugin_21, :version => "1.0", :class => TestPlugin21 }]
+    order = Proxy::Plugins.build_configuration_order(loaded)
+    assert_equal [{ :name => :test_plugin_18, :version => "1.0", :class => TestPlugin18 },
+                  { :name => :test_plugin_20, :version => "1.0", :class => TestPlugin20 },
+                  { :name => :test_plugin_19, :version => "1.0", :class => TestPlugin19 },
+                  { :name => :test_plugin_21, :version => "1.0", :class => TestPlugin21 }],
+                 order
+  end
+
+  class TestPlugin22 < Proxy::Plugin; uses_provider; initialize_after :first_prerequisite; end
+  def test_use_provider_affects_initialization_order
+    TestPlugin22.settings = ::Proxy::Settings::Plugin.new({:use_provider => 'test_provider'}, {})
+    assert_equal [:first_prerequisite, :test_provider], TestPlugin22.initialize_after
+  end
+
+  class TestPlugin23 < Proxy::Plugin; end
+  def test_multiple_initialize_after
+    TestPlugin23.initialize_after :first_prerequisite
+    TestPlugin23.initialize_after :second_prerequisite, :third_prerequisite
+    assert_equal [:first_prerequisite, :second_prerequisite, :third_prerequisite],
+                 TestPlugin23.initialize_after
+  end
 end

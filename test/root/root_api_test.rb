@@ -17,12 +17,6 @@ class TestPlugin3 < ::Proxy::Plugin
   plugin :test3, "0.0.1"
 end
 
-class TestPlugins2 < ::Proxy::Plugins
-  def self.enabled=(arg)
-    @@enabled = arg
-  end
-end
-
 class RootApiTest < Test::Unit::TestCase
   include Rack::Test::Methods
 
@@ -31,7 +25,7 @@ class RootApiTest < Test::Unit::TestCase
   end
 
   def test_features
-    TestPlugins2.enabled = {:test2 => TestPlugin2, :test3 => TestPlugin3, :foreman_proxy => TestPlugin0}
+    ::Proxy::Plugins.stubs(:enabled_plugins).returns([TestPlugin2.new, TestPlugin3.new, TestPlugin0.new])
     get "/features"
     assert_equal ['test2', 'test3'], JSON.parse(last_response.body)
   end
