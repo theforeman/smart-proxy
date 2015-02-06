@@ -69,6 +69,26 @@ module ::Proxy
       File.join(migration_dir, "dst")
     end
 
+    def path(*segments)
+      File.join(segments)
+    end
+
+    def duplicate_original_configuration
+      FileUtils.cp_r(path(src_dir, '.'), dst_dir)
+    end
+
+    def copy_original_configuration_except(*exceptions)
+      FileUtils.cp_r(Dir.glob(path(src_dir, "*.yml")) - exceptions.map { |e| path(src_dir, e) }, dst_dir)
+      FileUtils.cp_r(
+          Dir.glob(path(src_dir, "settings.d", "*.*")) - exceptions.map { |e| path(src_dir, e) },
+          path(dst_dir, "settings.d"))
+    end
+
+    def create_migration_dirs
+      FileUtils.mkdir_p(src_dir)
+      FileUtils.mkdir_p(File.join(dst_dir, "settings.d"))
+    end
+
     def underscore(src)
       src = src.gsub(/::/, '/')
       src = src.gsub(/([A-Z]+)([A-Z][a-z])/,'\1_\2')
@@ -117,7 +137,7 @@ module ::Proxy
         m = migration.new(working_dir_path)
         puts "#{m.migration_name}"
 
-        create_migration_dirs(m.src_dir, m.dst_dir)
+        m.create_migration_dirs
         if migration == migrations.first
           copy_original_configuration(m.src_dir)
         else
@@ -157,11 +177,6 @@ module ::Proxy
       @migrations.persist_migrations_state(migrations.map {|m| m.class.name}, path)
     rescue Exception => e
       p "Couldn't save migration state: #{e}"
-    end
-
-    def create_migration_dirs(src_dir, dst_dir)
-      FileUtils.mkdir_p(src_dir)
-      FileUtils.mkdir_p(File.join(dst_dir, "settings.d"))
     end
 
     def copy_original_configuration(dst_dir)

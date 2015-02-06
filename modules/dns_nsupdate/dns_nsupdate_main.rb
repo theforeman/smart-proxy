@@ -1,14 +1,19 @@
 require 'resolv'
 
-module Proxy::Dns
-  class Nsupdate < Record
+module Proxy::Dns::Nsupdate
+  class Record < ::Proxy::Dns::Record
 
     include Proxy::Log
     include Proxy::Util
     attr_reader :resolver
 
+    def self.record(attrs = {})
+      new(attrs.merge(:server => ::Proxy::Dns::Nsupdate::Plugin.settings.dns_server,
+                      :ttl => ::Proxy::Dns::Plugin.settings.dns_ttl))
+    end
+
     def initialize options = {}
-      raise "Unable to find Key file - check your dns_key settings" unless Proxy::Dns::Plugin.settings.dns_key.nil? || File.exist?(Proxy::Dns::Plugin.settings.dns_key)
+      raise "Unable to find Key file - check your dns_key settings" unless Proxy::Dns::Nsupdate::Plugin.settings.dns_key.nil? || File.exist?(Proxy::Dns::Nsupdate::Plugin.settings.dns_key)
       super(options)
     end
 
@@ -44,12 +49,12 @@ module Proxy::Dns
 
       nsupdate "connect"
       case @type
-      when "A"
-        raise Proxy::Dns::NotFound.new("Cannot find DNS entry for #{@fqdn}") unless dns_find(@fqdn)
-        nsupdate "update delete #{@fqdn} #{@type}"
-      when "PTR"
-        raise Proxy::Dns::NotFound.new("Cannot find DNS entry for #{@value}") unless dns_find(@value)
-        nsupdate "update delete #{@value} #{@type}"
+        when "A"
+          raise Proxy::Dns::NotFound.new("Cannot find DNS entry for #{@fqdn}") unless dns_find(@fqdn)
+          nsupdate "update delete #{@fqdn} #{@type}"
+        when "PTR"
+          raise Proxy::Dns::NotFound.new("Cannot find DNS entry for #{@value}") unless dns_find(@value)
+          nsupdate "update delete #{@value} #{@type}"
       end
       nsupdate "disconnect"
     end
@@ -58,7 +63,7 @@ module Proxy::Dns
 
     def nsupdate_args
       args = ""
-      args = "-k #{Proxy::Dns::Plugin.settings.dns_key} " if Proxy::Dns::Plugin.settings.dns_key
+      args = "-k #{Proxy::Dns::Nsupdate::Plugin.settings.dns_key} " if Proxy::Dns::Nsupdate::Plugin.settings.dns_key
       args
     end
 

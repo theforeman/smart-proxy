@@ -3,17 +3,11 @@
 :enabled: false 
 
 # Valid providers:
-#   nsupdate
-#   nsupdate_gss (for GSS-TSIG support)
-#   virsh
-#   dnscmd
-#:dns_provider: nsupdate
-#:dns_key: /etc/rndc.key
-# use this setting if you are managing a dns server which is not localhost though this proxy
-#:dns_server: dns.domain.com
+#   dns_nsupdate
+#   dns_nsupdate_gss (for GSS-TSIG support)
+#   dns_virsh
+#   dns_dnscmd
+#:use_provider: dns_nsupdate
 # use this setting if you want to override default TTL setting (86400)
 #:dns_ttl: 86400
-# use dns_tsig_* for GSS-TSIG updates using Kerberos.  Required for Windows MS DNS with
-# Secure Dynamic Updates, or BIND as used in FreeIPA.  Set dns_provider to nsupdate_gss.
-#:dns_tsig_keytab: /usr/share/foreman-proxy/dns.keytab
-#:dns_tsig_principal: DNS/host.example.com@EXAMPLE.COM
+

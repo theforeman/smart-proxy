@@ -1,0 +1,7 @@
+---
+#
+# Configuration file for Windows-specific 'dnscmd' dns provider
+#
+
+# use this setting if you are managing a dns server which is not localhost though this proxy
+#:dns_server: dns.domain.com

@@ -5,36 +5,7 @@ module Proxy::Dns
     authorize_with_ssl_client
 
     def dns_setup(opts)
-      raise "Smart Proxy is not configured to support DNS" unless Proxy::Dns::Plugin.settings.enabled
-      case Proxy::Dns::Plugin.settings.dns_provider
-      when "dnscmd"
-        require 'dns/providers/dnscmd'
-        @server = Proxy::Dns::Dnscmd.new(opts.merge(
-          :server => Proxy::Dns::Plugin.settings.dns_server,
-          :ttl => Proxy::Dns::Plugin.settings.dns_ttl
-        ))
-      when "nsupdate"
-        require 'dns/providers/nsupdate'
-        @server = Proxy::Dns::Nsupdate.new(opts.merge(
-          :server => Proxy::Dns::Plugin.settings.dns_server,
-          :ttl => Proxy::Dns::Plugin.settings.dns_ttl
-        ))
-      when "nsupdate_gss"
-        require 'dns/providers/nsupdate_gss'
-        @server = Proxy::Dns::NsupdateGSS.new(opts.merge(
-          :server => Proxy::Dns::Plugin.settings.dns_server,
-          :ttl => Proxy::Dns::Plugin.settings.dns_ttl,
-          :tsig_keytab => Proxy::Dns::Plugin.settings.dns_tsig_keytab,
-          :tsig_principal => Proxy::Dns::Plugin.settings.dns_tsig_principal
-        ))
-      when "virsh"
-        require 'dns/providers/virsh'
-        @server = Proxy::Dns::Virsh.new(opts.merge(
-          :virsh_network => Proxy::SETTINGS.virsh_network
-        ))
-      else
-        log_halt 400, "Unrecognized or missing DNS provider: #{Proxy::Dns::Plugin.settings.dns_provider || "MISSING"}"
-      end
+      @server = ::Proxy::ProviderFactory.get_provider(Proxy::Dns::Plugin.settings.use_provider, opts)
     rescue => e
       log_halt 400, e
     end

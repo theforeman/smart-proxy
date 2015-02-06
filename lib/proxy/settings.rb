@@ -14,7 +14,7 @@ module Proxy::Settings
   def self.load_plugin_settings(defaults, settings_file, settings_directory = nil)
     settings = {}
     begin
-      settings = YAML.load(File.read(File.join(settings_directory || ::Proxy::SETTINGS.settings_directory, settings_file)))
+      settings = YAML.load(File.read(File.join(settings_directory || ::Proxy::SETTINGS.settings_directory, settings_file))) || {}
     rescue Errno::ENOENT
       logger.warn("Couldn't find settings file #{settings_directory || ::Proxy::SETTINGS.settings_directory}/#{settings_file}. Using default settings.")
     end

@@ -82,14 +82,14 @@ class MigrationTest < Test::Unit::TestCase
   end
 
   def test_create_migration_dirs
-    migrator = ::Proxy::Migrator.new(
-        "./work_dir", "./migrations_dir", "./config/dummy-settings.yml", "./modules_config_dir",
-        ::Proxy::Migrations.new("./dummy", []))
+    Dir.mktmpdir do |tmp|
+      migration = ::Proxy::Migration.new(tmp)
+      migration.create_migration_dirs
 
-    FileUtils.expects(:mkdir_p).with("migration_src_dir")
-    FileUtils.expects(:mkdir_p).with("migration_results_dir/settings.d")
-
-    migrator.create_migration_dirs("migration_src_dir", "migration_results_dir")
+      assert File.exist?(migration.src_dir)
+      assert File.exist?(migration.dst_dir)
+      assert File.exist?(File.join(migration.dst_dir, "settings.d"))
+    end
   end
 
   def test_execute_a_migration
@@ -98,12 +98,41 @@ class MigrationTest < Test::Unit::TestCase
         ::Proxy::Migrations.new("./dummy", []))
 
     migration = @migration.migrations.first.new("./work_dir")
-    migrator.expects(:create_migration_dirs).with(migration.src_dir, migration.dst_dir)
+    @migration.migrations.first.any_instance.expects(:create_migration_dirs)
     migrator.expects(:copy_original_configuration).with(migration.src_dir)
 
     migrator.execute_migrations([@migration.migrations.first])
 
     assert_equal 1, migrator.executed_migrations.size
     assert migrator.executed_migrations.first.instance_of?(@migration.migrations.first)
+  end
+
+  def test_copy_original_configuration_skips_files_in_config_dir
+    Dir.mktmpdir do |tmp|
+      migration = ::Proxy::Migration.new(tmp)
+      setup_test_migration_dirs(migration)
+
+      migration.copy_original_configuration_except("settings.yml")
+
+      assert !File.exist?(File.join(migration.dst_dir, "settings.yml"))
+    end
+  end
+
+  def test_copy_original_configuration_skips_files_in_modulesconfig_dir
+    Dir.mktmpdir do |tmp|
+      migration = ::Proxy::Migration.new(tmp)
+      setup_test_migration_dirs(migration)
+
+      migration.copy_original_configuration_except(File.join("settings.d", "test_module.yml"))
+
+      assert !File.exist?(File.join(migration.dst_dir, "settings.d", "test_module.yml"))
+    end
+  end
+
+  def setup_test_migration_dirs(migration)
+    migration.create_migration_dirs
+    FileUtils.touch(File.join(migration.src_dir, "settings.yml"))
+    FileUtils.mkdir_p(File.join(migration.src_dir, "settings.d"))
+    FileUtils.touch(File.join(migration.src_dir, "settings.d", "test_module.yml"))
   end
 end

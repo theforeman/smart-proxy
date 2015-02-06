@@ -1,0 +1,8 @@
+---
+#
+# Configuration file for libvirtd-specific 'virsh' dns provider
+#
+# There's currently no configuration options for this provider.
+# Virsh network name is a global parameter that can be set
+# in the main settings.yml file in 'virsh_network' parameter.
+#
