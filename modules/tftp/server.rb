@@ -93,6 +93,13 @@ module Proxy::TFTP
   end
 
   def self.fetch_boot_file dst, src
+    # If dst file name contains a slash - we don't use a hyphen (file goes into a subdirectory)
+    if dst.include? "/"      
+      filename    = dst + src.split("/")[-1]
+    else
+      filename    = dst + '-' + src.split("/")[-1]
+    end
+
     filename    = dst + '-' + src.split("/")[-1]
     destination = Pathname.new(File.expand_path(filename, Proxy::TFTP::Plugin.settings.tftproot)).cleanpath
     tftproot    = Pathname.new(Proxy::TFTP::Plugin.settings.tftproot).cleanpath
