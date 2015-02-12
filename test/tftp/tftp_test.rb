@@ -43,4 +43,11 @@ class TftpTest < Test::Unit::TestCase
     end
   end
 
+  def test_boot_filename_has_no_dash_when_prefix_ends_with_slash
+    assert_equal "a/b/c/somefile", Proxy::TFTP.boot_filename('a/b/c/', '/d/somefile')
+  end
+
+  def test_boot_filename_uses_dash_when_prefix_does_not_end_with_slash
+    assert_equal "a/b/c-somefile", Proxy::TFTP.boot_filename('a/b/c', '/d/somefile')
+  end
 end
