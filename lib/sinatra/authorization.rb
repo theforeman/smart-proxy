@@ -1,9 +1,9 @@
 module Sinatra
   module Authorization
-    def authorize_with_trusted_hosts
+    def authorize_with_trusted_hosts pattern=nil
       helpers ::Proxy::Helpers
 
-      before do
+      before pattern do
         # When :trusted_hosts is given, we check the client against the list
         # HTTPS: test the certificate CN
         # HTTP: test the reverse DNS entry of the remote IP
@@ -26,11 +26,11 @@ module Sinatra
       end
     end
 
-    def authorize_with_ssl_client
+    def authorize_with_ssl_client pattern=nil
       helpers ::Proxy::Helpers
       helpers ::Proxy::Log
 
-      before do
+      before pattern do
         if ['yes', 'on', '1'].include? request.env['HTTPS'].to_s
           if request.env['SSL_CLIENT_CERT'].to_s.empty?
             log_halt 403, "No client SSL certificate supplied"
