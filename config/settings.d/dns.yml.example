@@ -7,6 +7,7 @@
 #   nsupdate_gss (for GSS-TSIG support)
 #   virsh
 #   dnscmd
+#   aws
 #:dns_provider: nsupdate
 #:dns_key: /etc/rndc.key
 # use this setting if you are managing a dns server which is not localhost though this proxy
@@ -17,3 +18,7 @@
 # Secure Dynamic Updates, or BIND as used in FreeIPA.  Set dns_provider to nsupdate_gss.
 #:dns_tsig_keytab: /usr/share/foreman-proxy/dns.keytab
 #:dns_tsig_principal: DNS/host.example.com@EXAMPLE.COM
+#
+# For AWS users add the following settings for the AWS credentials
+#:dns_aws_accesskey: "ABCDEF123456"
+#:dns_aws_secretkey: "ABCDEF123456!@#$"

@@ -7,16 +7,12 @@ module Proxy::Dns
     attr_reader :resolver
 
     def initialize options = {}
-      @server = "8.8.8.8"
       @dns_aws_accesskey = options[:dns_aws_accesskey]
       @dns_aws_secretkey = options[:dns_aws_secretkey]
       raise "Route53: dns_aws_secretkey and dns_aws_accesskey must be set." unless defined? @dns_aws_accesskey and defined? @dns_aws_secretkey
       super(options)
     end
 
-    #create({ :fqdn => "node1.cloud.vormetric.com", :value => '1.1.1.1'})
-    # create({ :fqdn => "node01.lab", :value => "3.100.168.192.in-addr.arpa",
-    #          :type => "PTR"}a)
     def create
 
       conn = Route53::Connection.new(@dns_aws_accesskey , @dns_aws_secretkey)
@@ -46,7 +42,6 @@ module Proxy::Dns
       end
     end
 
-    # remove({ :fqdn => "node01.lab", :value => "192.168.100.2"}
     def remove
 
       conn = Route53::Connection.new(@dns_aws_accesskey, @dns_aws_secretkey)
