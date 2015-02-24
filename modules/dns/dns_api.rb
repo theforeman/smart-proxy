@@ -36,7 +36,8 @@ module Proxy::Dns
           require "dns/providers/aws"
           @server = Proxy::Dns::Aws.new(opts.merge(
                   :dns_aws_accesskey => Proxy::Dns::Plugin.settings.dns_aws_accesskey,
-                  :dns_aws_secretkey => Proxy::Dns::Plugin.settings.dns_aws_secretkey
+                  :dns_aws_secretkey => Proxy::Dns::Plugin.settings.dns_aws_secretkey,
+                  :ttl => Proxy::Dns::Plugin.settings.dns_ttl
                                         ))
         else
           log_halt 400, "Unrecognized or missing DNS provider: #{Proxy::Dns::Plugin.settings.dns_provider || "MISSING"}"
