@@ -1,3 +1,91 @@
+2015-02-26	Corey Osman <corey@logicminds.biz>
+	* Fixes #9245 - Add override setting to allow mcollective puppet runs to run as a different user
+
+2015-02-24	Christian Arnold <christian.arnold@t-systems.de>
+	* refs #8625: add support for custom salt_puppetrun_cmd config parameter
+
+2015-02-19	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* refs #9299: prefixes ending with a '/' do not get appended a '-'
+
+2015-02-19	Lukas Zapletal <lzap+git@redhat.com>
+	* Fixes #9457 - fixed file permissions of debug script
+
+2015-02-09	Lukas Zapletal <lzap+git@redhat.com>
+	* Fixes #9089 - refactored SSL client verification into method
+	* Refs #8710 - moved foreman-debug bits into proxy package
+
+2015-01-28	Markus Frosch <markus@lazyfrosch.de>
+	* Refs #7849 - Avoid OpenSSL deprecation
+
+2015-01-27	Stephen Benjamin <stbenjam@redhat.com>
+	* fixes #9102 - remove trusted_hosts check from templates module
+
+2015-01-26	Lukas Zapletal <lzap+git@redhat.com>
+	* Fixes #8905 - bind_port config option
+
+2015-01-26	Markus Frosch <markus@lazyfrosch.de>
+	* Fixes #7849 - re-factor trusted_hosts handling
+
+2015-01-21	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #9061: pinned rack version to < 1.6
+
+2015-01-14	Markus Frosch <markus@lazyfrosch.de>
+	* Fixes #8948: Remove implicit test ordering from DHCP API test
+
+2015-01-14	zjherner <zjherner@gmail.com>
+	* Fixes #8788 - DHCP not detecting pingable addresses on Windows
+
+2015-01-07	Mathieu Parent <math.parent@gmail.com>
+	* Fixes #8853 - Actually redirect stderr to proxy error log
+
+2014-12-30	Shlomi Zadok <shlomi@ben-hanna.com>
+	* fixes #8811 - refactor per-module enabling of http(s) to http(s)_rackup
+
+2014-12-22	Greg Sutcliffe <gsutclif@redhat.com>
+	* Fixes #8748 - Allow per-module enabling of http(s)
+
+2014-12-17	Ori Rabin <orabin@redhat.com>
+	* Fixes #8210 - Adding caching for smart-proxy puppet classes using Stefan Julin's implementation of cache
+
+2014-12-11	Lukas Zapletal <lzap+git@redhat.com>
+	* Fixes #8538 - Fixed ISC DHCP states and duplicities
+
+2014-11-26	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* fixes #8282: sslv3 is disabled
+
+2014-11-21	Stephen Benjamin <stbenjam@redhat.com>
+	* fixes #7197 - add man page for foreman-prepare-realm
+
+2014-11-20	Ori Rabin <orabin@redhat.com>
+	* Fixes #8347 - facts feature should not be enabled by default
+
+2014-11-20	Stephen Benjamin <stbenjam@redhat.com>
+	* fixes #8278 - update foreman-prepare-realm for freeipa 4
+
+2014-11-12	Greg Sutcliffe <gsutclif@redhat.com>
+	* Refs #8267 - pass template_url in call to foreman
+
+2014-11-11	Lukas Zapletal <lzap+git@redhat.com>
+	* Fixes #8320 - shutdown shell provider threading fixed
+
+2014-11-06	Dominic Cleal <dcleal@redhat.com>
+	* fixes #8300 - set webmock custom HTTP status response correctly
+
+2014-11-06	Marek Hulan <mhulan@redhat.com>
+	* Fixes #8160 - Remove chef related code
+
+2014-11-04	Dustin Tsang <dtsang@redhat.com>
+	* Refs #969 - Proxy-side changes for serving templates from the proxy
+
+2014-11-03	Shlomi Zadok <shlomi@ben-hanna.com>
+	* fixes #7352 - missing DNS record returns 404
+
+2014-10-29	Lukas Zapletal <lzap+git@redhat.com>
+	* Fixes #8006 - added STDOUT proxy log option
+
+2014-10-28	Dominic Cleal <dcleal@redhat.com>
+	* Bump version to 1.8-develop
+
 2014-10-22	Lukas Zapletal <lzap+git@redhat.com>
 	* Fixes #7859 - puppetssh run works on Ruby 1.9+
 
