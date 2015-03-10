@@ -21,6 +21,34 @@ class BmcApiTest < Test::Unit::TestCase
     authorize user, pass
   end
 
+  def test_api_can_get_log_level_setting
+    Proxy::BMC::IPMI.logger = nil
+    Proxy::BMC::Plugin.settings.stubs(:provider_log_level).returns('DEBUG')
+    Proxy::BMC::IPMI.any_instance.stubs(:poweron?).returns(true)
+    get "/#{host}/chassis/power/on", args
+    assert_equal 0, Proxy::BMC::IPMI.log_level
+    assert_equal 'Rubyipmi', Proxy::BMC::IPMI.logger.progname
+    assert_not_equal "./logs/test.log", Proxy::BMC::IPMI.logger.instance_variable_get("@logdev").filename
+  end
+
+  def test_api_recovers_from_incorrect_log_level
+    Proxy::BMC::IPMI.logger = nil
+    Proxy::BMC::Plugin.settings.stubs(:provider_log_level).returns('GARBAGE')
+    Proxy::BMC::IPMI.any_instance.stubs(:poweron?).returns(true)
+    get "/#{host}/chassis/power/on", args
+    assert_not_equal 'Rubyipmi', Proxy::BMC::IPMI.logger.progname
+    assert_equal "./logs/test.log", Proxy::BMC::IPMI.logger.instance_variable_get("@logdev").filename
+  end
+
+  def test_api_uses_default_logger
+    Proxy::BMC::IPMI.logger = nil
+    Proxy::BMC::Plugin.settings.stubs(:provider_log_level).returns(nil)
+    Proxy::BMC::IPMI.any_instance.stubs(:poweron?).returns(true)
+    get "/#{host}/chassis/power/on", args
+    assert_not_equal 'Rubyipmi', Proxy::BMC::IPMI.logger.progname
+    assert_equal "./logs/test.log", Proxy::BMC::IPMI.logger.instance_variable_get("@logdev").filename
+  end
+
   def test_api_can_put_power_action
     Proxy::BMC::IPMI.any_instance.stubs(:poweroff).returns(true)
     put "/#{host}/chassis/power/off", args

@@ -5,6 +5,25 @@ module Proxy
   module BMC
     class IPMI < Base
       include Proxy::Log
+      attr_accessor :logger, :log_level
+
+      # set the log level of rubyipmi, set to 0 or Logger::DEBUG for usablable output
+      def self.log_level=(log_level)
+        Rubyipmi.log_level = log_level
+      end
+
+      def self.log_level
+        Rubyipmi.logger.level
+      end
+
+      def self.logger
+        Rubyipmi.logger
+      end
+
+      # set the logger for rubyipmi
+      def self.logger=(log)
+        Rubyipmi.logger = log
+      end
 
       def self.installed?(provider)
         # check with the lib to see if at least one provider is installed
