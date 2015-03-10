@@ -7,4 +7,5 @@
 #   dns_nsupdate_gss (for GSS-TSIG support)
 #   dns_virsh
 #   dns_dnscmd
+#   dns_aws
 #:dns_provider: dns_nsupdate
