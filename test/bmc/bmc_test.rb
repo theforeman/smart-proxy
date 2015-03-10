@@ -1,10 +1,26 @@
 require 'test_helper'
 require 'bmc/ipmi'
+require 'logger'
 
 class BmcTest < Test::Unit::TestCase
+
   def setup
     @args = { :username => "user", :password => "pass", :bmc_provider => "ipmitool", :host => "host" }
     @bmc  = Proxy::BMC::IPMI.new(@args)
+  end
+
+  def test_sets_log_level
+    Proxy::BMC::IPMI.log_level = 0
+    Rubyipmi.logger = nil  # reset the log object
+    assert_equal Proxy::BMC::IPMI.log_level, 0
+    assert_equal 'Rubyipmi', Proxy::BMC::IPMI.logger.progname
+  end
+
+  def test_sets_logger
+    log = Logger.new('/tmp/logtest.log')
+    log.level = Logger::INFO
+    Proxy::BMC::IPMI.logger = log
+    assert_equal log, Proxy::BMC::IPMI.logger
   end
 
   def test_creates_rubyipmi_object

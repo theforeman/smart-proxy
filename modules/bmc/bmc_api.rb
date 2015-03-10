@@ -34,7 +34,6 @@ module Proxy::BMC
 
     # Gets the power status, does not change power
     get "/:host/chassis/power/?:action?" do
-
       # return hint on valid options
       if params[:action].nil?
         return { :actions => ["on", "off", "status"] }.to_json
@@ -51,11 +50,9 @@ module Proxy::BMC
           else
             { :error => "The action: #{params[:action]} is not a valid action" }.to_json
         end
-
       rescue => e
         log_halt 400, e
       end
-
     end
 
     get "/:host/lan/?:action?" do
@@ -82,7 +79,6 @@ module Proxy::BMC
     end
 
     get "/:host/chassis/identify/?:action?" do
-
       # return hint on valid options
       if params[:action].nil?
         return { :actions => ["status"] }.to_json
@@ -102,7 +98,6 @@ module Proxy::BMC
     end
 
     get "/:host/chassis/config/?:function?" do
-
       # return hint on valid options
       # removing bootdevice until its supported in rubyipmi
       if params[:function].nil?
@@ -126,7 +121,6 @@ module Proxy::BMC
     end
 
     put "/:host/chassis/power/?:action?" do
-
       # return hint on valid options
       if params[:action].nil?
         return { :actions => ["on", "off", "cycle", "soft"] }.to_json
@@ -152,7 +146,6 @@ module Proxy::BMC
     end
 
     put "/:host/chassis/config/?:function?/?:action?" do
-
       if params[:function].nil?
         return { :functions => ["bootdevice"] }.to_json
       end
@@ -191,11 +184,9 @@ module Proxy::BMC
       rescue => e
         log_halt 400, e
       end
-
     end
 
     put "/:host/chassis/identify/?:action?" do
-
       if params[:action].nil?
         return { :actions => ["on", "off"] }.to_json
       end
@@ -208,13 +199,10 @@ module Proxy::BMC
             { :action => params[:action], :result => @bmc.identifyoff }.to_json
           else
             { :error => "The action: #{params[:function]} is not a valid function" }.to_json
-
         end
-
       rescue => e
         log_halt 400, e
       end
-
     end
 
     private
@@ -223,6 +211,15 @@ module Proxy::BMC
       # Either use the default provider or allow user to specify provider in request
       provider_type ||= params[:bmc_provider] || Proxy::BMC::Plugin.settings.bmc_default_provider
       provider_type.downcase! if provider_type
+      if log_level = ::Proxy::BMC::Plugin.settings.provider_log_level
+        # using the log_level below will cause rubyipmi to create its own log, instead of using the proxy log
+        begin
+          log_level = ::Logger.const_get(log_level.upcase)
+        rescue
+          logger.warn("Incorrect bmc log level supplied #{log_level}, ignoring setting")
+          log_level = nil
+        end
+      end
 
       case provider_type
       when /ipmi/
@@ -232,6 +229,18 @@ module Proxy::BMC
         raise "bad_authentication_request" unless auth.basic?
 
         username, password = auth.credentials
+
+        # setting the log level must come before IPMI initialization
+        # if the user supplies the provider_log_level all provider logs will be sent to
+        # the provider specific log instead of the smart proxy logs
+        # if the user doesn't supply the provider log level, all logs will be sent to the smart proxy logs
+        # this was configured to make easier specific log output for BMC without having to see other logs
+        if log_level
+          Proxy::BMC::IPMI.log_level = log_level
+        else
+          # this causes rubyipmi to use the supplied logger, most actions in rubyipmi only output during Logger::DEBUG
+          Proxy::BMC::IPMI.logger = logger
+        end
 
         # check to see if provider is given and no default provider is set, search for installed providers
         unless Proxy::BMC::IPMI.installed?(provider_type)
