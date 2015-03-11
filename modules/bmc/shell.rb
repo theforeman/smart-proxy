@@ -19,6 +19,13 @@ module Proxy
         true
       end
 
+      # test to ensure connection is valid
+      # since we assume shell will always work we just return, but we could later
+      # test for correct sudo access to shutdown to ensure correct behavior
+      def test
+        true
+      end
+
       # Must be on
       def poweroff?
         false

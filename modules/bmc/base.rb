@@ -93,6 +93,11 @@ module Proxy
         raise NotImplementedError.new
       end
 
+      # returns boolean if the test is successful
+      def test
+        raise NotImplementedError.new
+      end
+
       # return the gateway of the bmc device
       def gateway
         raise NotImplementedError.new

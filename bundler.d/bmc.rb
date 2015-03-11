@@ -1,3 +1,3 @@
 group :bmc do
-  gem 'rubyipmi', '>= 0.9.0'
+  gem 'rubyipmi', '>= 0.9.1'
 end
