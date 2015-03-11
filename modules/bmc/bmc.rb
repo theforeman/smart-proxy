@@ -3,13 +3,24 @@ require 'bmc/bmc_plugin'
 module Proxy
   module BMC
     # Just a bunch of stubs
-    def self.installed_providers?
+    def installed_providers
+      Proxy::BMC::IPMI.providers_installed + ['shell']
     end
 
-    def self.providers
+    def installed_ipmi_providers
+      Proxy::BMC::IPMI.providers_installed
     end
 
-    def self.installed?(provider)
+    def providers
+      Proxy::BMC::IPMI.providers + ['shell']
+    end
+
+    def installed?(provider)
+      if provider == 'shell'
+        true
+      else
+        Proxy::BMC::IPMI.installed?(provider)
+      end
     end
   end
 end

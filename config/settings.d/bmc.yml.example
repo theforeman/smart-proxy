@@ -6,9 +6,3 @@
 # - freeipmi / ipmitool - requires the appropriate package installed, and the rubyipmi gem
 # - shell - for local reboot control (requires sudo access to /sbin/shutdown for the proxy user)
 #:bmc_default_provider: freeipmi
-#
-# Setting the log level below will cause rubyipmi to output logs to /tmp/rubyipmi.log
-# If you want the Rubyipmi logs to go into the smart_proxy logs you will need to set the main log level in settings.yaml to DEBUG
-# and disable the provider_log_level below
-# valid options are WARN, DEBUG, ERROR, FATAL, INFO, UNKNOWN
-#:provider_log_level: DEBUG
