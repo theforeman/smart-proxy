@@ -24,7 +24,18 @@ module Proxy::BMC
 
     # returns host operations
     get "/:host" do
-      { :actions => %w[chassis lan] }.to_json
+      { :actions => %w[chassis lan test] }.to_json
+    end
+
+    # runs a test against the bmc device and returns true if the connection was successful
+    get "/:host/test" do
+      bmc_setup
+      begin
+        result = @bmc.test
+        { :action => :test, :result => result }.to_json
+      rescue => e
+        log_halt 400, e
+      end
     end
 
     # returns chassis operations

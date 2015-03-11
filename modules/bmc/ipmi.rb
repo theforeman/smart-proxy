@@ -78,6 +78,11 @@ module Proxy
         Rubyipmi.connect(args[:username], args[:password], args[:host], args[:bmc_provider])
       end
 
+      # returns boolean true if connection to device is successful
+      def test
+        host.connection_works?
+      end
+
       # Turn the led light on
       def identifyon
         host.chassis.identify(true)

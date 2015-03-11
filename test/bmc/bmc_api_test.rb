@@ -57,6 +57,14 @@ class BmcApiTest < Test::Unit::TestCase
     assert_match(/true|false/, data["result"].to_s)
   end
 
+  def test_api_can_get_test_status
+    Proxy::BMC::IPMI.any_instance.stubs(:test).returns(true)
+    get "/#{host}/test", args
+    assert last_response.ok?, "Last response was not ok"
+    data = JSON.parse(last_response.body)
+    assert_match(/true|false/, data["result"].to_s)
+  end
+
   def test_api_can_get_power_on_status
     Proxy::BMC::IPMI.any_instance.stubs(:poweron?).returns(true)
     get "/#{host}/chassis/power/on", args
