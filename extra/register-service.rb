@@ -1,5 +1,6 @@
-#!c:\ruby187\bin\ruby
-if PLATFORM !~ /mingw/
+#!/usr/bin/env ruby
+
+if RUBY_PLATFORM !~ /mingw/
   puts "To install this service on Unix please create a startup script"
 else
   require 'rubygems'
@@ -9,12 +10,11 @@ else
   include Win32
   include Config
 
-  executable = Pathname.new(__FILE__).dirname.parent.join("bin", "smart-proxy")
+  executable = Pathname.new(__FILE__).dirname.parent.join("bin", "smart-proxy-win-service")
   executable = executable.realpath
   ruby = File.join(CONFIG['bindir'], 'ruby').tr('/', '\\')
   cmd  = ruby + ' "' + executable.to_s.tr('/', '\\') + '"'
   puts "Installing #{cmd} as a service"
-  cmd += ' --service'
 
   default_user = ENV["USERNAME"]
   default_user = ENV["USERDOMAIN"] + '\\' + default_user if ENV["USERDOMAIN"]
