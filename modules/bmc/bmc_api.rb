@@ -1,25 +1,32 @@
+require 'bmc/ipmi'
+
 module Proxy::BMC
   class Api < ::Sinatra::Base
     helpers ::Proxy::Helpers
     authorize_with_trusted_hosts
     authorize_with_ssl_client
-
     # All GET requests will only read ipmi data, no changes
     # All PUT requests will update information on the bmc device
 
-    # FIXME: this is broken... 
-    get "" do
-      # return list of available options
+    # return list of available options
+    get "/" do
+      res = ['providers', 'providers/installed', 'host']
+      { :available_resources => res}.to_json
     end
 
-    # FIXME: this is broken... Returns a list of bmc providers
+    # Returns a list of bmc providers
     get "/providers" do
-      { :providers => Proxy::BMC.providers }.to_json
+      { :providers => Proxy::BMC::IPMI.providers + ['shell'] }.to_json
     end
 
-    # FIXME: this is broken... Returns a list of installed providers
+    # Returns a list of installed providers
     get "/providers/installed" do
-      { :installed_providers => Proxy::BMC.installed_providers? }.to_json
+      { :installed_providers => Proxy::BMC::IPMI.providers_installed + ['shell'] }.to_json
+    end
+
+    # returns a helpful message that the user should supply a hostname
+    get "/host" do
+      { :message => "You need to supply the hostname or ip of the actual bmc device"}.to_json
     end
 
     # returns host operations
@@ -216,62 +223,61 @@ module Proxy::BMC
       end
     end
 
-    private
+    # returns a provider type by validating the given type.  If for some reason the type is invalid
+    # this function will try and find the first available provider that could be used.  If there are no providers available
+    # lets halt and notify the user.
+    def find_ipmi_provider(provider_type)
+      # check to see if provider is given and if no default provider is set, search for installed providers
+      unless Proxy::BMC::IPMI.installed?(provider_type)
+        # check if provider_type is a valid type
+        if Proxy::BMC::IPMI.providers.include?(provider_type)
+          logger.warn "#{provider_type} specified but it is not installed"
+        else
+          logger.warn "Invalid BMC type: #{provider_type}, must be one of #{Proxy::BMC::IPMI.providers.join(',')}"
+        end
+        if Proxy::BMC::IPMI.providers_installed.length > 0
+          provider_type = Proxy::BMC::IPMI.providers_installed.first
+          logger.warn "Using #{provider_type} as the default BMC provider"
+        else
+          log_halt 400, "No BMC providers are installed, please install at least freeipmi or ipmitool"
+        end
+      end
+      provider_type
+    end
 
     def bmc_setup
       # Either use the default provider or allow user to specify provider in request
       provider_type ||= params[:bmc_provider] || Proxy::BMC::Plugin.settings.bmc_default_provider
       provider_type.downcase! if provider_type
-      if log_level = ::Proxy::BMC::Plugin.settings.provider_log_level
-        # using the log_level below will cause rubyipmi to create its own log, instead of using the proxy log
-        begin
-          log_level = ::Logger.const_get(log_level.upcase)
-        rescue
-          logger.warn("Incorrect bmc log level supplied #{log_level}, ignoring setting")
-          log_level = nil
-        end
+      # unless the provider is shell find a suitable provider
+      if provider_type != 'shell'
+        provider_type = find_ipmi_provider(provider_type)
       end
 
       case provider_type
-      when /ipmi/
-        require 'bmc/ipmi'
+        when 'freeipmi', 'ipmitool'
 
-        raise "unauthorized" unless auth.provided?
-        raise "bad_authentication_request" unless auth.basic?
+          raise "unauthorized" unless auth.provided?
+          raise "bad_authentication_request" unless auth.basic?
 
-        username, password = auth.credentials
+          username, password = auth.credentials
 
-        # setting the log level must come before IPMI initialization
-        # if the user supplies the provider_log_level all provider logs will be sent to
-        # the provider specific log instead of the smart proxy logs
-        # if the user doesn't supply the provider log level, all logs will be sent to the smart proxy logs
-        # this was configured to make easier specific log output for BMC without having to see other logs
-        if log_level
-          Proxy::BMC::IPMI.log_level = log_level
-        else
           # this causes rubyipmi to use the supplied logger, most actions in rubyipmi only output during Logger::DEBUG
           Proxy::BMC::IPMI.logger = logger
-        end
 
-        # check to see if provider is given and no default provider is set, search for installed providers
-        unless Proxy::BMC::IPMI.installed?(provider_type)
-          # check if provider_type is a valid type
-          if Proxy::BMC::IPMI.providers.include?(provider_type)
-            log_halt 400, "#{provider_type} is not installed, please install a ipmi provider"
-          else
-            log_halt 400, "Unrecognized or missing bmc provider type: #{provider_type}"
-          end
-        end
-
-        # all the use of the http auth basic header to pass credentials
-        args = { :host     => params[:host], :username     => username,
-                 :password => password,      :bmc_provider => provider_type }
-        @bmc = Proxy::BMC::IPMI.new(args)
-      when "shell"
-        require 'bmc/shell'
-        @bmc = Proxy::BMC::Shell.new
-      else
-        log_halt 400, "Unrecognized or missing BMC type: #{provider_type}"
+          # we use the http auth basic header to pass credentials
+          # The idea here is to pass the credentials on the command line
+          # to execute ipmi commands and has nothing to do with authorization
+          # of using smart-proxy. Its simply a tunnel to pass credentials through,
+          # since we are essentially remotely executing ipmi commands using Rubyipmi.
+          args = { :host     => params[:host], :username     => username,
+                   :password => password,      :bmc_provider => provider_type }
+          @bmc = Proxy::BMC::IPMI.new(args)
+        when "shell"
+          require 'bmc/shell'
+          @bmc = Proxy::BMC::Shell.new
+        else
+          log_halt 400, "Invalid BMC type: #{provider_type}"
       end
     rescue => e
       log_halt 400, e
@@ -280,6 +286,5 @@ module Proxy::BMC
     def auth
       @auth ||= Rack::Auth::Basic::Request.new(request.env)
     end
-
   end
 end
