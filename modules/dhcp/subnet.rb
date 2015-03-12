@@ -240,7 +240,7 @@ module Proxy::DHCP
       # This code is from net-ping, and stripped down for use here
       # We don't need all the ldap dependencies net-ping brings in
 
-      @service_check = true
+      @service_check = false
       @port          = 7
       @timeout       = 1
       @exception     = nil
