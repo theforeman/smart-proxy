@@ -82,13 +82,13 @@ module Proxy::HttpRequest
 
   class Facts < ForemanRequest
     def post_facts(facts)
-      send_request(request_factory.create_post('/api/hosts/facts',facts))
+      send_request(request_factory.create_post('api/hosts/facts', facts))
     end
   end
 
   class Reports < ForemanRequest
     def post_report(report)
-      send_request(request_factory.create_post('/api/reports',report))
+      send_request(request_factory.create_post('api/reports', report))
     end
   end
 end
