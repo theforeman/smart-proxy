@@ -99,11 +99,15 @@ module Proxy::TFTP
     tftproot    = Pathname.new(Proxy::TFTP::Plugin.settings.tftproot).cleanpath
     raise "TFTP destination outside of tftproot" unless destination.to_s.start_with?(tftproot.to_s)
 
-    # Ensure that our image directory exists
-    # as the dst might contain another sub directory
-    FileUtils.mkdir_p destination.parent
+    if Proxy::TFTP::Plugin.settings.tftp_fetch_boot_files
+      # Ensure that our image directory exists
+      # as the dst might contain another sub directory
+      FileUtils.mkdir_p destination.parent
 
-    ::Proxy::HttpDownloads.start_download(src.to_s, destination.to_s)
+      ::Proxy::HttpDownloads.start_download(src.to_s, destination.to_s)
+    else
+      raise "TFTP boot file does not exist" unless File.exist?(destination)
+    end
   end
 
   def self.boot_filename(dst, src)

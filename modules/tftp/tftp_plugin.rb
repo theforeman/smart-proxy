@@ -6,5 +6,6 @@ module Proxy::TFTP
     https_rackup_path File.expand_path("http_config.ru", File.expand_path("../", __FILE__))
 
     default_settings :tftproot => '/var/lib/tftpboot'
+    default_settings :tftp_fetch_boot_files => true
   end
 end
