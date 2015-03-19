@@ -40,6 +40,8 @@ module Proxy::BMC
       begin
         result = @bmc.test
         { :action => :test, :result => result }.to_json
+      rescue NotImplementedError => e
+        log_halt 501, e
       rescue => e
         log_halt 400, e
       end
@@ -68,6 +70,8 @@ module Proxy::BMC
           else
             { :error => "The action: #{params[:action]} is not a valid action" }.to_json
         end
+      rescue NotImplementedError => e
+        log_halt 501, e
       rescue => e
         log_halt 400, e
       end
@@ -91,6 +95,8 @@ module Proxy::BMC
           else
             { :error => "The action: #{params[:action]} is not a valid action" }.to_json
         end
+      rescue NotImplementedError => e
+        log_halt 501, e
       rescue => e
         log_halt 400, e
       end
@@ -110,6 +116,8 @@ module Proxy::BMC
           else
             { :error => "The action: #{params[:action]} is not a valid action" }.to_json
         end
+      rescue NotImplementedError => e
+        log_halt 501, e
       rescue => e
         log_halt 400, e
       end
@@ -121,7 +129,6 @@ module Proxy::BMC
       if params[:function].nil?
         #return {:actions => ["bootdevice", "bootdevices"]}.to_json
         return { :functions => ["bootdevices"] }.to_json
-
       end
       bmc_setup
       begin
@@ -133,6 +140,8 @@ module Proxy::BMC
           else
             { :error => "The action: #{params[:function]} is not a valid function" }.to_json
         end
+      rescue NotImplementedError => e
+        log_halt 501, e
       rescue => e
         log_halt 400, e
       end
@@ -157,7 +166,8 @@ module Proxy::BMC
           else
             { :error => "The action: #{params[:action]} is not a valid action" }.to_json
         end
-
+      rescue NotImplementedError => e
+        log_halt 501, e
       rescue => e
         log_halt 400, e
       end
@@ -195,10 +205,11 @@ module Proxy::BMC
                   { :error => "#{params[:action]} is not a valid boot device" }.to_json
                 end
             end
-
           else
             { :error => "The action: #{params[:function]} is not a valid function" }.to_json
         end
+      rescue NotImplementedError => e
+        log_halt 501, e
       rescue => e
         log_halt 400, e
       end
@@ -218,6 +229,8 @@ module Proxy::BMC
           else
             { :error => "The action: #{params[:function]} is not a valid function" }.to_json
         end
+      rescue NotImplementedError => e
+        log_halt 501, e
       rescue => e
         log_halt 400, e
       end
