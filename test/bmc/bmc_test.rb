@@ -24,7 +24,7 @@ class BmcTest < Test::Unit::TestCase
     Rubyipmi::Ipmitool::Connection.any_instance.stubs(:connection_works?).returns(true)
     assert bmc.test
     Rubyipmi::Ipmitool::Connection.any_instance.stubs(:connection_works?).returns(false)
-    assert ! bmc.test
+    assert !bmc.test
   end
 
   def test_should_turnoff_led

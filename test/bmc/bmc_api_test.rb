@@ -70,7 +70,7 @@ class BmcApiTest < Test::Unit::TestCase
     auth.stubs(:credentials).returns('username','password')
     api.stubs(:auth).returns(auth)
     api.stubs(:find_ipmi_provider).returns('ipmitool')
-    api.stubs(:params).returns({ :bmc_provider => 'ipmitool', :host => :host })
+    api.stubs(:params).returns(:bmc_provider => 'ipmitool', :host => :host)
     result = api.bmc_setup
     assert_kind_of(Proxy::BMC::IPMI,result)
   end
@@ -85,7 +85,7 @@ class BmcApiTest < Test::Unit::TestCase
     auth.stubs(:credentials).returns('username','password')
     api.stubs(:auth).returns(auth)
     api.stubs(:find_ipmi_provider).returns('freeipmi')
-    api.stubs(:params).returns({ :bmc_provider => 'freeipmi', :host => :host })
+    api.stubs(:params).returns(:bmc_provider => 'freeipmi', :host => :host)
     result = api.bmc_setup
     assert_kind_of(Proxy::BMC::IPMI,result)
   end
@@ -98,7 +98,7 @@ class BmcApiTest < Test::Unit::TestCase
     auth.stubs(:basic?).returns(true)
     auth.stubs(:credentials).returns('username','password')
     api.stubs(:auth).returns(auth)
-    api.stubs(:params).returns({ :bmc_provider => 'shell', :host => :host })
+    api.stubs(:params).returns(:bmc_provider => 'shell', :host => :host)
     result = api.bmc_setup
     assert_kind_of(Proxy::BMC::Shell,result)
   end
@@ -123,6 +123,15 @@ class BmcApiTest < Test::Unit::TestCase
     assert last_response.ok?, "Last response was not ok"
     data = JSON.parse(last_response.body)
     assert_equal true, data['result']
+  end
+
+  def test_shell_provider_recovers_from_not_implemented_method_and_retruns_501_error
+    Proxy::BMC::Plugin.settings.stubs(:bmc_default_provider).returns('shell')
+    Proxy::BMC::IPMI.stubs(:providers_installed).returns(['shell'])
+    test_args = { :bmc_provider => 'shell' }
+    get "/#{host}/lan/gateway", test_args
+    assert_equal last_response.status, 501
+    assert_equal 'NotImplementedError', last_response.body
   end
 
   def test_api_returns_invalid_provider_type
