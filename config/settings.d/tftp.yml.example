@@ -5,3 +5,6 @@
 #:tftproot: /var/lib/tftpboot
 # Defines the TFTP Servername to use, overrides the name in the subnet declaration
 #:tftp_servername: tftp.domain.com
+
+# Optionally disable fetching TFTP boot files
+#:tftp_fetch_boot_files: false
