@@ -228,8 +228,8 @@ module Proxy::BMC
       when /ipmi/
         require 'bmc/ipmi'
 
-        raise "unauthorized" unless auth.provided?
-        raise "bad_authentication_request" unless auth.basic?
+        log_halt 401, "unauthorized" unless auth.provided?
+        log_halt 401, "bad_authentication_request, credentials are not in auth.basic format" unless auth.basic?
 
         username, password = auth.credentials
 

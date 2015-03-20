@@ -21,6 +21,45 @@ class BmcApiTest < Test::Unit::TestCase
     authorize user, pass
   end
 
+  def test_api_throws_401_error_when_auth_is_not_provided
+    Proxy::BMC::IPMI.stubs(:providers_installed).returns(['freeipmi'])
+    Proxy::BMC::Plugin.settings.stubs(:bmc_default_provider).returns('freeipmi')
+    auth = mock()
+    auth.expects(:provided?).returns(false)
+    Proxy::BMC::Api.any_instance.stubs(:auth).returns(auth)
+    test_args = { :bmc_provider => 'freeipmi' }
+    get "/#{host}/lan/gateway", test_args
+    assert_equal 'unauthorized', last_response.body
+    assert_equal 401, last_response.status
+  end
+
+  def test_api_does_not_throw_401_error_when_auth_is_provided_and_in_basic_format
+    Proxy::BMC::IPMI.stubs(:providers_installed).returns(['freeipmi'])
+    Proxy::BMC::Plugin.settings.stubs(:bmc_default_provider).returns('freeipmi')
+    Proxy::BMC::IPMI.any_instance.stubs(:gateway).returns("192.168.1.1")
+    auth = mock()
+    auth.expects(:provided?).returns(true)
+    auth.expects(:basic?).returns(true)
+    auth.expects(:credentials).returns('username','password')
+    Proxy::BMC::Api.any_instance.stubs(:auth).returns(auth)
+    test_args = { :bmc_provider => 'freeipmi' }
+    get "/#{host}/lan/gateway", test_args
+    assert_equal 200, last_response.status
+  end
+
+  def test_api_throws_401_error_when_auth_is_not_basic
+    Proxy::BMC::IPMI.stubs(:providers_installed).returns(['freeipmi'])
+    Proxy::BMC::Plugin.settings.stubs(:bmc_default_provider).returns('freeipmi')
+    auth = mock()
+    auth.expects(:provided?).returns(true)
+    auth.expects(:basic?).returns(false)
+    Proxy::BMC::Api.any_instance.stubs(:auth).returns(auth)
+    test_args = { :bmc_provider => 'freeipmi' }
+    get "/#{host}/lan/gateway", test_args
+    assert_equal 'bad_authentication_request, credentials are not in auth.basic format', last_response.body
+    assert_equal 401, last_response.status
+  end
+
   def test_api_can_put_power_action
     Proxy::BMC::IPMI.any_instance.stubs(:poweroff).returns(true)
     put "/#{host}/chassis/power/off", args
