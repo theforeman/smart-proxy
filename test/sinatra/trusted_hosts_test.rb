@@ -58,6 +58,7 @@ class TrustedHostsTest < Test::Unit::TestCase
   def test_trusted_hosts_http_forbids_access
     Proxy::SETTINGS.expects(:trusted_hosts).at_least_once.returns(['host.example.org'])
     Resolv.any_instance.expects(:getname).with('10.0.0.1').returns('eve.example.org')
+    Resolv.any_instance.expects(:getaddresses).with('eve.example.org').returns(['10.0.0.3'])
     get '/test', nil, 'REMOTE_ADDR' => '10.0.0.1'
     assert last_response.forbidden?
   end
