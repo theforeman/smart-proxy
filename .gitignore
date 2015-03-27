@@ -2,6 +2,7 @@ tags
 .idea/
 config/settings.yml
 config/settings.d/*.yml
+config/migration_state
 .idea
 logs
 *swp

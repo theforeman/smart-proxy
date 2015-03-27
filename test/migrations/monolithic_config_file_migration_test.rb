@@ -1,15 +1,17 @@
 require 'test_helper'
-require File.join(File.dirname(__FILE__),'../extra/migrate_settings')
+require File.join(File.dirname(__FILE__),'../../extra/migrate_settings')
+::Proxy::Migration.inject_migrations_instance(::Proxy::Migrations.new("dummy"))
+require File.join(File.dirname(__FILE__),'../../extra/migrations/20150327000000_migrate_monolithic_config')
 
-class ProxyMigrationTest < Test::Unit::TestCase
+class MonolithicConfigMigrationTest < Test::Unit::TestCase
 
   def setup
     @old_config = YAML.load_file(File.join(File.dirname(__FILE__),'./migration_settings.yml'))
-    @output, @unknown = migrate(@old_config)
+    @output, @unknown = MigrateMonolithicConfig.new("/tmp").migrate_monolithic_config(@old_config)
   end
 
   def test_output_has_multiple_blocks
-    assert_equal modules.size, @output.keys.size
+    assert_equal MigrateMonolithicConfig.new("/tmp").modules.size, @output.keys.size
   end
 
   def test_output_has_correct_general_settings
@@ -91,13 +93,13 @@ class ProxyMigrationTest < Test::Unit::TestCase
   def test_migration_correctly_uses_http_when_ssl_disabled
     config = YAML.load_file(File.join(File.dirname(__FILE__),'./migration_settings.yml'))
     config.delete(:ssl_certificate)
-    output, _ = migrate(config)
+    output, _ = MigrateMonolithicConfig.new("/tmp").migrate_monolithic_config(config)
     assert_equal 8443, output[:settings][:http_port]
     assert_nil output[:settings][:https_port]
   end
 
   def test_migration_idempotence
-    output2, _ = migrate(@output[:settings].dup)
+    output2, _ = MigrateMonolithicConfig.new("/tmp").migrate_monolithic_config(@output[:settings].dup)
     # Matches the test used inside the script for its exit value
     assert_equal @output[:settings], output2[:settings]
   end
