@@ -283,8 +283,8 @@ module Proxy::BMC
           # to execute ipmi commands and has nothing to do with authorization
           # of using smart-proxy. Its simply a tunnel to pass credentials through,
           # since we are essentially remotely executing ipmi commands using Rubyipmi.
-          args = { :host     => params[:host], :username     => username,
-                   :password => password,      :bmc_provider => provider_type }
+          args = { :host     => params[:host], :username     => username, :options => params[:options],
+                   :password => password, :bmc_provider => provider_type }
           @bmc = Proxy::BMC::IPMI.new(args)
         when "shell"
           require 'bmc/shell'
