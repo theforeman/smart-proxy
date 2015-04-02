@@ -100,14 +100,14 @@ class BmcApiTest < Test::Unit::TestCase
   end
 
   def test_api_bmc_setup_returns_new_ipmi_proxy_given_ipmitool
-    api = Proxy::BMC::Api.new!
     Proxy::BMC::Plugin.settings.stubs(:bmc_default_provider).returns('freeipmi')
-    auth = Object.new
+    api = Proxy::BMC::Api.new!
+    auth = mock()
     auth.stubs(:provided?).returns(true)
     auth.stubs(:basic?).returns(true)
     auth.stubs(:credentials).returns('username','password')
     api.stubs(:auth).returns(auth)
-    api.stubs(:find_ipmi_provider).returns('ipmitool')
+    api.expects(:find_ipmi_provider).with('ipmitool').returns('ipmitool')
     api.stubs(:params).returns(:bmc_provider => 'ipmitool', :host => :host)
     result = api.bmc_setup
     assert_kind_of(Proxy::BMC::IPMI,result)
@@ -115,13 +115,13 @@ class BmcApiTest < Test::Unit::TestCase
 
   def test_api_bmc_setup_returns_new_ipmi_proxy_given_freeipmi
     api = Proxy::BMC::Api.new!
-    Proxy::BMC::Plugin.settings.stubs(:bmc_default_provider).returns('freeipmi')
-    auth = Object.new
+    Proxy::BMC::Plugin.settings.stubs(:bmc_default_provider).returns('ipmitool')
+    auth = mock()
     auth.stubs(:provided?).returns(true)
     auth.stubs(:basic?).returns(true)
     auth.stubs(:credentials).returns('username','password')
     api.stubs(:auth).returns(auth)
-    api.stubs(:find_ipmi_provider).returns('freeipmi')
+    api.expects(:find_ipmi_provider).with('freeipmi').returns('freeipmi')
     api.stubs(:params).returns(:bmc_provider => 'freeipmi', :host => :host)
     result = api.bmc_setup
     assert_kind_of(Proxy::BMC::IPMI,result)
@@ -130,14 +130,37 @@ class BmcApiTest < Test::Unit::TestCase
   def test_api_bmc_setup_returns_new_shell_proxy_given_shell
     api = Proxy::BMC::Api.new!
     Proxy::BMC::Plugin.settings.stubs(:bmc_default_provider).returns('freeipmi')
-    auth = Object.new
+    api.stubs(:params).returns(:bmc_provider => 'shell', :host => :host)
+    result = api.bmc_setup
+    assert_kind_of(Proxy::BMC::Shell,result)
+  end
+
+  def test_api_uses_options_hash
+    api = Proxy::BMC::Api.new!
+    Proxy::BMC::Plugin.settings.stubs(:bmc_default_provider).returns('freeipmi')
+    auth = mock()
     auth.stubs(:provided?).returns(true)
     auth.stubs(:basic?).returns(true)
     auth.stubs(:credentials).returns('username','password')
     api.stubs(:auth).returns(auth)
-    api.stubs(:params).returns(:bmc_provider => 'shell', :host => :host)
+    api.stubs(:find_ipmi_provider).returns('freeipmi')
+    api.stubs(:params).returns(:bmc_provider => 'freeipmi', :host => :host, :options => {:privilege => 'OPERATOR'})
     result = api.bmc_setup
-    assert_kind_of(Proxy::BMC::Shell,result)
+    assert_kind_of(Proxy::BMC::IPMI,result)
+  end
+
+  def test_api_uses_options_hash_when_nil
+    api = Proxy::BMC::Api.new!
+    Proxy::BMC::Plugin.settings.stubs(:bmc_default_provider).returns('freeipmi')
+    auth = mock()
+    auth.stubs(:provided?).returns(true)
+    auth.stubs(:basic?).returns(true)
+    auth.stubs(:credentials).returns('username','password')
+    api.stubs(:auth).returns(auth)
+    api.stubs(:find_ipmi_provider).returns('freeipmi')
+    api.stubs(:params).returns(:bmc_provider => 'freeipmi', :host => :host, :options => {:privilege => 'OPERATOR'})
+    result = api.bmc_setup
+    assert_kind_of(Proxy::BMC::IPMI,result)
   end
 
   def test_api_recovers_from_missing_provider
