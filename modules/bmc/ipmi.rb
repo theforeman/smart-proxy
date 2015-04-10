@@ -65,7 +65,12 @@ module Proxy
       end
 
       def connect(args = { })
-        Rubyipmi.connect(args[:username], args[:password], args[:host], args[:bmc_provider], args[:options] || {})
+        if args[:options].instance_of?(Hash)
+          options = args[:options]
+        else
+          options = {}     # catches nil and empty string cases
+        end
+        Rubyipmi.connect(args[:username], args[:password], args[:host], args[:bmc_provider], options)
       end
 
       # returns boolean true if connection to device is successful
