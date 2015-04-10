@@ -40,6 +40,27 @@ module Proxy::Helpers
     end
   end
 
+  # parses the body as json and returns a hash of the body
+  # returns empty hash if there is a json parse error or body is empty
+  # request.env["CONTENT_TYPE"] must contain application/json in order for the json to be parsed
+  def parse_json_body
+    json_data = {}
+    # if the user has explicitly set the content_type then there must be something worth decoding
+    # we use a regex because it might contain something else like: application/json;charset=utf-8
+    # by default the content type will probably be set to "application/x-www-form-urlencoded" unless the
+    # user changed it.  If the user doesn't specify the content type we just ignore the body since a form
+    # will be parsed into the request.params object for us by sinatra
+    if request.env["CONTENT_TYPE"] =~ /application\/json/
+      begin
+        body_parameters = request.body.read
+        json_data = JSON.parse(body_parameters)
+      rescue => e
+        log_halt 415, "Invalid JSON content in body of request: \n#{e.message}"
+      end
+    end
+    json_data
+  end
+
   # reverse lookup an IP address while verifying it via forward resolv
   def remote_fqdn(forward_verify=true)
     ip = request.env['REMOTE_ADDR']

@@ -8,6 +8,10 @@ module Proxy::BMC
     # All GET requests will only read ipmi data, no changes
     # All PUT requests will update information on the bmc device
 
+    before do
+      content_type :json
+    end
+
     # return list of available options
     get "/" do
       res = ['providers', 'providers/installed', 'host']
@@ -260,7 +264,7 @@ module Proxy::BMC
 
     def bmc_setup
       # Either use the default provider or allow user to specify provider in request
-      provider_type ||= params[:bmc_provider] || Proxy::BMC::Plugin.settings.bmc_default_provider
+      provider_type = params['bmc_provider'] || body_parameters['bmc_provider'] || Proxy::BMC::Plugin.settings.bmc_default_provider
       provider_type.downcase! if provider_type
       # unless the provider is shell find a suitable provider
       if provider_type != 'shell'
@@ -269,12 +273,9 @@ module Proxy::BMC
 
       case provider_type
         when 'freeipmi', 'ipmitool'
-
           log_halt 401, "unauthorized" unless auth.provided?
           log_halt 401, "bad_authentication_request, credentials are not in auth.basic format" unless auth.basic?
-
           username, password = auth.credentials
-
           # this causes rubyipmi to use the supplied logger, most actions in rubyipmi only output during Logger::DEBUG
           Proxy::BMC::IPMI.logger = logger
 
@@ -283,7 +284,8 @@ module Proxy::BMC
           # to execute ipmi commands and has nothing to do with authorization
           # of using smart-proxy. Its simply a tunnel to pass credentials through,
           # since we are essentially remotely executing ipmi commands using Rubyipmi.
-          args = { :host     => params[:host], :username     => username, :options => params[:options],
+
+          args = { :host     => params[:host], :username     => username, :options => body_parameters['options'],
                    :password => password, :bmc_provider => provider_type }
           @bmc = Proxy::BMC::IPMI.new(args)
         when "shell"
@@ -294,6 +296,15 @@ module Proxy::BMC
       end
     rescue => e
       log_halt 400, e
+    end
+
+    # gets any parameters that were parsed into the body
+    # we have to parse the JSON body in the request and merge into the params object for later use
+    # if the user does not set the content type to application/json we will just assume there is garbage in the body
+    # also if the user decides to do http://127.0.0.1/bmc/192.168.1.6/test?bmc_provider=freeipmi as well as pass in
+    # a json encode body with the parameters, all of these items will be merged together
+    def body_parameters
+      @body_parameters ||= parse_json_body.merge(params)
     end
 
     def auth
