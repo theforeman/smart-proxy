@@ -1,3 +1,12 @@
+2015-04-13	Dominic Cleal <dcleal@redhat.com>
+	* Release 1.8.0-RC3
+
+2015-04-09	Corey Osman <corey@logicminds.biz>
+	* Fixes #9852 - REST API violation in BMC smart proxy API     * authentication errors now return 401 and proper message
+
+2015-04-09	Marek Hulan <mhulan@redhat.com>
+	* Fixes #9740 - support foreman_url with path
+
 2015-03-26	Dominic Cleal <dcleal@redhat.com>
 	* Release 1.8.0-RC2
 
