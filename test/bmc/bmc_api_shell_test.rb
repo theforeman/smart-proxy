@@ -1,6 +1,7 @@
 require 'test_helper'
 require 'json'
 require 'bmc/bmc_api'
+require 'bmc/shell'
 
 ENV['RACK_ENV'] = 'test'
 
@@ -12,13 +13,9 @@ class BmcApiShellTest < Test::Unit::TestCase
   end
 
   def setup
-    # Testing instructions
-    #rake test TEST=test/bmc_api_test.rb
-
     @host    ||= ENV["ipmihost"] || "host"
     provider ||= ENV["ipmiprovider"] || "shell"
     @args    = { :bmc_provider => provider }
-    require 'bmc/shell'
   end
 
   def test_api_shell_should_powercycle_with_shutdown

@@ -91,6 +91,29 @@ module Proxy::Util
     end
   end
 
+  def shell_command(cmd, wait = true)
+    begin
+      c = popen(cmd)
+      unless wait
+        Process.detach(c.pid)
+        return 0
+      end
+      Process.wait(c.pid)
+    rescue Exception => e
+      logger.error("Exception '#{e}' when executing '#{cmd}'")
+      return false
+    end
+    logger.warn("Non-null exit code when executing '#{cmd}'") if $?.exitstatus != 0
+    $?.exitstatus == 0
+  end
+
+  def popen(cmd)
+    # 1.8.7 note: this assumes that cli options are space-separated
+    cmd = cmd.join(' ') if RUBY_VERSION <= '1.8.7'
+    logger.debug("about to execute: #{cmd}")
+    IO.popen(cmd)
+  end
+
   def strict_encode64(str)
     if Base64.respond_to?(:strict_encode64)
       Base64.strict_encode64(str)

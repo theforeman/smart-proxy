@@ -212,7 +212,7 @@ class BmcApiTest < Test::Unit::TestCase
     get "/providers", args
     assert last_response.ok?, "Last response was not ok"
     data = JSON.parse(last_response.body)
-    expected = ['freeipmi','ipmitool', 'shell']
+    expected = ['freeipmi','ipmitool', 'ssh', 'shell']
     assert_equal(expected, data["providers"])
   end
 
@@ -220,7 +220,7 @@ class BmcApiTest < Test::Unit::TestCase
     get "/providers/installed", args
     assert last_response.ok?, "Last response was not ok"
     data = JSON.parse(last_response.body)
-    expected = ['freeipmi','ipmitool', 'shell']
+    expected = ['freeipmi','ipmitool', 'ssh', 'shell']
     assert_equal(expected, data["installed_providers"])
   end
 
