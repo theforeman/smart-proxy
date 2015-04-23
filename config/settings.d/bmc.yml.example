@@ -5,4 +5,15 @@
 # Available providers:
 # - freeipmi / ipmitool - requires the appropriate package installed, and the rubyipmi gem
 # - shell - for local reboot control (requires sudo access to /sbin/shutdown for the proxy user)
+# - ssh - limited remote control (status, reboot, turn off)
 #:bmc_default_provider: freeipmi
+
+# default user and ssh key for ssh provider
+#:bmc_ssh_user: root
+#:bmc_ssh_key: /usr/share/foreman/.ssh/id_rsa
+
+# individual commands for actions
+#:bmc_ssh_powerstatus: "true"
+#:bmc_ssh_powercycle: "shutdown -r +1"
+#:bmc_ssh_poweroff: "shutdown +1"
+#:bmc_ssh_poweron: "false"

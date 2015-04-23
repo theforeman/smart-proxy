@@ -20,12 +20,12 @@ module Proxy::BMC
 
     # Returns a list of bmc providers
     get "/providers" do
-      { :providers => Proxy::BMC::IPMI.providers + ['shell'] }.to_json
+      { :providers => Proxy::BMC::IPMI.providers + non_ipmi_providers }.to_json
     end
 
     # Returns a list of installed providers
     get "/providers/installed" do
-      { :installed_providers => Proxy::BMC::IPMI.providers_installed + ['shell'] }.to_json
+      { :installed_providers => Proxy::BMC::IPMI.providers_installed + non_ipmi_providers }.to_json
     end
 
     # returns a helpful message that the user should supply a hostname
@@ -240,6 +240,10 @@ module Proxy::BMC
       end
     end
 
+    def non_ipmi_providers
+      ['ssh', 'shell']
+    end
+
     # returns a provider type by validating the given type.  If for some reason the type is invalid
     # this function will try and find the first available provider that could be used.  If there are no providers available
     # lets halt and notify the user.
@@ -267,7 +271,7 @@ module Proxy::BMC
       provider_type = params['bmc_provider'] || body_parameters['bmc_provider'] || Proxy::BMC::Plugin.settings.bmc_default_provider
       provider_type.downcase! if provider_type
       # unless the provider is shell find a suitable provider
-      if provider_type != 'shell'
+      unless non_ipmi_providers.include? provider_type
         provider_type = find_ipmi_provider(provider_type)
       end
 
@@ -291,6 +295,9 @@ module Proxy::BMC
         when "shell"
           require 'bmc/shell'
           @bmc = Proxy::BMC::Shell.new
+        when "ssh"
+          require 'bmc/ssh'
+          @bmc = Proxy::BMC::SSH.new(params[:host])
         else
           log_halt 400, "Invalid BMC type: #{provider_type}"
       end
