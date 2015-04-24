@@ -188,6 +188,7 @@ module Proxy::DHCP
         @om = IO.popen("/bin/sh -c '#{om_binary} 2>&1'", "r+")
         @om.puts "key #{Proxy::DhcpPlugin.settings.dhcp_key_name} \"#{Proxy::DhcpPlugin.settings.dhcp_key_secret}\"" if Proxy::DhcpPlugin.settings.dhcp_key_name && Proxy::DhcpPlugin.settings.dhcp_key_secret
         @om.puts "server #{name}"
+        @om.puts "port #{Proxy::DhcpPlugin.settings.dhcp_omapi_port}" if Proxy::DhcpPlugin.settings.dhcp_omapi_port
         @om.puts "connect"
         @om.puts "new host"
       elsif cmd == "disconnect"
