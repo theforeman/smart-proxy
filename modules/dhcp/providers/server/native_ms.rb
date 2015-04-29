@@ -1,5 +1,9 @@
 require 'checks'
-require 'win32/open3'
+if RUBY_VERSION < '1.9'
+  require 'win32/open3'
+else
+  require 'open3'
+end
 require 'dhcp/subnet'
 require 'dhcp/record/reservation'
 require 'dhcp/record/lease'
@@ -174,7 +178,7 @@ module Proxy::DHCP
     def execute cmd, msg=nil, error_only=false
       tsecs = 5
       response = nil
-      interpreter = Proxy::SETTINGS.x86_64 ? 'c:\windows\sysnative\cmd.exe' : 'c:\windows\system32\cmd.exe'
+      interpreter = ENV['COMSPEC']
       command  = interpreter + ' /c c:\Windows\System32\netsh.exe -c dhcp ' + "server #{name} #{cmd}"
 
       std_in = std_out = std_err = nil
