@@ -21,3 +21,4 @@
 #:dhcp_leases: /var/lib/dhcpd/dhcpd.leases
 #:dhcp_key_name: secret_key_name
 #:dhcp_key_secret: secret_key
+#:dhcp_omapi_port: 7911
