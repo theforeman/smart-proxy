@@ -5,8 +5,9 @@ require 'dhcp/providers/server/native_ms'
 
 class DHCPServerMicrosoftTest < Test::Unit::TestCase
 
+  # rubocop:disable Metrics/MethodLength
   def setup
-    @server = Proxy::DHCP::Server::NativeMS.new(:server => "1.2.3.4")
+    @server = Proxy::DHCP::Server::NativeMS.new(:server => "1.2.3.4", :name => 'test')
     @server.stubs(:execute).with("show scope", "Enumerated the scopes on 1.2.3.4").returns('
 ==============================================================================
  Scope Address  - Subnet Mask    - State        - Scope Name          -  Comment
@@ -115,7 +116,9 @@ Options for Scope 172.29.205.0:
                 Option Element Value = 172.29.205.1
 Command completed successfully.
     ')
-    @server.stubs(:execute).with("scope 172.29.205.0 Show ReservedOptionValue 172.29.205.25", "Queried  options").returns('
+    @server.stubs(:execute).with(
+        regexp_matches(/^scope 172.29.205.0 Show ReservedOptionValue .+/),
+        regexp_matches(/^Queried .+ options/)).returns('
 Changed the current scope context to 172.29.205.0 scope.
 
 Options for the Reservation Address 172.29.205.25 in the Scope 172.29.205.0 :
@@ -150,6 +153,8 @@ Command completed successfully.
   end
 
   def test_should_load_subnet_records
+    @server.stubs(:execute_with_script).returns([])
+
     find_subnet
     assert @subnet.records.size > 0
   end
@@ -163,32 +168,76 @@ Command completed successfully.
   def test_subnet_should_have_options_and_values
     find_subnet
     @server.loadSubnetOptions @subnet
-    error = false
-    @subnet.options.each do |o,v|
-      error = true if o.nil? || o.empty? || v.nil? || o.empty?
-    end
-    assert error == false
+    assert !@subnet.options.any? { |o,v| o.to_s.empty? || v.nil? || v.to_s.empty? }
   end
 
   def test_records_should_have_options
+    @server.stubs(:execute_with_script).returns([])
     find_subnet
+
     record = @subnet.records.first
     @server.loadRecordOptions record
     assert record.options.size > 0
   end
 
   def test_records_should_have_options_and_values
+    @server.stubs(:execute_with_script).returns([])
     find_subnet
+
     record = @subnet.records.first
     @server.loadRecordOptions record
-    error = false
-    record.options.each { |o,v| error = true if o.nil? || o.empty? || v.nil? || v.empty? }
-    assert error == false
+    assert !@subnet.options.any? { |o,v| o.to_s.empty? || v.nil? || v.to_s.empty? }
   end
 
-  def test_should_find_unused_ip
+  def test_build_netsh_script
+    script_file = @server.build_netsh_script("172.29.205.56" => { :subnet => @server.subnets.first,
+                                                                  :ip => "172.29.205.56",
+                                                                  :mac => "00:14:4f:40:e9:88" })
+
+    readlines = script_file.open.readlines
+
+    assert_equal 2, readlines.size
+    assert_equal "dhcp server\n", readlines[0]
+    assert readlines[1].include?("Show ReservedOptionValue 172.29.205.56\n")
+  ensure
+    if !script_file.nil?
+      script_file.close
+      script_file.unlink
+    end
+  end
+
+  def test_subnet_entries
+    @server.stubs(:execute_with_script).returns([])
     find_subnet
-    assert !@subnet.unused_ip
+
+    entries = @server.subnet_entries(@subnet)
+    expected_subnet_entries = @subnet.records.inject({}) do |acc, cur|
+        acc[cur.ip] = { :subnet => cur.subnet, :ip => cur.ip, :mac => cur.mac }; acc
+    end
+
+    assert_equal expected_subnet_entries, entries
   end
 
+  def test_execute_builds_correct_command
+    @server.expects(:execute_command).with(
+        'c:\Windows\System32\netsh.exe' + " -r #{@server.name} -c dhcp server blah", 5, nil, false)
+    @server.unstub(:execute)
+
+    @server.execute('blah')
+  end
+
+  def test_execute_with_script_builds_correct_command
+    @server.expects(:execute_command).with(
+        'c:\Windows\System32\netsh.exe' + " -r #{@server.name} -f blah", 30, nil, false)
+    @server.unstub(:execute)
+
+    @server.execute_with_script('blah')
+  end
+
+  def test_should_raise_dhcp_exception_on_netsh_timeout
+    @server.expects(:timeout).raises(TimeoutError)
+    assert_raise Proxy::DHCP::Error do
+      @server.execute_command("dummy", 5, nil, false)
+    end
+  end
 end

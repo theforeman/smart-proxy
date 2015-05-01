@@ -1,5 +1,6 @@
 require 'checks'
-require 'win32/open3'
+require 'win32/open3' if RUBY_PLATFORM =~ /mingw/
+require 'tempfile'
 require 'dhcp/subnet'
 require 'dhcp/record/reservation'
 require 'dhcp/record/lease'
@@ -85,37 +86,70 @@ module Proxy::DHCP
       end
       short_vendor
     end
-    private :find_or_create_vendor_name
 
-    def loadSubnetData subnet
-      super
+    def subnet_entries(subnet)
+      all_entries = {}
+      # Extract the data and build a scriptfile
       cmd = "scope #{subnet.network} show reservedip"
       msg = "Enumerated hosts on #{subnet.network}"
-
-      # Extract the data
-      execute(cmd, msg).each do |line|
+      execute(cmd, msg).each_line do |line|
         #     172.29.216.6      -    00-a0-e7-21-41-00-
         if line =~ /^\s+([\w\.]+)\s+-\s+([-a-f\d]+)/
           ip  = $1
           next unless subnet.include?(ip)
           mac = $2.gsub(/-/,":").match(/^(.*?).$/)[1]
-          begin
-            opts = {:subnet => subnet, :ip => ip, :mac => mac}
-            opts.merge!(loadRecordOptions(opts))
-            logger.debug opts.inspect
-            if opts.include? :hostname
-              Proxy::DHCP::Reservation.new opts.merge(:deleteable => true)
-            else
-              # this is not a lease, rather reservation
-              # but we require option 12(hostname) to be defined for our leases
-              # workaround until #1172 is resolved.
-              Proxy::DHCP::Lease.new opts
-            end
-          rescue Exception => e
-            logger.warn "Skipped #{line} - #{e}"
-          end
+          opts = {:subnet => subnet, :ip => ip, :mac => mac}
+          all_entries[ip] = opts
         end
       end
+
+      all_entries
+    end
+
+    def build_netsh_script(subnet_entries)
+      netsh_tmp = Tempfile.new('smartproxydhcp')
+      netsh_tmp.write("dhcp server\n")
+      subnet_entries.each_value do |entry|
+        netsh_tmp.write("scope #{entry[:subnet].network} Show ReservedOptionValue #{entry[:ip]}\n")
+      end
+
+      netsh_tmp
+    ensure
+      netsh_tmp.close unless netsh_tmp.nil?
+    end
+
+    def subnet_entries_to_records(subnet_entries, netsh_results)
+      subnet_entries.each do |ip, existing_options|
+        query_result = netsh_results[ip] || ''
+        new_options = parse_options(query_result)
+
+        logger.debug "    query_result #{query_result.inspect}"
+        logger.debug "     new_options #{new_options.inspect}"
+        logger.debug "existing_options #{existing_options.inspect}"
+
+        complete_subnet_entry = existing_options.merge(new_options)
+        logger.debug "merged_options #{complete_subnet_entry.inspect}"
+        if complete_subnet_entry.include? :hostname
+          logger.info "New reservation #{complete_subnet_entry.inspect}"
+          Proxy::DHCP::Reservation.new complete_subnet_entry.merge(:deleteable => true)
+        else
+          # this is not a lease, rather reservation
+          # but we require option 12(hostname) to be defined for our leases
+          # workaround until #1172 is resolved.
+          logger.info "New Lease #{complete_subnet_entry.inspect}"
+          Proxy::DHCP::Lease.new complete_subnet_entry
+        end
+      end
+    end
+
+    def loadSubnetData subnet
+      super
+      all_entries = subnet_entries(subnet)
+      netsh_tmp = build_netsh_script(all_entries)
+      script_output = execute_with_script(netsh_tmp.path,"Running NETSH in script mode")
+      subnet_entries_to_records(all_entries, parse_script_output_to_hash(script_output))
+    ensure
+      netsh_tmp.unlink unless netsh_tmp.nil?
     end
 
     def loadSubnetOptions subnet
@@ -127,7 +161,6 @@ module Proxy::DHCP
       subnet.options = parse_options(execute(cmd, msg))
     end
 
-    private
     def loadRecordOptions opts
       raise "unable to find subnet for #{opts[:ip]}" if opts[:subnet].nil?
       cmd = "scope #{opts[:subnet].network} Show ReservedOptionValue #{opts[:ip]}"
@@ -162,7 +195,7 @@ module Proxy::DHCP
       cmd = "show scope"
       msg = "Enumerated the scopes on #{@name}"
 
-      execute(cmd, msg).each do |line|
+      execute(cmd, msg).each_line do |line|
         # 172.29.216.0   - 255.255.254.0  -Active        -DC BRS               -
         if match = line.match(/^\s*([\d\.]+)\s*-\s*([\d\.]+)\s*-\s*(Active|Disabled)/)
           next unless managed_subnet? "#{match[1]}/#{match[2]}"
@@ -172,21 +205,33 @@ module Proxy::DHCP
     end
 
     def execute cmd, msg=nil, error_only=false
-      tsecs = 5
-      response = nil
-      interpreter = Proxy::SETTINGS.x86_64 ? 'c:\windows\sysnative\cmd.exe' : 'c:\windows\system32\cmd.exe'
-      command  = interpreter + ' /c c:\Windows\System32\netsh.exe -c dhcp ' + "server #{name} #{cmd}"
+      # netsh.exe specifies using -r for remoting
+      command  = 'c:\Windows\System32\netsh.exe' + " -r #{name} -c dhcp server #{cmd}"
+      execute_command(command, 5, msg, error_only)
+    end
 
+    # Invokes netsh.exe with a script file
+    def execute_with_script scriptfile, msg=nil, error_only=false
+      command  = 'c:\Windows\System32\netsh.exe' + " -r #{name} -f #{scriptfile}"
+      execute_command(command, 30, msg, error_only)
+    end
+
+    def execute_command(command, timeout, msg, error_only)
+      response = nil
       std_in = std_out = std_err = nil
+
+      interpreter = (Proxy::SETTINGS.x86_64 ? 'c:\windows\sysnative\cmd.exe' : 'c:\windows\system32\cmd.exe') + ' /c '
+      full_command = interpreter + command
+
       begin
-        timeout(tsecs) do
-          logger.debug "executing: #{command}"
-          std_in, std_out, std_err  = Open3.popen3(command)
+        timeout(timeout) do
+          logger.debug "executing: #{full_command}"
+          std_in, std_out, std_err  = Open3.popen3(full_command)
           response  = std_out.readlines
           response += std_err.readlines
         end
       rescue TimeoutError
-        raise Proxy::DHCP::Error.new("Netsh did not respond within #{tsecs} seconds")
+        raise Proxy::DHCP::Error.new("Netsh did not respond within #{timeout} seconds")
       ensure
         std_in.close  unless std_in.nil?
         std_out.close unless std_in.nil?
@@ -194,6 +239,27 @@ module Proxy::DHCP
       end
       report msg, response, error_only
       response
+    end
+
+    # convert scriptfile output into a hash for fast queries
+    def parse_script_output_to_hash content
+      processed = {}
+      queryResults = ""
+      anIP = nil
+      content.each do |line|
+        anIP = $1 if line.match(/^Options for the Reservation Address ([\w\.]+)/)
+
+        if line.match(/^Command completed/) && !anIP.nil?
+          queryResults += line
+          processed[anIP] = queryResults
+          queryResults = ""
+          anIP = nil
+        end
+
+        queryResults += line if !anIP.nil?
+      end
+      logger.debug "found #{processed.size} queries"
+      processed
     end
 
     def report msg, response, error_only
@@ -226,23 +292,22 @@ module Proxy::DHCP
     def parse_options response
       optionId = nil
       options  = {}
-      response.each do |line|
+      response.each_line do |line|
         line.chomp!
         break if line.match(/^Command completed/)
 
         case line
-        #TODO: this logic is broken, as the output reports only once the vendor type
-        # making it impossible to detect if its a standard option or a custom one.
-        when /For vendor class \[([^\]]+)\]:/
-          options[:vendor] = "<#{$1}>"
-        when /OptionId : (\d+)/
-          optionId = $1.to_i
-        when /Option Element Value = (\S+)/
-          #TODO move options to a class or something
-          opts = SUNW.update(Standard)
-          title = opts.select {|k,v| v[:code] == optionId}.flatten[0]
-          logger.debug "found option #{title}"
-          options[title] = $1
+          #TODO: this logic is broken, as the output reports only once the vendor type
+          # making it impossible to detect if its a standard option or a custom one.
+          when /For vendor class \[([^\]]+)\]:/
+            options[:vendor] = "<#{$1}>"
+          when /OptionId : (\d+)/
+            optionId = $1.to_i
+          when /Option Element Value = (\S+)/
+            #TODO move options to a class or something
+            opts = SUNW.update(Standard)
+            title = opts.select {|k,v| v[:code] == optionId}.flatten[0]
+            options[title] = $1 if title
         end
       end
       logger.debug options.inspect
@@ -252,7 +317,7 @@ module Proxy::DHCP
     def parse_classes response
       klass   = nil
       classes = []
-      response.each do |line|
+      response.each_line do |line|
         line.chomp!
         break if line.match(/^Command completed/)
 
