@@ -1,5 +1,6 @@
 require 'openssl'
 require 'puppet'
+require 'set'
 
 module Proxy::PuppetCa
   extend ::Proxy::Log
@@ -182,7 +183,7 @@ module Proxy::PuppetCa
       raise "Unable to find CRL" unless File.exist?(crl)
 
       crl = OpenSSL::X509::CRL.new(File.read(crl))
-      crl.revoked.collect {|r| r.serial}
+      Set.new(crl.revoked.collect {|r| r.serial})
     end
 
     def puppetca mode, certname
