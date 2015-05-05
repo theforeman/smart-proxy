@@ -8,40 +8,45 @@
 require 'yaml'
 
 def modules
-  [ :settings, :tftp, :dns, :dhcp, :puppet, :puppetca, :bmc, :chef, :realm ]
+  [ :settings, :tftp, :dns, :dhcp, :puppet, :puppetca, :bmc, :chef, :realm,
+    :dns_nsupdate, :dns_nsupdate_gss, :dns_virsh, :dns_dnscmd ]
 end
 
 def known_options
   {
-    :daemon             => :settings,
-    :daemon_pid         => :settings,
-    :log_file           => :settings,
-    :log_level          => :settings,
-    :port               => :settings,
-    :ssl_ca_file        => :settings,
-    :ssl_certificate    => :settings,
-    :ssl_private_key    => :settings,
-    :trusted_hosts      => :settings,
-    :virsh_network      => :settings,
-    :foreman_url        => :settings,
-    :settings_directory => :settings,
-    :http_port          => :settings,
-    :https_port         => :settings,
-    :use_cache          => :settings,
-    :cache_location     => :settings,
-    :puppetca_use_sudo  => :puppetca,
-    :puppetdir          => :puppetca,
-    :ssldir             => :puppetca,
-    :sudo_command       => :puppetca,
-    :customrun_args     => :puppet,
-    :customrun_cmd      => :puppet,
-    :freeipa_remove_dns => :realm
+    :daemon             => [:settings],
+    :daemon_pid         => [:settings],
+    :log_file           => [:settings],
+    :log_level          => [:settings],
+    :port               => [:settings],
+    :ssl_ca_file        => [:settings],
+    :ssl_certificate    => [:settings],
+    :ssl_private_key    => [:settings],
+    :trusted_hosts      => [:settings],
+    :virsh_network      => [:settings],
+    :foreman_url        => [:settings],
+    :settings_directory => [:settings],
+    :http_port          => [:settings],
+    :https_port         => [:settings],
+    :use_cache          => [:settings],
+    :cache_location     => [:settings],
+    :puppetca_use_sudo  => [:puppetca],
+    :puppetdir          => [:puppetca],
+    :ssldir             => [:puppetca],
+    :sudo_command       => [:puppetca],
+    :customrun_args     => [:puppet],
+    :customrun_cmd      => [:puppet],
+    :freeipa_remove_dns => [:realm],
+    :dns_server         => [:dns_nsupdate, :dns_nsupdate_gss, :dns_dnscmd],
+    :dns_ttl            => [:dns_nsupdate, :dns_nsupdate_gss],
+    :dns_tsig_keytab    => [:dns_nsupdate_gss],
+    :dns_tsig_principal => [:dns_nsupdate_gss],
+    :dns_provider       => [:dns]
   }
 end
 
-def migrate(data)
-  output     = {}
-  modules.each {|m| output[m] = {} }
+def migrate_main_configuration(data)
+  output = Hash.new { |h,k| h[k] = Hash.new }
 
   # chef's enabler got called something non-standard...
   data[:chef] = data.delete(:chefproxy) unless data[:chefproxy].nil?
@@ -51,8 +56,8 @@ def migrate(data)
 
     # handle special cases first
     if known_options.include? option
-      m = known_options[option]
-      output[m][option] = value
+      module_names = known_options[option]
+      module_names.each {|m| output[m][option] = value }
       data.delete(option)
       parsed = true
     end
@@ -101,7 +106,7 @@ if __FILE__ == $0 then
   orig_file = ARGV[0] || '/etc/foreman-proxy/settings.yml'
   data      = YAML.load_file(orig_file)
 
-  output,unknown = migrate(data.dup)
+  output,unknown = migrate_main_configuration(data.dup)
   exit(1) if data == output[:settings] # it looks like we already have the new style settings
   write_to_files(output,unknown)
   exit(0)
