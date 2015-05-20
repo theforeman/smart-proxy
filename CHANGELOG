@@ -1,3 +1,9 @@
+2015-05-20	Dominic Cleal <dcleal@redhat.com>
+	* Release 1.8.1
+
+2015-05-20	Jon McKenzie <jcmcken@gmail.com>
+	* Fixes #10324 - Improves certificate serial lookup in Puppet CA module
+
 2015-04-28	Dominic Cleal <dcleal@redhat.com>
 	* Release 1.8.0
 
