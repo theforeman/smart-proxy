@@ -14,6 +14,7 @@ module Proxy::Helpers
         return yield
       end
     rescue => e
+      exception = e
       message += e.message
       code     = code || 400
     end
