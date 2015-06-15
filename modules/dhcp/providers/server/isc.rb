@@ -46,6 +46,7 @@ module Proxy::DHCP
 
       statements += solaris_options_statements(options)
       statements += ztp_options_statements(options)
+      statements += poap_options_statements(options)
 
       omcmd "set statements = \"#{statements.join(" ")}\""      unless statements.empty?
       omcmd "create"
@@ -379,6 +380,17 @@ module Proxy::DHCP
         opt150 = ip2hex validate_ip(options[:nextServer])
         statements << "option option-150 = #{opt150};"
         statements << "option FM_ZTP.config-file-name = \\\"#{options[:filename]}\\\";"
+      end
+      statements
+    end
+
+    # Cisco NX-OS POAP requires special DHCP options
+    def poap_options_statements(options)
+      statements = []
+      if options[:filename] && options[:filename].match(/^poap.cfg.*/i)
+        logger.debug "setting POAP options"
+        statements << "option tftp-server-name = #{options[:nextServer]};"
+        statements << "option bootfile-name = \\\"#{options[:filename]}\\\";"
       end
       statements
     end
