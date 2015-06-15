@@ -38,8 +38,8 @@ module Proxy::PuppetCa
         autosign.close
         logger.info "Removed #{certname} from autosign"
       else
-        logger.info "Attempt to remove nonexistant client autosign for #{certname}"
-        raise NotPresent, "Attempt to remove nonexistant client autosign for #{certname}"
+        logger.info "Attempt to remove nonexistent client autosign for #{certname}"
+        raise NotPresent, "Attempt to remove nonexistent client autosign for #{certname}"
       end
     end
 
@@ -199,8 +199,8 @@ module Proxy::PuppetCa
         # Later versions of puppetca return OK even if the certificate is not present
         # However we can report this condition for 0.24 and not flag an error to foreman
         if response =~ /Could not find client certificate/ || $?.exitstatus == 24
-          logger.info "Attempt to remove nonexistant client certificate for #{certname}"
-          raise NotPresent, "Attempt to remove nonexistant client certificate for #{certname}"
+          logger.info "Attempt to remove nonexistent client certificate for #{certname}"
+          raise NotPresent, "Attempt to remove nonexistent client certificate for #{certname}"
         else
           logger.warn "Failed to run puppetca: #{response}"
           raise "Execution of puppetca failed, check log files"
