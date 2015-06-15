@@ -81,7 +81,7 @@ class Proxy::DhcpApi < ::Sinatra::Base
   get "/:network/:record" do
     begin
       content_type :json
-      record = load_subnet[params[:record]]
+      record = @server.find_record(params[:record])
       log_halt 404, "Record #{params[:network]}/#{params[:record]} not found" unless record
       record.options.to_json
     rescue => e
