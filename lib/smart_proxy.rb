@@ -18,6 +18,7 @@ require 'proxy/http_downloads'
 require 'proxy/helpers'
 require 'proxy/plugin'
 require 'proxy/error'
+require 'proxy/request'
 
 require 'bundler_helper'
 Proxy::BundlerHelper.require_groups(:default)
