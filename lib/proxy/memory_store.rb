@@ -1,4 +1,4 @@
-module Proxy::Puppet
+module Proxy
   class MemoryStore
     def initialize
       @root = {}
@@ -13,8 +13,12 @@ module Proxy::Puppet
       put(@root, args, value)
     end
 
+    def delete(*path)
+      do_delete(@root, path)
+    end
+
     def values(*path)
-      get_all_values(get(@root, path))
+      path.empty? ? get_all_values(@root) : get_all_values(get(@root, path))
     end
 
     private
@@ -30,6 +34,11 @@ module Proxy::Puppet
 
       store[path.first] = {} unless store.key?(path.first)
       put(store[path.first], path.slice(1, path.size - 1), value)
+    end
+
+    def do_delete(store, path)
+      return store.delete(path.first) if path.size == 1
+      do_delete(store[path.first], path.slice(1, path.size - 1))
     end
 
     def get_all_values(store)

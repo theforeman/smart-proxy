@@ -1,4 +1,4 @@
-require 'puppet_proxy/memory_store'
+require 'proxy/memory_store'
 require 'thread'
 
 module Proxy::Puppet
@@ -18,8 +18,8 @@ module Proxy::Puppet
       logger.debug("Running scan_directory on #{environment}: #{directory}")
 
       @mutex.synchronize do
-        tmp_classes = MemoryStore.new
-        tmp_timestamps = MemoryStore.new
+        tmp_classes = ::Proxy::MemoryStore.new
+        tmp_timestamps = ::Proxy::MemoryStore.new
 
         Dir.glob("#{directory}/*").map do |path|
           puppetmodule = File.basename(path)

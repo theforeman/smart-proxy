@@ -1,6 +1,7 @@
 require "dhcp/subnet"
 require "dhcp/record"
 require "dhcp/record/lease"
+require "dhcp/subnet_service"
 
 module Proxy::DHCP
   # represents a DHCP Server
@@ -12,30 +13,14 @@ module Proxy::DHCP
     include Proxy::Log
     include Proxy::Validations
 
-    def initialize(name)
+    def initialize(name, service)
       @name    = name
-      @subnets = []
       @loaded  = false
-    end
-
-    def loaded?
-      @loaded
-    end
-
-    def clear
-      @subnets = []
-      @loaded  = false
-    end
-
-    def load
-      self.clear
-      @loaded = true
-      loadSubnets
+      @service = service
     end
 
     def subnets
-      self.load if not loaded?
-      @subnets
+      @service.all_subnets
     end
 
     # Abstracted Subnet loader method
@@ -54,35 +39,45 @@ module Proxy::DHCP
       logger.debug "Loading Subnet options for #{subnet}"
     end
 
-    # Adds a Subnet to a server object
-    def add_subnet subnet
-      if find_subnet(subnet.network).nil?
-        @subnets << validate_subnet(subnet)
-        logger.debug "Added #{subnet} to #{name}"
-        return true
-      end
-      logger.warn "Subnet #{subnet} already exists in server #{name}"
-      return false
+    def find_subnet subnet_address
+      @service.find_subnet(subnet_address)
     end
 
-    def find_subnet value
-      subnets.each do |s|
-        return s if value.is_a?(String) && s.network == value
-        return s if value.is_a?(Proxy::DHCP::Record) && s.include?(value.ip)
-        return s if value.is_a?(IPAddr) && s.include?(value)
-      end
-      return nil
+    def all_leases(subnet)
+      @service.all_leases(subnet)
     end
 
-    def find_record record
-      subnets.each do |s|
-        s.records.each do |v|
-          return v if record.is_a?(String) && (v.ip == record || v.mac == record)
-          return v if record.is_a?(Proxy::DHCP::Record) && v == record
-          return v if record.is_a?(IPAddr) && v.ip == record.to_s
-        end
+    def all_hosts(subnet)
+      @service.all_hosts(subnet)
+    end
+
+    def find_record(subnet_address, an_address)
+      @service.find_host_by_ip(subnet_address, an_address) ||
+          @service.find_host_by_mac(subnet_address, an_address) ||
+          @service.find_lease_by_ip(subnet_address, an_address) ||
+          @service.find_lease_by_mac(subnet_address, an_address)
+    end
+
+    def unused_ip(subnet, mac_address, from_address, to_address)
+      # first check if we already have a record for this host
+      # if we do, we can simply reuse the same ip address.
+      if mac_address
+        r = ip_by_mac_address_and_range(subnet, mac_address, from_address, to_address)
+        return r if r
       end
-      return nil
+
+      subnet.unused_ip(all_hosts(subnet.network) + all_leases(subnet.network),
+                       :from => from_address, :to => to_address)
+    end
+
+    def ip_by_mac_address_and_range(subnet, mac_address, from_address, to_address)
+      r = @service.find_host_by_mac(subnet.network, mac_address) ||
+          @service.find_lease_by_mac(subnet.network, mac_address)
+
+      if r && subnet.valid_range(:from => from_address, :to => to_address).include?(r.ip)
+        logger.debug "Found an existing dhcp record #{r}, reusing..."
+        return r.ip
+      end
     end
 
     def inspect
@@ -114,8 +109,8 @@ module Proxy::DHCP
       options.merge!(:hostname => hostname || name, :subnet => subnet, :ip => ip, :mac => mac)
 
       # try to figure out if we already have this record
-      record = find_record(ip) || find_record(mac)
-      unless record.nil? || record.is_a?(Proxy::DHCP::Lease)
+      record = @service.find_host_by_ip(subnet.network, ip) || @service.find_host_by_mac(subnet.network, mac)
+      unless record.nil?
         if Record.compare_options(record.options, options)
           # we already got this record, no need to do anything
           logger.debug "We already got the same DHCP record - skipping"
@@ -127,11 +122,8 @@ module Proxy::DHCP
           raise Proxy::DHCP::Collision, "Record #{net}/#{ip} already exists"
         end
       end
-      Proxy::DHCP::Reservation.new(options)
-    end
 
-    def delRecord subnet, record
-      subnet.delete record
+      Proxy::DHCP::Reservation.new(options)
     end
 
     def vendor_options_included? options
@@ -148,6 +140,5 @@ module Proxy::DHCP
       return true unless managed_subnets
       managed_subnets.include? subnet
     end
-
   end
 end

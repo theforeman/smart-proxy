@@ -14,19 +14,18 @@ class Proxy::DhcpApi < ::Sinatra::Base
           && File.exist?(Proxy::DhcpPlugin.settings.dhcp_config) && File.exist?(Proxy::DhcpPlugin.settings.dhcp_leases)
           log_halt 400, "Unable to find the DHCP configuration or lease files"
         end
-        @server = Proxy::DHCP::ISC.new(:name => Proxy::DhcpPlugin.settings.dhcp_server,
-                                       :config => Proxy::DhcpPlugin.settings.dhcp_config,
-                                       :leases => Proxy::DhcpPlugin.settings.dhcp_leases)
+        @server = Proxy::DHCP::ISC.instance_with_default_parameters
       when "native_ms"
         require 'dhcp/providers/server/native_ms'
-        @server = Proxy::DHCP::NativeMS.new(:server => Proxy::DhcpPlugin.settings.dhcp_server ? Proxy::DhcpPlugin.settings.dhcp_server : "127.0.0.1")
+        @server = Proxy::DHCP::NativeMS.instance_with_default_parameters
       when "virsh"
         require 'dhcp/providers/server/virsh'
-        @server = Proxy::DHCP::Virsh.new(:virsh_network => Proxy::SETTINGS.virsh_network)
+        @server = Proxy::DHCP::Virsh.instance_with_default_parameters
       else
         log_halt 400, "Unrecognized or missing DHCP vendor type: #{Proxy::DhcpPlugin.settings.dhcp_vendor.nil? ? "MISSING" : Proxy::DhcpPlugin.settings.dhcp_vendor}"
       end
-      @subnets = @server.subnets
+
+      @server.loadSubnets
     rescue => e
       log_halt 400, e
     end
@@ -38,6 +37,10 @@ class Proxy::DhcpApi < ::Sinatra::Base
       log_halt 404, "Subnet #{params[:network]} not found" unless @subnet
       @subnet
     end
+
+    def load_subnet_data
+      @server.loadSubnetData(@subnet)
+    end
   end
 
   get "/?" do
@@ -45,8 +48,8 @@ class Proxy::DhcpApi < ::Sinatra::Base
       if request.accept? 'application/json'
         content_type :json
 
-        log_halt 404, "No subnets found on server @{name}" unless @subnets
-        @subnets.map{|s| {:network => s.network, :netmask => s.netmask }}.to_json
+        log_halt 404, "No subnets found on server @{name}" unless @server.subnets
+        @server.subnets.map{|s| {:network => s.network, :netmask => s.netmask }}.to_json
       else
         erb :"dhcp/index"
       end
@@ -58,9 +61,11 @@ class Proxy::DhcpApi < ::Sinatra::Base
   get "/:network" do
     begin
       load_subnet
+      load_subnet_data
+
       if request.accept? 'application/json'
         content_type :json
-        {:reservations => @subnet.reservations, :leases => @subnet.leases}.to_json
+        {:reservations => @server.all_hosts(@subnet.network), :leases => @server.all_leases(@subnet.network)}.to_json
       else
         erb :"dhcp/show"
       end
@@ -72,7 +77,11 @@ class Proxy::DhcpApi < ::Sinatra::Base
   get "/:network/unused_ip" do
     begin
       content_type :json
-      ({:ip => load_subnet.unused_ip(:from => params[:from], :to => params[:to], :mac => params[:mac])}).to_json
+
+      load_subnet
+      load_subnet_data
+
+      ({:ip => @server.unused_ip(@subnet, params[:mac], params[:from], params[:to])}).to_json
     rescue => e
       log_halt 400, e
     end
@@ -81,7 +90,11 @@ class Proxy::DhcpApi < ::Sinatra::Base
   get "/:network/:record" do
     begin
       content_type :json
-      record = @server.find_record(params[:record])
+
+      load_subnet
+      load_subnet_data
+
+      record = @server.find_record(@subnet.network, params[:record])
       log_halt 404, "Record #{params[:network]}/#{params[:record]} not found" unless record
       record.options.to_json
     rescue => e
@@ -92,6 +105,9 @@ class Proxy::DhcpApi < ::Sinatra::Base
   # create a new record in a network
   post "/:network" do
     begin
+      load_subnet
+      load_subnet_data
+
       content_type :json
       @server.addRecord(params)
     rescue Proxy::DHCP::Collision => e
@@ -106,7 +122,10 @@ class Proxy::DhcpApi < ::Sinatra::Base
   # delete a record from a network
   delete "/:network/:record" do
     begin
-      record = load_subnet.reservation_for(params[:record])
+      load_subnet
+      load_subnet_data
+
+      record = @server.find_record(@subnet.network, params[:record])
       log_halt 404, "Record #{params[:network]}/#{params[:record]} not found" unless record
       @server.delRecord @subnet, record
       if request.accept? 'application/json'
