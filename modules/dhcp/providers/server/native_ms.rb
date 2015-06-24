@@ -1,5 +1,5 @@
 require 'checks'
-require 'win32/open3'
+require 'win32/open3' if RUBY_PLATFORM =~ /mingw/
 require 'dhcp/subnet'
 require 'dhcp/record/reservation'
 require 'dhcp/record/lease'
@@ -10,8 +10,14 @@ module Proxy::DHCP
   # executed on a Microsoft server under a service account
   class NativeMS < Server
 
+    def self.instance_with_default_parameters
+      Proxy::DHCP::NativeMS.new(
+          :server => Proxy::DhcpPlugin.settings.dhcp_server ? Proxy::DhcpPlugin.settings.dhcp_server : "127.0.0.1",
+          :service => Proxy::DHCP::SubnetService.instance_with_default_parameters)
+    end
+
     def initialize(options = {})
-      super options[:server]
+      super options[:server], options[:service]
     end
 
     def delRecord subnet, record
@@ -25,7 +31,6 @@ module Proxy::DHCP
       cmd = "scope #{subnet.network} delete reservedip #{record.ip} #{mac}"
 
       execute(cmd, msg)
-      subnet.delete(record)
     end
 
     def addRecord options={}
@@ -87,13 +92,13 @@ module Proxy::DHCP
     end
     private :find_or_create_vendor_name
 
-    def loadSubnetData subnet
-      super
+    def find_subnet_dhcp_records(subnet)
       cmd = "scope #{subnet.network} show reservedip"
       msg = "Enumerated hosts on #{subnet.network}"
 
+      to_return = []
       # Extract the data
-      execute(cmd, msg).each do |line|
+      execute(cmd, msg).each_line do |line|
         #     172.29.216.6      -    00-a0-e7-21-41-00-
         if line =~ /^\s+([\w\.]+)\s+-\s+([-a-f\d]+)/
           ip  = $1
@@ -104,16 +109,31 @@ module Proxy::DHCP
             opts.merge!(loadRecordOptions(opts))
             logger.debug opts.inspect
             if opts.include? :hostname
-              Proxy::DHCP::Reservation.new opts.merge(:deleteable => true)
+              to_return << Proxy::DHCP::Reservation.new(opts.merge(:deleteable => true))
             else
               # this is not a lease, rather reservation
               # but we require option 12(hostname) to be defined for our leases
               # workaround until #1172 is resolved.
-              Proxy::DHCP::Lease.new opts
+              to_return << Proxy::DHCP::Lease.new(opts)
             end
           rescue Exception => e
             logger.warn "Skipped #{line} - #{e}"
           end
+        end
+      end
+
+      to_return
+    end
+
+    def loadSubnetData subnet
+      super
+      records = find_subnet_dhcp_records(subnet)
+      records.each do |record|
+        case record
+        when Proxy::DHCP::Reservation
+          @service.add_host(record.subnet_address, record)
+        when Proxy::DHCP::Lease
+          @service.add_lease(record.subnet_address, record)
         end
       end
     end
@@ -127,7 +147,6 @@ module Proxy::DHCP
       subnet.options = parse_options(execute(cmd, msg))
     end
 
-    private
     def loadRecordOptions opts
       raise "unable to find subnet for #{opts[:ip]}" if opts[:subnet].nil?
       cmd = "scope #{opts[:subnet].network} Show ReservedOptionValue #{opts[:ip]}"
@@ -157,18 +176,25 @@ module Proxy::DHCP
       parse_classes(execute(cmd, msg))
     end
 
-    def loadSubnets
-      super
+    def find_all_subnets
       cmd = "show scope"
       msg = "Enumerated the scopes on #{@name}"
 
-      execute(cmd, msg).each do |line|
+      ret_val = []
+      execute(cmd, msg).each_line do |line|
         # 172.29.216.0   - 255.255.254.0  -Active        -DC BRS               -
         if match = line.match(/^\s*([\d\.]+)\s*-\s*([\d\.]+)\s*-\s*(Active|Disabled)/)
           next unless managed_subnet? "#{match[1]}/#{match[2]}"
-          Proxy::DHCP::Subnet.new(self, match[1], match[2])
+          ret_val << Proxy::DHCP::Subnet.new(match[1], match[2])
         end
       end
+
+      ret_val
+    end
+
+    def loadSubnets
+      super
+      @service.add_subnets(*find_all_subnets)
     end
 
     def execute cmd, msg=nil, error_only=false
@@ -186,7 +212,7 @@ module Proxy::DHCP
           response += std_err.readlines
         end
       rescue TimeoutError
-        raise Proxy::DHCP::Error.new("Netsh did not respond within #{tsecs} seconds")
+        raise Proxy::DHCP::Error.new("Netsh did nota respond within #{tsecs} seconds")
       ensure
         std_in.close  unless std_in.nil?
         std_out.close unless std_in.nil?
@@ -226,7 +252,7 @@ module Proxy::DHCP
     def parse_options response
       optionId = nil
       options  = {}
-      response.each do |line|
+      response.each_line do |line|
         line.chomp!
         break if line.match(/^Command completed/)
 
@@ -241,12 +267,11 @@ module Proxy::DHCP
           #TODO move options to a class or something
           opts = SUNW.update(Standard)
           title = opts.select {|k,v| v[:code] == optionId}.flatten[0]
-          logger.debug "found option #{title}"
-          options[title] = $1
+          options[title] = $1 if title
         end
       end
       logger.debug options.inspect
-      return options
+      options
     end
 
     def parse_classes response

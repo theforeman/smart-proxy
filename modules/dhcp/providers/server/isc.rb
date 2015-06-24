@@ -8,8 +8,15 @@ module Proxy::DHCP
   class ISC < Server
     include Proxy::Util
 
+    def self.instance_with_default_parameters
+        Proxy::DHCP::ISC.new(:name => Proxy::DhcpPlugin.settings.dhcp_server,
+                             :config => Proxy::DhcpPlugin.settings.dhcp_config,
+                             :leases => Proxy::DhcpPlugin.settings.dhcp_leases,
+                             :service => Proxy::DHCP::SubnetService.instance_with_default_parameters)
+    end
+
     def initialize options
-      super(options[:name])
+      super(options[:name], options[:service])
       @config = read_config(options[:config]).join("")
       @leases = read_config(options[:leases], true).join("")
     end
@@ -25,7 +32,6 @@ module Proxy::DHCP
       omcmd "open"
       omcmd "remove"
       omcmd("disconnect", msg)
-      subnet.delete record
     end
 
     def addRecord options = {}
@@ -54,15 +60,14 @@ module Proxy::DHCP
       record
     end
 
-    def loadSubnetData subnet
-      super
-
+    def parse_config_and_leases_for_records
       # Config will have host blocks,
       # Leases will have host and lease blocks.
       # Scan both together, in order, because host delete and lease end
       # events are appended linearly to the leases file.
       conf = @config + @leases
 
+      ret_val = []
       # scan for host statements
       conf.scan(/host\s+(\S+\s*\{[^}]+\})/) do |host|
         if match = host[0].match(/^(\S+)\s*\{([^\}]+)/)
@@ -72,24 +77,11 @@ module Proxy::DHCP
           body.split(";").each do |data|
             opts.merge!(parse_record_options(data))
           end
-          if opts[:deleted]
-            record = find_record_by_hostname(subnet, hostname, 'reservation')
-            subnet.delete record if record
-            next
-          end
         end
         begin
-          if subnet.include?(opts[:ip])
-            # delete possible duplicities 
-            if dupe = subnet.has_mac?(opts[:mac], :reservation)
-              subnet.delete(dupe)
-            end
-            if dupe = subnet.has_ip?(opts[:ip], :reservation)
-              subnet.delete(dupe)
-            end
-            # and add the record
-            Proxy::DHCP::Reservation.new(opts.merge(:subnet => subnet))
-          end
+          subnet = @service.find_subnet(opts[:ip])
+          next unless subnet
+          ret_val << Proxy::DHCP::Reservation.new(opts.merge(:subnet => subnet))
         rescue Exception => e
           logger.warn "skipped #{hostname} - #{e}"
         end
@@ -104,38 +96,72 @@ module Proxy::DHCP
             opts.merge! parse_record_options(data)
           end
           next if opts[:mac].nil?
-          # delete expired (explicitly) expired leases
-          if opts[:state] == "free" || (opts[:next_state] == "free" && opts[:ends] && opts[:ends] < Time.now)
-            record = find_record_by_ip(subnet, ip, 'lease')
-            subnet.delete record if record
-            next
-          end
-          if subnet.include? ip
-            # delete possible duplicities 
-            if dupe = subnet.has_mac?(opts[:mac], :lease)
-              subnet.delete(dupe)
-            end
-            if dupe = subnet.has_ip?(ip, :lease)
-              subnet.delete(dupe)
-            end
-            # and add the record
-            Proxy::DHCP::Lease.new(opts.merge(:subnet => subnet, :ip => ip))
-          end
+
+          subnet = @service.find_subnet(ip)
+          next unless subnet
+          ret_val << Proxy::DHCP::Lease.new(opts.merge(:subnet => subnet, :ip => ip))
         end
       end
-      report "Enumerated hosts on #{subnet.network}"
+
+      ret_val
     end
 
-    private
+    def initialize_memory_store_with_dhcp_records(records)
+      records.each do |record|
 
-    def loadSubnets
-      super
+        case record
+        when Proxy::DHCP::Reservation
+          if record.options[:deleted]
+            record = @service.find_host_by_hostname(record.subnet_address, record.name)
+            @service.delete_host(record) if record
+            next
+          end
+          if dupe = @service.find_host_by_mac(record.subnet_address, record.mac)
+            @service.delete_host(dupe)
+          end
+          if dupe = @service.find_host_by_ip(record.subnet_address, record.ip)
+            @service.delete_host(dupe)
+          end
+
+          @service.add_host(record.subnet_address, record)
+        when Proxy::DHCP::Lease
+          if record.options[:state] == "free" || (record.options[:next_state] == "free" && record.options[:ends] && record.options[:ends] < Time.now)
+            record = @service.find_lease_by_ip(record.subnet_address, record.ip)
+            @service.delete_lease(record) if record
+            next
+          end
+
+          if dupe = @service.find_lease_by_mac(record.subnet_address, record.mac)
+            @service.delete_lease(dupe)
+          end
+          if dupe = @service.find_lease_by_ip(record.subnet_address, record.ip)
+            @service.delete_lease(dupe)
+          end
+
+          @service.add_lease(record.subnet_address, record)
+        end
+      end
+    end
+
+    def loadSubnetData subnet
+      initialize_memory_store_with_dhcp_records(parse_config_and_leases_for_records)
+    end
+
+    def parse_config_for_subnets
+      ret_val = []
+
       @config.scan(/subnet\s+([\d\.]+)\s+netmask\s+([\d\.]+)/) do |match|
         next unless managed_subnet? "#{match[0]}/#{match[1]}"
 
-        Proxy::DHCP::Subnet.new(self, match[0], match[1])
+        ret_val << Proxy::DHCP::Subnet.new(match[0], match[1])
       end
-      "Enumerated the scopes on #{@name}"
+
+      ret_val
+    end
+
+    def loadSubnets
+      super
+      @service.add_subnets(*parse_config_for_subnets)
     end
 
     def parse_record_options text
@@ -226,18 +252,6 @@ module Proxy::DHCP
 
     def hex2ip hex
       hex.split(":").map{|h| h.to_i(16).to_s}.join(".")
-    end
-
-    def find_record_by_hostname subnet, hostname, kind
-      subnet.records.find do |v|
-        v.options[:hostname] == hostname && v.kind == kind
-      end
-    end
-
-    def find_record_by_ip subnet, ip, kind
-      subnet.records.find do |v|
-        v.options[:ip] == ip && v.kind == kind
-      end
     end
 
     # ISC stores timestamps in UTC, therefor forcing the time to load from GMT/UTC TZ

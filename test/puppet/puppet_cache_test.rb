@@ -7,8 +7,8 @@ require 'tmpdir'
 class PuppetCacheTest < Test::Unit::TestCase
 
   def setup
-    @classes_cache = ::Proxy::Puppet::MemoryStore.new
-    @timestamps = ::Proxy::Puppet::MemoryStore.new
+    @classes_cache = ::Proxy::MemoryStore.new
+    @timestamps = ::Proxy::MemoryStore.new
     @scanner = ::Proxy::Puppet::PuppetCache.new(::Proxy::Puppet::ClassScanner, @classes_cache, @timestamps)
   end
 

@@ -12,7 +12,7 @@ module Proxy::Puppet
       parser = @use_eparser ? ::Proxy::Puppet::ClassScannerEParser : ::Proxy::Puppet::ClassScanner
 
       if Proxy::Puppet::Plugin.settings.use_cache
-        @@cached ||= PuppetCache.new(parser, MemoryStore.new, MemoryStore.new)
+        @@cached ||= PuppetCache.new(parser, ::Proxy::MemoryStore.new, ::Proxy::MemoryStore.new)
       else
         parser
       end
