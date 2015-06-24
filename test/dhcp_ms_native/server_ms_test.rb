@@ -1,18 +1,18 @@
 require 'test_helper'
-
 require 'dhcp/dhcp'
-require 'dhcp/providers/server/native_ms'
+require 'dhcp_native_ms/dhcp_native_ms'
+require 'dhcp_native_ms/dhcp_native_ms_main'
+require 'dhcp/sparc_attrs'
+require 'dhcp_common/dependency_injection/dependencies'
 
 class DHCPServerMicrosoftTest < Test::Unit::TestCase
 
   # rubocop:disable Metrics/MethodLength
   def setup
-    @subnet_service = Proxy::DHCP::SubnetService.new(Proxy::MemoryStore.new, Proxy::MemoryStore.new,
-                                                     Proxy::MemoryStore.new, Proxy::MemoryStore.new,
-                                                     Proxy::MemoryStore.new, Proxy::MemoryStore.new)
-
-    @server = Proxy::DHCP::Server::NativeMS.new(:server => "1.2.3.4",
-                                                :service => @subnet_service)
+    ::Proxy::DhcpPlugin.load_test_settings({})
+    @subnet_service = Proxy::DHCP::SubnetService.new
+    @server = Proxy::DHCP::NativeMS::Provider.new.initialize_for_testing(:name => "1.2.3.4",
+                                                                         :service => @subnet_service)
 
     @server.stubs(:execute).with("show scope", "Enumerated the scopes on 1.2.3.4").returns('
 ==============================================================================
@@ -148,7 +148,12 @@ Options for the Reservation Address 172.29.205.25 in the Scope 172.29.205.0 :
                 Option Element Value = brslcs25
 Command completed successfully.
 ')
-    @server.loadSubnets
+    @server.load_subnets
+  end
+
+  def test_ms_provider_initialization
+    ::Proxy::DhcpPlugin.load_test_settings(:server => 'a_server')
+    assert_equal 'a_server', Proxy::DHCP::NativeMS::Provider.new.name
   end
 
   def test_should_load_subnets
@@ -165,20 +170,20 @@ Command completed successfully.
 
   def test_subnet_should_have_options
     subnet = @server.find_subnet "172.29.205.0"
-    @server.loadSubnetOptions subnet
+    @server.load_subnet_options subnet
 
     assert subnet.options.size > 0
   end
 
   def test_subnet_should_have_options_and_values
     subnet = @server.find_subnet "172.29.205.0"
-    @server.loadSubnetOptions subnet
+    @server.load_subnet_options subnet
 
     assert !subnet.options.any? { |o,v| o.to_s.empty? || v.nil? || v.to_s.empty? }
   end
 
   def test_records_should_have_options
-    @server.loadSubnetData(@server.find_subnet("172.29.205.0"))
+    @server.load_subnet_data(@server.find_subnet("172.29.205.0"))
     record = @subnet_service.all_leases("172.29.205.0").first
     @server.loadRecordOptions record
 
@@ -186,7 +191,7 @@ Command completed successfully.
   end
 
   def test_records_should_have_options_and_values
-    @server.loadSubnetData(@server.find_subnet("172.29.205.0"))
+    @server.load_subnet_data(@server.find_subnet("172.29.205.0"))
     record = @subnet_service.all_leases("172.29.205.0").first
     @server.loadRecordOptions record
 

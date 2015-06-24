@@ -1,26 +1,23 @@
 require 'checks'
 require 'open3'
-require 'dhcp/subnet'
-require 'dhcp/record/reservation'
-require 'dhcp/record/lease'
-require 'dhcp/server'
+require 'dhcp_common/server'
 
-module Proxy::DHCP
+module Proxy::DHCP::NativeMS
   # Represents Microsoft DHCP Server manipulated via the netsh command
   # executed on a Microsoft server under a service account
-  class NativeMS < Server
+  class Provider < ::Proxy::DHCP::Server
 
-    def self.instance_with_default_parameters
-      Proxy::DHCP::NativeMS.new(
-          :server => Proxy::DhcpPlugin.settings.dhcp_server ? Proxy::DhcpPlugin.settings.dhcp_server : "127.0.0.1",
-          :service => Proxy::DHCP::SubnetService.instance_with_default_parameters)
+    def initialize_for_testing(params)
+      @name = params[:name] || @name
+      @service = params[:service] || service
+      self
     end
 
-    def initialize(options = {})
-      super options[:server], options[:service]
+    def initialize
+      super(Proxy::DhcpPlugin.settings.server)
     end
 
-    def delRecord subnet, record
+    def del_record subnet, record
       validate_subnet subnet
       validate_record record
       # TODO: Refactor this into the base class
@@ -33,7 +30,7 @@ module Proxy::DHCP
       execute(cmd, msg)
     end
 
-    def addRecord options={}
+    def add_record options={}
       record = super(options)
 
       cmd = "scope #{record.subnet.network} add reservedip #{record.ip} #{record.mac.gsub(/:/,"")} #{record.name}"
@@ -125,20 +122,20 @@ module Proxy::DHCP
       to_return
     end
 
-    def loadSubnetData subnet
+    def load_subnet_data subnet
       super
       records = find_subnet_dhcp_records(subnet)
       records.each do |record|
         case record
-        when Proxy::DHCP::Reservation
-          @service.add_host(record.subnet_address, record)
-        when Proxy::DHCP::Lease
-          @service.add_lease(record.subnet_address, record)
+          when Proxy::DHCP::Reservation
+            service.add_host(record.subnet_address, record)
+          when Proxy::DHCP::Lease
+            service.add_lease(record.subnet_address, record)
         end
       end
     end
 
-    def loadSubnetOptions subnet
+    def load_subnet_options subnet
       super subnet
       raise "invalid Subnet" unless subnet.is_a? Proxy::DHCP::Subnet
       cmd = "scope #{subnet.network} Show OptionValue"
@@ -192,9 +189,9 @@ module Proxy::DHCP
       ret_val
     end
 
-    def loadSubnets
+    def load_subnets
       super
-      @service.add_subnets(*find_all_subnets)
+      service.add_subnets(*find_all_subnets)
     end
 
     def execute cmd, msg=nil, error_only=false
@@ -257,17 +254,17 @@ module Proxy::DHCP
         break if line.match(/^Command completed/)
 
         case line
-        #TODO: this logic is broken, as the output reports only once the vendor type
-        # making it impossible to detect if its a standard option or a custom one.
-        when /For vendor class \[([^\]]+)\]:/
-          options[:vendor] = "<#{$1}>"
-        when /OptionId : (\d+)/
-          optionId = $1.to_i
-        when /Option Element Value = (\S+)/
-          #TODO move options to a class or something
-          opts = SUNW.update(Standard)
-          title = opts.select {|k,v| v[:code] == optionId}.flatten[0]
-          options[title] = $1 if title
+          #TODO: this logic is broken, as the output reports only once the vendor type
+          # making it impossible to detect if its a standard option or a custom one.
+          when /For vendor class \[([^\]]+)\]:/
+            options[:vendor] = "<#{$1}>"
+          when /OptionId : (\d+)/
+            optionId = $1.to_i
+          when /Option Element Value = (\S+)/
+            #TODO move options to a class or something
+            opts = SUNW.update(Standard)
+            title = opts.select {|k,v| v[:code] == optionId}.flatten[0]
+            options[title] = $1 if title
         end
       end
       logger.debug options.inspect
@@ -282,10 +279,10 @@ module Proxy::DHCP
         break if line.match(/^Command completed/)
 
         case line
-        when /Class \[([^\]]+)\]:/
-          klass = $1
-        when /Isvendor= TRUE/
-          classes << klass
+          when /Class \[([^\]]+)\]:/
+            klass = $1
+          when /Isvendor= TRUE/
+            classes << klass
         end
       end
       logger.debug "found the following classes: #{classes.join(", ")}"
@@ -295,6 +292,5 @@ module Proxy::DHCP
     def vendor_options_supported?
       true
     end
-
   end
 end

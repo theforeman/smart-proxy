@@ -3,8 +3,9 @@ require 'json'
 require 'ostruct'
 
 require 'dhcp/dhcp'
+require 'dhcp_common/dependency_injection/container'
 require 'dhcp/dhcp_api'
-require 'dhcp/providers/server/isc'
+require 'dhcp_isc/dhcp_isc'
 require 'dhcp/sparc_attrs'
 
 ENV['RACK_ENV'] = 'test'
@@ -20,12 +21,17 @@ class DhcpApiTest < Test::Unit::TestCase
   def setup
     Proxy::DhcpPlugin.load_test_settings(
       :enabled => true,
-      :dhcp_vendor => 'isc',
-      :dhcp_config => './test/fixtures/dhcp/dhcp.conf',
-      :dhcp_leases => './test/fixtures/dhcp/dhcp.leases',
+      :use_provider => 'dhcp_isc',
       :dhcp_subnets => '192.168.122.0/255.255.255.0')
 
-    Proxy::DHCP::Server::ISC.any_instance.stubs(:omcmd)
+    Proxy::DHCP::ISC::Plugin.load_test_settings(
+      :config => './test/fixtures/dhcp/dhcp.conf',
+      :leases => './test/fixtures/dhcp/dhcp.leases')
+
+    Proxy::Plugins.configure_loaded_plugins
+    Proxy::DHCP::ISC::Plugin.new.configure_plugin
+
+    Proxy::DHCP::ISC::Provider.any_instance.stubs(:omcmd)
   end
 
   # Date formats change between Ruby versions and JSON libraries & versions
@@ -214,7 +220,7 @@ class DhcpApiTest < Test::Unit::TestCase
   def test_sparc_host_creation
     sub = Proxy::DHCP::Subnet.new('192.168.122.0','255.255.255.0')
 
-    Proxy::DHCP::Server::ISC.any_instance.stubs(:find_subnet).returns(sub)
+    Proxy::DHCP::ISC::Provider.any_instance.stubs(:find_subnet).returns(sub)
 
     post '/192.168.122.10', sparc_attrs
     assert last_response.ok?, "Last response was not ok: #{last_response.body}"

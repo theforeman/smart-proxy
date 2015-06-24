@@ -1,17 +1,14 @@
 require 'test_helper'
-require "dhcp/dhcp"
-require 'dhcp/server'
-require 'dhcp/subnet'
-require 'dhcp/record'
-require 'dhcp/record/reservation'
+require 'dhcp_common/dhcp_common'
+require 'dhcp_common/server'
+require 'dhcp_common/dependency_injection/dependencies'
 
 class DHCPServerTest < Test::Unit::TestCase
 
   def setup
-    @service = Proxy::DHCP::SubnetService.new(Proxy::MemoryStore.new, Proxy::MemoryStore.new,
-                                              Proxy::MemoryStore.new, Proxy::MemoryStore.new,
-                                              Proxy::MemoryStore.new, Proxy::MemoryStore.new)
-    @server = Proxy::DHCP::Server.new("testcase", @service)
+    @service = Proxy::DHCP::SubnetService.new
+    @server = Proxy::DHCP::Server.new("testcase")
+    @server.service = @service
 
     @subnet = Proxy::DHCP::Subnet.new("192.168.0.0", "255.255.255.0")
     @service.add_subnet(@subnet)
@@ -26,13 +23,13 @@ class DHCPServerTest < Test::Unit::TestCase
 
   def test_should_raise_exception_when_record_exists
     assert_raises Proxy::DHCP::AlreadyExists do
-      @server.addRecord('hostname' => 'test', 'network' => @subnet.network, 'ip' => "192.168.0.11", 'mac' => "aa:bb:cc:dd:ee:ff")
+      @server.add_record('hostname' => 'test', 'network' => @subnet.network, 'ip' => "192.168.0.11", 'mac' => "aa:bb:cc:dd:ee:ff")
     end
   end
 
   def test_should_raise_exception_when_address_in_use
     assert_raises Proxy::DHCP::Collision do
-      @server.addRecord('hostname' => 'test-1', 'network' => @subnet.network, 'ip' => "192.168.0.11", 'mac' => "aa:bb:cc:dd:ee:ef")
+      @server.add_record('hostname' => 'test-1', 'network' => @subnet.network, 'ip' => "192.168.0.11", 'mac' => "aa:bb:cc:dd:ee:ef")
     end
   end
 
@@ -63,6 +60,19 @@ class DHCPServerTest < Test::Unit::TestCase
 
   def test_ip_by_mac_address_and_range_should_return_nil_when_range_ip_is_outside_range
     assert_nil @server.ip_by_mac_address_and_range(@subnet, "aa:bb:cc:dd:ee:ff", "192.168.0.100", "192.168.0.120")
+  end
+
+  def test_managed_subnet
+    ::Proxy::DhcpPlugin.load_test_settings(:subnets => ['192.168.1.0/255.255.255.0', '192.168.2.0/255.255.255.0'])
+
+    assert @server.managed_subnet?('192.168.1.0/255.255.255.0')
+    assert @server.managed_subnet?('192.168.2.0/255.255.255.0')
+    assert !@server.managed_subnet?('192.168.3.0/255.255.255.0')
+  end
+
+  def test_managed_subnet_should_return_true_when_setting_is_undefined
+    ::Proxy::DhcpPlugin.load_test_settings({})
+    assert @server.managed_subnet?('192.168.1.0/255.255.255.0')
   end
 
   def test_should_have_a_name

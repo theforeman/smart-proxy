@@ -2,24 +2,11 @@
 # Can be true, false, or http/https to enable just one of the protocols
 :enabled: false
 
-# valid vendors:
-#   - isc
-#   - native_ms (Microsoft native implementation)
-#   - virsh (simple implementation for libvirt)
-#:dhcp_vendor: isc
-#:dhcp_server: 127.0.0.1
-#:dhcp_omapi_port: 7911
-# dhcp_subnets is an ISC &  Native MS implementation setting. It restricts the subnets queried to a
-# subset, so as to reduce the query time.
-#:dhcp_subnets: [192.168.205.0/255.255.255.128, 192.168.205.128/255.255.255.128]
-# Settings for Ubuntu ISC
-#:dhcp_config: /etc/dhcp3/dhcpd.conf
-#:dhcp_leases: /var/lib/dhcp3/dhcpd.leases
-# Settings for Redhat ISC
-# Redhat 5
-#:dhcp_config: /etc/dhcpd.conf
-# Redhat 6
-#:dhcp_config: /etc/dhcp/dhcpd.conf
-#:dhcp_leases: /var/lib/dhcpd/dhcpd.leases
-#:dhcp_key_name: secret_key_name
-#:dhcp_key_secret: secret_key
+# valid providers:
+#   - dhcp_isc (ISC dhcp server)
+#   - dhcp_native_ms (Microsoft native implementation)
+#   - dhcp_virsh (simple implementation for libvirt)
+#:use_provider: dhcp_isc
+#:server: 127.0.0.1
+# subnets restricts the subnets queried to a subset, to reduce the query time.
+#:subnets: [192.168.205.0/255.255.255.128, 192.168.205.128/255.255.255.128]

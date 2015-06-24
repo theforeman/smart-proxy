@@ -1,29 +1,28 @@
 require 'proxy/virsh'
 require 'rexml/document'
 require 'ipaddr'
-require 'dhcp/subnet'
-require 'dhcp/record/reservation'
-require 'dhcp/server'
+require 'dhcp_common/server'
 
-module Proxy::DHCP
-  class Virsh < Server
+module Proxy::DHCP::Virsh
+  class Provider < ::Proxy::DHCP::Server
     include Proxy::Virsh
 
-    def self.instance_with_default_parameters
-      Proxy::DHCP::Virsh.new(:virsh_network => Proxy::SETTINGS.virsh_network,
-                             :service => Proxy::DHCP::SubnetService.instance_with_default_parameters)
+    def initialize
+      super("127.0.0.1")
+      @network = Proxy::SETTINGS.virsh_network
     end
 
-    def initialize options
-      @network = options[:virsh_network]
-      raise "DNS virsh provider needs 'virsh_network' option" unless network
-      super(options[:name], options[:service])
+    def initialize_for_testing(params)
+      @name = params[:name] || @name
+      @service = params[:service] || service
+      @network = params[:network] || @network
+      self
     end
 
     # we support only one subnet
-    def loadSubnets
+    def load_subnets
       super
-      @service.add_subnets(*parse_config_for_subnets)
+      service.add_subnets(*parse_config_for_subnets)
     end
 
     def parse_config_for_subnets
@@ -60,7 +59,7 @@ module Proxy::DHCP
         doc = REXML::Document.new xml = dump_xml
         REXML::XPath.each(doc, "//network/ip[not(@family) or @family='ipv4']/dhcp/host") do |e|
           to_ret << Proxy::DHCP::Reservation.new(:subnet => subnet, :ip => e.attributes["ip"],
-                                       :mac => e.attributes["mac"], :hostname => e.attributes["name"])
+                                                 :mac => e.attributes["mac"], :hostname => e.attributes["name"])
         end
       rescue Exception => e
         msg = "DHCP virsh provider error: unable to retrive virsh info: #{e}"
@@ -71,19 +70,19 @@ module Proxy::DHCP
       to_ret
     end
 
-    def loadSubnetData subnet
+    def load_subnet_data subnet
       super(subnet)
       records = parse_config_for_dhcp_records(subnet)
-      records.each { |record| @service.add_host(record.subnet_address, record) }
+      records.each { |record| service.add_host(record.subnet_address, record) }
     end
 
-    def addRecord options={}
+    def add_record options={}
       record = super(options)
       virsh_update_dhcp 'add-last', record.mac, record.ip, record.name
       record
     end
 
-    def delRecord subnet, record
+    def del_record subnet, record
       virsh_update_dhcp 'delete', record.mac, record.ip, record[:hostname]
     end
 
@@ -103,6 +102,5 @@ module Proxy::DHCP
     rescue Proxy::Virsh::Error => e
       raise Proxy::DHCP::Error, "Failed to update DHCP: #{e}"
     end
-
   end
 end

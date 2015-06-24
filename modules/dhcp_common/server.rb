@@ -1,11 +1,17 @@
-require "dhcp/subnet"
-require "dhcp/record"
-require "dhcp/record/lease"
-require "dhcp/subnet_service"
+require "dhcp_common/subnet"
+require "dhcp_common/record"
+require "dhcp_common/record/lease"
+require "dhcp_common/record/reservation"
+require 'dhcp_common/record/deleted_reservation'
+require "dhcp_common/subnet_service"
+require 'dhcp_common/dependency_injection/container'
 
 module Proxy::DHCP
   # represents a DHCP Server
   class Server
+    extend Proxy::DHCP::DependencyInjection::Injectors
+
+    inject_attr :subnet_service, :service
     attr_reader :name
     alias_method :to_s, :name
 
@@ -13,49 +19,47 @@ module Proxy::DHCP
     include Proxy::Log
     include Proxy::Validations
 
-    def initialize(name, service)
+    def initialize(name)
       @name    = name
-      @loaded  = false
-      @service = service
     end
 
     def subnets
-      @service.all_subnets
+      service.all_subnets
     end
 
     # Abstracted Subnet loader method
-    def loadSubnets
+    def load_subnets
       logger.debug "Loading subnets for #{name}"
     end
 
     # Abstracted Subnet data loader method
-    def loadSubnetData subnet
+    def load_subnet_data subnet
       raise "Invalid Subnet" unless subnet.is_a? Proxy::DHCP::Subnet
       logger.debug "Loading subnet data for #{subnet}"
     end
 
     # Abstracted Subnet options loader method
-    def loadSubnetOptions subnet
+    def load_subnet_options subnet
       logger.debug "Loading Subnet options for #{subnet}"
     end
 
     def find_subnet subnet_address
-      @service.find_subnet(subnet_address)
+      service.find_subnet(subnet_address)
     end
 
     def all_leases(subnet)
-      @service.all_leases(subnet)
+      service.all_leases(subnet)
     end
 
     def all_hosts(subnet)
-      @service.all_hosts(subnet)
+      service.all_hosts(subnet)
     end
 
     def find_record(subnet_address, an_address)
-      @service.find_host_by_ip(subnet_address, an_address) ||
-        @service.find_host_by_mac(subnet_address, an_address) ||
-        @service.find_lease_by_ip(subnet_address, an_address) ||
-        @service.find_lease_by_mac(subnet_address, an_address)
+      service.find_host_by_ip(subnet_address, an_address) ||
+        service.find_host_by_mac(subnet_address, an_address) ||
+        service.find_lease_by_ip(subnet_address, an_address) ||
+        service.find_lease_by_mac(subnet_address, an_address)
     end
 
     def unused_ip(subnet, mac_address, from_address, to_address)
@@ -71,8 +75,8 @@ module Proxy::DHCP
     end
 
     def ip_by_mac_address_and_range(subnet, mac_address, from_address, to_address)
-      r = @service.find_host_by_mac(subnet.network, mac_address) ||
-          @service.find_lease_by_mac(subnet.network, mac_address)
+      r = service.find_host_by_mac(subnet.network, mac_address) ||
+          service.find_lease_by_mac(subnet.network, mac_address)
 
       if r && subnet.valid_range(:from => from_address, :to => to_address).include?(r.ip)
         logger.debug "Found an existing dhcp record #{r}, reusing..."
@@ -84,11 +88,11 @@ module Proxy::DHCP
       self
     end
 
-    # addRecord options can take a params hash from the API layer, which behaves
+    # add_record options can take a params hash from the API layer, which behaves
     # like a HashWithIndifferentAccess to symbol and string keys.
     # Delete keys with string names before adding them back with symbol names,
     # otherwise there will be duplicate information.
-    def addRecord options = {}
+    def add_record options = {}
       # dup the hash before modifying it locally
       options = options.dup
       options.delete("captures")
@@ -109,7 +113,7 @@ module Proxy::DHCP
       options.merge!(:hostname => hostname || name, :subnet => subnet, :ip => ip, :mac => mac)
 
       # try to figure out if we already have this record
-      record = @service.find_host_by_ip(subnet.network, ip) || @service.find_host_by_mac(subnet.network, mac)
+      record = service.find_host_by_ip(subnet.network, ip) || service.find_host_by_mac(subnet.network, mac)
       unless record.nil?
         if Record.compare_options(record.options, options)
           # we already got this record, no need to do anything
@@ -136,7 +140,7 @@ module Proxy::DHCP
 
     # Default: manage any subnet. If specified: manage only specified subnets.
     def managed_subnet? subnet
-      managed_subnets = Proxy::DhcpPlugin.settings.dhcp_subnets
+      managed_subnets = Proxy::DhcpPlugin.settings.subnets
       return true unless managed_subnets
       managed_subnets.include? subnet
     end

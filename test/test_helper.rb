@@ -16,3 +16,6 @@ require "mocha/setup"
 require "rack/test"
 
 require 'smart_proxy_for_testing'
+require 'provider_interface_validation/dhcp_provider'
+
+include DhcpProviderInterfaceValidation
