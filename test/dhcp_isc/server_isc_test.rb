@@ -2,7 +2,9 @@ require 'test_helper'
 require 'dhcp/sparc_attrs'
 require 'json'
 require 'dhcp/dhcp'
-require 'dhcp/providers/server/isc'
+require 'dhcp_isc/dhcp_isc'
+require 'dhcp_isc/dhcp_isc_main'
+require 'dhcp_common/dependency_injection/dependencies'
 
 class ServerIscTest < Test::Unit::TestCase
   class OMIO
@@ -20,31 +22,42 @@ class ServerIscTest < Test::Unit::TestCase
   include SparcAttrs
 
   def setup
-    Proxy::DhcpPlugin.load_test_settings(
-      :enabled => true,
-      :dhcp_vendor => 'isc',
-      :dhcp_omapi_port => 999,
-      :dhcp_config => './test/fixtures/dhcp/dhcp.conf',
-      :dhcp_leases => './test/fixtures/dhcp/dhcp.leases',
-      :dhcp_subnets => '192.168.122.0/255.255.255.0')
+    ::Proxy::DhcpPlugin.load_test_settings({})
+    ::Proxy::DHCP::ISC::Plugin.load_test_settings({})
 
-    @subnet_service = Proxy::DHCP::SubnetService.new(Proxy::MemoryStore.new, Proxy::MemoryStore.new,
-                                                     Proxy::MemoryStore.new, Proxy::MemoryStore.new,
-                                                     Proxy::MemoryStore.new, Proxy::MemoryStore.new)
-    @dhcp = Proxy::DHCP::Server::ISC.new(
-        :name => '192.168.122.1', :config => './test/fixtures/dhcp/dhcp.conf',
-        :leases => './test/fixtures/dhcp/dhcp.leases',
-        :service => @subnet_service)
+    @subnet_service =  Proxy::DHCP::SubnetService.new
+    @dhcp = Proxy::DHCP::ISC::Provider.new.initialize_for_testing(
+        :name => '192.168.122.1', :config_file => './test/fixtures/dhcp/dhcp.conf',
+        :leases_file => './test/fixtures/dhcp/dhcp.leases',
+        :service => @subnet_service, :omapi_port => 999)
+  end
+
+  class DhcpIscProviderForTesting < ::Proxy::DHCP::ISC::Provider
+    attr_reader :config_file, :leases_file, :key_name, :key_secret, :omapi_port
+  end
+
+  def test_isc_provider_initialization
+    ::Proxy::DhcpPlugin.load_test_settings(:server => 'a_server')
+    ::Proxy::DHCP::ISC::Plugin.load_test_settings(:config => 'config_file', :leases => 'leases_file',
+                                                  :omapi_port => '7777', :key_name => 'key_name',
+                                                  :key_secret => 'key_secret')
+
+    provider = DhcpIscProviderForTesting.new
+    assert_equal 'a_server', provider.name
+    assert_equal 'config_file', provider.config_file
+    assert_equal 'leases_file', provider.leases_file
+    assert_equal '7777', provider.omapi_port
+    assert_equal 'key_name', provider.key_name
+    assert_equal 'key_secret', provider.key_secret
   end
 
   def test_omcmd_server_connect
-    srv = Proxy::DHCP::ISC.new :name => '1.2.3.4', :config => './test/fixtures/dhcp/dhcp.conf', :leases => './test/fixtures/dhcp/dhcp.leases'
-    srv.stubs(:which).returns('fakeshell')
+    @dhcp.stubs(:which).returns('fakeshell')
     omio = OMIO.new
     IO.expects(:popen).with("/bin/sh -c 'fakeshell 2>&1'", "r+").returns(omio)
-    srv.send(:omcmd, 'connect')
+    @dhcp.omcmd('connect')
     assert_equal "port 999", omio.input_commands[1]
-    assert_equal "server 1.2.3.4", omio.input_commands[0]
+    assert_equal "server 192.168.122.1", omio.input_commands[0]
   end
 
   def test_sparc_host_quirks
@@ -80,43 +93,43 @@ class ServerIscTest < Test::Unit::TestCase
   end
 
   def test_subnet_matching_without_parameters_or_declarations
-    assert "subnet 192.168.1.0 netmask 255.255.255.128 {}".match(Proxy::DHCP::ISC::SUBNET_BLOCK_REGEX)
+    assert "subnet 192.168.1.0 netmask 255.255.255.128 {}".match(Proxy::DHCP::ISC::Provider::SUBNET_BLOCK_REGEX)
   end
 
   def test_subnet_matching_with_ip_parameter
-    assert "subnet 192.168.123.0 netmask 255.255.255.192 {option subnet-mask 255.255.255.192;}".match(Proxy::DHCP::ISC::SUBNET_BLOCK_REGEX)
+    assert "subnet 192.168.123.0 netmask 255.255.255.192 {option subnet-mask 255.255.255.192;}".match(Proxy::DHCP::ISC::Provider::SUBNET_BLOCK_REGEX)
   end
 
   def test_subnet_matching_with_numerical_parameter
-    assert "subnet 192.168.123.0 netmask 255.255.255.192 {adaptive-lease-time-threshold 50;}".match(Proxy::DHCP::ISC::SUBNET_BLOCK_REGEX)
+    assert "subnet 192.168.123.0 netmask 255.255.255.192 {adaptive-lease-time-threshold 50;}".match(Proxy::DHCP::ISC::Provider::SUBNET_BLOCK_REGEX)
   end
 
   def test_subnet_matching_with_timestamp_parameter
-    assert "subnet 192.168.123.0 netmask 255.255.255.192 {dynamic-bootp-lease-cutoff 5 2016/11/11 01:01:00;}".match(Proxy::DHCP::ISC::SUBNET_BLOCK_REGEX)
+    assert "subnet 192.168.123.0 netmask 255.255.255.192 {dynamic-bootp-lease-cutoff 5 2016/11/11 01:01:00;}".match(Proxy::DHCP::ISC::Provider::SUBNET_BLOCK_REGEX)
   end
 
   def test_subnet_matching_with_string_parameter
-    assert "subnet 192.168.123.0 netmask 255.255.255.192 {filename \"filename\";}".match(Proxy::DHCP::ISC::SUBNET_BLOCK_REGEX)
+    assert "subnet 192.168.123.0 netmask 255.255.255.192 {filename \"filename\";}".match(Proxy::DHCP::ISC::Provider::SUBNET_BLOCK_REGEX)
   end
 
   def test_subnet_matching_with_spaces_in_parameter
-    assert "subnet 192.168.123.0 netmask 255.255.255.192 { option subnet-mask 255.255.255.192 ; }".match(Proxy::DHCP::ISC::SUBNET_BLOCK_REGEX)
+    assert "subnet 192.168.123.0 netmask 255.255.255.192 { option subnet-mask 255.255.255.192 ; }".match(Proxy::DHCP::ISC::Provider::SUBNET_BLOCK_REGEX)
   end
 
   def test_subnet_matching_with_declaration
-    assert "subnet 192.168.123.0 netmask 255.255.255.192 {pool{range 192.168.42.200 192.168.42.254;}}".match(Proxy::DHCP::ISC::SUBNET_BLOCK_REGEX)
+    assert "subnet 192.168.123.0 netmask 255.255.255.192 {pool{range 192.168.42.200 192.168.42.254;}}".match(Proxy::DHCP::ISC::Provider::SUBNET_BLOCK_REGEX)
   end
 
   def test_subnet_matching_with_declaration_and_parameter
     assert "subnet 192.168.123.0 netmask 255.255.255.192 {pool{range 192.168.42.200 192.168.42.254;}option subnet-mask 255.255.255.192;}".
-             match(Proxy::DHCP::ISC::SUBNET_BLOCK_REGEX)
+             match(Proxy::DHCP::ISC::Provider::SUBNET_BLOCK_REGEX)
   end
 
   def test_mathing_with_spaces_in_declarations
-    assert "subnet 192.168.1.0 netmask 255.255.255.128 { pool\n{ range abc ; } }".match(Proxy::DHCP::ISC::SUBNET_BLOCK_REGEX)
+    assert "subnet 192.168.1.0 netmask 255.255.255.128 { pool\n{ range abc ; } }".match(Proxy::DHCP::ISC::Provider::SUBNET_BLOCK_REGEX)
   end
 
-  def test_loadSubnets_loads_managed_subnets
+  def test_load_subnets_loads_managed_subnets
     subnets = @dhcp.parse_config_for_subnets
     assert_equal 4, subnets.size
   end
@@ -171,7 +184,7 @@ class ServerIscTest < Test::Unit::TestCase
     subnet = Proxy::DHCP::Subnet.new("192.168.122.0", "255.255.255.0")
 
     @subnet_service.add_subnet(subnet)
-    @dhcp.loadSubnetData(subnet)
+    @dhcp.load_subnet_data(subnet)
 
     assert_equal 8, @subnet_service.all_hosts("192.168.122.0").size + @subnet_service.all_leases("192.168.122.0").size
     assert_nil @subnet_service.find_host_by_hostname("deleted.example.com")

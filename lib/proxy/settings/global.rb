@@ -8,7 +8,8 @@ module ::Proxy::Settings
       :daemon => false,
       :daemon_pid => "/var/run/foreman-proxy/foreman-proxy.pid",
       :forward_verify => true,
-      :bind_host => "*"
+      :bind_host => "*",
+      :virsh_network => 'default'
     }
 
     HOW_TO_NORMALIZE = {

@@ -1,4 +1,4 @@
-require 'dhcp/record'
+require 'dhcp_common/record'
 
 module Proxy::DHCP
   # represent a DHCP Lease

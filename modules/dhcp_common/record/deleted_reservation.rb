@@ -1,4 +1,4 @@
-require 'dhcp/record/reservation'
+require 'dhcp_common/record/reservation'
 
 module Proxy::DHCP
   # represent a deleted DHCP Record

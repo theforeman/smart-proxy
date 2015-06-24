@@ -1,22 +1,17 @@
 require 'test_helper'
-
-require 'dhcp/dhcp'
-require 'dhcp/subnet'
-require 'dhcp/record/lease'
-require 'dhcp/record/reservation'
-require 'dhcp/subnet_service'
+require 'dhcp_common/dhcp_common'
+require 'dhcp_common/server'
 
 class SubnetServiceTest < Test::Unit::TestCase
   def setup
-    @subnets = Proxy::MemoryStore.new
-    @leases_ip_store = Proxy::MemoryStore.new
-    @leases_mac_store = Proxy::MemoryStore.new
-    @reservations_ip_store = Proxy::MemoryStore.new
-    @reservations_mac_store = Proxy::MemoryStore.new
-    @reservations_name_store = Proxy::MemoryStore.new
+    @service = Proxy::DHCP::SubnetService.new
 
-    @service = Proxy::DHCP::SubnetService.new(@subnets, @leases_ip_store, @leases_mac_store, @reservations_ip_store,
-                                              @reservations_mac_store, @reservations_name_store)
+    @subnets = @service.subnets = Proxy::MemoryStore.new
+    @leases_ip_store = @service.leases_by_ip = Proxy::MemoryStore.new
+    @leases_mac_store = @service.leases_by_mac = Proxy::MemoryStore.new
+    @reservations_ip_store = @service.reservations_by_ip = Proxy::MemoryStore.new
+    @reservations_mac_store = @service.reservations_by_mac = Proxy::MemoryStore.new
+    @reservations_name_store = @service.reservations_by_name = Proxy::MemoryStore.new
   end
 
   def test_add_subnet

@@ -1,8 +1,6 @@
 require 'test_helper'
-require "dhcp/dhcp"
-require 'dhcp/server'
-require 'dhcp/subnet'
-require 'dhcp/record/reservation'
+require 'dhcp_common/dhcp_common'
+require 'dhcp_common/server'
 
 class Proxy::DHCPSubnetTest < Test::Unit::TestCase
   def setup

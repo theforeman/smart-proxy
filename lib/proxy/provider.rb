@@ -3,7 +3,7 @@ class ::Proxy::Provider
   include ::Proxy::Log
 
   class << self
-    attr_reader :provider_factory_proc
+    attr_reader :provider_factory
 
     def plugin(plugin_name, aversion, attrs = {})
       @plugin_name = plugin_name.to_sym
