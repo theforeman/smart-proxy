@@ -17,7 +17,6 @@ module Proxy::Dns
     #          :type => "PTR"}
     def create
       nsupdate "connect"
-
       @resolver = Resolv::DNS.new(:nameserver => @server)
       case @type
         when "A"
@@ -32,6 +31,13 @@ module Proxy::Dns
           else
             nsupdate "update add #{@value}.  #{@ttl} IN #{@type} #{@fqdn}"
           end
+        when "CNAME"
+          if name = dns_find(@value)
+            raise(Proxy::Dns::Collision, "#{@value} is already used by #{name}")
+          end  
+          nsupdate "update add #{@value} #{@ttl} #{@type} #{@fqdn}"
+        else
+          raise "Unmanaged DNS record type " + @type
       end
       nsupdate "disconnect"
     ensure
@@ -44,12 +50,17 @@ module Proxy::Dns
 
       nsupdate "connect"
       case @type
-      when "A"
-        raise Proxy::Dns::NotFound.new("Cannot find DNS entry for #{@fqdn}") unless dns_find(@fqdn)
-        nsupdate "update delete #{@fqdn} #{@type}"
-      when "PTR"
-        raise Proxy::Dns::NotFound.new("Cannot find DNS entry for #{@value}") unless dns_find(@value)
-        nsupdate "update delete #{@value} #{@type}"
+        when "A"
+          raise Proxy::Dns::NotFound.new("Cannot find DNS entry for #{@fqdn}") unless dns_find(@fqdn)
+          nsupdate "update delete #{@fqdn} #{@type}"
+        when "PTR"
+          raise Proxy::Dns::NotFound.new("Cannot find DNS entry for #{@value}") unless dns_find(@value)
+          nsupdate "update delete #{@value} #{@type}"
+        when "CNAME"
+          raise Proxy::Dns::NotFound.new("Cannot find DNS entry for #{@fqdn}") unless dns_find(@value)
+          nsupdate "update delete #{@value} #{@type}"
+        else
+          raise "Unmanaged DNS record type " + @type
       end
       nsupdate "disconnect"
     end
