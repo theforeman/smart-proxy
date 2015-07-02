@@ -23,6 +23,13 @@ class Proxy::DhcpApi < ::Sinatra::Base
       when "virsh"
         require 'dhcp/providers/server/virsh'
         @server = Proxy::DHCP::Virsh.new(:virsh_network => Proxy::SETTINGS.virsh_network)
+      when "infoblox"
+        require 'dhcp/providers/server/infoblox'
+        @server = Proxy::DHCP::Infoblox.new(
+          :server   => Proxy::DhcpPlugin.settings.dhcp_server ? Proxy::DhcpPlugin.settings.dhcp_server : "127.0.0.1",
+          :username => Proxy::DhcpPlugin.settings.username ? Proxy::DhcpPlugin.settings.username : "admin",
+          :password => Proxy::DhcpPlugin.settings.password ? Proxy::DhcpPlugin.settings.password : "admin"
+        )
       else
         log_halt 400, "Unrecognized or missing DHCP vendor type: #{Proxy::DhcpPlugin.settings.dhcp_vendor.nil? ? "MISSING" : Proxy::DhcpPlugin.settings.dhcp_vendor}"
       end

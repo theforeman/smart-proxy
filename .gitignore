@@ -14,3 +14,4 @@ bundler.d/Gemfile.local.rb
 .bundle
 pkg/
 test/tmp/*
+.project
