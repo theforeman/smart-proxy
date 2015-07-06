@@ -1,3 +1,65 @@
+2015-07-06	Dominic Cleal <dcleal@redhat.com>
+	* Release 1.9.0-RC1
+
+2015-06-24	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* fixes #10801: fixed spelling of error messages in puppetca module
+	* fixes #10895: moved smart_proxy_chef-specific classes to the plugin itself
+
+2015-06-18	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* fixes #10769 - added a debug trace when downloading templates from foreman
+
+2015-06-17	Klaas Demter <demter@atix.de>
+	* refs #8046: Add possibility for providers to overwrite find_record to load single records
+
+2015-06-16	Fernando Carolo <carolo@gmail.com>
+	* Fixes #10527 - DHCP/TFTP support for Cisco POAP
+
+2015-06-11	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #9121: better readme for the github project page
+
+2015-06-05	Lukas Zapletal <lzap+git@redhat.com>
+	* Fixes #10639 - stracktrace is reported via log_halt
+
+2015-06-03	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #10003: Support for config file migrations
+
+2015-05-05	Martin Matuska <martin.matuska@axelspringer.de>
+	* Fixes #9713: restore WIN32 service support
+
+2015-05-05	Jon McKenzie <jcmcken@gmail.com>
+	* Fixes #10324 - Improves certificate serial lookup in Puppet CA module
+
+2015-05-05	Matt Chesler <matt@chesler.nyc>
+	* Fixes #10320 - WIN32 requires additional gems
+
+2015-05-05	Florian Maier <maier@atix.de>
+	* Fixes #10264 - omapi port not evaluated.
+
+2015-04-30	Corey Osman <corey@logicminds.biz>
+	* Fixes #10116 - BMC is not able to use parameters passed in through body
+
+2015-04-08	Corey Osman <corey@logicminds.biz>
+	* Fixes #7543 - allow additional rubyipmi connection options to be passed through
+
+2015-04-07	Corey Osman <corey@logicminds.biz>
+	* Fixes #9852 - REST API violation in BMC smart proxy API     * authentication errors now return 401 and proper message
+
+2015-04-02	Dominic Cleal <dcleal@redhat.com>
+	* fixes #9919 - stub DNS lookup during trusted hosts test
+
+2015-03-31	Marek Hulan <mhulan@redhat.com>
+	* Fixes #9740 - support foreman_url with path
+
+2015-03-20	Corey Osman <corey@logicminds.biz>
+	* Fixes #9840 - BMC providers should return 501 error code when they don't implement the api call
+	* Fixes #9711 - bmc module does not full implement its api    * adds additional logic around providers    * implements /providers, /providers/installed, /host, /    * the / returns a list of resources to use to help the user    * catches a case where if the provider is nil, we can default to a provider and warn the user    * changes the bmc_setup method to be public instead of private.    * refactors the providers_installed? rubyipmi command to providers_installed
+	* Fixes #9710 - add rubyipmi test_connection api call
+	* Fixes #9709 - allow the bmc module to log all impi calls
+	* Fixes #9709 - allow the bmc module to log all impi calls
+
+2015-03-03	Dominic Cleal <dcleal@redhat.com>
+	* Bump version to 1.9-develop
+
 2015-02-26	Corey Osman <corey@logicminds.biz>
 	* Fixes #9245 - Add override setting to allow mcollective puppet runs to run as a different user
 
