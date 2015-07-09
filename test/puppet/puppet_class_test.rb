@@ -1,4 +1,5 @@
 require 'test_helper'
+require 'puppet_proxy/puppet_plugin'
 require 'puppet_proxy/puppet_class'
 require 'puppet_proxy/initializer'
 
@@ -25,11 +26,6 @@ class PuppetClassTest < Test::Unit::TestCase
     assert_equal "klass::nested", klass.name
   end
 
-  def test_puppet_class_should_be_an_opject
-    klass = Proxy::Puppet::PuppetClass.new "foreman_proxy::install"
-    assert_kind_of Proxy::Puppet::PuppetClass, klass
-  end
-
   def test_scan_directory_loads_scanner
     Proxy::Puppet::Initializer.expects(:load)
     Proxy::Puppet::ClassScanner.expects(:scan_directory).with('/foo',  'development')
@@ -41,5 +37,16 @@ class PuppetClassTest < Test::Unit::TestCase
     Proxy::Puppet::Initializer.expects(:load)
     Proxy::Puppet::ClassScannerEParser.expects(:scan_directory).with('/foo',  'development')
     Proxy::Puppet::PuppetClass.scan_directory('/foo', 'development', true)
+  end
+
+  def test_json_serialization
+    clazz = Proxy::Puppet::PuppetClass.new(
+        "foreman_proxy::install", "namedconf_path"=>"${::dns::params::namedconf_path}", "dnsdir"=>"${::dns::params::dnsdir}")
+
+    assert clazz.to_json.include?("\"json_class\":\"Proxy::Puppet::PuppetClass\"")
+    assert clazz.to_json.include?("\"klass\":\"foreman_proxy::install\"")
+    assert clazz.to_json.include?("\"params\":{")
+    assert clazz.to_json.include?("\"namedconf_path\":\"${::dns::params::namedconf_path}\"")
+    assert clazz.to_json.include?("\"dnsdir\":\"${::dns::params::dnsdir}\"")
   end
 end

@@ -37,11 +37,25 @@ class Proxy::Puppet::PuppetClass
   end
 
   attr_reader :params
-
-  private
   attr_reader :klass
 
   def has_module?(klass)
     !!klass.index("::")
+  end
+
+  def to_json(*a)
+    {
+        'json_class' => self.class.name,
+        'klass' => klass,
+        'params' => params
+    }.to_json(*a)
+  end
+
+  def self.from_hash(o)
+    new(o['klass'], o['params'])
+  end
+
+  def ==(other)
+    klass == other.klass && params == other.params
   end
 end
