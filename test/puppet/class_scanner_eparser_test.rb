@@ -164,11 +164,10 @@ class ClassScannerEParserTest < Test::Unit::TestCase
     return unless Puppet::PUPPETVERSION.to_f >= 3.2
     Proxy::Puppet::Plugin.load_test_settings(:use_cache => true)
 
-    Proxy::Puppet::PuppetCache.stubs(:read_from_cache).returns('./test/fixtures/modules_include' =>
-                                                                     { 'testinclude' =>
-                                                                     { :timestamp => Time.now,
-                                                                       :manifest => [[Proxy::Puppet::PuppetClass.new('testinclude')],
-                                                                                     [Proxy::Puppet::PuppetClass.new('testinclude::check::cache')]] }})
+    Proxy::Puppet::PuppetCache.stubs(:read_from_cache).returns(
+        './test/fixtures/modules_include' => { 'testinclude' => { 'timestamp' => Time.now.to_i,
+                                                                  'manifest' => [[Proxy::Puppet::PuppetClass.new('testinclude')],
+                                                                                 [Proxy::Puppet::PuppetClass.new('testinclude::check::cache')]] }})
     Proxy::Puppet::PuppetCache.stubs(:write_to_cache)
 
     klasses =  Proxy::Puppet::ClassScannerEParser.scan_directory('./test/fixtures/modules_include', "example_env")

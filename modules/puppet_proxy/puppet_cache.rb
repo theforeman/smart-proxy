@@ -19,13 +19,13 @@ module Proxy::Puppet
         changed    = false
         manifest   = Dir.glob("#{directory}/*").map do |path|
           puppetmodule = File.basename(path)
-          mtime        = File.mtime(path)
+          mtime        = File.mtime(path).to_i
           seenmodules.push(puppetmodule)
 
           lcache[puppetmodule] = {} unless lcache.has_key?(puppetmodule)
-          if lcache[puppetmodule].has_key?(:timestamp) && lcache[puppetmodule][:timestamp] >= mtime
+          if lcache[puppetmodule].has_key?('timestamp') && lcache[puppetmodule]['timestamp'] >= mtime
             logger.debug("Using cached class #{puppetmodule}")
-            modulemanifest = lcache[puppetmodule][:manifest]
+            modulemanifest = lcache[puppetmodule]['manifest']
           else
             changed = true
             logger.info("Scanning class #{puppetmodule}")
@@ -33,8 +33,8 @@ module Proxy::Puppet
               scanner.scan_manifest File.read(filename), filename
             end
 
-            lcache[puppetmodule][:timestamp]= Time.new
-            lcache[puppetmodule][:manifest] = modulemanifest
+            lcache[puppetmodule]['timestamp']= Time.new.to_i
+            lcache[puppetmodule]['manifest'] = modulemanifest
           end
           modulemanifest
         end.compact.flatten
@@ -58,7 +58,24 @@ module Proxy::Puppet
         cachefile = File.expand_path("cache_#{environment}.json", Proxy::Puppet::Plugin.settings.cache_location)
 
         if File.exist?(cachefile)
-          JSON.parse(File.read(cachefile))
+          as_hash = JSON.load(File.new(cachefile))
+
+          if as_hash.delete('version') != ::Proxy::Puppet::Plugin.version
+            logger.info("Mismatching puppet cache version, discarding.")
+            return {}
+          end
+
+          # ran into issues with deserialisation in older versions of json gem (ruby 1.8.7 + json 1.5.5),
+          # and opted for the deserialisation approach below.
+          # TODO: switch back to json library based deserialisation by implementing PuppetClass.json_create
+          # when support for Ruby 1.8.7 has been dropped.
+          as_hash.values.each do |dir|
+            dir.values.each do |puppet_module|
+              puppet_module['manifest'] =
+                puppet_module['manifest'].flatten.map { |klass| [Proxy::Puppet::PuppetClass.from_hash(klass)] }
+            end
+          end
+          as_hash
         else
           {}
         end
@@ -73,7 +90,8 @@ module Proxy::Puppet
 
         unless lock.nil?
           tmpfile = cachefile + '.tmp'
-          File.open(tmpfile, 'w') { |file| file.write(cache.to_json) }
+          to_serialise = cache.merge('version' => ::Proxy::Puppet::Plugin.version)
+          File.open(tmpfile, 'w') { |file| file.write(to_serialise.to_json) }
           File.rename(tmpfile, cachefile)
           Proxy::FileLock.unlock(lock)
         end
