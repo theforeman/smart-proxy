@@ -14,7 +14,7 @@ Gem::Specification.new do |s|
   s.test_files = FileList["{test}/**/*test.rb"].to_a
   s.license = 'GPLv3'
   s.has_rdoc = true
-  s.extra_rdoc_files = ["README"]
+  s.extra_rdoc_files = ["README.md"]
   s.add_dependency 'json', '~> 1.8'
   s.add_dependency 'rack', '~> 1.5'
   s.add_dependency 'sinatra', '~> 1.4'
