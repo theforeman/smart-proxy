@@ -103,28 +103,37 @@ module Proxy
         logger.warn "Missing SSL setup, https is disabled."
         nil
       else
-        begin
-          app = Rack::Builder.new do
-            ::Proxy::Plugins.enabled_plugins.each {|p| instance_eval(p.https_rackup)}
-          end
-
-          Rack::Server.new(
-            :app => app,
-            :server => :webrick,
-            :Host => SETTINGS.bind_host,
-            :Port => SETTINGS.https_port,
-            :SSLEnable => true,
-            :SSLVerifyClient => OpenSSL::SSL::VERIFY_PEER,
-            :SSLPrivateKey => OpenSSL::PKey::RSA.new(File.read(SETTINGS.ssl_private_key)),
-            :SSLCertificate => OpenSSL::X509::Certificate.new(File.read(SETTINGS.ssl_certificate)),
-            :SSLCACertificateFile => SETTINGS.ssl_ca_file,
-            :daemonize => false,
-            :pid => SETTINGS.daemon ? pid_path : nil)
-        rescue => e
-          logger.error "Unable to access the SSL keys. Are the values correct in settings.yml and do permissions allow reading?: #{e}"
-          nil
+        app = Rack::Builder.new do
+          ::Proxy::Plugins.enabled_plugins.each {|p| instance_eval(p.https_rackup)}
         end
+
+        Rack::Server.new(
+          :app => app,
+          :server => :webrick,
+          :Host => SETTINGS.bind_host,
+          :Port => SETTINGS.https_port,
+          :SSLEnable => true,
+          :SSLVerifyClient => OpenSSL::SSL::VERIFY_PEER,
+          :SSLPrivateKey => load_ssl_private_key(SETTINGS.ssl_private_key),
+          :SSLCertificate => load_ssl_certificate(SETTINGS.ssl_certificate),
+          :SSLCACertificateFile => SETTINGS.ssl_ca_file,
+          :daemonize => false,
+          :pid => SETTINGS.daemon ? pid_path : nil)
       end
+    end
+
+    def load_ssl_private_key(path)
+      OpenSSL::PKey::RSA.new(File.read(path))
+    rescue Exception => e
+      logger.error "Unable to load private SSL key. Are the values correct in settings.yml and do permissions allow reading?: #{e}"
+      raise e
+    end
+
+    def load_ssl_certificate(path)
+      OpenSSL::X509::Certificate.new(File.read(path))
+    rescue Exception => e
+      logger.error "Unable to load SSL certificate. Are the values correct in settings.yml and do permissions allow reading?: #{e}"
+      raise e
     end
 
     def launch
@@ -133,11 +142,7 @@ module Proxy
       create_pid_dir
       http_app = http_app()
       https_app = https_app()
-
-      if http_app.nil? && https_app.nil?
-        logger.error("Both http and https are disabled, unable to start.")
-        exit(1)
-      end
+      raise Exception.new("Both http and https are disabled, unable to start.") if http_app.nil? && https_app.nil?
 
       Process.daemon if SETTINGS.daemon
 
@@ -150,6 +155,19 @@ module Proxy
       end
 
       (t1 || t2).join
+    rescue SignalException => e
+      # This is to prevent the exception handler below from catching SignalException exceptions.
+      logger.info("Caught #{e}. Exiting")
+      raise
+    rescue SystemExit
+      # do nothing. This is to prevent the exception handler below from catching SystemExit exceptions.
+      raise
+    rescue Exception => e
+      logger.error("Error during startup, terminating. #{e}")
+      logger.debug("#{e}:#{e.backtrace.join("\n")}")
+
+      puts "Errors detected on startup, see log for details. Exiting."
+      exit(1)
     end
   end
 end

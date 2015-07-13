@@ -1,5 +1,11 @@
 require 'test_helper'
 
+class Proxy::Plugins
+  def self.reset
+    @@enabled = {}
+  end
+end
+
 class Proxy::Plugin
   class << self
     attr_writer :settings
@@ -7,12 +13,53 @@ class Proxy::Plugin
 end
 
 class PluginTest < Test::Unit::TestCase
+  def setup
+    ::Proxy::Plugins.reset
+  end
+
   class TestPlugin1 < Proxy::Plugin; end
   def test_log_used_default_settings
     plugin = TestPlugin1.new
     plugin.class.settings = ::Proxy::Settings::Plugin.new({:a => 'a', :b => 'b'}, {})
 
     assert_equal ':a: a, :b: b, :enabled: false', plugin.log_used_default_settings
+  end
+
+  class TestPlugin1A < Proxy::Plugin; plugin :test_plugin_1a, "1.0"; default_settings :enabled => true; end
+  class TestPlugin1B < Proxy::Plugin; end
+  class TestPlugin1C < Proxy::Provider; plugin :test_plugin_1c, "1.0", :factory => nil; default_settings :enabled => true; end
+  def test_enabled_plugins
+    TestPlugin1A.new.configure_plugin
+    TestPlugin1C.new.configure_plugin
+
+    assert_equal 1, Proxy::Plugins.enabled_plugins.size
+    assert Proxy::Plugins.enabled_plugins.first.is_a?(PluginTest::TestPlugin1A)
+  end
+
+  class TestPlugin1D < Proxy::Plugin; plugin :test_plugin_1d, "1.0"; default_settings :enabled => true; end
+  class TestPlugin1E < Proxy::Provider; plugin :test_plugin_1e, "1.0", :factory => nil; default_settings :enabled => true; end
+  class TestPlugin1F < Proxy::Provider; plugin :test_plugin_1f, "1.0", :factory => nil; default_settings :enabled => true; end
+  def test_find_provider
+    TestPlugin1E.new.configure_plugin
+    TestPlugin1F.new.configure_plugin
+
+    assert Proxy::Plugins.find_provider(:test_plugin_1e).is_a?(PluginTest::TestPlugin1E)
+  end
+
+  def test_find_provider_should_raise_exception_if_no_provider_exists
+    assert_raises ::Proxy::PluginProviderNotFound do
+      Proxy::Plugins.find_provider(:nonexistent)
+    end
+  end
+
+  class TestPlugin1G < Proxy::Plugin; plugin :test_plugin_1g, "1.0"; default_settings :enabled => true; end
+  def test_find_provider_should_raise_exception_if_provider_is_of_wrong_class
+    TestPlugin1G.new.configure_plugin
+
+    assert_equal 1, Proxy::Plugins.enabled_plugins.size
+    assert_raises ::Proxy::PluginProviderNotFound do
+      Proxy::Plugins.find_provider(:test_plugin_1g)
+    end
   end
 
   class TestPlugin2 < Proxy::Plugin; plugin :test2, '1.0'; end
