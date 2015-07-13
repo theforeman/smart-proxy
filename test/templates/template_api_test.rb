@@ -24,7 +24,7 @@ class TemplateApiTest < Test::Unit::TestCase
   end
 
   def test_api_can_ask_for_a_template
-    Proxy::Templates::Handler.stubs(:get_template).returns("An API template")
+    Proxy::Templates::TemplateProxyRequest.stubs(:get_template).returns("An API template")
     get "/provision", @args
     assert last_response.ok?, "Last response was not ok"
     assert_match("An API template", last_response.body)
