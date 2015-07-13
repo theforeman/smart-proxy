@@ -61,14 +61,12 @@ class ::Proxy::Plugins
     end
 
     def enabled_plugins
-      plugins = @@enabled.select {|name, instance| instance.is_a?(::Proxy::Plugin)}
-      plugins.values
+      @@enabled.values.select {|instance| instance.is_a?(::Proxy::Plugin)}
     end
 
     def find_provider(provider_name)
-      providers = @@enabled.select {|name, instance| instance.is_a?(::Proxy::Provider)}
-      provider = providers[provider_name.to_sym]
-      raise ::Proxy::PluginProviderNotFound, "Provider '#{provider_name}' could not be found" unless provider
+      provider = @@enabled[provider_name.to_sym]
+      raise ::Proxy::PluginProviderNotFound, "Provider '#{provider_name}' could not be found" if provider.nil? || !provider.is_a?(::Proxy::Provider)
       provider
     end
   end
