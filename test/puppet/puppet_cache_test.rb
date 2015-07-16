@@ -14,15 +14,17 @@ class PuppetCacheTest < Test::Unit::TestCase
   end
 
   def test_should_refresh_cache_when_dir_is_not_in_cache
+    timestamp = Time.new
     Proxy::Puppet::PuppetCache.expects(:read_from_cache).returns({})
     Proxy::Puppet::PuppetCache.expects(:write_to_cache).with(
         {"./test/fixtures/modules_include" => {
             "testinclude" => {
-                'timestamp' => Time.now.to_i,
+                'timestamp' => timestamp.to_i,
                 'manifest' => [
                   [::Proxy::Puppet::PuppetClass.new('testinclude')],
                   [::Proxy::Puppet::PuppetClass.new('testinclude::sub::foo')]]}
         }}, "example_env")
+    Time.expects(:new).returns(timestamp)
 
     cache = Proxy::Puppet::PuppetCache.scan_directory_with_cache('./test/fixtures/modules_include', 'example_env', @scanner)
 
@@ -39,6 +41,7 @@ class PuppetCacheTest < Test::Unit::TestCase
 
   def test_should_refresh_cache_when_dir_is_changed
     mtime = File.mtime(Dir.glob('./test/fixtures/modules_include/*')[0]).to_i
+    timestamp = Time.new
 
     Proxy::Puppet::PuppetCache.stubs(:read_from_cache).returns('./test/fixtures/modules_include' =>
                                                                    { 'testinclude' => { 'timestamp' => (mtime - 1000),
@@ -47,11 +50,12 @@ class PuppetCacheTest < Test::Unit::TestCase
     Proxy::Puppet::PuppetCache.expects(:write_to_cache).with(
         {"./test/fixtures/modules_include" => {
             "testinclude" => {
-                'timestamp' => Time.now.to_i,
+                'timestamp' => timestamp.to_i,
                 'manifest' => [
                   [::Proxy::Puppet::PuppetClass.new('testinclude')],
                   [::Proxy::Puppet::PuppetClass.new('testinclude::sub::foo')]]}
         }}, "example_env")
+    Time.expects(:new).returns(timestamp)
 
     cache = Proxy::Puppet::PuppetCache.scan_directory_with_cache('./test/fixtures/modules_include', 'example_env', @scanner)
 
