@@ -1,3 +1,18 @@
+2015-07-20	Dominic Cleal <dcleal@redhat.com>
+	* Release 1.9.0-RC2
+
+2015-07-17	Dominic Cleal <dcleal@redhat.com>
+	* fixes #11131 - use consistent timestamps in cache test expectations
+
+2015-07-17	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* fixes #10941: fixed puppet class caching
+
+2015-07-17	Lukas Zapletal <lzap+git@redhat.com>
+	* Fixes #10877 - puppet pinned to 3.x series
+
+2015-07-17	Ewoud Kohl van Wijngaarden <ekohlvanwijngaarden@antagonist.nl>
+	* Fixes #11090: fix README filename in the gemspec
+
 2015-07-06	Dominic Cleal <dcleal@redhat.com>
 	* Release 1.9.0-RC1
 
