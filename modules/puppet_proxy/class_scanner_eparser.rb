@@ -2,20 +2,19 @@ require 'puppet_proxy/puppet_class'
 require 'puppet'
 require 'puppet_proxy/class_scanner_base'
 
+# this is needed to support tests in environments with puppet version < 3.2
+module Proxy::Puppet
+  class ClassScannerEParser < ClassScannerBase; end
+end
+
 if Puppet::PUPPETVERSION.to_f >= 3.2
   require 'puppet/pops'
 
   module Proxy::Puppet
     class ClassScannerEParser < ClassScannerBase
       class << self
-
-        # scans a given directory and its sub directory for puppet classes
-        # returns an array of PuppetClass objects.
-        def scan_directory directory, environment
-          super directory, environment
-        end
-
         def scan_manifest manifest, filename = ''
+          Proxy::Puppet::Initializer.load
           klasses = []
 
           already_seen = Set.new

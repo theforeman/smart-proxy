@@ -2,21 +2,6 @@ require 'puppet_proxy/class_scanner'
 require 'puppet_proxy/class_scanner_eparser'
 
 class Proxy::Puppet::PuppetClass
-  class << self
-    # scans a given directory and its sub directory for puppet classes
-    # returns an array of PuppetClass objects.
-    def scan_directory directory, environment, eparser = false
-      # Get a Puppet Parser to parse the manifest source
-      Proxy::Puppet::Initializer.load
-
-      if eparser
-        Proxy::Puppet::ClassScannerEParser.scan_directory directory, environment
-      else
-        Proxy::Puppet::ClassScanner.scan_directory directory, environment
-      end
-    end
-  end
-
   def initialize name, params = {}
     @klass  = name || raise("Must provide puppet class name")
     @params = params
