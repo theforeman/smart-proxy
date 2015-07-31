@@ -4,13 +4,8 @@ require 'puppet_proxy/class_scanner_base'
 module Proxy::Puppet
   class ClassScanner < ClassScannerBase
     class << self
-      # scans a given directory and its sub directory for puppet classes
-      # returns an array of PuppetClass objects.
-      def scan_directory directory, environment
-        super directory, environment
-      end
-
       def scan_manifest manifest, filename = ''
+        Proxy::Puppet::Initializer.load
         parser = Puppet::Parser::Parser.new Puppet::Node::Environment.new
         klasses = []
 
