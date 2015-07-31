@@ -3,6 +3,7 @@ require 'puppet_proxy/initializer'
 require 'puppet_proxy/config_reader'
 require 'puppet_proxy/puppet_class'
 require 'puppet_proxy/api_request'
+require 'puppet_proxy/class_scanner_factory'
 require 'proxy/util'
 
 class Proxy::Puppet::Environment
@@ -146,7 +147,8 @@ class Proxy::Puppet::Environment
     ::Proxy::Puppet::Initializer.load
     conf = ::Proxy::Puppet::ConfigReader.new(::Proxy::Puppet::Initializer.config).get
     eparser = (conf[:main] && conf[:main][:parser] == 'future') || (conf[:master] && conf[:master][:parser] == 'future')
+    scanner = ::Proxy::Puppet::ClassScannerFactory.new(eparser).scanner
 
-    paths.map {|path| ::Proxy::Puppet::PuppetClass.scan_directory path, name, eparser}.flatten
+    paths.map {|path| scanner.scan_directory(path, name) }.flatten
   end
 end

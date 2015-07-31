@@ -54,5 +54,3 @@
 
 # Cache options
 #:use_cache: true
-# default location of cache is relative to the installation dir
-#:cache_location: '/var/lib/smart-proxy/cache'
