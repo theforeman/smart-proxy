@@ -11,10 +11,6 @@ class TftpTest < Test::Unit::TestCase
     assert_respond_to @tftp, :logger
   end
 
-  def test_path_to_tftp_directory_without_tftproot_setting
-    assert_equal "/var/lib/tftpboot", @tftp.send(:path)
-  end
-
   def test_path_to_tftp_directory_with_tftproot_setting
     Proxy::TFTP::Plugin.settings.stubs(:tftproot).returns("/some/tftp/root")
     assert_equal Proxy::TFTP::Plugin.settings.tftproot, @tftp.send(:path)
