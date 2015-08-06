@@ -8,6 +8,7 @@ class Proxy::Puppet::CustomRun < Proxy::Puppet::Runner
       return false
     end
 
-    shell_command( [ escape_for_shell(cmd), Proxy::Puppet::Plugin.settings.customrun_args, shell_escaped_nodes ] )
+    customrun_args = (a = Proxy::Puppet::Plugin.settings.customrun_args).is_a?(Array) ? a : a.split(' ')
+    shell_command(([escape_for_shell(cmd), customrun_args] + shell_escaped_nodes).flatten)
   end
 end
