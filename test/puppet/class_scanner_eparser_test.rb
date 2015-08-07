@@ -4,7 +4,7 @@ require 'puppet_proxy/class_scanner_eparser'
 
 class ClassScannerEParserTest < Test::Unit::TestCase
   def setup
-    Proxy::Puppet::Plugin.load_test_settings(:use_cache => false)
+    Proxy::Puppet::Plugin.load_test_settings(:use_cache => false, :puppet_conf => "test/fixtures/puppet.conf")
   end
 
   def test_should_find_class_in_a_manifest
@@ -148,7 +148,6 @@ class ClassScannerEParserTest < Test::Unit::TestCase
 
   def test_should_handle_import_in_a_manifest_without_cache
     return unless Puppet::PUPPETVERSION.to_f >= 3.2
-    Proxy::Puppet::Plugin.load_test_settings(:use_cache => false)
 
     klasses =  Proxy::Puppet::ClassScannerEParser.scan_directory('./test/fixtures/modules_include', "example_env")
     assert_equal 2, klasses.size
