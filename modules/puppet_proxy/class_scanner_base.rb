@@ -1,3 +1,5 @@
+require 'puppet_proxy/initializer'
+
 module Proxy::Puppet
   class ClassScannerBase
     class << self
