@@ -8,6 +8,6 @@ class Proxy::Puppet::CustomRun < Proxy::Puppet::Runner
       return false
     end
 
-    shell_command( [ escape_for_shell(cmd), Proxy::Puppet::Plugin.settings.customrun_args, shell_escaped_nodes ] )
+    shell_command( [ escape_for_shell(cmd), Proxy::Puppet::Plugin.settings.customrun_args || '', shell_escaped_nodes.join(' ') ] )
   end
 end
