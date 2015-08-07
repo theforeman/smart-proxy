@@ -290,7 +290,7 @@ module Proxy::BMC
           @bmc = Proxy::BMC::IPMI.new(args)
         when "shell"
           require 'bmc/shell'
-          @bmc = Proxy::BMC::Shell.new
+          @bmc = Proxy::BMC::Shell.new(body_parameters['kernel'], body_parameters['initram'], body_parameters['append'])
         else
           log_halt 400, "Invalid BMC type: #{provider_type}"
       end

@@ -130,6 +130,7 @@ class BmcApiTest < Test::Unit::TestCase
     api = Proxy::BMC::Api.new!
     Proxy::BMC::Plugin.settings.stubs(:bmc_default_provider).returns('freeipmi')
     api.stubs(:params).returns('bmc_provider' => 'shell', :host => :host)
+    api.stubs(:body_parameters).returns({})
     result = api.bmc_setup
     assert_kind_of(Proxy::BMC::Shell,result)
   end
