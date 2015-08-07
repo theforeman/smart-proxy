@@ -1,3 +1,9 @@
+2015-08-07	Dominic Cleal <dcleal@redhat.com>
+	* Release 1.9.0-RC3
+
+2015-08-06	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #11229: changes in puppet modules are now being detected when listing available puppet classes
+
 2015-07-20	Dominic Cleal <dcleal@redhat.com>
 	* Release 1.9.0-RC2
 
