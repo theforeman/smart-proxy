@@ -5,9 +5,12 @@ module Proxy
     class Shell < Base
       include Proxy::Log
       include Proxy::Util
+      attr_accessor :kernel, :initram, :append
 
-      def initialize
-        # Nothing needed to set up shell
+      def initialize(kernel, initram, append)
+        @kernel = kernel
+        @initram = initram
+        @append = append
       end
 
       def self.installed?(args)
@@ -37,35 +40,59 @@ module Proxy
       end
 
       def powercycle
-        sudo = which('sudo')
-        shutdown = which('shutdown')
+        if kernel && initram && append
+          unless (kexec = which('kexec'))
+            logger.warn "kexec binary was not found - aborting"
+            return false
+          end
 
-        unless sudo
-          logger.warn "sudo binary was not found - aborting reboot"
-          return false
+          # download kernel and image synchronously
+          if ::Proxy::HttpDownloads.start_download(kernel, '/tmp/vmlinuz').join != 0
+            logger.warn "unable to download kernel - aborting"
+            return false
+          end
+          if ::Proxy::HttpDownloads.start_download(initram, '/tmp/initrd.img').join != 0
+            logger.warn "unable to download init RAM disk - aborting"
+            return false
+          end
+
+          run_after_response 2, kexec, "--force", "--append='#{append}'", "--initrd=/tmp/initrd.img", "/tmp/vmlinuz"
+        else
+          unless (shutdown = which('shutdown'))
+            logger.warn "shutdown binary was not found - aborting reboot"
+            return false
+          end
+
+          run_after_response 5, shutdown, "-r", "now", "Foreman BMC API reboot"
         end
 
-        unless shutdown
-          logger.warn "shutdown binary was not found - aborting reboot"
-          return false
-        end
-
-        # because we are actually terminating the server, we do not care about the return code -
+        # Because we are actually terminating the server, we do not care about the return code -
         # we actually must not care because there is no time to wait (we need to finish the request
-        # as soon as possible)
+        # as soon as possible).
+        return true
+      end
+
+      private
+
+      # Execute command in a separate thread after 5 seconds to give the server some time to finish
+      # the request.
+      def run_after_response(seconds, *command)
+        logger.debug "BMC shell execution scheduled in #{seconds} seconds"
         Thread.start do
-          # give the http server some time to flush the buffers
-          sleep 5
-          # and see you next time
-          exitcode = system sudo, "shutdown", "-r", "now", "Foreman BMC API"
-          # only report errors
-          if exitcode != 0
-            logger.warn "The attempted shutdown failed with code #{exitcode}"
+          begin
+            sleep seconds
+            logger.debug "BMC shell executing: #{command.inspect}"
+            if (sudo = which('sudo'))
+              status = system(sudo, *command)
+            else
+              logger.warn "sudo binary was not found"
+            end
+            # only report errors
+            logger.warn "The attempted command failed with code #{$?.exitstatus}" unless status
+          rescue Exception => e
+            logger.error "Error during command execution: #{e}"
           end
         end
-
-        # let's return true and finish the request
-        return true
       end
 
     end

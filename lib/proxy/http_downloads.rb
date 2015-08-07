@@ -7,9 +7,9 @@ module Proxy
         lock =  Proxy::FileLock.try_locking(dst)
         unless lock.nil?
           HttpDownload.new(src, dst, lock)
-          return true
+        else
+          false
         end
-        false
       end
     end
   end

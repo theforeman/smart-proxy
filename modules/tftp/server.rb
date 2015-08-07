@@ -115,7 +115,7 @@ module Proxy::TFTP
     # as the dst might contain another sub directory
     FileUtils.mkdir_p destination.parent
 
-    ::Proxy::HttpDownloads.start_download(src.to_s, destination.to_s)
+    ::Proxy::HttpDownloads.start_download(src.to_s, destination.to_s) && true
   end
 
   def self.boot_filename(dst, src)
