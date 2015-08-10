@@ -17,12 +17,12 @@ class ProxyUtilTest < Test::Unit::TestCase
   end
 
   def test_commandtask_with_exit_0
-    t = Proxy::Util::CommandTask.new('true')
+    t = Proxy::Util::CommandTask.new('true').start
     assert_equal t.join, 0
   end
 
   def test_commandtask_with_exit_1
-    t = Proxy::Util::CommandTask.new('false')
+    t = Proxy::Util::CommandTask.new('false').start
     # In Ruby 1.8, the return code is always 0
     assert_equal t.join, RUBY_VERSION =~ /^1\.8/ ? 0 : 1
   end
