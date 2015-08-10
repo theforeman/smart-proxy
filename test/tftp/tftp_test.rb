@@ -27,14 +27,14 @@ class TftpTest < Test::Unit::TestCase
   end
 
   def test_paths_inside_tftp_directory_dont_raise_errors
-    ::Proxy::HttpDownloads.stubs(:start_download).returns(true)
+    ::Proxy::HttpDownload.any_instance.stubs(:start).returns(true)
     FileUtils.stubs(:mkdir_p).returns(true)
 
     assert Proxy::TFTP.send(:fetch_boot_file,'/some/root/boot/file','http://localhost/file')
   end
 
   def test_paths_outside_tftp_directory_raise_errors
-    ::Proxy::HttpDownloads.stubs(:start_download).returns(true)
+    ::Proxy::HttpDownload.any_instance.stubs(:start).returns(true)
     FileUtils.stubs(:mkdir_p).returns(true)
 
     assert_raises RuntimeError do
