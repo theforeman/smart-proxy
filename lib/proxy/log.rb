@@ -1,6 +1,13 @@
 require 'logger'
+begin
+  require 'syslog/logger'
+  ::Syslog::Logger.class_eval { alias_method :write, :info }
+rescue LoadError
+  puts "Setting log_file=SYSLOG not supported on this platform, ignoring"
+end
 
-Logger.class_eval { alias_method :write, :'<<' } # ::Rack::CommonLogger expects loggers to implement 'write' method
+# ::Rack::CommonLogger expects loggers to implement 'write' method
+Logger.class_eval { alias_method :write, :info }
 
 module Proxy
   module Log
@@ -10,13 +17,27 @@ module Proxy
       @@logger ||= ::Proxy::Log.logger
     end
 
+    def self.default_logger(log_file)
+      # We keep the last 6 10MB log files
+      ::Logger.new(log_file, 6, 1024*1024*10)
+    end
+
     def self.logger
       log_file = ::Proxy::SETTINGS.log_file
       if log_file.upcase == 'STDOUT'
+        if SETTINGS.daemon
+          puts "Settings log_file=STDOUT and daemon=true are incompatible, exiting..."
+          exit 1
+        end
         logger = ::Logger.new(STDOUT)
+      elsif log_file.upcase == 'SYSLOG'
+        begin
+          logger = ::Syslog::Logger.new 'foreman-proxy'
+        rescue
+          logger = default_logger(log_file)
+        end
       else
-        # We keep the last 6 10MB log files
-        logger = ::Logger.new(log_file, 6, 1024*1024*10)
+        logger = default_logger(log_file)
       end
       logger.level = ::Logger.const_get(::Proxy::SETTINGS.log_level.upcase)
       logger

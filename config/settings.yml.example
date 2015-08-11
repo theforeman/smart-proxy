@@ -51,7 +51,7 @@
 :virsh_network: default
 
 # Log configuration
-# Uncomment and modify if you want to change the location of the log file or use STDOUT
+# Uncomment and modify if you want to change the location of the log file or use STDOUT or SYSLOG values
 #:log_file: /var/log/foreman-proxy/proxy.log
 # Uncomment and modify if you want to change the log level
 # WARN, DEBUG, ERROR, FATAL, INFO, UNKNOWN
