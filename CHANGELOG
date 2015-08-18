@@ -1,3 +1,9 @@
+2015-08-18	Dominic Cleal <dcleal@redhat.com>
+	* Release 1.9.0
+
+2015-08-18	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #11311: puppet tests no longer fail if /etc/puppet/puppet.conf doesn't exist
+
 2015-08-07	Dominic Cleal <dcleal@redhat.com>
 	* Release 1.9.0-RC3
 
