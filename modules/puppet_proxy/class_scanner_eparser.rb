@@ -44,7 +44,11 @@ if Puppet::PUPPETVERSION.to_f >= 3.2
       end
 
       def do_find ast
-        @@finder_visitor.visit_this(self, ast)
+        if Puppet::PUPPETVERSION.to_i < 4
+          @@finder_visitor.visit_this(self, ast)
+        else
+          @@finder_visitor.visit_this(self, ast, [])
+        end
       end
 
       def find_HostClassDefinition o
