@@ -114,7 +114,7 @@ module Proxy
       t2 = Thread.new { http_app.start } unless http_app.nil?
 
       begin
-        if Gem.loaded_specs['rack'].version < Gem::Version.create('1.6.4')
+        if Rack.release < '1.6.4'
           # Rack installs its own trap; Sleeping for 5 secs insures we overwrite it with our own
           sleep 5
           trap(:INT) do
