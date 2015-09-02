@@ -2,9 +2,10 @@ require 'logger'
 begin
   require 'syslog/logger'
   ::Syslog::Logger.class_eval { alias_method :write, :info }
-rescue LoadError
-  puts "Setting log_file=SYSLOG not supported on this platform, ignoring"
+rescue LoadError # rubocop:disable Lint/HandleExceptions
+  # ignore, syslog isn't available on this platform
 end
+# rubocop:enable Lint/HandleExceptions
 
 # ::Rack::CommonLogger expects loggers to implement 'write' method
 Logger.class_eval { alias_method :write, :info }
@@ -35,6 +36,7 @@ module Proxy
           logger = ::Syslog::Logger.new 'foreman-proxy'
         rescue
           logger = default_logger(log_file)
+          puts "'SYSLOG' logger is not supported on this platform, using file-based logger instead"
         end
       else
         logger = default_logger(log_file)
