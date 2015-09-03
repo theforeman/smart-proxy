@@ -7,6 +7,8 @@
 #   - native_ms (Microsoft native implementation)
 #   - virsh (simple implementation for libvirt)
 #:dhcp_vendor: isc
+#:dhcp_server: 127.0.0.1
+#:dhcp_omapi_port: 7911
 # dhcp_subnets is an ISC &  Native MS implementation setting. It restricts the subnets queried to a
 # subset, so as to reduce the query time.
 #:dhcp_subnets: [192.168.205.0/255.255.255.128, 192.168.205.128/255.255.255.128]
@@ -21,4 +23,3 @@
 #:dhcp_leases: /var/lib/dhcpd/dhcpd.leases
 #:dhcp_key_name: secret_key_name
 #:dhcp_key_secret: secret_key
-#:dhcp_omapi_port: 7911
