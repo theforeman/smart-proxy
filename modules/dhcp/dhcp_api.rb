@@ -14,7 +14,7 @@ class Proxy::DhcpApi < ::Sinatra::Base
           && File.exist?(Proxy::DhcpPlugin.settings.dhcp_config) && File.exist?(Proxy::DhcpPlugin.settings.dhcp_leases)
           log_halt 400, "Unable to find the DHCP configuration or lease files"
         end
-        @server = Proxy::DHCP::ISC.new(:name => "127.0.0.1",
+        @server = Proxy::DHCP::ISC.new(:name => Proxy::DhcpPlugin.settings.dhcp_server,
                                        :config => Proxy::DhcpPlugin.settings.dhcp_config,
                                        :leases => Proxy::DhcpPlugin.settings.dhcp_leases)
       when "native_ms"

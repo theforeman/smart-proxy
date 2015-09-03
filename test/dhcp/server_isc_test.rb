@@ -9,6 +9,18 @@ ENV['RACK_ENV'] = 'test'
 class ServerIscTest < Test::Unit::TestCase
   include Rack::Test::Methods
 
+  class OMIO
+    attr_reader :input_commands
+
+    def initialize
+      @input_commands = []
+    end
+
+    def puts str
+      @input_commands << str
+    end
+  end
+
   def app
     Proxy::DhcpApi.new
   end
@@ -36,9 +48,20 @@ class ServerIscTest < Test::Unit::TestCase
     Proxy::DhcpPlugin.load_test_settings(
       :enabled => true,
       :dhcp_vendor => 'isc',
+      :dhcp_omapi_port => 999,
       :dhcp_config => './test/fixtures/dhcp/dhcp.conf',
       :dhcp_leases => './test/fixtures/dhcp/dhcp.leases',
       :dhcp_subnets => '192.168.122.0/255')
+  end
+
+  def test_omcmd_server_connect
+    srv = Proxy::DHCP::ISC.new :name => '1.2.3.4', :config => './test/fixtures/dhcp/dhcp.conf', :leases => './test/fixtures/dhcp/dhcp.leases'
+    srv.stubs(:which).returns('fakeshell')
+    omio = OMIO.new
+    IO.expects(:popen).with("/bin/sh -c 'fakeshell 2>&1'", "r+").returns(omio)
+    srv.send(:omcmd, 'connect')
+    assert_equal "port 999", omio.input_commands[1]
+    assert_equal "server 1.2.3.4", omio.input_commands[0]
   end
 
   def test_sparc_host_creation
