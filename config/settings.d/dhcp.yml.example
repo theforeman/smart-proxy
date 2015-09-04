@@ -3,6 +3,7 @@
 :enabled: false
 
 # valid vendors:
+#   - infoblox
 #   - isc
 #   - native_ms (Microsoft native implementation)
 #   - virsh (simple implementation for libvirt)
@@ -22,3 +23,7 @@
 #:dhcp_key_name: secret_key_name
 #:dhcp_key_secret: secret_key
 #:dhcp_omapi_port: 7911
+# Infoblox settings:
+#:dhcp_server: 127.0.0.1
+#:username: admin
+#:password: admin
