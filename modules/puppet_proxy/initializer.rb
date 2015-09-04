@@ -25,7 +25,12 @@ module Proxy::Puppet
         end
 
         # Don't follow imports, the proxy scans for .pp files itself
-        Puppet[:ignoreimport] = true
+        # This is only applied when using a version of Puppet older than 4.0 that
+        # isn't using the future parser, as the future parser ignores imports by
+        # default.
+        if Puppet::PUPPETVERSION.to_i < 4 || Puppet[:parser] == 'future'
+          Puppet[:ignoreimport] = true
+        end
       end
 
       def config

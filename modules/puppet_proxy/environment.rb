@@ -146,7 +146,7 @@ class Proxy::Puppet::Environment
   def classes
     ::Proxy::Puppet::Initializer.load
     conf = ::Proxy::Puppet::ConfigReader.new(::Proxy::Puppet::Initializer.config).get
-    eparser = (conf[:main] && conf[:main][:parser] == 'future') || (conf[:master] && conf[:master][:parser] == 'future')
+    eparser = (conf[:main] && conf[:main][:parser] == 'future') || (conf[:master] && conf[:master][:parser] == 'future') || Puppet::PUPPETVERSION.to_i >= 4
     scanner = ::Proxy::Puppet::ClassScannerFactory.new(eparser).scanner
 
     paths.map {|path| scanner.scan_directory(path, name) }.flatten
