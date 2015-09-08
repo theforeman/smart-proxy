@@ -1,6 +1,12 @@
 require 'augeas'
 
 module Proxy::Puppet
+  class PuppetConfig
+    def get
+      Proxy::Puppet::ConfigReader.new(Proxy::Puppet::Plugin.settings.puppet_conf).get
+    end
+  end
+
   class ConfigReader
     attr_reader :config
 

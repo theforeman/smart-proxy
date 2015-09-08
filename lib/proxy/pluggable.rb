@@ -36,6 +36,11 @@ module Proxy::Pluggable
     def validate!
       validate_dependencies!(self.class.dependencies)
       validate_prerequisites_enabled!(self.class.initialize_after)
+      execute_validators(self.class.validators)
+    end
+
+    def execute_validators(validators)
+      validators.each { |validator| validator.validate! }
     end
 
     def validate_prerequisites_enabled!(prerequisites)
@@ -107,6 +112,17 @@ module Proxy::Pluggable
       else
         @initialize_after += module_names.map(&:to_sym)
       end
+    end
+
+    def validators
+      @validators ||= []
+    end
+
+    def validate_readable(*settings)
+      # Passing in plugin class and setting name is a bit awkward, but we need to delay the loading of module settings
+      # until after module's Plugin/Provider class has been loaded (to preserve order-independence of statements used in
+      # the class body of the Plugin.)
+      settings.each { |setting| validators << ::Proxy::PluginValidators::FileReadable.new(self, setting) }
     end
   end
 end

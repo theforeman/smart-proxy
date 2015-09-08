@@ -3,11 +3,10 @@ require 'puppet_proxy/puppet_plugin'
 require 'puppet_proxy/initializer'
 require 'puppet_proxy/class_scanner'
 
-class ClassScannerTest < Test::Unit::TestCase
-
+module ClassScannerTestSuite
   def setup
-    Proxy::Puppet::Plugin.load_test_settings(:puppet_conf => './test/fixtures/puppet.conf', :use_cache => false)
-    Proxy::Puppet::Initializer.load
+    Proxy::Puppet::Plugin.load_test_settings(:puppet_conf => './test/fixtures/puppet.conf')
+    Proxy::Puppet::Initializer.new.reset_puppet
   end
 
   def test_should_find_class_in_a_manifest
@@ -16,7 +15,7 @@ class ClassScannerTest < Test::Unit::TestCase
       include 'x::y'
     }
     EOF
-    klasses =  Proxy::Puppet::ClassScanner.scan_manifest(manifest)
+    klasses =  Proxy::Puppet::ClassScanner.new.scan_manifest(manifest)
     assert_kind_of Array, klasses
     assert_equal 1, klasses.size
 
@@ -30,7 +29,7 @@ class ClassScannerTest < Test::Unit::TestCase
     manifest = <<-EOF
       include 'x::y'
     EOF
-    klasses =  Proxy::Puppet::ClassScanner.scan_manifest(manifest)
+    klasses =  Proxy::Puppet::ClassScanner.new.scan_manifest(manifest)
     assert klasses.empty?
   end
   def test_should_find_multiple_class_in_a_manifest
@@ -43,7 +42,7 @@ class ClassScannerTest < Test::Unit::TestCase
     }
 
     EOF
-    klasses =  Proxy::Puppet::ClassScanner.scan_manifest(manifest)
+    klasses =  Proxy::Puppet::ClassScanner.new.scan_manifest(manifest)
     assert_kind_of Array, klasses
     assert_equal 2, klasses.size
     klasses.sort! { |k1,k2| k1.name <=> k2.name }
@@ -60,7 +59,7 @@ class ClassScannerTest < Test::Unit::TestCase
   end
 
   def test_should_scan_and_return_empty_array_when_directory_does_not_exist
-    klasses =  Proxy::Puppet::ClassScanner.scan_directory('/tmp/no_such_dir', "example_env")
+    klasses =  Proxy::Puppet::ClassScanner.new.scan_directory('/tmp/no_such_dir', "example_env")
     assert_kind_of Array, klasses
     assert klasses.empty?
   end
@@ -70,7 +69,7 @@ class ClassScannerTest < Test::Unit::TestCase
     class foreman::install {
     }
     EOF
-    klasses = Proxy::Puppet::ClassScanner.scan_manifest(manifest)
+    klasses = Proxy::Puppet::ClassScanner.new.scan_manifest(manifest)
     assert_kind_of Array, klasses
     assert_equal 1, klasses.size
     klass = klasses.first
@@ -82,7 +81,7 @@ class ClassScannerTest < Test::Unit::TestCase
     class foreman::install () {
     }
     EOF
-    klasses = Proxy::Puppet::ClassScanner.scan_manifest(manifest)
+    klasses = Proxy::Puppet::ClassScanner.new.scan_manifest(manifest)
     assert_kind_of Array, klasses
     assert_equal 1, klasses.size
     klass = klasses.first
@@ -94,7 +93,7 @@ class ClassScannerTest < Test::Unit::TestCase
     class foreman::install ($mandatory) {
     }
     EOF
-    klasses = Proxy::Puppet::ClassScanner.scan_manifest(manifest)
+    klasses = Proxy::Puppet::ClassScanner.new.scan_manifest(manifest)
     assert_kind_of Array, klasses
     assert_equal 1, klasses.size
     klass = klasses.first
@@ -118,27 +117,27 @@ class ClassScannerTest < Test::Unit::TestCase
     ) {
     }
     EOF
-    klasses = Proxy::Puppet::ClassScanner.scan_manifest(manifest)
+    klasses = Proxy::Puppet::ClassScanner.new.scan_manifest(manifest)
     assert_kind_of Array, klasses
     assert_equal 1, klasses.size
     klass = klasses.first
     assert_equal({
-      'mandatory' => nil,
-      'undef' => '',
-      'emptyString' => '',
-      'emptyStringDq' => '',
-      'string' => 'foo',
-      'integer' => 42,
-      'float' => 3.14,
-      'array' => ['', '', 'foo', 42, 3.14],
-      # All keys must be strings
-      'hash' => { 'unquoted' => '', 'quoted' => '', '42' => 'integer', '3.14' => 'float', '' => 'empty' },
-      'complex' => { 'array' => ['','foo',42,3.14], 'hash' => {'foo'=>'bar'}, 'mixed' => [{'foo'=>'bar'},{'bar'=>'baz'}] }
-    }, klass.params)
+                     'mandatory' => nil,
+                     'undef' => '',
+                     'emptyString' => '',
+                     'emptyStringDq' => '',
+                     'string' => 'foo',
+                     'integer' => 42,
+                     'float' => 3.14,
+                     'array' => ['', '', 'foo', 42, 3.14],
+                     # All keys must be strings
+                     'hash' => { 'unquoted' => '', 'quoted' => '', '42' => 'integer', '3.14' => 'float', '' => 'empty' },
+                     'complex' => { 'array' => ['','foo',42,3.14], 'hash' => {'foo'=>'bar'}, 'mixed' => [{'foo'=>'bar'},{'bar'=>'baz'}] }
+                 }, klass.params)
   end
 
   def test_should_handle_import_in_a_manifest
-    klasses =  Proxy::Puppet::ClassScanner.scan_directory('./test/fixtures/modules_include', "example_env")
+    klasses =  Proxy::Puppet::ClassScanner.new.scan_directory('./test/fixtures/modules_include', "example_env")
     assert_kind_of Array, klasses
     assert_equal 2, klasses.size
 
@@ -150,5 +149,10 @@ class ClassScannerTest < Test::Unit::TestCase
   end
 
   #TODO add scans to a real puppet directory with modules
+end
 
+if Puppet::PUPPETVERSION.to_i < 4
+  class ClassScannerTest < Test::Unit::TestCase
+    include ClassScannerTestSuite
+  end
 end
