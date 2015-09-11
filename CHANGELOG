@@ -1,3 +1,9 @@
+2015-09-11	Dominic Cleal <dcleal@redhat.com>
+	* Release 1.9.1
+
+2015-09-09	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #10940: puppetrun works properly now on ruby > 1.8.7
+
 2015-08-18	Dominic Cleal <dcleal@redhat.com>
 	* Release 1.9.0
 
