@@ -1,5 +1,5 @@
 require 'resolv'
-require 'win32/open3'
+require RbConfig::CONFIG['target_os'] == 'mingw32' && !(RUBY_VERSION =~ /1.9/) && !(RUBY_VERSION =~ /2.0/) ? 'win32/open3' : 'open3'
 
 module Proxy::Dns::Dnscmd
   class Record < ::Proxy::Dns::Record
