@@ -75,7 +75,7 @@ class ServerIscTest < Test::Unit::TestCase
     assert_equal [], @dhcp.send(:poap_options_statements, {})
     assert_equal [], @dhcp.send(:poap_options_statements, :filename => 'foo.cfg')
 
-    assert_equal ['option tftp-server-name = 192.168.122.1;', 'option bootfile-name = \\"poap.cfg/something.py\\";'],
+    assert_equal ['option tftp-server-name = \\"192.168.122.1\\";', 'option bootfile-name = \\"poap.cfg/something.py\\";'],
                  @dhcp.send(:poap_options_statements, :filename => 'poap.cfg/something.py', :nextServer => '192.168.122.1')
   end
 

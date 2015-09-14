@@ -403,7 +403,7 @@ module Proxy::DHCP
       statements = []
       if options[:filename] && options[:filename].match(/^poap.cfg.*/i)
         logger.debug "setting POAP options"
-        statements << "option tftp-server-name = #{options[:nextServer]};"
+        statements << "option tftp-server-name = \\\"#{options[:nextServer]}\\\";"
         statements << "option bootfile-name = \\\"#{options[:filename]}\\\";"
       end
       statements
