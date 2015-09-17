@@ -212,7 +212,7 @@ module Proxy::DHCP
           response += std_err.readlines
         end
       rescue TimeoutError
-        raise Proxy::DHCP::Error.new("Netsh did not respond within #{tsecs} seconds")
+        raise Proxy::DHCP::Error.new("Netsh did nota respond within #{tsecs} seconds")
       ensure
         std_in.close  unless std_in.nil?
         std_out.close unless std_in.nil?
