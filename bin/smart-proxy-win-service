@@ -1,40 +1,42 @@
-#!/usr/bin/env ruby
-
 $LOAD_PATH.unshift(*Dir[File.expand_path("../../lib", __FILE__), File.expand_path("../../modules", __FILE__)])
 
 raise "win-service executable can only be used as a service in windows environment" unless RUBY_PLATFORM =~ /mingw/
 
-require 'smart_proxy_main'
 require 'win32/daemon'
+require 'logger'
+require 'smart_proxy_main'
+
 include Win32
 
-begin
-  logfile = "../../tmp/proxy.log"
-  $stdout.reopen(logfile, "a")
-  $stdout.sync = true
-  $stderr.reopen($stdout)
-  puts "#{Time.now}: Service is starting"
+LOG_DIR_PATH = File.expand_path("../../log", __FILE__)
+Dir.mkdir(LOG_DIR_PATH) unless Dir.exist?(LOG_DIR_PATH)
 
-  class Daemon
+def logger
+  @logger ||= Logger.new(File.expand_path("win-service.log", LOG_DIR_PATH))
+end
+
+begin
+  class SmartDaemon < Daemon
     def service_init
-      puts "#{Time.now}: Service is initializing"
+      logger.info("Service is initializing")
     end
 
-    def service_main(*args)
-      puts "#{Time.now}: Service is running"
+    def service_main
+      logger.info("Service is running")
+      # Start the foreman daemon
       Proxy::Launcher.new.launch
-      puts "#{Time.now}: Service is terminating"
+
+      # the daemon is about to exit.
+      logger.info("Service is terminating")
     end
 
     def service_stop
-      puts "#{Time.now}: Service stopped"
-      exit!(true)
-    end
+      logger.info("Service is stopping.")
+    end    
   end
 
-  daemon = Daemon.new
-  daemon.mainloop
-rescue Exception => err
-  File.open(logfile, (File::APPEND|File::CREAT|File::WRONLY)){ |f| f.puts " ***Daemon failure #{Time.now} err=#{err}" }
+  SmartDaemon.mainloop
+rescue Exception => e
+  logger.error("Daemon failure: #{e}  #{e.backtrace.join("\n")}")
   raise
 end
