@@ -9,29 +9,19 @@ module Proxy::Puppet
     attr_reader :url, :ssl_ca, :ssl_cert, :ssl_key
 
     def initialize
-      Proxy::Puppet::Initializer.load
       certname  = Puppet[:certname]
 
       @url = Proxy::Puppet::Plugin.settings.puppet_url.to_s.empty? ? "https://#{Facter.value(:fqdn)}:8140" : Proxy::Puppet::Plugin.settings.puppet_url
       begin
         URI.parse(url)
       rescue URI::InvalidURIError => e
-        raise ConfigurationError.new("Invalid puppet_url setting: #{e}")
+        raise ::Puppet::Error::ConfigurationError.new("Invalid puppet_url setting: #{e}")
       end
 
-      @ssl_ca   = Proxy::Puppet::Plugin.settings.puppet_ssl_ca.to_s.empty? ? '/var/lib/puppet/ssl/certs/ca.pem' : Proxy::Puppet::Plugin.settings.puppet_ssl_ca
+      @ssl_ca   = Proxy::Puppet::Plugin.settings.puppet_ssl_ca
       @ssl_cert = Proxy::Puppet::Plugin.settings.puppet_ssl_cert.to_s.empty? ? "/var/lib/puppet/ssl/certs/#{certname}.pem" : Proxy::Puppet::Plugin.settings.puppet_ssl_cert
       @ssl_key  = Proxy::Puppet::Plugin.settings.puppet_ssl_key.to_s.empty? ? "/var/lib/puppet/ssl/private_keys/#{certname}.pem" : Proxy::Puppet::Plugin.settings.puppet_ssl_key
-
-      check_file(:puppet_ssl_ca, ssl_ca)
-      check_file(:puppet_ssl_cert, ssl_cert)
-      check_file(:puppet_ssl_key, ssl_key)
     end
-
-    def check_file(name, path)
-      raise ConfigurationError.new("Cannot find #{name} file #{path}") if !File.exist?(path)
-    end
-    private :check_file
 
     def send_request(path)
       uri              = URI.parse(url)
@@ -61,6 +51,17 @@ module Proxy::Puppet
   class EnvironmentsApi < ApiRequest
     def find_environments
       response = send_request('/v2.0/environments')
+      if response.is_a? Net::HTTPOK
+        JSON.load(response.body)
+      else
+        raise ApiError.new("Failed to query Puppet find environments API (#{response.code}): #{response.body}")
+      end
+    end
+  end
+
+  class EnvironmentsApiv3 < ApiRequest
+    def find_environments
+      response = send_request('puppet/v3/environments')
       if response.is_a? Net::HTTPOK
         JSON.load(response.body)
       else

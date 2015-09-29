@@ -8,8 +8,7 @@ require 'dhcp/record'
 class Proxy::DHCPRecordTest < Test::Unit::TestCase
 
   def setup
-    @server = Proxy::DHCP::Server.new("testcase")
-    @subnet = Proxy::DHCP::Subnet.new(@server,"192.168.0.0","255.255.255.0")
+    @subnet = Proxy::DHCP::Subnet.new("192.168.0.0","255.255.255.0")
     @ip = "123.321.123.321"
     @mac = "aa:bb:CC:dd:ee:ff"
     @record = Proxy::DHCP::Record.new(:subnet => @subnet, :ip => @ip, :mac => @mac)
@@ -63,5 +62,4 @@ class Proxy::DHCPRecordTest < Test::Unit::TestCase
   def test_options_should_be_a_hash
     assert_kind_of Hash, @record.options
   end
-
 end

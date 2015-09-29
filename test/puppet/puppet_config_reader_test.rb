@@ -1,5 +1,5 @@
 require 'test_helper'
-require 'puppet_proxy/config_reader'
+require 'puppet_proxy/puppet_config'
 
 class PuppetConfigReaderTest < Test::Unit::TestCase
   def setup
@@ -10,13 +10,8 @@ class PuppetConfigReaderTest < Test::Unit::TestCase
     Proxy::Puppet::ConfigReader.new(@puppet_conf)
   end
 
-  def test_should_initialize
-    assert_kind_of Proxy::Puppet::ConfigReader, build
-  end
-
   def test_get_should_return_section_hash
-    assert_kind_of Hash, build.get
-    assert_equal [:agent, :development, :main, :master, :production], build.get.keys.sort
+    assert_equal Set.new([:agent, :development, :main, :master, :production]), Set.new(build.get.keys)
   end
 
   def test_get_section_contents_hash
@@ -24,5 +19,4 @@ class PuppetConfigReaderTest < Test::Unit::TestCase
     assert_equal [:modulepath], build.get[:production].keys
     assert_equal '/etc/puppet/modules/production:/etc/puppet/modules/common', build.get[:production][:modulepath]
   end
-
 end

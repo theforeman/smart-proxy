@@ -1,15 +1,14 @@
 require 'test_helper'
 require 'puppet_proxy/puppet_plugin'
+require 'puppet_proxy/initializer'
 require 'puppet_proxy/puppet_class'
 require 'puppet_proxy/puppet_cache'
 require 'tmpdir'
 
-class PuppetCacheTest < Test::Unit::TestCase
-
+module PuppetCacheTestSuite
   def setup
-    @classes_cache = ::Proxy::Puppet::MemoryStore.new
-    @timestamps = ::Proxy::Puppet::MemoryStore.new
-    @scanner = ::Proxy::Puppet::PuppetCache.new(::Proxy::Puppet::ClassScanner, @classes_cache, @timestamps)
+    Proxy::Puppet::Plugin.load_test_settings(:puppet_conf => './test/fixtures/puppet.conf')
+    Proxy::Puppet::Initializer.new.reset_puppet
   end
 
   def test_should_refresh_classes_cache_when_dir_is_not_in_cache
@@ -95,5 +94,33 @@ class PuppetCacheTest < Test::Unit::TestCase
     result = @scanner.scan_directory('empty_environment', 'example_env')
 
     assert result.empty?
+  end
+end
+
+if Puppet::PUPPETVERSION.to_i < 4
+  class PuppetCacheWithLegacyParserTest < Test::Unit::TestCase
+    include PuppetCacheTestSuite
+
+    def setup
+      super
+      @classes_cache = ::Proxy::MemoryStore.new
+      @timestamps = ::Proxy::MemoryStore.new
+      @scanner = ::Proxy::Puppet::PuppetCache.new(@classes_cache, @timestamps)
+      @scanner.puppet_class_scanner = ::Proxy::Puppet::ClassScanner.new
+    end
+  end
+end
+
+if Puppet::PUPPETVERSION.to_f >= 3.2
+  class PuppetCacheWithFutureParserTest < Test::Unit::TestCase
+    include PuppetCacheTestSuite
+
+    def setup
+      super
+      @classes_cache = ::Proxy::MemoryStore.new
+      @timestamps = ::Proxy::MemoryStore.new
+      @scanner = ::Proxy::Puppet::PuppetCache.new(@classes_cache, @timestamps)
+      @scanner.puppet_class_scanner = ::Proxy::Puppet::ClassScannerEParser.new
+    end
   end
 end

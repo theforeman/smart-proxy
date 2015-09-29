@@ -23,13 +23,7 @@ Rake::TestTask.new(:test) do |t|
   t.libs << '.'
   t.libs << 'lib'
   t.libs << 'test'
-  files = FileList['test/**/*_test.rb']
-  if PLATFORM =~ /mingw/
-    files = FileList['test/**/server_ms_test*']
-  else
-    files = FileList['test/**/*_test.rb'].delete_if{|f| f =~ /_ms_/}
-  end
-  t.test_files  = files
+  t.test_files = FileList['test/**/*_test.rb']
   t.verbose = true
 end
 

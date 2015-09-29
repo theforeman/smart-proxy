@@ -1,5 +1,5 @@
 require 'resolv'
-require 'open3'
+require 'open3' if RUBY_PLATFORM =~ /mingw/
 
 module Proxy::Dns::Dnscmd
   class Record < ::Proxy::Dns::Record

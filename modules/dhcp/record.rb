@@ -16,7 +16,10 @@ module Proxy::DHCP
       @mac     = validate_mac options[:mac]
       @deleteable = options.delete(:deleteable) if options[:deleteable]
       @options = options
-      @subnet.add_record(self)
+    end
+
+    def subnet_address
+      @subnet.network
     end
 
     def to_s
