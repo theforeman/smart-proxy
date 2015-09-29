@@ -1,5 +1,5 @@
 require 'checks'
-require RbConfig::CONFIG['target_os'] == 'mingw32' && !(RUBY_VERSION =~ /1.(9|8)/) && !(RUBY_VERSION =~ /^2./) ? 'win32/open3' : 'open3'
+require 'open3'
 require 'dhcp/subnet'
 require 'dhcp/record/reservation'
 require 'dhcp/record/lease'
