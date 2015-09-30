@@ -1,4 +1,4 @@
-require 'puppet' if RUBY_PLATFORM =~ /ruby/
+require 'puppet'
 
 module Proxy::Puppet
   class Initializer

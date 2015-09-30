@@ -1,4 +1,4 @@
-require 'augeas' if RUBY_PLATFORM =~ /ruby/
+require 'augeas'
 
 module Proxy::Puppet
   class PuppetConfig
