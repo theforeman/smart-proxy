@@ -1,6 +1,3 @@
-require 'puppet_proxy/initializer'
-require 'puppet_proxy/ssl_configuration_validator'
-
 module Proxy::Puppet
   class Plugin < Proxy::Plugin
     http_rackup_path File.expand_path("http_config.ru", File.expand_path("../", __FILE__))
@@ -14,8 +11,12 @@ module Proxy::Puppet
     validate_readable :puppet_conf
 
     after_activation do
+      require 'puppet_proxy/initializer'
+      require 'puppet_proxy/ssl_configuration_validator'
+
       ::Proxy::Puppet::Initializer.new.reset_puppet
       ::Proxy::Puppet::SslConfigurationValidator.new.validate_ssl_paths!
+
       require 'puppet_proxy/dependency_injection/dependencies'
     end
   end
