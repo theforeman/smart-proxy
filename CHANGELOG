@@ -1,3 +1,63 @@
+2015-10-01	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #12012: missing puppet module dependencies no longer crash smart-proxy on startup
+
+2015-10-01	Fernando Carolo <carolo@corp.globo.com>
+	* Fixes #11997 - DHCP option for NX-OS should be quoted
+
+2015-09-30	Dominic Cleal <dcleal@redhat.com>
+	* refs #11599 - permit Puppet 4.x in Gemfile
+
+2015-09-29	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #11599: introduced support for puppet 4.0 These changes are based on Damien Churchil's PR
+
+2015-09-17	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #11866: first pass at speeding up dhcp (both isc and ms).
+
+2015-09-11	Lukas Zapletal <lzap+git@redhat.com>
+	* Fixes #11318 - HttpDownloads.start_download returns instance
+	* Fixes #11676 - added dhcp_server option
+
+2015-09-04	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* fixes #11653: only display warning message about unavailability of 'SYSLOG' when it was configured
+	* fixes #11654: no longer rely on rubygems to determine rack version
+
+2015-08-28	Lukas Zapletal <lzap+git@redhat.com>
+	* Fixes #11323 - fixed PID writing, interrupt trap and daemon logging
+
+2015-08-25	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #10940: puppetrun works properly now on ruby > 1.8.7
+
+2015-08-07	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #11311: puppet tests no longer fail if /etc/puppet/puppet.conf doesn't exist
+
+2015-08-03	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #11103: tftp tests no longer fail when module config file contains changes.
+	* Fixes #11229: changes in puppet modules are now being detected when listing available puppet classes
+
+2015-07-22	Lukas Zapletal <lzap+git@redhat.com>
+	* Fixes #10259 - Templates are now fully proxied
+
+2015-07-16	Dominic Cleal <dcleal@redhat.com>
+	* fixes #11131 - use consistent timestamps in cache test expectations
+
+2015-07-16	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* fixes #10941: fixed puppet class caching
+
+2015-07-14	Lukas Zapletal <lzap+git@redhat.com>
+	* Fixes #10877 - puppet pinned to 3.x series
+
+2015-07-14	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* fixes #11098: fixed ruby 1.8-specific issues around plugin and provider searches
+
+2015-07-10	Ewoud Kohl van Wijngaarden <ekohlvanwijngaarden@antagonist.nl>
+	* Fixes #11090: fix README filename in the gemspec
+
+2015-07-10	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #7008: dns providers are now plugins
+
+2015-06-26	Dominic Cleal <dcleal@redhat.com>
+	* Bump version to 1.10-develop
+
 2015-06-24	Dmitri Dolguikh <dmitri@appliedlogic.ca>
 	* fixes #10801: fixed spelling of error messages in puppetca module
 	* fixes #10895: moved smart_proxy_chef-specific classes to the plugin itself
