@@ -1,5 +1,5 @@
 require 'resolv'
-require 'win32/open3'
+require 'open3'
 
 module Proxy::Dns::Dnscmd
   class Record < ::Proxy::Dns::Record
