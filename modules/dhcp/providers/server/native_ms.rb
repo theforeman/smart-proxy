@@ -1,5 +1,5 @@
 require 'checks'
-require 'open3' if RUBY_PLATFORM =~ /mingw/
+require 'open3'
 require 'dhcp/subnet'
 require 'dhcp/record/reservation'
 require 'dhcp/record/lease'
