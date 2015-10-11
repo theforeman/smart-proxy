@@ -30,7 +30,10 @@ require 'proxy/request'
 require 'bundler_helper'
 Proxy::BundlerHelper.require_groups(:default)
 
+require 'json'
+require 'rack'
 require 'rack-patch' if Rack.release < "1.3"
+require 'sinatra'
 require 'sinatra-patch'
 require 'sinatra/authorization'
 require 'poodles-fix'

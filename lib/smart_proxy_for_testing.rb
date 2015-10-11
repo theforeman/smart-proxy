@@ -1,5 +1,8 @@
 require 'proxy'
 require 'checks'
+require 'json'
+require 'rack'
+require 'sinatra'
 require 'proxy/log'
 require 'proxy/settings'
 require 'proxy/settings/plugin'
