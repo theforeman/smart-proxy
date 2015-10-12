@@ -17,6 +17,7 @@ module Proxy::Puppet
       ::Proxy::Puppet::Initializer.new.reset_puppet
       ::Proxy::Puppet::SslConfigurationValidator.new.validate_ssl_paths!
 
+      require 'puppet_proxy/dependency_injection/container'
       require 'puppet_proxy/dependency_injection/dependencies'
     end
   end
