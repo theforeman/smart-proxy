@@ -1,6 +1,3 @@
-require 'puppet_proxy/class_scanner'
-require 'puppet_proxy/class_scanner_eparser'
-
 class Proxy::Puppet::PuppetClass
   def initialize name, params = {}
     @klass  = name || raise("Must provide puppet class name")
