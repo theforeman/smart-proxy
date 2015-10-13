@@ -1,5 +1,3 @@
-require 'rake'
-
 Gem::Specification.new do |s|
   s.name = "smart_proxy"
   s.version = File.read(File.join(File.dirname(__FILE__), 'VERSION')).chomp.gsub('-', '.')
@@ -8,20 +6,18 @@ Gem::Specification.new do |s|
   s.homepage = "http://theforeman.org/"
   s.platform = Gem::Platform::RUBY
   s.summary = "Foreman Proxy Agent, manage remote DHCP, DNS, TFTP and Puppet servers"
-  s.files = FileList["{bin,public,config,views,lib,modules}/**/*", "VERSION"].to_a
-  s.default_executable = 'bin/smart_proxy.rb'
+  s.files = (Dir.glob("{bin,public,config,views,lib,modules}/**/*") + ["VERSION"])
+  s.executables << 'smart-proxy'
   s.require_paths = ["lib", "modules"]
-  s.test_files = FileList["{test}/**/*test.rb"].to_a
+  s.test_files = Dir.glob("{test}/**/*test.rb")
   s.license = 'GPLv3'
   s.has_rdoc = true
   s.extra_rdoc_files = ["README.md"]
-  s.add_dependency 'json', '~> 1.8'
-  s.add_dependency 'rack', '~> 1.5'
-  s.add_dependency 'sinatra', '~> 1.4'
-  s.rubyforge_project = 'rake'
+  s.add_dependency 'json' 
+  s.add_dependency 'rack', '>= 1.1', '< 1.6' # ruby 1.8.7 support is broken in rack 1.6 versions < 1.6.4
+  s.add_dependency 'sinatra'
   s.description = <<EOF
 Foreman Proxy is used via The Foreman Project, it allows Foreman to manage
 Remote DHCP, DNS, TFTP and Puppet servers via a REST API
 EOF
 end
-
