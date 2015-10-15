@@ -58,7 +58,7 @@ module Proxy::Pluggable
       dependencies.each do |dep|
         plugin = ::Proxy::Plugins.find_plugin(dep.name)
         raise ::Proxy::PluginNotFound, "Plugin '#{dep.name}' required by plugin '#{plugin_name}' could not be found." unless plugin
-        unless ::Gem::Dependency.new('', dep.version).match?('', plugin.version)
+        unless ::Gem::Dependency.new('', dep.version).match?('', self.class.cleanup_version(plugin.version))
           raise ::Proxy::PluginVersionMismatch, "Available version '#{plugin.version}' of plugin '#{dep.name}' doesn't match version '#{dep.version}' required by plugin '#{plugin_name}'"
         end
       end
@@ -77,7 +77,7 @@ module Proxy::Pluggable
     end
 
     def requires(plugin_name, version_spec)
-      self.dependencies << ::Proxy::Dependency.new(plugin_name, version_spec.chomp('-develop'))
+      self.dependencies << ::Proxy::Dependency.new(plugin_name, cleanup_version(version_spec))
     end
 
     def bundler_group(name)
@@ -123,6 +123,10 @@ module Proxy::Pluggable
       # until after module's Plugin/Provider class has been loaded (to preserve order-independence of statements used in
       # the class body of the Plugin.)
       settings.each { |setting| validators << ::Proxy::PluginValidators::FileReadable.new(self, setting) }
+    end
+
+    def cleanup_version(version)
+      version.chomp('-develop').sub(/\-RC\d+$/, '')
     end
   end
 end

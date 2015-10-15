@@ -69,14 +69,22 @@ class PluginTest < Test::Unit::TestCase
   end
 
   # version number follows core (non-release) standard with -develop, which has special handling
-  class TestPlugin3 < Proxy::Plugin; plugin :test3, '1.5-develop'; end
-  class TestPlugin4 < Proxy::Plugin; plugin :test4, '1.0'; requires :test3, '~> 1.5.0'; end
+  class TestPlugin3a < Proxy::Plugin; plugin :test3a, '1.5-develop'; end
+  class TestPlugin3b < Proxy::Plugin; plugin :test3b, '1.10.0-RC1'; end
+  class TestPlugin4a < Proxy::Plugin; plugin :test4a, '1.0'; requires :test3a, '~> 1.5.0'; end
+  class TestPlugin4b < Proxy::Plugin; plugin :test4b, '1.0'; requires :test3b, '~> 1.10.0'; end
   def test_satisfied_dependency
     assert_nothing_raised do
-      TestPlugin3.new.validate_dependencies!(TestPlugin3.dependencies)
+      TestPlugin3a.new.validate_dependencies!(TestPlugin3a.dependencies)
     end
     assert_nothing_raised do
-      TestPlugin4.new.validate_dependencies!(TestPlugin4.dependencies)
+      TestPlugin3b.new.validate_dependencies!(TestPlugin3b.dependencies)
+    end
+    assert_nothing_raised do
+      TestPlugin4a.new.validate_dependencies!(TestPlugin4a.dependencies)
+    end
+    assert_nothing_raised do
+      TestPlugin4b.new.validate_dependencies!(TestPlugin4b.dependencies)
     end
   end
 
