@@ -54,7 +54,7 @@ module Proxy::DHCP
       statements += ztp_options_statements(options)
       statements += poap_options_statements(options)
 
-      omcmd "set statements = \"#{statements.join(" ")}\""      unless statements.empty?
+      omcmd "set statements = \"#{statements.join(' ')}\""      unless statements.empty?
       omcmd "create"
       omcmd("disconnect", "Added DHCP reservation for #{record}")
       record
@@ -108,7 +108,6 @@ module Proxy::DHCP
 
     def initialize_memory_store_with_dhcp_records(records)
       records.each do |record|
-
         case record
         when Proxy::DHCP::Reservation
           if record.options[:deleted]
@@ -149,11 +148,26 @@ module Proxy::DHCP
 
     def parse_config_for_subnets
       ret_val = []
-
-      @config.scan(/subnet\s+([\d\.]+)\s+netmask\s+([\d\.]+)/) do |match|
-        next unless managed_subnet? "#{match[0]}/#{match[1]}"
-
-        ret_val << Proxy::DHCP::Subnet.new(match[0], match[1])
+      # Extract subnets config block
+      @config.scan(/subnet\s+([\d\.]+)\s+netmask\s+([\d\.]+)\s*{([\w|;|\.|,|\-|\s]*)}/) do |match|
+        network, netmask, subnet_config_lines = match
+        options = {}
+        if subnet_config_lines
+          # Split each config lines and scan for some interesting options (dns, gateway, dhcp range) used in foreman subnets.
+          # Some other options can be added later, see manpages dhcpd.conf(5) or dhcpd-options(5) for available ISC DHCP subnet options.
+          subnet_config_lines.split(';').each do |option|
+            case option
+              when /option\s+routers\s+[\d\.]+/
+                options[:routers] = get_ip_list_from_config_line(option)
+              when /option\s+domain\-name\-servers\s+[\d\.]+/
+                options[:domain_name_servers] = get_ip_list_from_config_line(option)
+              when /range\s+[\d\.]+\s+[\d\.]+/
+                # get IP addr range used for this subnet
+                options[:range] = get_range_from_config_line(option)
+            end
+          end
+        end
+        ret_val << Proxy::DHCP::Subnet.new(network, netmask, options.reject{|key, value| value.nil? || value.empty? })
       end
 
       ret_val
@@ -288,9 +302,7 @@ module Proxy::DHCP
       logger.debug "Reading config file #{file}"
       config = []
       File.readlines(file).each do |line|
-
-        line.strip! # remove left and right whitespace
-        next if line.start_with?("#") # remove comments
+        line = line.split('#').first.strip # remove comments, left and right whitespace
         next if line.empty? # remove blank lines
 
         if /^include\s+"(.*)"\s*;/ =~ line
@@ -408,5 +420,15 @@ module Proxy::DHCP
       end
       statements
     end
+  end
+
+  # Get all IPv4 addresses provided by the ISC DHCP config line following the pattern "my-config-option-or-directive IPv4_ADDR[, IPv4_ADDR] [...];" and return an array.
+  def get_ip_list_from_config_line(option_line)
+    option_line.scan(/\s*((?:(?:\d{1,3}\.){3}\d{1,3})\s*(?:,\s*(?:(?:\d{1,3}\.){3}\d{1,3})\s*)*)/).first.first.gsub(/\s/,'').split(",").reject{|value| value.nil? || value.empty? }
+  end
+
+  # Get IPv4 range provided by the ISC DHCP config line following the pattern "range IPv4_ADDR IPv4_ADDR;" and return an array.
+  def get_range_from_config_line(range_line)
+    range_line.scan(/\s*((?:\d{1,3}\.){3}\d{1,3})\s*((?:\d{1,3}\.){3}\d{1,3})\s*/).first
   end
 end

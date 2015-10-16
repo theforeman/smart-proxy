@@ -53,9 +53,9 @@ module Proxy::DHCP
 
     def find_record(subnet_address, an_address)
       @service.find_host_by_ip(subnet_address, an_address) ||
-          @service.find_host_by_mac(subnet_address, an_address) ||
-          @service.find_lease_by_ip(subnet_address, an_address) ||
-          @service.find_lease_by_mac(subnet_address, an_address)
+        @service.find_host_by_mac(subnet_address, an_address) ||
+        @service.find_lease_by_ip(subnet_address, an_address) ||
+        @service.find_lease_by_mac(subnet_address, an_address)
     end
 
     def unused_ip(subnet, mac_address, from_address, to_address)
