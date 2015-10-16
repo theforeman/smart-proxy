@@ -80,10 +80,54 @@ class ServerIscTest < Test::Unit::TestCase
   end
 
   def test_loadSubnets_loads_managed_subnets
-    subnets = @dhcp.loadSubnets
+    subnets = @dhcp.parse_config_for_subnets
+    assert_equal 4, subnets.size
+  end
 
-    assert_equal 1, subnets.size
-    assert_equal "192.168.122.0", subnets.first.network
+  def test_managed_subnets_options
+    subnets = @dhcp.parse_config_for_subnets
+    assert_not_nil subnets[0].options
+    assert_not_nil subnets[1].options
+    assert_not_nil subnets[2].options
+    assert_equal Hash.new, subnets[3].options
+  end
+
+  def test_managed_subnets_network_addresses
+    subnets = @dhcp.parse_config_for_subnets
+    assert_equal "192.168.122.0", subnets[0].network
+    assert_equal "192.168.123.0", subnets[1].network
+    assert_equal "192.168.124.0", subnets[2].network
+    assert_equal "192.168.1.0", subnets[3].network
+  end
+
+  def test_managed_subnets_netmask
+    subnets = @dhcp.parse_config_for_subnets
+    assert_equal "255.255.255.0", subnets[0].netmask
+    assert_equal "255.255.255.192", subnets[1].netmask
+    assert_equal "255.255.255.0", subnets[2].netmask
+    assert_equal "255.255.255.128", subnets[3].netmask
+  end
+
+  def test_managed_subnets_router_addresses
+    subnets = @dhcp.parse_config_for_subnets
+    assert_equal ["192.168.122.250"], subnets[0].options[:routers]
+    assert_equal nil, subnets[0].options[:routers][1]
+    assert_equal ["192.168.123.1"],   subnets[1].options[:routers]
+    assert_equal ["192.168.124.1", "192.168.124.2"],   subnets[2].options[:routers]
+  end
+
+  def test_managed_subnets_domain_name_servers
+    subnets = @dhcp.parse_config_for_subnets
+    assert_equal nil, subnets[0].options[:domain_name_servers]
+    assert_equal ["192.168.123.1"], subnets[1].options[:domain_name_servers]
+    assert_equal ["192.168.123.1", "192.168.122.250"], subnets[2].options[:domain_name_servers]
+  end
+
+  def test_managed_subnets_range
+    subnets = @dhcp.parse_config_for_subnets
+    assert_equal nil, subnets[0].options[:range]
+    assert_equal ["192.168.123.2", "192.168.123.62"], subnets[1].options[:range]
+    assert_equal nil, subnets[2].options[:range]
   end
 
   def test_parse_config_and_leases
@@ -93,5 +137,18 @@ class ServerIscTest < Test::Unit::TestCase
     @dhcp.loadSubnetData(subnet)
 
     assert_equal 7, @subnet_service.all_hosts("192.168.122.0").size + @subnet_service.all_leases("192.168.122.0").size
+  end
+
+  def test_get_ip_list_from_config_line
+    assert_equal ["192.168.1.1"], @dhcp.get_ip_list_from_config_line("option foo-bar 192.168.1.1")
+    assert_equal ["192.168.1.1", "192.168.20.10"], @dhcp.get_ip_list_from_config_line("option foo-bar 192.168.1.1,192.168.20.10")
+    assert_equal ["192.168.1.1", "192.168.20.10", "192.168.130.100"], @dhcp.get_ip_list_from_config_line("option foo-bar 192.168.1.1, 192.168.20.10,192.168.130.100")
+    assert_equal ["192.168.1.1", "192.168.20.10", "192.168.130.100", "10.1.1.1"], @dhcp.get_ip_list_from_config_line("option foo-bar 192.168.1.1, 192.168.20.10,192.168.130.100,      10.1.1.1")
+  end
+
+  def test_get_range_from_config_line
+    assert_equal ["192.168.1.1", "192.168.1.254"], @dhcp.get_range_from_config_line("range 192.168.1.1 192.168.1.254")
+    assert_equal ["192.168.10.1", "192.168.10.8"], @dhcp.get_range_from_config_line("range 192.168.10.1 192.168.10.8")
+    assert_equal ["10.16.1.1", "10.16.1.254"], @dhcp.get_range_from_config_line("range 10.16.1.1 10.16.1.254")
   end
 end

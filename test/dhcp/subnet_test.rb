@@ -5,7 +5,6 @@ require 'dhcp/subnet'
 require 'dhcp/record/reservation'
 
 class Proxy::DHCPSubnetTest < Test::Unit::TestCase
-
   def setup
     @network = "192.168.0.0"
     @netmask = "255.255.255.0"
@@ -23,6 +22,39 @@ class Proxy::DHCPSubnetTest < Test::Unit::TestCase
   def test_should_not_save_invalid_network_addresses
     assert_raise Proxy::Validations::Error do
       Proxy::DHCP::Subnet.new("1..1.1", @netmask)
+    end
+  end
+
+  def test_should_not_save_invalid_router_addresses
+    assert_raise Proxy::Validations::Error do
+      Proxy::DHCP::Subnet.new(@network, @netmask, :routers => ["192.168..1"])
+    end
+  end
+
+  def test_should_not_save_invalid_domain_name_servers_addresses
+    assert_raise Proxy::Validations::Error do
+      Proxy::DHCP::Subnet.new(@network, @netmask, :domain_name_servers => ["192.168.1.."])
+    end
+    assert_raise Proxy::Validations::Error do
+      Proxy::DHCP::Subnet.new(@network, @netmask, :domain_name_servers => ["192.168.1.1", "192.1068.13"])
+    end
+  end
+
+  def test_should_not_save_invalid_range
+    assert_raise Proxy::Validations::Error do
+      Proxy::DHCP::Subnet.new(@network, @netmask, :range => ["192.168.0..", "192.168.0.50"])
+    end
+    assert_raise Proxy::Validations::Error do
+      Proxy::DHCP::Subnet.new(@network, @netmask, :range => ["192.168.0.3", "192.168.0.."])
+    end
+    assert_raise Proxy::DHCP::Error do
+      Proxy::DHCP::Subnet.new(@network, @netmask, :range => ["192.168.0.3", "192.168.1.100"])
+    end
+    assert_raise Proxy::DHCP::Error do
+      Proxy::DHCP::Subnet.new(@network, @netmask, :range => ["192.168.1.3", "192.168.0.100"])
+    end
+    assert_raise Proxy::DHCP::Error do
+      Proxy::DHCP::Subnet.new(@network, @netmask, :range => ["192.168.0.100", "192.168.0.3"])
     end
   end
 

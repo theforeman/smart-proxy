@@ -37,8 +37,31 @@ class DhcpApiTest < Test::Unit::TestCase
     get "/"
     assert last_response.ok?, "Last response was not ok: #{last_response.status} #{last_response.body}"
     data = JSON.parse(last_response.body)
-    expected = [{"network"=>"192.168.122.0", "netmask"=>"255.255.255.0"}]
-    assert_equal expected, data
+    expected = [{
+        "network"=>"192.168.122.0",
+        "netmask"=>"255.255.255.0",
+        "options"=>{"routers"=>["192.168.122.250"]}
+      },{
+        "network"=>"192.168.123.0",
+        "netmask"=>"255.255.255.192",
+        "options"=>{
+          "routers"=>["192.168.123.1"],
+          "domain_name_servers"=>["192.168.123.1"],
+          "range"=>["192.168.123.2", "192.168.123.62"]
+        }
+      },{
+        "network"=>"192.168.124.0",
+        "netmask"=>"255.255.255.0",
+        "options"=>{
+          "routers"=>["192.168.124.1", "192.168.124.2"],
+          "domain_name_servers"=>["192.168.123.1", "192.168.122.250"]
+        }
+      },{
+         "network"=>"192.168.1.0",
+         "netmask"=>"255.255.255.128",
+         "options" => {}
+    }].to_set
+    assert_equal expected, data.to_set
   end
 
   def test_api_02_get_network

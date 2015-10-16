@@ -22,7 +22,7 @@ class Proxy::DhcpApi < ::Sinatra::Base
         require 'dhcp/providers/server/virsh'
         @server = Proxy::DHCP::Virsh.instance_with_default_parameters
       else
-        log_halt 400, "Unrecognized or missing DHCP vendor type: #{Proxy::DhcpPlugin.settings.dhcp_vendor.nil? ? "MISSING" : Proxy::DhcpPlugin.settings.dhcp_vendor}"
+        log_halt 400, "Unrecognized or missing DHCP vendor type: #{Proxy::DhcpPlugin.settings.dhcp_vendor.nil? ? 'MISSING' : Proxy::DhcpPlugin.settings.dhcp_vendor}"
       end
 
       @server.loadSubnets
@@ -49,7 +49,7 @@ class Proxy::DhcpApi < ::Sinatra::Base
         content_type :json
 
         log_halt 404, "No subnets found on server @{name}" unless @server.subnets
-        @server.subnets.map{|s| {:network => s.network, :netmask => s.netmask }}.to_json
+        @server.subnets.map{|s| {:network => s.network, :netmask => s.netmask, :options => s.options}}.to_json
       else
         erb :"dhcp/index"
       end
