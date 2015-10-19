@@ -3,9 +3,7 @@ require 'test_helper'
 class TestDependencyOne; end
 class TestDependencyTwo; end
 
-class TestContainer
-  include Proxy::DependencyInjection::Container
-end
+class TestContainer < Proxy::DependencyInjection::Container; end
 
 module TestInjectors
   include Proxy::DependencyInjection::Accessors

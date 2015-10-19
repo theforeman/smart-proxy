@@ -1,22 +1,25 @@
+require 'dns_common/dns_common'
+
 module Proxy::Dns
   class Api < ::Sinatra::Base
+    extend Proxy::Dns::DependencyInjection::Injectors
+    inject_attr :dns_provider, :server
+
     helpers ::Proxy::Helpers
     authorize_with_trusted_hosts
     authorize_with_ssl_client
 
-    def dns_setup(opts)
-      @server = ::Proxy::ProviderFactory.get_provider(Proxy::Dns::Plugin.settings.use_provider, opts)
-    rescue => e
-      log_halt 400, e
-    end
-
     post "/?" do
-      fqdn  = params[:fqdn]
+      fqdn = params[:fqdn]
       value = params[:value]
-      type  = params[:type]
+      type = params[:type].upcase unless params[:type].nil?
+
+      log_halt(400, "'create' requires fqdn, value, and type parameters") if fqdn.nil? || value.nil? || type.nil?
+      log_halt(400, "unrecognized 'type' parameter: #{type}") unless type == 'A' || type == 'PTR'
+
       begin
-        dns_setup(:fqdn => fqdn, :value => value, :type => type)
-        @server.create
+        server.create_a_record(fqdn, value) if type == 'A'
+        server.create_ptr_record(fqdn, value) if type == 'PTR'
       rescue Proxy::Dns::Collision => e
         log_halt 409, e
       rescue Exception => e
@@ -25,16 +28,12 @@ module Proxy::Dns
     end
 
     delete "/:value" do
-      case params[:value]
-      when /\.(in-addr|ip6)\.arpa$/
-        type = "PTR"
-        value = params[:value]
-      else
-        fqdn = params[:value]
-      end
+      log_halt(400, "'remove' requires value parameter") if params[:value].nil?
+      type = params[:value].match(/\.(in-addr|ip6)\.arpa$/) ? "PTR" : "A"
+
       begin
-        dns_setup(:fqdn => fqdn, :value => value, :type => type)
-        @server.remove
+        server.remove_a_record(params[:value]) if type == 'A'
+        server.remove_ptr_record(params[:value]) if type == 'PTR'
       rescue Proxy::Dns::NotFound => e
         log_halt 404, e
       rescue => e

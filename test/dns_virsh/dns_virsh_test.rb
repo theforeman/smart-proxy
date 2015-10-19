@@ -3,12 +3,17 @@ require 'dns_virsh/dns_virsh_plugin'
 require 'dns_virsh/dns_virsh_main'
 
 class DnsVirshTest < Test::Unit::TestCase
+  def test_virsh_provider_initialization
+    ::Proxy::SETTINGS.stubs(:virsh_network).returns('some_network')
+    server = Proxy::Dns::Virsh::Record.new
+    assert_equal "some_network", server.network
+  end
+
   def test_virsh_entry_not_exists_returns_proxy_dns_notfound
     Proxy::Dns::Virsh::Record.any_instance.stubs(:dump_xml).returns('<network><name>default</name></network>')
-    server = Proxy::Dns::Virsh::Record.new(:fqdn=>'not_existing.example.com', :value=>'127.13.0.2',
-                                   :type=>'A', :virsh_network=>'default')
+    server = Proxy::Dns::Virsh::Record.new('default')
     assert_raise Proxy::Dns::NotFound do
-      server.remove
+      server.remove_a_record('not_existing.example.com')
     end
   end
 
@@ -31,10 +36,9 @@ class DnsVirshTest < Test::Unit::TestCase
 </network>
 XMLRESPONSE
     Proxy::Dns::Virsh::Record.any_instance.stubs(:dump_xml).returns(xml_response)
-    server = Proxy::Dns::Virsh::Record.new(:fqdn=>'not_existing.example.com', :value=>'127.13.0.2',
-                                   :type=>'A', :virsh_network=>'default')
+    server = Proxy::Dns::Virsh::Record.new("default")
     server.expects(:escape_for_shell).at_least(2).returns(true)
     server.expects(:virsh).returns('Updated')
-    assert server.remove
+    assert server.remove_a_record('not_existing.example.com')
   end
 end
