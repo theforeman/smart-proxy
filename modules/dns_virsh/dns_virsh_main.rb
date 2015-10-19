@@ -1,5 +1,6 @@
 require "proxy/virsh"
 require 'rexml/document'
+require 'dns_common/dns_common'
 
 module Proxy::Dns::Virsh
   class Record < ::Proxy::Dns::Record
@@ -7,44 +8,37 @@ module Proxy::Dns::Virsh
     include Proxy::Util
     include Proxy::Virsh
 
-    def self.record(attrs = {})
-      new(attrs.merge(:virsh_network => ::Proxy::SETTINGS.virsh_network))
+    def initialize(a_network = nil)
+      @network = a_network || ::Proxy::SETTINGS.virsh_network
+      raise "DNS virsh provider needs 'virsh_network' option" unless @network
+      super(nil, nil)
     end
 
-
-    def initialize options = {}
-      @network = options[:virsh_network]
-      raise "DNS virsh provider needs 'virsh_network' option" unless network
-      super(options)
-    end
-
-    def create
-      if @type == 'A'
-        result = virsh_update_dns 'add-last', @fqdn, @value
-        if result =~ /^Updated/
-          return true
-        else
-          raise Proxy::Dns::Error.new("DNS update error: #{result}")
-        end
+    def create_a_record(fqdn, ip)
+      result = virsh_update_dns 'add-last', fqdn, ip
+      if result =~ /^Updated/
+        return true
       else
-        logger.warn "not creating #{@type} record for #{@fqdn} (unsupported)"
+        raise Proxy::Dns::Error.new("DNS update error: #{result}")
       end
     end
 
-    def remove
-      if @type == 'A'
-        result = virsh_update_dns 'delete', @fqdn, find_ip_for_host(@fqdn)
-        if result =~ /^Updated/
-          return true
-        else
-          raise Proxy::Dns::Error.new("DNS update error: #{result}")
-        end
+    def create_ptr_record(fqdn, ip)
+      logger.warn "not creating PTR record for #{fqdn} (unsupported)"
+    end
+
+    def remove_a_record(fqdn)
+      result = virsh_update_dns 'delete', fqdn, find_ip_for_host(fqdn)
+      if result =~ /^Updated/
+        return true
       else
-        logger.warn "not deleting #{@type} record for #{@fqdn} (unsupported)"
+        raise Proxy::Dns::Error.new("DNS update error: #{result}")
       end
     end
 
-    private
+    def remove_ptr_record(ip)
+      logger.warn "not deleting PTR record for #{ip} (unsupported)"
+    end
 
     def find_ip_for_host host
       begin
@@ -73,6 +67,5 @@ module Proxy::Dns::Virsh
     rescue Proxy::Virsh::Error => e
       raise Proxy::Dns::Error, "Failed to update DNS: #{e}"
     end
-
   end
 end

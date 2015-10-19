@@ -1,4 +1,4 @@
-module Proxy::Puppet
+module Proxy::Dns
   module DependencyInjection
     class Container < Proxy::DependencyInjection::Container; end
 

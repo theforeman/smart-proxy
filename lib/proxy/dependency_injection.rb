@@ -24,35 +24,26 @@ module Proxy::DependencyInjection
     end
   end
 
-  module Container
-    def self.included(base)
-      base.send(:include, InstanceMethods)
-      base.send(:extend, ClassMethods)
+  class Container
+    def dependencies
+      @dependencies ||= {}
     end
 
-    module InstanceMethods
-      def dependencies
-        @dependencies ||= {}
-      end
-
-      def add_dependency(var_name, a_wrapper)
-        dependencies[var_name] = a_wrapper
-      end
-
-      def get_dependency(var_name)
-        raise "Dependency '#{var_name}' is undefined" unless dependencies.key?(var_name)
-        dependencies[var_name]
-      end
-
-      def container_instance
-        self
-      end
+    def add_dependency(var_name, a_wrapper)
+      dependencies[var_name] = a_wrapper
     end
 
-    module ClassMethods
-      def instance
-        @@instance ||= new
-      end
+    def get_dependency(var_name)
+      raise "Dependency '#{var_name}' is undefined" unless dependencies.key?(var_name)
+      dependencies[var_name]
+    end
+
+    def container_instance
+      self
+    end
+
+    def self.instance
+      @@instance ||= new
     end
   end
 

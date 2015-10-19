@@ -1,65 +1,55 @@
 require 'resolv'
+require 'dns_common/dns_common'
 
 module Proxy::Dns::Nsupdate
   class Record < ::Proxy::Dns::Record
 
     include Proxy::Log
     include Proxy::Util
-    attr_reader :resolver
 
-    def self.record(attrs = {})
-      new(attrs.merge(:server => ::Proxy::Dns::Nsupdate::Plugin.settings.dns_server,
-                      :ttl => ::Proxy::Dns::Plugin.settings.dns_ttl))
+    def initialize(a_server = nil, a_ttl = nil)
+      super(a_server || ::Proxy::Dns::Nsupdate::Plugin.settings.dns_server,
+            a_ttl || ::Proxy::Dns::Plugin.settings.dns_ttl)
     end
 
-    def initialize options = {}
-      raise "Unable to find Key file - check your dns_key settings" unless Proxy::Dns::Nsupdate::Plugin.settings.dns_key.nil? || File.exist?(Proxy::Dns::Nsupdate::Plugin.settings.dns_key)
-      super(options)
+    def create_a_record(fqdn, ip)
+      do_create(fqdn, ip, "A")
     end
 
-    # create({ :fqdn => "node01.lab", :value => "192.168.100.2"}
-    # create({ :fqdn => "node01.lab", :value => "3.100.168.192.in-addr.arpa",
-    #          :type => "PTR"}
-    def create
-      nsupdate "connect"
+    def create_ptr_record(fqdn, ip)
+      do_create(ip, fqdn, "PTR")
+    end
 
-      @resolver = Resolv::DNS.new(:nameserver => @server)
-      case @type
-        when "A"
-          if ip = dns_find(@fqdn)
-            raise(Proxy::Dns::Collision, "#{@fqdn} is already used by #{ip}") unless ip == @value
-          else
-            nsupdate "update add #{@fqdn}.  #{@ttl} #{@type} #{@value}"
-          end
-        when "PTR"
-          if name = dns_find(@value)
-            raise(Proxy::Dns::Collision, "#{@value} is already used by #{name}") unless name == @fqdn
-          else
-            nsupdate "update add #{@value}.  #{@ttl} IN #{@type} #{@fqdn}"
-          end
+    def do_create(id, value, type)
+      nsupdate_connect
+
+      if found = dns_find(id)
+        raise(Proxy::Dns::Collision, "#{id} is already used by #{found}") unless found == value
+      else
+        nsupdate "update add #{id}. #{@ttl} #{type} #{value}"
       end
-      nsupdate "disconnect"
+
+      nsupdate_disconnect
     ensure
       @om.close unless @om.nil? || @om.closed?
     end
 
-    # remove({ :fqdn => "node01.lab", :value => "192.168.100.2"}
-    def remove
-      @resolver = Resolv::DNS.new(:nameserver => @server)
-
-      nsupdate "connect"
-      case @type
-        when "A"
-          raise Proxy::Dns::NotFound.new("Cannot find DNS entry for #{@fqdn}") unless dns_find(@fqdn)
-          nsupdate "update delete #{@fqdn} #{@type}"
-        when "PTR"
-          raise Proxy::Dns::NotFound.new("Cannot find DNS entry for #{@value}") unless dns_find(@value)
-          nsupdate "update delete #{@value} #{@type}"
-      end
-      nsupdate "disconnect"
+    def remove_a_record(fqdn)
+      do_remove(fqdn, "A")
     end
 
-    protected
+    def remove_ptr_record(ip)
+      do_remove(ip, "PTR")
+    end
+
+    def do_remove(id, type)
+      nsupdate_connect
+
+      raise Proxy::Dns::NotFound.new("Cannot find DNS entry for #{id}") unless dns_find(id)
+      nsupdate "update delete #{id} #{type}"
+
+      nsupdate_disconnect
+    end
 
     def nsupdate_args
       args = ""
@@ -67,34 +57,33 @@ module Proxy::Dns::Nsupdate
       args
     end
 
-    def nsupdate cmd
-      status = nil
-      if cmd == "connect"
-        find_nsupdate if @nsupdate.nil?
-        nsupdate_cmd = "#{@nsupdate} #{nsupdate_args}"
-        logger.debug "running #{nsupdate_cmd}"
-        @om = IO.popen(nsupdate_cmd, "r+")
-        logger.debug "nsupdate: executed - server #{@server}"
-        @om.puts "server #{@server}"
-      elsif cmd == "disconnect"
-        @om.puts "send"
-        @om.puts "answer"
-        @om.close_write
-        status = @om.readlines
-        @om.close
-        @om = nil # we cannot serialize an IO object, even if closed.
-        # TODO Parse output for errors!
-        if !status.empty? && status[1] !~ /status: NOERROR/
-          logger.debug "nsupdate: errors\n" + status.join("\n")
-          raise Proxy::Dns::Error.new("Update errors: #{status.join("\n")}")
-        end
-      else
-        logger.debug "nsupdate: executed - #{cmd}"
-        @om.puts cmd
+    def nsupdate_connect
+      find_nsupdate if @nsupdate.nil?
+      nsupdate_cmd = "#{@nsupdate} #{nsupdate_args}"
+      logger.debug "running #{nsupdate_cmd}"
+      @om = IO.popen(nsupdate_cmd, "r+")
+      logger.debug "nsupdate: executed - server #{@server}"
+      @om.puts "server #{@server}"
+    end
+
+    def nsupdate_disconnect
+      @om.puts "send"
+      @om.puts "answer"
+      @om.close_write
+      status = @om.readlines
+      @om.close
+      @om = nil # we cannot serialize an IO object, even if closed.
+      # TODO Parse output for errors!
+      if !status.empty? && status[1] !~ /status: NOERROR/
+        logger.debug "nsupdate: errors\n" + status.join("\n")
+        raise Proxy::Dns::Error.new("Update errors: #{status.join("\n")}")
       end
     end
 
-    private
+    def nsupdate cmd
+      logger.debug "nsupdate: executed - #{cmd}"
+      @om.puts cmd
+    end
 
     def find_nsupdate
       @nsupdate = which("nsupdate")
@@ -102,16 +91,6 @@ module Proxy::Dns::Nsupdate
         logger.warn "unable to find nsupdate binary, maybe missing bind-utils package?"
         raise "unable to find nsupdate binary"
       end
-    end
-
-    def dns_find key
-      if match = key.match(/(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/)
-        resolver.getname(match[1..4].reverse.join(".")).to_s
-      else
-        resolver.getaddress(key).to_s
-      end
-    rescue Resolv::ResolvError
-      false
     end
   end
 end

@@ -36,6 +36,7 @@ module Proxy::Pluggable
     def validate!
       validate_dependencies!(self.class.dependencies)
       validate_prerequisites_enabled!(self.class.initialize_after)
+      execute_validators(self.class.plugin_default_settings.keys.map {|k| ::Proxy::PluginValidators::Presence.new(self.class, k)})
       execute_validators(self.class.validators)
     end
 
@@ -66,14 +67,12 @@ module Proxy::Pluggable
   end
 
   module ClassMethods
-    attr_reader :plugin_name, :version, :after_activation_blk, :plugin_default_settings, :bundler_group_name
+    attr_reader :plugin_name, :version, :after_activation_blk, :bundler_group_name
+
+    # Methods below define DSL for defining plugins
 
     def after_activation(&blk)
       @after_activation_blk = blk
-    end
-
-    def dependencies
-      @dependencies ||= []
     end
 
     def requires(plugin_name, version_spec)
@@ -100,10 +99,6 @@ module Proxy::Pluggable
       @plugin_default_settings.merge!(a_hash)
     end
 
-    def settings
-      @settings ||= Proxy::Settings.load_plugin_settings(plugin_default_settings, settings_file)
-    end
-
     def initialize_after(*module_names)
       @initialize_after ||= []
       if module_names.empty?
@@ -114,15 +109,33 @@ module Proxy::Pluggable
       end
     end
 
-    def validators
-      @validators ||= []
-    end
-
     def validate_readable(*settings)
       # Passing in plugin class and setting name is a bit awkward, but we need to delay the loading of module settings
       # until after module's Plugin/Provider class has been loaded (to preserve order-independence of statements used in
       # the class body of the Plugin.)
       settings.each { |setting| validators << ::Proxy::PluginValidators::FileReadable.new(self, setting) }
+    end
+
+    def validate_presence(*settings)
+      settings.each { |setting| validators << ::Proxy::PluginValidators::Presence.new(self, setting) }
+    end
+
+    # End of DSL
+
+    def dependencies
+      @dependencies ||= []
+    end
+
+    def plugin_default_settings
+      @plugin_default_settings ||= {}
+    end
+
+    def settings
+      @settings ||= Proxy::Settings.load_plugin_settings(plugin_default_settings, settings_file)
+    end
+
+    def validators
+      @validators ||= []
     end
 
     def cleanup_version(version)

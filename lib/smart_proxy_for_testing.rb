@@ -27,11 +27,12 @@ Proxy::SETTINGS = ::Proxy::Settings::Global.new(:log_file => './logs/test.log', 
 Proxy::VERSION = File.read(File.join(File.dirname(__FILE__), '../VERSION')).chomp
 
 ::Sinatra::Base.set :run, false
+::Sinatra::Base.register ::Sinatra::Authorization
 
-class ::Proxy::Plugin
-  ::Sinatra::Base.register ::Sinatra::Authorization
-
-  def self.load_test_settings(a_hash)
-    @settings = ::Proxy::Settings::Plugin.new(plugin_default_settings, a_hash)
+module ::Proxy::Pluggable
+  module ClassMethods
+    def load_test_settings(a_hash)
+      @settings = ::Proxy::Settings::Plugin.new(plugin_default_settings, a_hash)
+    end
   end
 end

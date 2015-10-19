@@ -1,65 +1,49 @@
 require 'resolv'
 require 'open3'
+require 'dns_common/dns_common'
 
 module Proxy::Dns::Dnscmd
   class Record < ::Proxy::Dns::Record
     include Proxy::Log
     include Proxy::Util
-    attr_reader :resolver
 
-    def self.record(attrs = {})
-      new(attrs.merge(:server => ::Proxy::Dns::Dnscmd::Plugin.settings.dns_server,
-                      :ttl => ::Proxy::Dns::Plugin.settings.dns_ttl))
+    def initialize(a_server = nil, a_ttl = nil)
+      super(a_server || ::Proxy::Dns::Dnscmd::Plugin.settings.dns_server,
+            a_ttl || ::Proxy::Dns::Plugin.settings.dns_ttl)
     end
 
-    def initialize options = {}
-      super(options)
-    end
-
-    # create({ :fqdn => "node01.lab", :value => "192.168.100.2"}
-    # create({ :fqdn => "node01.lab", :value => "3.100.168.192.in-addr.arpa",
-    #          :type => "PTR"}
-    def create
-      @resolver = Resolv::DNS.new(:nameserver => @server)
-      case @type
-        when "A"
-          if ip = dns_find(@fqdn)
-            raise(Proxy::Dns::Collision, "#{@fqdn} is already used by #{ip}") unless ip == @value
-          else
-            zone = @fqdn.sub(/[^.]+./,'')
-            msg = "Added DNS entry #{@fqdn} => #{@value}"
-            cmd = "/RecordAdd #{zone} #{@fqdn}. A #{@value}"
-            execute(cmd, msg)
-          end
-        when "PTR"
-          if name = dns_find(@value)
-            raise(Proxy::Dns::Collision, "#{@value} is already used by #{name}") unless name == @fqdn
-          else
-            # TODO: determine reverse zone names, #4025
-            true
-          end
+    def create_a_record(fqdn, ip)
+      if found = dns_find(fqdn)
+        raise(Proxy::Dns::Collision, "#{fqdn} is already used by #{found}") if found != ip
+      else
+        zone = fqdn.sub(/[^.]+./,'')
+        msg = "Added DNS entry #{fqdn} => #{ip}"
+        cmd = "/RecordAdd #{zone} #{fqdn}. A #{ip}"
+        execute(cmd, msg)
       end
     end
 
-    # remove({ :fqdn => "node01.lab", :value => "192.168.100.2"}
-    # remove({ :fqdn => "node01.lab", :value => "3.100.168.192.in-addr.arpa"}
-    def remove
-      @resolver = Resolv::DNS.new(:nameserver => @server)
-      case @type
-        when "A"
-          raise Proxy::Dns::NotFound.new("Cannot find DNS entry for #{@fqdn}") unless dns_find(@fqdn)
-          zone = @fqdn.sub(/[^.]+./,'')
-          msg = "Removed DNS entry #{@fqdn} => #{@value}"
-          cmd = "/RecordDelete #{zone} #{@fqdn}. A /f"
-          execute(cmd, msg)
-        when "PTR"
-          # TODO: determine reverse zone names, #4025
-          raise Proxy::Dns::NotFound.new("Cannot find DNS entry for #{@value}") unless dns_find(@value)
-          true
-      end
+    # noop
+    def create_ptr_record(fqdn, ip)
+      found = dns_find(ip)
+      raise(Proxy::Dns::Collision, "#{ip} is already used by #{found}") if found && found != fqdn
+      true
     end
 
-    private
+    def remove_a_record(fqdn)
+      ip = dns_find(fqdn)
+      raise Proxy::Dns::NotFound.new("Cannot find DNS entry for #{fqdn}") unless ip
+      zone = fqdn.sub(/[^.]+./,'')
+      msg = "Removed DNS entry #{fqdn} => #{ip}"
+      cmd = "/RecordDelete #{zone} #{fqdn}. A /f"
+      execute(cmd, msg)
+    end
+
+    # noop
+    def remove_ptr_record(ip)
+      raise Proxy::Dns::NotFound.new("Cannot find DNS entry for #{ip}") unless dns_find(ip)
+      true
+    end
 
     def execute cmd, msg=nil, error_only=false
       tsecs = 5
@@ -100,16 +84,6 @@ module Proxy::Dns::Dnscmd
     rescue
       logger.error "Dnscmd failed:\n" + (response.is_a?(Array) ? response.join("\n") : "Response was not an array! #{response}")
       raise Proxy::Dns::Error.new("Unknown error while processing '#{msg}'")
-    end
-
-    def dns_find key
-      if match = key.match(/(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/)
-        resolver.getname(match[1..4].reverse.join(".")).to_s
-      else
-        resolver.getaddress(key).to_s
-      end
-    rescue Resolv::ResolvError
-      false
     end
   end
 end

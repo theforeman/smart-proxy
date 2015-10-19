@@ -6,23 +6,19 @@ module Proxy::Dns::NsupdateGSS
     include Proxy::Kerberos
     attr_reader :tsig_keytab, :tsig_principal
 
-    def initialize options = {}
+    def initialize(a_server = nil, a_ttl = nil)
       @tsig_keytab = ::Proxy::Dns::NsupdateGSS::Plugin.settings.dns_tsig_keytab
       @tsig_principal = ::Proxy::Dns::NsupdateGSS::Plugin.settings.dns_tsig_principal
-      raise "Keytab not configured via dns_tsig_keytab for DNS GSS-TSIG support" unless tsig_keytab
-      raise "Unable to read dns_tsig_keytab file at #{tsig_keytab}" unless File.exist?(tsig_keytab)
-      raise "Kerberos principal required - check dns_tsig_principal setting" unless tsig_principal
-      super(options)
+      super(a_server || ::Proxy::Dns::NsupdateGSS::Plugin.settings.dns_server,
+            a_ttl || ::Proxy::Dns::Plugin.settings.dns_ttl)
     end
-
-    protected
 
     def nsupdate_args
-      "#{super} -g "
+      " -g "
     end
 
-    def nsupdate cmd
-      init_krb5_ccache(tsig_keytab, tsig_principal) if cmd == "connect"
+    def nsupdate_connect cmd
+      init_krb5_ccache(tsig_keytab, tsig_principal)
       super
     end
   end
