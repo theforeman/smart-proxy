@@ -32,11 +32,6 @@ module Proxy::Templates
       logger.warn "Unable to extract request headers: #{e}"
       {}
     end
-
-    def self.get_template(kind, env, params)
-      @handler ||= TemplateProxyRequest.new
-      @handler.get_template(kind, env, params)
-    end
   end
 
 end

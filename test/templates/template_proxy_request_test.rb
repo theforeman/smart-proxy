@@ -40,7 +40,7 @@ class TemplateProxyRequestTest < Test::Unit::TestCase
     @expected_body = "my template"
     args = { :token => "test-token" }
     stub_request(:get, @foreman_url+'/unattended/provision?token=test-token&url='+@template_url).to_return(:status => [200, 'OK'], :body => @expected_body)
-    result = Proxy::Templates::TemplateProxyRequest.get_template('provision', @request_env, args)
+    result = Proxy::Templates::TemplateProxyRequest.new.get_template('provision', @request_env, args)
     assert_equal(@expected_body, result)
   end
 
@@ -48,7 +48,7 @@ class TemplateProxyRequestTest < Test::Unit::TestCase
     @expected_body = "my template"
     args = { :token => "test-token", :static => "true" }
     stub_request(:get, @foreman_url+'/unattended/provision?static=true&token=test-token&url='+@template_url).to_return(:status => [200, 'OK'], :body => @expected_body)
-    result = Proxy::Templates::TemplateProxyRequest.get_template('provision', @request_env, args)
+    result = Proxy::Templates::TemplateProxyRequest.new.get_template('provision', @request_env, args)
     assert_equal(@expected_body, result)
   end
 
@@ -56,7 +56,7 @@ class TemplateProxyRequestTest < Test::Unit::TestCase
     @expected_body = "my template"
     args = { :mac => "aa:bb:cc:dd:ee:ff" }
     stub_request(:get, @foreman_url+'/unattended/provision?mac=aa:bb:cc:dd:ee:ff&url='+@template_url).to_return(:status => [200, 'OK'], :body => @expected_body)
-    result = Proxy::Templates::TemplateProxyRequest.get_template('provision', @request_env, args)
+    result = Proxy::Templates::TemplateProxyRequest.new.get_template('provision', @request_env, args)
     assert_equal(@expected_body, result)
   end
 
@@ -67,7 +67,7 @@ class TemplateProxyRequestTest < Test::Unit::TestCase
     stub_request(:get, @foreman_url+'/unattended/provision?token=test-token&url='+@template_url).
       with(:headers => {'X-Forwarded-For'=>'1.2.3.4, proxy.lan', 'X-Rhn-Provisioning-Mac-0'=>'aa:bb:cc:dd:ee:ff'}).
       to_return(:status => [200, 'OK'], :body => @expected_body)
-    result = Proxy::Templates::TemplateProxyRequest.get_template('provision', @request_env, args)
+    result = Proxy::Templates::TemplateProxyRequest.new.get_template('provision', @request_env, args)
     assert_equal(@expected_body, result)
   end
 end

@@ -16,7 +16,7 @@ class Proxy::TemplatesApi < Sinatra::Base
 
   get "/:kind" do |kind|
     log_halt(500, "Failed to retrieve #{kind} template for #{params.inspect}: ") do
-      Proxy::Templates::TemplateProxyRequest.get_template(kind, request.env, params)
+      Proxy::Templates::TemplateProxyRequest.new.get_template(kind, request.env, params)
     end
   end
 end
