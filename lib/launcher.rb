@@ -114,23 +114,10 @@ module Proxy
       t1 = Thread.new { https_app.start } unless https_app.nil?
       t2 = Thread.new { http_app.start } unless http_app.nil?
 
-      begin
-        if Rack.release < '1.6.4'
-          # Rack installs its own trap; Sleeping for 5 secs insures we overwrite it with our own
-          sleep 5
-          trap(:INT) do
-            exit(0)
-          end
-        end
-      rescue Exception => e
-        logger.warn "Unable to overwrite interrupt trap: #{e}"
-      end
-
-      ::Proxy::SignalHandler.install_ttin_trap
+      Proxy::SignalHandler.install_traps
 
       (t1 || t2).join
     rescue SignalException => e
-      # This is to prevent the exception handler below from catching SignalException exceptions.
       logger.info("Caught #{e}. Exiting")
       raise
     rescue SystemExit
