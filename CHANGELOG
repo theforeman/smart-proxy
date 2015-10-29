@@ -1,3 +1,9 @@
+2015-10-29	Dominic Cleal <dcleal@redhat.com>
+	* Release 1.10.0-RC2
+
+2015-10-28	Timo Goebel <timo.goebel@dm.de>
+	* fixes #12178 - Smart Proxy Plugins do not handle rc versions well
+
 2015-10-14	Dominic Cleal <dcleal@redhat.com>
 	* Release 1.10.0-RC1
 
