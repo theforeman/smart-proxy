@@ -1,5 +1,6 @@
 require 'proxy/log'
 require 'proxy/settings'
+require 'proxy/signal_handler'
 
 module Proxy
   class Launcher
@@ -124,6 +125,8 @@ module Proxy
       rescue Exception => e
         logger.warn "Unable to overwrite interrupt trap: #{e}"
       end
+
+      ::Proxy::SignalHandler.install_ttin_trap
 
       (t1 || t2).join
     rescue SignalException => e
