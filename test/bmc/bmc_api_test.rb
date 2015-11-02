@@ -476,6 +476,14 @@ class BmcApiTest < Test::Unit::TestCase
     assert_match(/not a valid/, data["error"])
   end
 
+  def test_api_returns_sensor_data_for_sensors_get
+    get "/#{host}/sensors", args
+    assert last_response.ok?, "Last response was not ok"
+    data = JSON.parse(last_response.body)
+    assert_operator(data["fan"].length, :>, 0)
+    assert_operator(data["temp"].length, :>, 0)
+  end
+
   private
   attr_reader :host, :args
 
