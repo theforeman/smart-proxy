@@ -7,8 +7,8 @@ module Proxy::Dns::NsupdateGSS
     attr_reader :tsig_keytab, :tsig_principal
 
     def initialize options = {}
-      @tsig_keytab = options[:tsig_keytab]
-      @tsig_principal = options[:tsig_principal]
+      @tsig_keytab = ::Proxy::Dns::NsupdateGSS::Plugin.settings.dns_tsig_keytab
+      @tsig_principal = ::Proxy::Dns::NsupdateGSS::Plugin.settings.dns_tsig_principal
       raise "Keytab not configured via dns_tsig_keytab for DNS GSS-TSIG support" unless tsig_keytab
       raise "Unable to read dns_tsig_keytab file at #{tsig_keytab}" unless File.exist?(tsig_keytab)
       raise "Kerberos principal required - check dns_tsig_principal setting" unless tsig_principal
