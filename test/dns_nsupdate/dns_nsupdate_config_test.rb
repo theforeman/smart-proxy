@@ -19,14 +19,21 @@ class DnsNsupdateConfigTest < Test::Unit::TestCase
   end
 
   def test_initialize_nsupdate_gss_succeeds
+    Proxy::Dns::NsupdateGSS::Plugin.settings.expects(:dns_tsig_keytab).returns('./key')
+    Proxy::Dns::NsupdateGSS::Plugin.settings.expects(:dns_tsig_principal).returns('a@B')
     File.expects(:exist?).with('./key').returns(true)
-    assert Proxy::Dns::NsupdateGSS::Record.new(:fqdn => 'example.com', :tsig_keytab => './key', :tsig_principal => 'a@B')
+    record = Proxy::Dns::NsupdateGSS::Record.new(:fqdn => 'example.com')
+    assert record
+    assert_equal './key', record.tsig_keytab
+    assert_equal 'a@B', record.tsig_principal
   end
 
   def test_initialize_nsupdate_gss_returns_error_with_missing_keykey_file
+    Proxy::Dns::NsupdateGSS::Plugin.settings.expects(:dns_tsig_keytab).returns('./key')
+    Proxy::Dns::NsupdateGSS::Plugin.settings.expects(:dns_tsig_principal).returns('a@B')
     File.expects(:exist?).with('./key').returns(false)
     assert_raise RuntimeError do
-      Proxy::Dns::NsupdateGSS::Record.new(:fqdn => 'example.com', :tsig_keytab => './key', :tsig_principal => 'a@B')
+      Proxy::Dns::NsupdateGSS::Record.new(:fqdn => 'example.com')
     end
   end
 end
