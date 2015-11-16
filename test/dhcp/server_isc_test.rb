@@ -79,6 +79,43 @@ class ServerIscTest < Test::Unit::TestCase
                  @dhcp.send(:poap_options_statements, :filename => 'poap.cfg/something.py', :nextServer => '192.168.122.1')
   end
 
+  def test_subnet_matching_without_parameters_or_declarations
+    assert "subnet 192.168.1.0 netmask 255.255.255.128 {}".match(Proxy::DHCP::ISC::SUBNET_BLOCK_REGEX)
+  end
+
+  def test_subnet_matching_with_ip_parameter
+    assert "subnet 192.168.123.0 netmask 255.255.255.192 {option subnet-mask 255.255.255.192;}".match(Proxy::DHCP::ISC::SUBNET_BLOCK_REGEX)
+  end
+
+  def test_subnet_matching_with_numerical_parameter
+    assert "subnet 192.168.123.0 netmask 255.255.255.192 {adaptive-lease-time-threshold 50;}".match(Proxy::DHCP::ISC::SUBNET_BLOCK_REGEX)
+  end
+
+  def test_subnet_matching_with_timestamp_parameter
+    assert "subnet 192.168.123.0 netmask 255.255.255.192 {dynamic-bootp-lease-cutoff 5 2016/11/11 01:01:00;}".match(Proxy::DHCP::ISC::SUBNET_BLOCK_REGEX)
+  end
+
+  def test_subnet_matching_with_string_parameter
+    assert "subnet 192.168.123.0 netmask 255.255.255.192 {filename \"filename\";}".match(Proxy::DHCP::ISC::SUBNET_BLOCK_REGEX)
+  end
+
+  def test_subnet_matching_with_spaces_in_parameter
+    assert "subnet 192.168.123.0 netmask 255.255.255.192 { option subnet-mask 255.255.255.192 ; }".match(Proxy::DHCP::ISC::SUBNET_BLOCK_REGEX)
+  end
+
+  def test_subnet_matching_with_declaration
+    assert "subnet 192.168.123.0 netmask 255.255.255.192 {pool{range 192.168.42.200 192.168.42.254;}}".match(Proxy::DHCP::ISC::SUBNET_BLOCK_REGEX)
+  end
+
+  def test_subnet_matching_with_declaration_and_parameter
+    assert "subnet 192.168.123.0 netmask 255.255.255.192 {pool{range 192.168.42.200 192.168.42.254;}option subnet-mask 255.255.255.192;}".
+             match(Proxy::DHCP::ISC::SUBNET_BLOCK_REGEX)
+  end
+
+  def test_mathing_with_spaces_in_declarations
+    assert "subnet 192.168.1.0 netmask 255.255.255.128 { pool\n{ range abc ; } }".match(Proxy::DHCP::ISC::SUBNET_BLOCK_REGEX)
+  end
+
   def test_loadSubnets_loads_managed_subnets
     subnets = @dhcp.parse_config_for_subnets
     assert_equal 4, subnets.size
@@ -112,8 +149,8 @@ class ServerIscTest < Test::Unit::TestCase
     subnets = @dhcp.parse_config_for_subnets
     assert_equal ["192.168.122.250"], subnets[0].options[:routers]
     assert_equal nil, subnets[0].options[:routers][1]
-    assert_equal ["192.168.123.1"],   subnets[1].options[:routers]
-    assert_equal ["192.168.124.1", "192.168.124.2"],   subnets[2].options[:routers]
+    assert_equal ["192.168.123.1"], subnets[1].options[:routers]
+    assert_equal ["192.168.124.1", "192.168.124.2"], subnets[2].options[:routers]
   end
 
   def test_managed_subnets_domain_name_servers

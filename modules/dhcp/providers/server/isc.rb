@@ -146,31 +146,34 @@ module Proxy::DHCP
       initialize_memory_store_with_dhcp_records(parse_config_and_leases_for_records)
     end
 
+    SUBNET_BLOCK_REGEX = /subnet\s+([\d\.]+)\s+netmask\s+([\d\.]+)\s*\{\s*([\w-]+\s*\{[^{}]*\}\s*|[\w-][^{}]*;\s*)*\}/
     def parse_config_for_subnets
       ret_val = []
       # Extract subnets config block
-      @config.scan(/subnet\s+([\d\.]+)\s+netmask\s+([\d\.]+)\s*{([\w|;|\.|,|\-|\s]*)}/) do |match|
+      @config.scan(SUBNET_BLOCK_REGEX) do |match|
         network, netmask, subnet_config_lines = match
-        options = {}
-        if subnet_config_lines
-          # Split each config lines and scan for some interesting options (dns, gateway, dhcp range) used in foreman subnets.
-          # Some other options can be added later, see manpages dhcpd.conf(5) or dhcpd-options(5) for available ISC DHCP subnet options.
-          subnet_config_lines.split(';').each do |option|
-            case option
-              when /option\s+routers\s+[\d\.]+/
-                options[:routers] = get_ip_list_from_config_line(option)
-              when /option\s+domain\-name\-servers\s+[\d\.]+/
-                options[:domain_name_servers] = get_ip_list_from_config_line(option)
-              when /range\s+[\d\.]+\s+[\d\.]+/
-                # get IP addr range used for this subnet
-                options[:range] = get_range_from_config_line(option)
-            end
-          end
+        ret_val << Proxy::DHCP::Subnet.new(network, netmask, parse_subnet_options(subnet_config_lines))
+      end
+      ret_val
+    end
+
+    def parse_subnet_options(subnet_config_lines)
+      return {} unless subnet_config_lines
+
+      options = {}
+      subnet_config_lines.split(';').each do |option|
+        case option
+          when /^option\s+routers\s+[\d\.]+/
+            options[:routers] = get_ip_list_from_config_line(option)
+          when /^option\s+domain\-name\-servers\s+[\d\.]+/
+            options[:domain_name_servers] = get_ip_list_from_config_line(option)
+          when /^range\s+[\d\.]+\s+[\d\.]+/
+            # get IP addr range used for this subnet
+            options[:range] = get_range_from_config_line(option)
         end
-        ret_val << Proxy::DHCP::Subnet.new(network, netmask, options.reject{|key, value| value.nil? || value.empty? })
       end
 
-      ret_val
+      options.reject{|key, value| value.nil? || value.empty? }
     end
 
     def loadSubnets
