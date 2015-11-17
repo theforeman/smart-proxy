@@ -1,3 +1,9 @@
+2015-11-17	Dominic Cleal <dcleal@redhat.com>
+	* Release 1.10.0-RC3
+
+2015-11-16	Dominic Cleal <dcleal@redhat.com>
+	* fixes #12449 - load nsupdate_gss config from plugin settings
+
 2015-10-29	Dominic Cleal <dcleal@redhat.com>
 	* Release 1.10.0-RC2
 
