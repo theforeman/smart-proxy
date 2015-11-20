@@ -1,4 +1,4 @@
-require 'proxy'
+require 'smart_proxy'
 require 'checks'
 require 'json'
 require 'rack'

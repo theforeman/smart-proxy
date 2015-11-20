@@ -1,6 +1,6 @@
 APP_ROOT = "#{File.dirname(__FILE__)}/.."
 
-require 'proxy'
+require 'smart_proxy'
 require 'launcher'
 
 require 'fileutils'
