@@ -31,7 +31,10 @@ class RootApiTest < Test::Unit::TestCase
   end
 
   def test_version
+    ::Proxy::Plugins.stubs(:enabled_plugins).returns([TestPlugin2.new, TestPlugin3.new, TestPlugin0.new])
     get "/version"
-    assert_equal({"version" => Proxy::VERSION}, JSON.parse(last_response.body))
+    assert_equal(Proxy::VERSION, JSON.parse(last_response.body)["version"])
+    modules = Hash[::Proxy::Plugins.enabled_plugins.collect {|plugin| [plugin.plugin_name.to_s, plugin.version.to_s]}].reject { |key| key == 'foreman_proxy' }
+    assert_equal(modules, JSON.parse(last_response.body)["modules"])
   end
 end
