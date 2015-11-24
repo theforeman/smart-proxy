@@ -60,7 +60,7 @@ class Proxy::DHCP::SubnetService
   def add_host(subnet_address, record)
     @reservations_by_ip[subnet_address, record.ip] = record
     @reservations_by_mac[subnet_address, record.mac] = record
-    @reservations_by_name[subnet_address, record.name] = record
+    @reservations_by_name[record.name] = record
     logger.debug("Added a reservation: #{record.ip}:#{record.mac}:#{record.name}")
   end
 
@@ -73,7 +73,7 @@ class Proxy::DHCP::SubnetService
   def delete_host(record)
     @reservations_by_ip.delete(record.subnet.network, record.ip)
     @reservations_by_mac.delete(record.subnet.network, record.mac)
-    @reservations_by_name.delete(record.subnet.network, record.name)
+    @reservations_by_name.delete(record.name)
     logger.debug("Deleted a reservation: #{record.ip}:#{record.mac}:#{record.name}")
   end
 
@@ -93,15 +93,15 @@ class Proxy::DHCP::SubnetService
     @reservations_by_ip[subnet_address, ip_address]
   end
 
-  def find_host_by_hostname(subnet_address, hostname)
-    @reservations_by_name[subnet_address, hostname]
+  def find_host_by_hostname(hostname)
+    return @reservations_by_name[hostname]
   end
 
   def all_hosts(subnet_address = nil)
     if subnet_address
-      return @reservations_by_name[subnet_address] ? @reservations_by_name.values(subnet_address) : []
+      return @reservations_by_ip[subnet_address] ? @reservations_by_ip.values(subnet_address) : []
     end
-    @reservations_by_name.values
+    @reservations_by_ip.values
   end
 
   def all_leases(subnet_address = nil)
