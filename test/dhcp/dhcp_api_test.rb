@@ -54,6 +54,10 @@ class DhcpApiTest < Test::Unit::TestCase
         "ip"         => "192.168.122.10",
         "mac"        => "10:10:10:10:10:10",
       }, {
+        "hostname"   => "undeleted.example.com",
+        "ip"         => "192.168.122.35",
+        "mac"        => "10:10:10:10:30:30",
+      },{
         "hostname"   => "mac441ea173366b.example.com",
         "ip"         => "192.168.122.44",
         "mac"        => "44:1e:a1:73:36:6b",

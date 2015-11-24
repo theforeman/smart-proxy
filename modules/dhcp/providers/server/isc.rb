@@ -1,5 +1,6 @@
 require 'time'
 require 'dhcp/subnet'
+require 'dhcp/record/deleted_reservation'
 require 'dhcp/record/reservation'
 require 'dhcp/record/lease'
 require 'dhcp/server'
@@ -78,13 +79,13 @@ module Proxy::DHCP
             opts.merge!(parse_record_options(data))
           end
         end
-        begin
-          subnet = @service.find_subnet(opts[:ip])
-          next unless subnet
-          ret_val << Proxy::DHCP::Reservation.new(opts.merge(:subnet => subnet))
-        rescue Exception => e
-          logger.warn "skipped #{hostname} - #{e}"
+        if opts[:deleted]
+          ret_val << Proxy::DHCP::DeletedReservation.new(opts)
+          next
         end
+        subnet = @service.find_subnet(opts[:ip])
+        next unless subnet
+        ret_val << Proxy::DHCP::Reservation.new(opts.merge(:subnet => subnet))
       end
 
       conf.scan(/lease\s+(\S+\s*\{[^}]+\})/) do |lease|
@@ -110,12 +111,11 @@ module Proxy::DHCP
       records.each do |record|
 
         case record
+        when Proxy::DHCP::DeletedReservation
+          record = @service.find_host_by_hostname(record.name)
+          @service.delete_host(record) if record
+          next
         when Proxy::DHCP::Reservation
-          if record.options[:deleted]
-            record = @service.find_host_by_hostname(record.subnet_address, record.name)
-            @service.delete_host(record) if record
-            next
-          end
           if dupe = @service.find_host_by_mac(record.subnet_address, record.mac)
             @service.delete_host(dupe)
           end
