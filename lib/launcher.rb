@@ -49,6 +49,7 @@ module Proxy
           :SSLPrivateKey => load_ssl_private_key(SETTINGS.ssl_private_key),
           :SSLCertificate => load_ssl_certificate(SETTINGS.ssl_certificate),
           :SSLCACertificateFile => SETTINGS.ssl_ca_file,
+          :SSLTmpDhCallback => SETTINGS.ssl_dhparam ? load_ssl_dhparam(SETTINGS.ssl_dhparam) : nil,
           :daemonize => false)
       end
     end
@@ -64,6 +65,13 @@ module Proxy
       OpenSSL::X509::Certificate.new(File.read(path))
     rescue Exception => e
       logger.error "Unable to load SSL certificate. Are the values correct in settings.yml and do permissions allow reading?: #{e}"
+      raise e
+    end
+
+    def load_ssl_dhparam(path)
+      proc { OpenSSL::PKey::DH.new(File.read(path)) }
+    rescue Exception => e
+      logger.error "Unable to load dhparam. Are the values correct in settings.yml and do permissions allow reading?: #{e}"
       raise e
     end
 
