@@ -5,5 +5,5 @@ group :development do
   gem 'rdoc'
   gem 'single_test'
   gem 'pry'
-  gem 'rubocop', '0.26.1' if  RUBY_VERSION > "1.9.2"
+  gem 'rubocop', '0.35.1' if  RUBY_VERSION > "1.9.2"
 end

@@ -39,3 +39,7 @@ Metrics/BlockNesting:
 
 Style/SymbolProc:
   Enabled: false
+
+# Workaround for bbatsov/rubocop#2451 (found in v0.35.1)
+Style/StabbyLambdaParentheses:
+  Enabled: false
