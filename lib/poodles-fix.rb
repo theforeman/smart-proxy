@@ -11,39 +11,35 @@ module OpenSSL
           :ssl_version => "SSLv23",
           :verify_mode => OpenSSL::SSL::VERIFY_PEER,
           :ciphers => %w{
-            ECDHE-ECDSA-AES128-GCM-SHA256
             ECDHE-RSA-AES128-GCM-SHA256
-            ECDHE-ECDSA-AES256-GCM-SHA384
+            ECDHE-ECDSA-AES128-GCM-SHA256
             ECDHE-RSA-AES256-GCM-SHA384
+            ECDHE-ECDSA-AES256-GCM-SHA384
             DHE-RSA-AES128-GCM-SHA256
             DHE-DSS-AES128-GCM-SHA256
-            DHE-RSA-AES256-GCM-SHA384
-            DHE-DSS-AES256-GCM-SHA384
-            ECDHE-ECDSA-AES128-SHA256
+            kEDH+AESGCM
             ECDHE-RSA-AES128-SHA256
-            ECDHE-ECDSA-AES128-SHA
+            ECDHE-ECDSA-AES128-SHA256
             ECDHE-RSA-AES128-SHA
-            ECDHE-ECDSA-AES256-SHA384
+            ECDHE-ECDSA-AES128-SHA
             ECDHE-RSA-AES256-SHA384
-            ECDHE-ECDSA-AES256-SHA
+            ECDHE-ECDSA-AES256-SHA384
             ECDHE-RSA-AES256-SHA
+            ECDHE-ECDSA-AES256-SHA
             DHE-RSA-AES128-SHA256
-            DHE-RSA-AES256-SHA256
             DHE-RSA-AES128-SHA
-            DHE-RSA-AES256-SHA
             DHE-DSS-AES128-SHA256
-            DHE-DSS-AES256-SHA256
-            DHE-DSS-AES128-SHA
+            DHE-RSA-AES256-SHA256
             DHE-DSS-AES256-SHA
-            AES128-GCM-SHA256
-            AES256-GCM-SHA384
-            AES128-SHA256
-            AES256-SHA256
-            AES128-SHA
-            AES256-SHA
-            ECDHE-ECDSA-RC4-SHA
-            ECDHE-RSA-RC4-SHA
-            RC4-SHA
+            DHE-RSA-AES256-SHA
+            !aNULL
+            !eNULL
+            !EXPORT
+            !DES
+            !RC4
+            !3DES
+            !MD5
+            !PSK
           }.join(":"),
           :options => lambda do
             opts = OpenSSL::SSL::OP_ALL
