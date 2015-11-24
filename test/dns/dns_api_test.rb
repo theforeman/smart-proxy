@@ -78,9 +78,7 @@ class DnsApiTest < Test::Unit::TestCase
   end
 
   def test_delete_returns_error_if_value_is_missing
-    def test_create_returns_error_if_type_is_missing
-      delete '/'
-      assert_equal 400, last_response.status
-    end
+    delete '/'
+    assert_equal 404, last_response.status
   end
 end
