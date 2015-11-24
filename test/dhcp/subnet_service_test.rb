@@ -77,7 +77,7 @@ class SubnetServiceTest < Test::Unit::TestCase
 
     assert_equal reservation, @reservations_ip_store["192.168.0.0", "192.168.0.1"]
     assert_equal reservation, @reservations_mac_store["192.168.0.0", "00:11:22:33:44:55"]
-    assert_equal reservation, @reservations_name_store["192.168.0.0", "test"]
+    assert_equal reservation, @reservations_name_store["test"]
   end
 
   def test_delete_lease
@@ -100,7 +100,7 @@ class SubnetServiceTest < Test::Unit::TestCase
 
     assert_nil @reservations_ip_store["192.168.0.0", "192.168.0.1"]
     assert_nil @reservations_mac_store["192.168.0.0", "00:11:22:33:44:55"]
-    assert_nil @reservations_name_store["192.168.0.0", "test"]
+    assert_nil @reservations_name_store["test"]
   end
 
   def test_all_leases
@@ -186,10 +186,10 @@ class SubnetServiceTest < Test::Unit::TestCase
                                                  :mac => "00:11:22:33:44:55", :ip => "192.168.0.1", :name => "test")
     @service.add_host("192.168.0.0", reservation)
 
-    assert_equal reservation, @service.find_host_by_hostname("192.168.0.0", "test")
+    assert_equal reservation, @service.find_host_by_hostname("test", "192.168.0.0")
   end
 
   def test_find_reservation_by_name_returns_nil_for_nonexistent_record
-    assert_nil @service.find_host_by_hostname("192.168.0.0",  "test")
+    assert_nil @service.find_host_by_hostname("test")
   end
 end
