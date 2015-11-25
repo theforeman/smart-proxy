@@ -36,7 +36,7 @@ require 'rack-patch' if Rack.release < "1.3"
 require 'sinatra'
 require 'sinatra-patch'
 require 'sinatra/authorization'
-require 'poodles-fix'
+require 'webrick-patch'
 
 module Proxy
   SETTINGS = Settings.load_global_settings
