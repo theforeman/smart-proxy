@@ -40,6 +40,11 @@ module Proxy
           ::Proxy::Plugins.enabled_plugins.each {|p| instance_eval(p.https_rackup)}
         end
 
+        ssl_options = OpenSSL::SSL::SSLContext::DEFAULT_PARAMS[:options]
+        ssl_options |= OpenSSL::SSL::OP_CIPHER_SERVER_PREFERENCE if defined?(OpenSSL::SSL::OP_CIPHER_SERVER_PREFERENCE)
+        ssl_options |= OpenSSL::SSL::OP_NO_TLSv1 if defined?(OpenSSL::SSL::OP_NO_TLSv1)
+        ssl_options |= OpenSSL::SSL::OP_NO_TLSv1_1 if defined?(OpenSSL::SSL::OP_NO_TLSv1_1)
+
         Rack::Server.new(
           :app => app,
           :server => :webrick,
@@ -51,6 +56,7 @@ module Proxy
           :SSLPrivateKey => load_ssl_private_key(SETTINGS.ssl_private_key),
           :SSLCertificate => load_ssl_certificate(SETTINGS.ssl_certificate),
           :SSLCACertificateFile => SETTINGS.ssl_ca_file,
+          :SSLOptions => ssl_options,
           :daemonize => false)
       end
     end
