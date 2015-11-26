@@ -173,7 +173,11 @@ class ServerIscTest < Test::Unit::TestCase
     @subnet_service.add_subnet(subnet)
     @dhcp.loadSubnetData(subnet)
 
-    assert_equal 7, @subnet_service.all_hosts("192.168.122.0").size + @subnet_service.all_leases("192.168.122.0").size
+    assert_equal 8, @subnet_service.all_hosts("192.168.122.0").size + @subnet_service.all_leases("192.168.122.0").size
+    assert_nil @subnet_service.find_host_by_hostname("deleted.example.com")
+    assert_nil @subnet_service.find_host_by_ip(subnet.network, "192.168.122.0")
+    assert_not_nil @subnet_service.find_host_by_hostname("undeleted.example.com")
+    assert_not_nil @subnet_service.find_host_by_ip(subnet.network, "192.168.122.35")
   end
 
   def test_get_ip_list_from_config_line
