@@ -3,6 +3,7 @@ require 'proxy/kerberos'
 require 'uri'
 require 'xmlrpc/client'
 require 'realm/client'
+require 'net/https'
 
 module Proxy::Realm
   class FreeIPA < Client
@@ -39,17 +40,23 @@ module Proxy::Realm
       if errors.empty?
         # Get krb5 token
         init_krb5_ccache Proxy::Realm::Plugin.settings.realm_keytab, Proxy::Realm::Plugin.settings.realm_principal
-        gssapi = GSSAPI::Simple.new(@ipa_server.host, "HTTP")
-        token = gssapi.init_context
+        @gssapi = GSSAPI::Simple.new(@ipa_server.host, "HTTP")
+        token = @gssapi.init_context
+
+        login = Net::HTTP.new(@ipa_server.host, 443)
+        login.use_ssl = true
+        login.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+        request = Net::HTTP::Post.new("/ipa/session/login_kerberos", 'Authorization'=>"Negotiate #{strict_encode64(token)}", 'Referer' => @ipa_server.to_s)
+        response = login.request(request)
+        cookie = response['Set-Cookie']
 
         # FreeIPA API returns some nils, Ruby XML-RPC doesn't like this
         XMLRPC::Config.module_eval { const_set(:ENABLE_NIL_PARSER, true) }
-
-        @ipa = XMLRPC::Client.new2(@ipa_server.to_s)
-        @ipa.http_header_extra={ 'Authorization'=>"Negotiate #{strict_encode64(token)}",
-                                 'Referer' => @ipa_server.to_s,
-                                 'Content-Type' => 'text/xml; charset=utf-8'
-                               }
+        @ipa = XMLRPC::Client.new2(@ipa_server.scheme + "://" + @ipa_server.host + "/ipa/session/xml")
+        # For some reason ipa insists on having 'Referer' header to be present...
+        @ipa.http_header_extra={ 'Referer' => @ipa_server.to_s, 'Content-Type' => 'text/xml; charset=utf-8' }
+        @ipa.cookie = cookie # set the session cookie
       else
         raise Proxy::Realm::Error.new errors.join(", ")
       end
