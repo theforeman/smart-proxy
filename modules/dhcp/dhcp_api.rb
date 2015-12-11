@@ -7,6 +7,7 @@ class Proxy::DhcpApi < ::Sinatra::Base
   before do
     begin
       raise "Smart Proxy is not configured to support DHCP" unless Proxy::DhcpPlugin.settings.enabled
+      raise "Missing DHCP vendor type" if Proxy::DhcpPlugin.settings.dhcp_vendor.nil?
       case Proxy::DhcpPlugin.settings.dhcp_vendor.downcase
       when "isc"
         require 'dhcp/providers/server/isc'
@@ -22,7 +23,7 @@ class Proxy::DhcpApi < ::Sinatra::Base
         require 'dhcp/providers/server/virsh'
         @server = Proxy::DHCP::Virsh.instance_with_default_parameters
       else
-        log_halt 400, "Unrecognized or missing DHCP vendor type: #{Proxy::DhcpPlugin.settings.dhcp_vendor.nil? ? 'MISSING' : Proxy::DhcpPlugin.settings.dhcp_vendor}"
+        log_halt 400, "Unrecognized DHCP vendor type: #{Proxy::DhcpPlugin.settings.dhcp_vendor}"
       end
 
       @server.loadSubnets
