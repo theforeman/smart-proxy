@@ -70,4 +70,22 @@ class Proxy::Puppet::Api < ::Sinatra::Base
       log_halt 406, "Failed to show puppet classes: #{e}"
     end
   end
+
+  get "/class_count" do
+    content_type :json
+    begin
+      Proxy::Puppet::Environment.all.map{|env| env.classes.length}.reduce(:+)
+    rescue => e
+      log_halt 406, "Failed to count puppet classes: #{e}"
+    end
+  end
+
+  get "/environments/class_count" do
+    content_type :json
+    begin
+      Hash[Proxy::Puppet::Environment.all.collect{|env| [env.name, env.classes.length]}].to_json
+    rescue => e
+      log_halt 406, "Failed to count puppet classes: #{e}"
+    end
+  end
 end
