@@ -1,3 +1,15 @@
+2015-12-23	Dominic Cleal <dcleal@redhat.com>
+	* Release 1.10.0
+
+2015-12-14	Phirince Philip <phirince@gmail.com>
+	* Fixes #12775 - Handle nonexistent dhcp_vendor
+
+2015-12-11	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #12254: pinned addressable gem to ~> 2.3.8
+
+2015-12-11	Brandon Weeks <weeks@squareup.com>
+	* Fixes #12465 - remove deleted records from results
+
 2015-11-17	Dominic Cleal <dcleal@redhat.com>
 	* Release 1.10.0-RC3
 
