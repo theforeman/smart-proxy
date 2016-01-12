@@ -25,7 +25,18 @@ module Proxy::DHCP
     end
 
     def include? ip
-      IPAddr.new(to_s).include?(ip.is_a?(IPAddr) ? ip : IPAddr.new(ip))
+      if ip.is_a?(IPAddr)
+        ipaddr = ip
+      else
+        begin
+          ipaddr = IPAddr.new(ip)
+        rescue
+          logger.debug("Ignoring invalid IP address #{ip}")
+          return false
+        end
+      end
+
+      IPAddr.new(to_s).include?(ipaddr)
     end
 
     def to_s
