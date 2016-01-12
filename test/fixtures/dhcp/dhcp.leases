@@ -40,6 +40,14 @@ host undeleted.example.com {
   fixed-address 192.168.122.35;
   supersede host-name = "undeleted.example.com";
 }
+# Missing or no IP address in the fixed-address field
+host host.domain {
+  hardware ethernet 00:01:02:84:12:ab;
+  fixed-address host1.sub.domain.com;
+}
+host test.domain {
+  hardware ethernet 00:50:56:84:30:63;
+}
 
 # The following six leases are from booting a real-world DELL hardware with
 # PXE using Foreman Discovery. Fist, a BIOS/UEFI DHCP request is sent along
