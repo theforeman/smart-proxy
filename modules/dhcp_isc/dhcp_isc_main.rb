@@ -95,6 +95,7 @@ module Proxy::DHCP::ISC
           ret_val << Proxy::DHCP::DeletedReservation.new(opts)
           next
         end
+        next if opts[:ip].nil? || opts[:ip].empty?
         subnet = service.find_subnet(opts[:ip])
         next unless subnet
         ret_val << Proxy::DHCP::Reservation.new(opts.merge(:subnet => subnet))
