@@ -245,7 +245,6 @@ class BmcApiTest < Test::Unit::TestCase
     Proxy::BMC::IPMI.any_instance.stubs(:poweron?).returns(true)
     get "/#{host}/chassis/power/on", args
     assert_not_equal 'Rubyipmi', Proxy::BMC::IPMI.logger.progname
-    assert_equal "./logs/test.log", Proxy::BMC::IPMI.logger.instance_variable_get("@logdev").filename
   end
 
   def test_api_can_put_power_action
