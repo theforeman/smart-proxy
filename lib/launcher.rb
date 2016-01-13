@@ -132,9 +132,7 @@ module Proxy
       # do nothing. This is to prevent the exception handler below from catching SystemExit exceptions.
       raise
     rescue Exception => e
-      logger.error("Error during startup, terminating. #{e}")
-      logger.debug("#{e}:#{e.backtrace.join("\n")}")
-
+      logger.error("Error during startup, terminating. #{e}", e.backtrace)
       puts "Errors detected on startup, see log for details. Exiting: #{e}"
       exit(1)
     end
