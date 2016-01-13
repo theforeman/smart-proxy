@@ -37,7 +37,7 @@ class Proxy::RootApi < Sinatra::Base
       ::Proxy::Events::Buffer.instance.iterate_ascending do |event|
         events << event.to_h if event && from_serial == 0 || (event && from_serial > 0 && event.serial >= from_serial)
       end
-      { :info => ::Proxy::Events::Buffer.instance.get_info, :events => events }.to_json
+      { :info => ::Proxy::Events::Buffer.instance.info, :events => events }.to_json
     rescue => e
       log_halt 400, e
     end

@@ -9,8 +9,8 @@ class RingBufferTest < Test::Unit::TestCase
 
   def test_should_be_empty
     assert_false @buffer.full?
-    @buffer.iterate_ascending { |x| fail }
-    @buffer.iterate_descending { |x| fail }
+    @buffer.iterate_ascending { |_| fail }
+    @buffer.iterate_descending { |_| fail }
   end
 
   def test_should_store_one_value
@@ -46,12 +46,12 @@ class RingBufferTest < Test::Unit::TestCase
 end
 
 class BufferTest < Test::Unit::TestCase
-  SIZE = 3
+  SIZE      = 3
   SIZE_TAIL = 2
 
   DEBUG = ::Logger::Severity::DEBUG
-  INFO = ::Logger::Severity::INFO
-  ERR = ::Logger::Severity::ERROR
+  INFO  = ::Logger::Severity::INFO
+  ERR   = ::Logger::Severity::ERROR
 
   def setup
     @buffer = Proxy::Events::Buffer.new
@@ -63,13 +63,13 @@ class BufferTest < Test::Unit::TestCase
   end
 
   def test_should_be_empty
-    @buffer.iterate_ascending { |x| fail }
-    @buffer.iterate_descending { |x| fail }
+    @buffer.iterate_ascending { |_| fail }
+    @buffer.iterate_descending { |_| fail }
   end
 
   def test_should_contain_one_value
-    @buffer.push(log_event(nil, Time.now.utc.to_i, ERR, "msg"))
-    @buffer.iterate_ascending { |x| assert_equal "msg", x.message }
+    @buffer.push(log_event(nil, Time.now.utc.to_i, ERR, 'msg'))
+    @buffer.iterate_ascending { |x| assert_equal 'msg', x.message }
   end
 
   def test_should_store_size

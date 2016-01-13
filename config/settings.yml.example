@@ -62,4 +62,3 @@
 #:log_buffer_errors: 1000
 # Log buffer threshold (debug messages are ignored by default)
 #:log_buffer_level: INFO
-

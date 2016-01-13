@@ -1,3 +1,4 @@
+require 'proxy/events/ring_buffer'
 require 'proxy/events/buffer'
 
 module Proxy::Events
@@ -6,14 +7,14 @@ module Proxy::Events
       @logger = logger
     end
 
-    def add(severity, message = nil, progname = nil, backtrace = nil, &block)
+    def add(severity, message = nil, progname = nil, backtrace = nil)
       severity ||= UNKNOWN
       progname ||= @logger.progname
       if message.nil?
         if block_given?
           message = yield
         else
-          message = progname
+          message  = progname
           progname = @logger.progname
         end
       end
@@ -37,11 +38,13 @@ module Proxy::Events
     def info(msg_or_progname, exception_or_backtrace = nil, &block)
       add(::Logger::Severity::INFO, nil, msg_or_progname, exception_or_backtrace, &block)
     end
+
     alias_method :write, :info
 
     def warn(msg_or_progname, exception_or_backtrace = nil, &block)
       add(::Logger::Severity::WARN, nil, msg_or_progname, exception_or_backtrace, &block)
     end
+
     alias_method :warning, :warn
 
     def error(msg_or_progname, exception_or_backtrace = nil, &block)
@@ -52,7 +55,7 @@ module Proxy::Events
       add(::Logger::Severity::FATAL, nil, msg_or_progname, exception_or_backtrace, &block)
     end
 
-    def method_missing(symbol, *args);
+    def method_missing(symbol, *args)
       @logger.send(symbol, *args)
     end
   end
