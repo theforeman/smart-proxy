@@ -140,8 +140,8 @@ class ::Proxy::Plugin
       logger.info("'#{plugin_name}' module is disabled.")
     end
   rescue Exception => e
-    logger.error("Couldn't enable plugin #{plugin_name}: #{e}")
-    logger.debug("#{e}:#{e.backtrace.join("\n")}")
+    logger.error("Couldn't enable plugin #{plugin_name}: #{e}", e.backtrace)
     ::Proxy::Plugins.disable_plugin(plugin_name)
+    ::Proxy::LogBuffer::Buffer.instance.failed_module(plugin_name, e.message)
   end
 end

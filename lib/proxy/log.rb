@@ -1,4 +1,6 @@
 require 'logger'
+require 'proxy/log_buffer/decorator'
+
 begin
   require 'syslog/logger'
   ::Syslog::Logger.class_eval { alias_method :write, :info }
@@ -42,7 +44,7 @@ module Proxy
         logger = default_logger(log_file)
       end
       logger.level = ::Logger.const_get(::Proxy::SETTINGS.log_level.upcase)
-      logger
+      ::Proxy::LogBuffer::Decorator.new(logger)
     end
   end
 
