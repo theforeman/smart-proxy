@@ -56,3 +56,10 @@
 # Uncomment and modify if you want to change the log level
 # WARN, DEBUG, ERROR, FATAL, INFO, UNKNOWN
 #:log_level: ERROR
+
+# Log buffer size and extra buffer size (for errors)
+#:log_buffer: 2000
+#:log_buffer_errors: 1000
+# Log buffer threshold (debug messages are ignored by default)
+#:log_buffer_level: INFO
+
