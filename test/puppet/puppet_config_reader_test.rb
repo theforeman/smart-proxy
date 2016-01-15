@@ -3,7 +3,7 @@ require 'puppet_proxy/puppet_config'
 
 class PuppetConfigReaderTest < Test::Unit::TestCase
   def setup
-    @puppet_conf = File.expand_path(File.join(File.dirname(__FILE__), '..', 'fixtures', 'puppet.conf'))
+    @puppet_conf = File.expand_path(File.join(File.dirname(__FILE__), '.', 'fixtures', 'puppet.conf'))
   end
 
   def build

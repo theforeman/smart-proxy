@@ -6,7 +6,11 @@ module Proxy::Puppet
     # returns an array of PuppetClass objects.
     def scan_directory directory, environment
       Dir.glob("#{directory}/*/manifests/**/*.pp").map do |filename|
-        scan_manifest File.read(filename), filename
+        # the encoding is ignored under 1.8.7.
+        # For the rest of rubies this will force external encoding to be UTF-8
+        # Earlier 1.9.x have US-ASCII by default for example
+        f = File.open(filename, "r:UTF-8")
+        scan_manifest f.read, filename
       end.compact.flatten
     end
   end

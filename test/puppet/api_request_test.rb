@@ -10,7 +10,7 @@ class PuppetApiRequestTest < Test::Unit::TestCase
   end
 
   def fixtures
-    File.expand_path(File.join(File.dirname(__FILE__), '..', 'fixtures', 'authentication'))
+    File.expand_path(File.join(File.dirname(__FILE__), '.', 'fixtures', 'authentication'))
   end
 
   def test_get_environments

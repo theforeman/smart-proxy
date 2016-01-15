@@ -12,7 +12,7 @@ module PuppetApiEnvironmentsRetrieverTestSuite
   def test_api_response_parsing
     @api_class.any_instance.
         stubs(:find_environments).
-        returns(JSON.load(File.read('./test/fixtures/environments_api.json')))
+        returns(JSON.load(File.read(File.expand_path('../fixtures/environments_api.json', __FILE__))))
 
     envs = @retriever.all
     assert_equal Set.new(['production', 'example_env', 'development', 'common']), Set.new(envs.map { |e| e.name })

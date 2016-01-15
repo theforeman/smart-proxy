@@ -137,7 +137,7 @@ module ClassScannerTestSuite
   end
 
   def test_should_handle_import_in_a_manifest
-    klasses =  Proxy::Puppet::ClassScanner.new.scan_directory('./test/fixtures/modules_include', "example_env")
+    klasses =  Proxy::Puppet::ClassScanner.new.scan_directory(File.expand_path('../fixtures/modules_include', __FILE__), "example_env")
     assert_kind_of Array, klasses
     assert_equal 2, klasses.size
 
@@ -146,6 +146,12 @@ module ClassScannerTestSuite
     assert_equal "testinclude", klass.module
 
     assert klasses.any? {|k| k.name == "testinclude" }
+  end
+
+  def test_should_parse_puppet_classes_with_unicode_chars
+    classes = Proxy::Puppet::ClassScanner.new.scan_directory(File.expand_path('../fixtures/with_unicode_chars', __FILE__), "testing")
+    assert_equal 1, classes.size
+    assert_equal "unicodetest", classes.first.name
   end
 
   #TODO add scans to a real puppet directory with modules

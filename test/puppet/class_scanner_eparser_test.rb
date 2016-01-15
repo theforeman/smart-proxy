@@ -11,7 +11,7 @@ end
 
 module ClassScannerEParserTestSuite
   def setup
-    Proxy::Puppet::Plugin.load_test_settings(:puppet_conf => './test/fixtures/puppet.conf')
+    Proxy::Puppet::Plugin.load_test_settings(:puppet_conf => File.expand_path('../fixtures/puppet.conf', __FILE__))
     Proxy::Puppet::Initializer.new.reset_puppet
   end
 
@@ -148,7 +148,7 @@ module ClassScannerEParserTestSuite
   end
 
   def test_should_handle_import_in_a_manifest_without_cache
-    klasses =  Proxy::Puppet::ClassScannerEParser.new.scan_directory('./test/fixtures/modules_include', "example_env")
+    klasses =  Proxy::Puppet::ClassScannerEParser.new.scan_directory(File.expand_path('../fixtures/modules_include', __FILE__), "example_env")
     assert_equal 2, klasses.size
 
     klass = klasses.find {|k| k.name == "sub::foo" }
@@ -156,6 +156,12 @@ module ClassScannerEParserTestSuite
     assert_equal "testinclude", klass.module
 
     assert klasses.any? {|k| k.name == "testinclude" }
+  end
+
+  def test_should_parse_puppet_classes_with_unicode_chars
+    classes = Proxy::Puppet::ClassScannerEParser.new.scan_directory(File.expand_path('../fixtures/with_unicode_chars', __FILE__), "testing")
+    assert_equal 1, classes.size
+    assert_equal "unicodetest", classes.first.name
   end
 
   #TODO add scans to a real puppet directory with modules
