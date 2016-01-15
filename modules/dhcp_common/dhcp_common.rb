@@ -5,6 +5,7 @@ module Proxy::DHCP
     :nextServer            => {:code => 66, :kind => "String"    }, # From where we download the pxeboot image via TFTP
     :filename              => {:code => 67, :kind => "String"    }  # The pxeboot image
   }
+
   SUNW = {
     :root_server_ip        => {:code => 2,  :kind => "IPAddress" }, # 192.168.216.241
     :root_server_hostname  => {:code => 3,  :kind => "String"    }, # mediahost
