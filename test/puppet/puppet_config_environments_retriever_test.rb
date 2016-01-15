@@ -18,7 +18,7 @@ class PuppetConfigEnvironmentsRetrieverTest < Test::Unit::TestCase
   def test_single_static_env
     @puppet_configuration.data = {
         :main => {},
-        :production => { :modulepath =>'./test/fixtures/environments/prod' }
+        :production => { :modulepath => module_path('environments/prod') }
     }
 
     env = @retriever.all
@@ -28,7 +28,7 @@ class PuppetConfigEnvironmentsRetrieverTest < Test::Unit::TestCase
   def test_master_is_remapped_to_production_when_solo
     @puppet_configuration.data = {
         :main => {},
-        :master => { :modulepath =>'./test/fixtures/environments/prod' }
+        :master => { :modulepath => module_path('environments/prod') }
     }
 
     env = @retriever.all
@@ -38,8 +38,8 @@ class PuppetConfigEnvironmentsRetrieverTest < Test::Unit::TestCase
   def test_multiple_static_env
     @puppet_configuration.data = {
         :main => {},
-        :production  => { :modulepath =>'./test/fixtures/environments/prod' },
-        :development => { :modulepath =>'./test/fixtures/environments/dev' }
+        :production  => { :modulepath => module_path('environments/prod') },
+        :development => { :modulepath => module_path('environments/dev') }
     }
     env = @retriever.all
     assert_equal Set.new(env.map { |e| e.name }), Set.new(['development', 'production'])
@@ -48,7 +48,7 @@ class PuppetConfigEnvironmentsRetrieverTest < Test::Unit::TestCase
   def test_multiple_modulepath_in_single_env_loads_all_classes
     @puppet_configuration.data = {
         :main => {},
-        :production  => { :modulepath =>'./test/fixtures/environments/dev:./test/fixtures/environments/prod' },
+        :production  => { :modulepath => module_path('environments/dev', 'environments/prod') },
     }
     env = @retriever.all
     assert_equal env.map { |e| e.name }, ['production']
@@ -57,7 +57,7 @@ class PuppetConfigEnvironmentsRetrieverTest < Test::Unit::TestCase
   def test_single_modulepath_in_single_env_with_dynamic_path
     @puppet_configuration.data = {
         :main => {},
-        :master => { :modulepath =>'./test/fixtures/environments/$environment/' }
+        :master => { :modulepath => module_path('environments/$environment/') }
     }
     env = @retriever.all
     assert_equal Set.new(env.map { |e| e.name }), Set.new(['dev','prod'])
@@ -66,7 +66,7 @@ class PuppetConfigEnvironmentsRetrieverTest < Test::Unit::TestCase
   def test_multiple_modulepath_in_single_env_with_multiple_dynamic_path
     @puppet_configuration.data = {
         :main => {},
-        :master => { :modulepath =>'./test/fixtures/multi_module/$environment/modules1:./test/fixtures/multi_module/$environment/modules2' }
+        :master => { :modulepath => module_path('multi_module/$environment/modules1', 'multi_module/$environment/modules2') }
     }
     env = @retriever.all
     assert_equal Set.new(env.map { |e| e.name }), Set.new(['dev','prod'])
@@ -75,7 +75,7 @@ class PuppetConfigEnvironmentsRetrieverTest < Test::Unit::TestCase
   def test_multiple_modulepath_in_single_env_with_multiple_dynamic_path_and_static_path
     @puppet_configuration.data = {
         :main => {},
-        :master => { :modulepath =>'./test/fixtures/environments/prod:./test/fixtures/multi_module/$environment/modules1:./test/fixtures/multi_module/$environment/modules2' }
+        :master => { :modulepath => module_path('environments/prod', 'multi_module/$environment/modules1', 'multi_module/$environment/modules2') }
     }
     env = @retriever.all
     assert_equal Set.new(env.map { |e| e.name }), Set.new(['master','dev','prod'])
@@ -84,7 +84,7 @@ class PuppetConfigEnvironmentsRetrieverTest < Test::Unit::TestCase
   def test_multiple_modulepath_in_single_env_with_dynamic_path
     @puppet_configuration.data = {
         :main => {},
-        :master => { :modulepath =>'./test/fixtures/environments/$environment:./test/fixtures/modules_include' }
+        :master => { :modulepath => module_path('environments/$environment', 'modules_include') }
     }
     env = @retriever.all
     assert_equal Set.new(env.map { |e| e.name }), Set.new(['dev', 'prod', 'master'])
@@ -93,9 +93,14 @@ class PuppetConfigEnvironmentsRetrieverTest < Test::Unit::TestCase
   def test_multiple_modulepath_in_single_env_with_broken_entry
     @puppet_configuration.data = {
         :main => {},
-        :master => { :modulepath =>'./no/such/$environment/modules:./test/fixtures/environments/prod' }
+        :master => { :modulepath => module_path('./no/such/$environment/modules', 'environments/prod') }
     }
     env = @retriever.all
     assert_equal env.map { |e| e.name }, ['master']
+  end
+
+  def module_path(*relative_path)
+    paths = relative_path.map { |path| File.expand_path(path, File.expand_path('../fixtures', __FILE__)) }
+    paths.size < 2 ? paths.first : paths.join(':')
   end
 end
