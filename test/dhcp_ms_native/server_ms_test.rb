@@ -183,6 +183,7 @@ Command completed successfully.
   end
 
   def test_records_should_have_options
+    p "!!!!!!!!!!!!!!!!!!!! test_records_should_have_options"
     @server.load_subnet_data(@server.find_subnet("172.29.205.0"))
     record = @subnet_service.all_leases("172.29.205.0").first
     @server.loadRecordOptions record
@@ -191,6 +192,7 @@ Command completed successfully.
   end
 
   def test_records_should_have_options_and_values
+    p "!!!!!!!!!!!!!!!!!!!! test_records_should_have_options_and_values"
     @server.load_subnet_data(@server.find_subnet("172.29.205.0"))
     record = @subnet_service.all_leases("172.29.205.0").first
     @server.loadRecordOptions record

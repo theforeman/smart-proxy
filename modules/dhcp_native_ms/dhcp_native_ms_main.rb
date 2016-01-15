@@ -104,7 +104,7 @@ module Proxy::DHCP::NativeMS
           begin
             opts = {:subnet => subnet, :ip => ip, :mac => mac}
             opts.merge!(loadRecordOptions(opts))
-            logger.debug opts.inspect
+            p opts.inspect
             if opts.include? :hostname
               to_return << Proxy::DHCP::Reservation.new(opts.merge(:deleteable => true))
             else
@@ -114,7 +114,7 @@ module Proxy::DHCP::NativeMS
               to_return << Proxy::DHCP::Lease.new(opts)
             end
           rescue Exception => e
-            logger.warn "Skipped #{line} - #{e}"
+            p "Skipped #{line} - #{e}"
           end
         end
       end
