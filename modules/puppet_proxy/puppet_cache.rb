@@ -31,7 +31,8 @@ module Proxy::Puppet
               tmp_timestamps[directory, filename] = @timestamps[directory, filename]
             else
               logger.debug("Scanning #{puppetmodule} classes in #{filename}")
-              tmp_classes[directory, filename] = puppet_class_scanner.scan_manifest File.read(filename), filename
+              f = File.open(filename, "r:UTF-8")
+              tmp_classes[directory, filename] = puppet_class_scanner.scan_manifest f.read, filename
               tmp_timestamps[directory, filename] = File.mtime(filename).to_i
             end
           end
