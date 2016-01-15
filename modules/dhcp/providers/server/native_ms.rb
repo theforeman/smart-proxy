@@ -117,7 +117,7 @@ module Proxy::DHCP
               to_return << Proxy::DHCP::Lease.new(opts)
             end
           rescue Exception => e
-            logger.warn "Skipped #{line} - #{e}"
+            logger.debug "Skipped #{line} - #{e}"
           end
         end
       end
@@ -250,28 +250,54 @@ module Proxy::DHCP
     end
 
     def parse_options response
-      optionId = nil
+      option_id = nil
+      vendor_class = nil
+      option_element_value = nil
+      option_name = nil
       options  = {}
+
       response.each_line do |line|
         line.chomp!
+
         break if line.match(/^Command completed/)
 
         case line
-        #TODO: this logic is broken, as the output reports only once the vendor type
-        # making it impossible to detect if its a standard option or a custom one.
         when /For vendor class \[([^\]]+)\]:/
-          options[:vendor] = "<#{$1}>"
+          # we only support a single vendor per record, and it's SUNW-based one
+          vendor_class = "<#{$1}>"
+          options[option_name] = option_element_value unless option_name.nil? || option_element_value.nil?
+          option_id = option_name = option_element_value = nil
         when /OptionId : (\d+)/
-          optionId = $1.to_i
+          options[option_name] = option_element_value unless option_name.nil? || option_element_value.nil?
+          option_element_value = nil
+          option_id = $1.to_i
+          option_name = vendor_class.nil? ? standard_option_name(option_id) : sunw_option(option_id)
         when /Option Element Value = (\S+)/
-          #TODO move options to a class or something
-          opts = SUNW.update(Standard)
-          title = opts.select {|k,v| v[:code] == optionId}.flatten[0]
-          options[title] = $1 if title
+          option_element_value = $1
         end
       end
-      logger.debug options.inspect
+
+      options[option_name] = option_element_value unless option_name.nil? || option_element_value.nil?
+      options[:vendor] = vendor_class unless vendor_class.nil?
       options
+    end
+
+    def standard_option_name(option_id)
+      @standard_options_by_id ||= generate_standard_options_by_id
+      @standard_options_by_id[option_id]
+    end
+
+    def generate_standard_options_by_id
+      Standard.inject({}) { |all, current| all[current[1][:code]] = current[0]; all }
+    end
+
+    def sunw_option(option_id)
+      @sunw_options_by_id ||= generate_sunw_options_by_id
+      @sunw_options_by_id[option_id]
+    end
+
+    def generate_sunw_options_by_id
+      SUNW.inject({}) { |all, current| all[current[1][:code]] = current[0]; all }
     end
 
     def parse_classes response

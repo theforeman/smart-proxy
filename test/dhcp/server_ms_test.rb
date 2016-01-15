@@ -115,6 +115,7 @@ Options for Scope 172.29.205.0:
                 Number of Option Elements = 1
                 Option Element Type = DWORD
                 Option Element Value = 691200
+        For vendor class [SPARC-Enterprise-T5120]:
         OptionId : 3
         Option Value:
                 Number of Option Elements = 1
@@ -179,7 +180,7 @@ Command completed successfully.
 
   def test_records_should_have_options
     @server.loadSubnetData(@server.find_subnet("172.29.205.0"))
-    record = @subnet_service.all_leases("172.29.205.0").first
+    record = @subnet_service.all_hosts("172.29.205.0").first
     @server.loadRecordOptions record
 
     assert record.options.size > 0
@@ -187,9 +188,97 @@ Command completed successfully.
 
   def test_records_should_have_options_and_values
     @server.loadSubnetData(@server.find_subnet("172.29.205.0"))
-    record = @subnet_service.all_leases("172.29.205.0").first
+    record = @subnet_service.all_hosts("172.29.205.0").first
     @server.loadRecordOptions record
 
     assert !record.options.any? { |o,v| o.to_s.empty? || v.nil? || v.to_s.empty? }
+  end
+
+  def test_parse_standard_options
+    to_parse = <<EOL
+        DHCP Standard Options :
+        General Option Values:
+        OptionId : 66
+        Option Value:
+                Number of Option Elements = 1
+                Option Element Type = STRING
+                Option Element Value = brsla025.brs.someware.com
+        OptionId : 67
+        Option Value:
+                Number of Option Elements = 1
+                Option Element Type = STRING
+                Option Element Value = gi-install/pxelinux.0
+        OptionId : 13
+        Option Value:
+                Number of Option Elements = 1
+                Option Element Type = STRING
+                Option Element Value = brslcs25
+Command completed successfully.
+EOL
+    parsed = @server.parse_options(to_parse)
+    assert_equal 2, parsed.size
+    assert_equal "brsla025.brs.someware.com", parsed[:nextServer]
+    assert_equal "gi-install/pxelinux.0", parsed[:filename]
+  end
+
+  def test_parse_vendor_options
+    to_parse = <<EOL
+        For vendor class [SPARC-Enterprise-T5120]:
+        OptionId : 66
+        Option Value:
+                Number of Option Elements = 1
+                Option Element Type = STRING
+                Option Element Value = brsla025.brs.someware.com
+        OptionId : 67
+        Option Value:
+                Number of Option Elements = 1
+                Option Element Type = STRING
+                Option Element Value = gi-install/pxelinux.0
+        OptionId : 2
+        Option Value:
+                Number of Option Elements = 1
+                Option Element Type = IPADDRESS
+                Option Element Value = 172.29.205.1
+        OptionId : 3
+        Option Value:
+                Number of Option Elements = 1
+                Option Element Type = STRING
+                Option Element Value = brsla025.brs.someware.com
+Command completed successfully.
+EOL
+    parsed = @server.parse_options(to_parse)
+    assert_equal 3, parsed.size
+    assert_equal "<SPARC-Enterprise-T5120>", parsed[:vendor]
+    assert_equal "172.29.205.1", parsed[:root_server_ip]
+    assert_equal "brsla025.brs.someware.com", parsed[:root_server_hostname]
+  end
+
+  def test_parse_standard_and_vendor_options
+    to_parse = <<EOL
+        DHCP Standard Options :
+        General Option Values:
+        OptionId : 68
+        Option Value:
+                Number of Option Elements = 1
+                Option Element Type = STRING
+                Option Element Value = brsla025.brs.someware.com
+        OptionId : 12
+        Option Value:
+                Number of Option Elements = 1
+                Option Element Type = STRING
+                Option Element Value = brslcs25
+        For vendor class [SPARC-Enterprise-T5120]:
+        OptionId : 12
+        Option Value:
+                Number of Option Elements = 1
+                Option Element Type = STRING
+                Option Element Value = /vol/solgi_5.10/sol10_hw0910
+Command completed successfully.
+EOL
+    parsed = @server.parse_options(to_parse)
+    assert_equal 3, parsed.size
+    assert_equal "<SPARC-Enterprise-T5120>", parsed[:vendor]
+    assert_equal "brslcs25", parsed[:hostname]
+    assert_equal "/vol/solgi_5.10/sol10_hw0910", parsed[:install_path]
   end
 end
