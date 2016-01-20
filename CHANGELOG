@@ -1,4 +1,21 @@
+2016-01-20	Dominic Cleal <dcleal@redhat.com>
+	* Release 1.10.1
+
+2016-01-19	Dominic Cleal <dcleal@redhat.com>
+	* fixes #13062 - handle missing or non-IP fixed-address ISC fields
+
+2016-01-19	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #12555: switched to session-based freeipa api
+	* Fixes #12136: load only Puppet dependencies that are required by the config
+	* Fixes #12319: fixed race condition in templates module
+
+2016-01-19	Brandon Weeks <weeks@squareup.com>
+	* Fixes #12578 - set SSL_OP_CIPHER_SERVER_PREFERENCE
+	* Fixes #12580 - configure WEBrick to use ::Proxy::Log.logger
+	* Fixes #12469 - raise Proxy::DHCP::InvalidRecord
+
 2015-12-23	Dominic Cleal <dcleal@redhat.com>
+	* Update VERSION to 1.10.0
 	* Release 1.10.0
 
 2015-12-14	Phirince Philip <phirince@gmail.com>
