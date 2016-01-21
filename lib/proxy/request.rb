@@ -39,6 +39,13 @@ module Proxy::HttpRequest
       req.body = body
       req
     end
+
+    def create_put(path, body, headers = {})
+      req = Net::HTTP::Put.new(uri(path).path)
+      req = add_headers(req, headers)
+      req.body = body
+      req
+    end
   end
 
   class ForemanRequest
