@@ -106,8 +106,12 @@ module Proxy
       retry
     end
 
+    def configure_plugins
+      ::Proxy::Plugins.update(::Proxy::PluginInitializer.new.initialize_plugins(::Proxy::Plugins.loaded))
+    end
+
     def launch
-      ::Proxy::Plugins.configure_loaded_plugins
+      configure_plugins
 
       http_app = http_app()
       https_app = https_app()

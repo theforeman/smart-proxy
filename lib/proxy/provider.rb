@@ -17,15 +17,16 @@ class ::Proxy::Provider
     self.class.provider_factory
   end
 
-  def configure_plugin
+  def configure_plugin(all_plugins)
     logger.info("'#{plugin_name}' settings were initialized with default values: %s" % log_used_default_settings) unless settings.used_defaults.empty?
-    validate!
-    ::Proxy::Plugins.plugin_enabled(plugin_name, self)
+    validate!(all_plugins)
     ::Proxy::BundlerHelper.require_groups(:default, bundler_group)
     after_activation
+    logger.info("Finished initialization of module '#{plugin_name}'")
+    true
   rescue Exception => e
     logger.error("Couldn't enable plugin #{plugin_name}: #{e}")
     logger.warn("#{e}:#{e.backtrace.join("\n")}")
-    ::Proxy::Plugins.disable_plugin(plugin_name)
+    false
   end
 end

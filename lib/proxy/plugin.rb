@@ -4,6 +4,7 @@ class ::Proxy::PluginNotFound < ::StandardError; end
 class ::Proxy::PluginVersionMismatch < ::StandardError; end
 class ::Proxy::PluginMisconfigured < ::StandardError; end
 class ::Proxy::PluginProviderNotFound < ::StandardError; end
+class ::Proxy::PluginLoadingAborted < ::StandardError; end
 
 class ::Proxy::Dependency
   attr_reader :name, :version
@@ -15,59 +16,53 @@ class ::Proxy::Dependency
 end
 
 class ::Proxy::Plugins
-  @@loaded = [] # {:name, :version, :class, :factory}
-  @@enabled = {} # plugin_name => instance
+  extend ::Proxy::Log
 
   class << self
     def plugin_loaded(a_name, a_version, a_class)
-      @@loaded += [{:name => a_name, :version => a_version, :class => a_class}]
+      self.loaded += [{:name => a_name, :version => a_version, :class => a_class, :enabled => false}]
     end
 
-    def configure_loaded_plugins
-      configuration_order = build_configuration_order(@@loaded)
-      configuration_order.each { |plugin| plugin[:class].new.configure_plugin }
+    def loaded
+      @loaded ||= [] # {:name, :version, :class, :factory, :instance, :enabled}
     end
 
-    def build_configuration_order(loaded_plugins)
-      plugins_only = loaded_plugins.select {|plugin| plugin[:class].ancestors.include?(::Proxy::Plugin)}
-      configuration_order = []
+    def loaded=(an_array)
+      @loaded = an_array
+    end
 
-      # FIX ME: config order currently is unaffected by provider prerequisites
-      plugins_only.each do |plugin|
-        next if configuration_order.include?(plugin)
-        prerequisite_names = plugin[:class].initialize_after - configuration_order.map { |p| p[:name] }
-        prerequisites = loaded_plugins.select {|p| prerequisite_names.include?(p[:name])}
-        configuration_order = configuration_order + prerequisites + [plugin]
+    def update(updated_plugins)
+      updated_plugins.each do |updated|
+        loaded.delete_if {|p| p[:name] == updated[:name]}
+        loaded << updated
       end
-
-      configuration_order
-    end
-
-    def plugin_enabled(plugin_name, instance)
-      @@enabled[plugin_name.to_sym] = instance
     end
 
     def plugin_enabled?(plugin_name)
-      !!@@enabled[plugin_name.to_sym]
+      plugin = loaded.find {|p| p[:name] == plugin_name.to_sym}
+      plugin.nil? ? false : !!plugin[:enabled]
     end
 
     def disable_plugin(plugin_name)
-      @@enabled.delete(plugin_name.to_sym)
+      logger.warn("::Proxy::Plugins.disable_plugin has been deprecated and will be removed from future versions of smart-proxy. Use Proxy::Pluggable#loading_failed instead.")
+      plugin = loaded.find {|p| p[:name] == plugin_name.to_sym}
+      plugin[:instance].fail
     end
 
+
     def find_plugin(plugin_name)
-      p = @@loaded.find { |plugin| plugin[:name].to_s == plugin_name.to_s }
+      p = loaded.find { |plugin| plugin[:name] == plugin_name.to_sym }
       return p[:class] if p
     end
 
     def enabled_plugins
-      @@enabled.values.select {|instance| instance.is_a?(::Proxy::Plugin)}
+      loaded.select {|p| p[:enabled] == true && p[:instance].is_a?(::Proxy::Plugin)}.map{|p| p[:instance]}
     end
 
     def find_provider(provider_name)
-      provider = @@enabled[provider_name.to_sym]
-      raise ::Proxy::PluginProviderNotFound, "Provider '#{provider_name}' could not be found" if provider.nil? || !provider.is_a?(::Proxy::Provider)
-      provider
+      provider = loaded.find {|p| p[:name] == provider_name.to_sym}
+      raise ::Proxy::PluginProviderNotFound, "Provider '#{provider_name}' could not be found" if provider.nil? || !provider[:instance].is_a?(::Proxy::Provider)
+      provider[:instance]
     end
   end
 end
@@ -89,9 +84,10 @@ end
 class ::Proxy::Plugin
   include ::Proxy::Pluggable
   include ::Proxy::Log
+  extend ::Proxy::Log
 
   class << self
-    attr_reader :get_http_rackup_path, :get_https_rackup_path
+    attr_reader :get_http_rackup_path, :get_https_rackup_path, :get_uses_provider
 
     def http_enabled?
       [true,'http'].include?(self.settings.enabled)
@@ -116,8 +112,28 @@ class ::Proxy::Plugin
     end
 
     def uses_provider
-      @uses_provider = true
+      @get_uses_provider = true
     end
+  end
+
+  def validate_prerequisites_enabled!(all_plugins, prerequisites)
+    prerequisites.each do |p|
+      if !(all_plugins.find {|plugin| plugin[:name] == p.to_sym})
+        raise ::Proxy::PluginMisconfigured, "Unable to find dependency '#{p}' of '#{plugin_name}'."
+      end
+      if !(all_plugins.find {|plugin| plugin[:name] == p.to_sym && plugin[:enabled] == true})
+        raise ::Proxy::PluginMisconfigured, "Dependency '#{p}' of '#{plugin_name}' has not been enabled."
+      end
+    end
+  end
+
+  def validate!(all_plugins)
+    validate_prerequisites_enabled!(all_plugins, [settings.use_provider]) if uses_provider?
+    super(all_plugins)
+  end
+
+  def uses_provider?
+    self.class.get_uses_provider
   end
 
   def http_rackup
@@ -128,20 +144,21 @@ class ::Proxy::Plugin
     (self.class.https_enabled? && self.class.get_https_rackup_path) ? File.read(self.class.get_https_rackup_path) : ""
   end
 
-  def configure_plugin
+  def configure_plugin(all_plugins)
     if settings.enabled
       logger.info("'#{plugin_name}' settings were initialized with default values: %s" % log_used_default_settings) unless settings.used_defaults.empty?
-      validate!
-      ::Proxy::Plugins.plugin_enabled(plugin_name, self)
+      validate!(all_plugins)
       ::Proxy::BundlerHelper.require_groups(:default, bundler_group)
       after_activation
       logger.info("Finished initialization of module '#{plugin_name}'")
+      true
     else
       logger.info("'#{plugin_name}' module is disabled.")
+      false
     end
   rescue Exception => e
     logger.error("Couldn't enable plugin #{plugin_name}: #{e}", e.backtrace)
-    ::Proxy::Plugins.disable_plugin(plugin_name)
     ::Proxy::LogBuffer::Buffer.instance.failed_module(plugin_name, e.message)
+    false
   end
 end

@@ -5,16 +5,10 @@ module Proxy::Templates
 
     plugin :templates, ::Proxy::VERSION
 
-    after_activation do
-      unless Proxy::SETTINGS.foreman_url
-        logger.warn "missing :foreman_url: from configurations. 'templates' module is disabled"
-        ::Proxy::Plugins.disable_plugin(:templates)
-      end
+    validate_presence :template_url
 
-      unless Proxy::Templates::Plugin.settings.template_url
-        logger.warn "missing :templates_url: from configurations. 'templates' module is disabled"
-        ::Proxy::Plugins.disable_plugin(:templates)
-      end
+    after_activation do
+      loading_failed "missing :foreman_url: from configuration." unless Proxy::SETTINGS.foreman_url
     end
   end
 end

@@ -9,8 +9,8 @@ class Proxy::FactsPlugin < ::Proxy::Plugin
     begin
       require "facter"
     rescue LoadError => e
-      ::Proxy::Plugins.disable_plugin(:facts)
-      logger.info "#{e} Facter gem was not found, 'facts' module is disabled"
+      logger.error "Facter gem was not found"
+      raise e
     end
   end
 end
