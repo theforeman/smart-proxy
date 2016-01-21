@@ -33,9 +33,8 @@ module Proxy::Pluggable
       instance_eval(&self.class.after_activation_blk) if self.class.after_activation_blk
     end
 
-    def validate!
-      validate_dependencies!(self.class.dependencies)
-      validate_prerequisites_enabled!(self.class.initialize_after)
+    def validate!(all_plugins)
+      validate_dependencies!(all_plugins, self.class.dependencies)
       execute_validators(self.class.plugin_default_settings.keys.map {|k| ::Proxy::PluginValidators::Presence.new(self.class, k)})
       execute_validators(self.class.validators)
     end
@@ -44,25 +43,18 @@ module Proxy::Pluggable
       validators.each { |validator| validator.validate! }
     end
 
-    def validate_prerequisites_enabled!(prerequisites)
-      prerequisites.each do |p|
-        if !::Proxy::Plugins.find_plugin(p)
-          raise ::Proxy::PluginMisconfigured, "Unable to find dependency '#{p}' of '#{plugin_name}'."
-        end
-        if !::Proxy::Plugins.plugin_enabled?(p)
-          raise ::Proxy::PluginMisconfigured, "Dependency '#{p}' of '#{plugin_name}' has not been enabled."
+    def validate_dependencies!(all_plugins, dependencies)
+      dependencies.each do |dep|
+        plugin = all_plugins.find {|p| p[:name] == dep.name}
+        raise ::Proxy::PluginNotFound, "Plugin '#{dep.name}' required by plugin '#{plugin_name}' could not be found." unless plugin
+        unless ::Gem::Dependency.new('', dep.version).match?('', self.class.cleanup_version(plugin[:instance].version))
+          raise ::Proxy::PluginVersionMismatch, "Available version '#{plugin[:instance].version}' of plugin '#{dep.name}' doesn't match version '#{dep.version}' required by plugin '#{plugin_name}'"
         end
       end
     end
 
-    def validate_dependencies!(dependencies)
-      dependencies.each do |dep|
-        plugin = ::Proxy::Plugins.find_plugin(dep.name)
-        raise ::Proxy::PluginNotFound, "Plugin '#{dep.name}' required by plugin '#{plugin_name}' could not be found." unless plugin
-        unless ::Gem::Dependency.new('', dep.version).match?('', self.class.cleanup_version(plugin.version))
-          raise ::Proxy::PluginVersionMismatch, "Available version '#{plugin.version}' of plugin '#{dep.name}' doesn't match version '#{dep.version}' required by plugin '#{plugin_name}'"
-        end
-      end
+    def loading_failed(message)
+      raise ::Proxy::PluginLoadingAborted, message
     end
   end
 
@@ -100,13 +92,7 @@ module Proxy::Pluggable
     end
 
     def initialize_after(*module_names)
-      @initialize_after ||= []
-      if module_names.empty?
-        to_return = @uses_provider ? @initialize_after + [settings.use_provider] : @initialize_after
-        to_return.map(&:to_sym)
-      else
-        @initialize_after += module_names.map(&:to_sym)
-      end
+      raise "#{plugin_name}: 'initialize_after' method has been removed."
     end
 
     def validate_readable(*settings)

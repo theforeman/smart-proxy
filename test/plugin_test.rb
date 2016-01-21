@@ -2,7 +2,7 @@ require 'test_helper'
 
 class Proxy::Plugins
   def self.reset
-    @@enabled = {}
+    @loaded = []
   end
 end
 
@@ -25,24 +25,10 @@ class PluginTest < Test::Unit::TestCase
     assert_equal ':a: a, :b: b, :enabled: false', plugin.log_used_default_settings
   end
 
-  class TestPlugin1A < Proxy::Plugin; plugin :test_plugin_1a, "1.0"; default_settings :enabled => true; end
-  class TestPlugin1B < Proxy::Plugin; end
-  class TestPlugin1C < Proxy::Provider; plugin :test_plugin_1c, "1.0", :factory => nil; default_settings :enabled => true; end
-  def test_enabled_plugins
-    TestPlugin1A.new.configure_plugin
-    TestPlugin1C.new.configure_plugin
-
-    assert_equal 1, Proxy::Plugins.enabled_plugins.size
-    assert Proxy::Plugins.enabled_plugins.first.is_a?(PluginTest::TestPlugin1A)
-  end
-
   class TestPlugin1D < Proxy::Plugin; plugin :test_plugin_1d, "1.0"; default_settings :enabled => true; end
   class TestPlugin1E < Proxy::Provider; plugin :test_plugin_1e, "1.0", :factory => nil; default_settings :enabled => true; end
-  class TestPlugin1F < Proxy::Provider; plugin :test_plugin_1f, "1.0", :factory => nil; default_settings :enabled => true; end
   def test_find_provider
-    TestPlugin1E.new.configure_plugin
-    TestPlugin1F.new.configure_plugin
-
+    Proxy::Plugins.update([{:name => :test_plugin_1d, :instance => TestPlugin1D.new}, {:name => :test_plugin_1e, :instance => TestPlugin1E.new}])
     assert Proxy::Plugins.find_provider(:test_plugin_1e).is_a?(PluginTest::TestPlugin1E)
   end
 
@@ -54,9 +40,7 @@ class PluginTest < Test::Unit::TestCase
 
   class TestPlugin1G < Proxy::Plugin; plugin :test_plugin_1g, "1.0"; default_settings :enabled => true; end
   def test_find_provider_should_raise_exception_if_provider_is_of_wrong_class
-    TestPlugin1G.new.configure_plugin
-
-    assert_equal 1, Proxy::Plugins.enabled_plugins.size
+    Proxy::Plugins.update([{:name => :test_plugin_1g, :instance => TestPlugin1G.new}])
     assert_raises ::Proxy::PluginProviderNotFound do
       Proxy::Plugins.find_provider(:test_plugin_1g)
     end
@@ -74,54 +58,48 @@ class PluginTest < Test::Unit::TestCase
   class TestPlugin4a < Proxy::Plugin; plugin :test4a, '1.0'; requires :test3a, '~> 1.5.0'; end
   class TestPlugin4b < Proxy::Plugin; plugin :test4b, '1.0'; requires :test3b, '~> 1.10.0'; end
   def test_satisfied_dependency
+    loaded = [{ :name => :test3a, :version => "1.5-develop", :class => TestPlugin3a, :instance => TestPlugin3a.new, :enabled => true },
+              { :name => :test3b, :version => "1.10.0-RC1", :class => TestPlugin3b, :instance => TestPlugin3b.new, :enabled => true },
+              { :name => :test_plugin_4a, :version => "1.0", :class => TestPlugin4a, :instance => TestPlugin4a, :enabled => true },
+              { :name => :test_plugin_4b, :version => "1.0", :class => TestPlugin4b, :instance => TestPlugin4b, :enabled => true }]
+
     assert_nothing_raised do
-      TestPlugin3a.new.validate_dependencies!(TestPlugin3a.dependencies)
+      TestPlugin3a.new.validate_dependencies!(loaded, TestPlugin3a.dependencies)
     end
     assert_nothing_raised do
-      TestPlugin3b.new.validate_dependencies!(TestPlugin3b.dependencies)
+      TestPlugin3b.new.validate_dependencies!(loaded, TestPlugin3b.dependencies)
     end
     assert_nothing_raised do
-      TestPlugin4a.new.validate_dependencies!(TestPlugin4a.dependencies)
+      TestPlugin4a.new.validate_dependencies!(loaded, TestPlugin4a.dependencies)
     end
     assert_nothing_raised do
-      TestPlugin4b.new.validate_dependencies!(TestPlugin4b.dependencies)
+      TestPlugin4b.new.validate_dependencies!(loaded, TestPlugin4b.dependencies)
     end
   end
 
   class TestPlugin5 < Proxy::Plugin; plugin :test5, '1.5'; end
   class TestPlugin6 < Proxy::Plugin; plugin :test6, '1.0'; requires :test5, '> 2.0'; end
   def test_unsatisified_dependency
+    loaded = [{ :name => :test5, :version => "1.5", :class => TestPlugin5, :instance => TestPlugin5, :enabled => true },
+              { :name => :test6, :version => "1.0", :class => TestPlugin6, :instance => TestPlugin6, :enabled => true }]
+
     assert_raise(::Proxy::PluginVersionMismatch) do
-      TestPlugin6.new.validate_dependencies!(TestPlugin6.dependencies)
+      TestPlugin6.new.validate_dependencies!(loaded, TestPlugin6.dependencies)
     end
   end
 
   class TestPlugin7 < Proxy::Plugin; plugin :test7, '1.0'; requires :unknown, '> 2.0'; end
   def test_missing_dependency
     assert_raise(::Proxy::PluginNotFound) do
-      TestPlugin7.new.validate_dependencies!(TestPlugin7.dependencies)
+      TestPlugin7.new.validate_dependencies!([], TestPlugin7.dependencies)
     end
   end
 
-  class TestPlugin8 < Proxy::Plugin; plugin :test8, '1.0'; requires :unknown, '> 2.0'; end
-  def test_configure_plugin_fail_validation
-    TestPlugin8.settings = ::Proxy::Settings::Plugin.new({:enabled => true}, {})
-    plugin = TestPlugin8.new
-    plugin.expects(:validate_dependencies!).with(TestPlugin8.dependencies).raises(::Proxy::PluginVersionMismatch)
-    Proxy::Plugins.expects(:plugin_enabled).never
-    Proxy::Plugins.expects(:disable_plugin).with(:test8)
-    plugin.configure_plugin
-  end
-
-  class TestPlugin9 < Proxy::Plugin; plugin :test9, '1.0'; end
+  class TestPlugin9 < Proxy::Plugin; plugin :test9, '1.0'; default_settings :enabled => true; end
   def test_configure_plugin_pass_validation
-    TestPlugin9.settings = ::Proxy::Settings::Plugin.new({:enabled => true}, {})
     plugin = TestPlugin9.new
-    plugin.expects(:validate_dependencies!).with(TestPlugin9.dependencies)
-    Proxy::Plugins.expects(:plugin_enabled).with(:test9, plugin)
     Proxy::BundlerHelper.expects(:require_groups).with(:default, :test9)
-    Proxy::Plugins.expects(:disable_plugin).never
-    plugin.configure_plugin
+    plugin.configure_plugin([])
   end
 
   class TestPlugin10 < Proxy::Plugin; plugin :test10, '1.0'; end
@@ -150,65 +128,34 @@ class PluginTest < Test::Unit::TestCase
     assert !TestPlugin12.http_enabled?
     assert TestPlugin12.https_enabled?
     assert TestPlugin12.plugin_name, 'test12'
+
     # Ensure that the content is read from 'http_config.ru'
     File.stubs(:read).returns("require 'test12/test12_api'")
     plugin = TestPlugin12.new
-    plugin.configure_plugin
+
     assert_equal plugin.http_rackup, ''
     assert_equal plugin.https_rackup, "require 'test12/test12_api'"
   end
 
-  class TestPlugin13 < Proxy::Plugin; end
-  class TestPlugin14 < Proxy::Plugin; end
-  def test_build_configuration_order
-    loaded = [{ :name => :test_plugin_13, :version => "1.0", :class => TestPlugin13 },
-              { :name => :test_plugin_14, :version => "1.0", :class => TestPlugin14 }]
-    order = Proxy::Plugins.build_configuration_order(loaded)
-    assert_equal loaded, order
+  class TestPlugin13 < Proxy::Plugin; uses_provider; default_settings :use_provider => :test_plugin_14; end
+  class TestPlugin14 < Proxy::Provider; end
+  def test_successful_validation_of_prerequisites
+    loaded = [{ :name => :test_plugin_14, :version => "1.0", :class => TestPlugin14, :instance => TestPlugin14.new, :enabled => true }]
+    assert_nothing_raised do
+      TestPlugin13.new.validate_prerequisites_enabled!(loaded, [:test_plugin_14])
+    end
   end
 
-  class TestPlugin15 < Proxy::Plugin; end
-  class TestPlugin16 < Proxy::Plugin; initialize_after :test_plugin_17; end
-  class TestPlugin17 < Proxy::Plugin; end
-  def test_build_configuration_order_with_prerequisites
-    loaded = [{ :name => :test_plugin_15, :version => "1.0", :class => TestPlugin15 },
-              { :name => :test_plugin_16, :version => "1.0", :class => TestPlugin16 },
-              { :name => :test_plugin_17, :version => "1.0", :class => TestPlugin17 }]
-    order = Proxy::Plugins.build_configuration_order(loaded)
-    assert_equal [{ :name => :test_plugin_15, :version => "1.0", :class => TestPlugin15 },
-                  { :name => :test_plugin_17, :version => "1.0", :class => TestPlugin17 },
-                  { :name => :test_plugin_16, :version => "1.0", :class => TestPlugin16 }],
-                 order
+  def test_validation_of_prerequisites_when_provider_is_disabled
+    loaded = [{ :name => :test_plugin_14, :version => "1.0", :class => TestPlugin14, :instance => TestPlugin14.new}]
+    assert_raise ::Proxy::PluginMisconfigured do
+      TestPlugin13.new.validate_prerequisites_enabled!(loaded, [:test_plugin_14])
+    end
   end
 
-  class TestPlugin18 < Proxy::Plugin; end
-  class TestPlugin19 < Proxy::Plugin; initialize_after :test_plugin_20; end
-  class TestPlugin20 < Proxy::Plugin; end
-  class TestPlugin21 < Proxy::Plugin; initialize_after :test_plugin_20; end
-  def test_build_configuration_order_repeated_prerequisites
-    loaded = [{ :name => :test_plugin_18, :version => "1.0", :class => TestPlugin18 },
-              { :name => :test_plugin_19, :version => "1.0", :class => TestPlugin19 },
-              { :name => :test_plugin_20, :version => "1.0", :class => TestPlugin20 },
-              { :name => :test_plugin_21, :version => "1.0", :class => TestPlugin21 }]
-    order = Proxy::Plugins.build_configuration_order(loaded)
-    assert_equal [{ :name => :test_plugin_18, :version => "1.0", :class => TestPlugin18 },
-                  { :name => :test_plugin_20, :version => "1.0", :class => TestPlugin20 },
-                  { :name => :test_plugin_19, :version => "1.0", :class => TestPlugin19 },
-                  { :name => :test_plugin_21, :version => "1.0", :class => TestPlugin21 }],
-                 order
-  end
-
-  class TestPlugin22 < Proxy::Plugin; uses_provider; initialize_after :first_prerequisite; end
-  def test_use_provider_affects_initialization_order
-    TestPlugin22.settings = ::Proxy::Settings::Plugin.new({:use_provider => 'test_provider'}, {})
-    assert_equal [:first_prerequisite, :test_provider], TestPlugin22.initialize_after
-  end
-
-  class TestPlugin23 < Proxy::Plugin; end
-  def test_multiple_initialize_after
-    TestPlugin23.initialize_after :first_prerequisite
-    TestPlugin23.initialize_after :second_prerequisite, :third_prerequisite
-    assert_equal [:first_prerequisite, :second_prerequisite, :third_prerequisite],
-                 TestPlugin23.initialize_after
+  def test_validation_of_prerequisites_when_provider_was_not_loaded
+    assert_raise ::Proxy::PluginMisconfigured do
+      TestPlugin13.new.validate_prerequisites_enabled!([], [:test_plugin_14])
+    end
   end
 end

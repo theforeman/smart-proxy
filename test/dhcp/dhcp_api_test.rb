@@ -15,23 +15,16 @@ class DhcpApiTest < Test::Unit::TestCase
   include SparcAttrs
 
   def app
-    Proxy::DhcpApi.new
-  end
+    app = Proxy::DhcpApi.new
+    @server = Proxy::DHCP::ISC::Provider.new
+    @server.initialize_for_testing(:name => 'localhost',
+                                   :config_file => './test/fixtures/dhcp/dhcp.conf',
+                                   :leases_file => './test/fixtures/dhcp/dhcp.leases')
 
-  def setup
-    Proxy::DhcpPlugin.load_test_settings(
-      :enabled => true,
-      :use_provider => 'dhcp_isc',
-      :dhcp_subnets => '192.168.122.0/255.255.255.0')
+    app.helpers.server = @server
+    @server.stubs(:omcmd)
 
-    Proxy::DHCP::ISC::Plugin.load_test_settings(
-      :config => './test/fixtures/dhcp/dhcp.conf',
-      :leases => './test/fixtures/dhcp/dhcp.leases')
-
-    Proxy::Plugins.configure_loaded_plugins
-    Proxy::DHCP::ISC::Plugin.new.configure_plugin
-
-    Proxy::DHCP::ISC::Provider.any_instance.stubs(:omcmd)
+    app
   end
 
   # Date formats change between Ruby versions and JSON libraries & versions
