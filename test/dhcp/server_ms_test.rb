@@ -27,7 +27,7 @@ class DHCPServerMicrosoftTest < Test::Unit::TestCase
  172.29.216.0   - 255.255.254.0  -Active        -DC BRS               -
 
  Total No. of Scopes = 6
-Command completed successfully.')
+Command completed successfully.'.split("\n"))
     @server.stubs(:execute).with("scope 172.29.205.0 show reservedip", "Enumerated hosts on 172.29.205.0").returns('
 Changed the current scope context to 172.29.205.0 scope.
 
@@ -97,7 +97,7 @@ Changed the current scope context to 172.29.205.0 scope.
 No of ReservedIPs : 57 in the Scope : 172.29.205.0.
 
 Command completed successfully.
-')
+'.split("\n"))
     @server.stubs(:execute).with("scope 172.29.205.0 Show OptionValue", "Queried 172.29.205.0 options").returns('
 Changed the current scope context to 172.29.205.0 scope.
 
@@ -121,7 +121,7 @@ Options for Scope 172.29.205.0:
                 Option Element Type = IPADDRESS
                 Option Element Value = 172.29.205.1
 Command completed successfully.
-    ')
+    '.split("\n"))
     @server.stubs(:execute).with(
         regexp_matches(/^scope 172.29.205.0 Show ReservedOptionValue 172.29.205.25/),
         regexp_matches(/^Queried .+ options/)).returns('
@@ -147,7 +147,7 @@ Options for the Reservation Address 172.29.205.25 in the Scope 172.29.205.0 :
                 Option Element Type = STRING
                 Option Element Value = brslcs25
 Command completed successfully.
-')
+'.split("\n"))
     @server.loadSubnets
   end
 

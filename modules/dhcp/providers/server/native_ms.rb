@@ -98,7 +98,7 @@ module Proxy::DHCP
 
       to_return = []
       # Extract the data
-      execute(cmd, msg).each_line do |line|
+      execute(cmd, msg).each do |line|
         #     172.29.216.6      -    00-a0-e7-21-41-00-
         if line =~ /^\s+([\w\.]+)\s+-\s+([-a-f\d]+)/
           ip  = $1
@@ -181,7 +181,7 @@ module Proxy::DHCP
       msg = "Enumerated the scopes on #{@name}"
 
       ret_val = []
-      execute(cmd, msg).each_line do |line|
+      execute(cmd, msg).each do |line|
         # 172.29.216.0   - 255.255.254.0  -Active        -DC BRS               -
         if match = line.match(/^\s*([\d\.]+)\s*-\s*([\d\.]+)\s*-\s*(Active|Disabled)/)
           next unless managed_subnet? "#{match[1]}/#{match[2]}"
@@ -252,7 +252,7 @@ module Proxy::DHCP
     def parse_options response
       optionId = nil
       options  = {}
-      response.each_line do |line|
+      response.each do |line|
         line.chomp!
         break if line.match(/^Command completed/)
 
