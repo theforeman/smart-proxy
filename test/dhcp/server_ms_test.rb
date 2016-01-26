@@ -27,7 +27,7 @@ class DHCPServerMicrosoftTest < Test::Unit::TestCase
  172.29.216.0   - 255.255.254.0  -Active        -DC BRS               -
 
  Total No. of Scopes = 6
-Command completed successfully.')
+Command completed successfully.'.split("\n"))
     @server.stubs(:execute).with("scope 172.29.205.0 show reservedip", "Enumerated hosts on 172.29.205.0").returns('
 Changed the current scope context to 172.29.205.0 scope.
 
@@ -97,7 +97,7 @@ Changed the current scope context to 172.29.205.0 scope.
 No of ReservedIPs : 57 in the Scope : 172.29.205.0.
 
 Command completed successfully.
-')
+'.split("\n"))
     @server.stubs(:execute).with("scope 172.29.205.0 Show OptionValue", "Queried 172.29.205.0 options").returns('
 Changed the current scope context to 172.29.205.0 scope.
 
@@ -122,7 +122,7 @@ Options for Scope 172.29.205.0:
                 Option Element Type = IPADDRESS
                 Option Element Value = 172.29.205.1
 Command completed successfully.
-    ')
+    '.split("\n"))
     @server.stubs(:execute).with(
         regexp_matches(/^scope 172.29.205.0 Show ReservedOptionValue 172.29.205.25/),
         regexp_matches(/^Queried .+ options/)).returns('
@@ -148,7 +148,7 @@ Options for the Reservation Address 172.29.205.25 in the Scope 172.29.205.0 :
                 Option Element Type = STRING
                 Option Element Value = brslcs25
 Command completed successfully.
-')
+'.split("\n"))
     @server.loadSubnets
   end
 
@@ -195,7 +195,7 @@ Command completed successfully.
   end
 
   def test_parse_standard_options
-    to_parse = <<EOL
+    to_parse = '
         DHCP Standard Options :
         General Option Values:
         OptionId : 66
@@ -214,7 +214,7 @@ Command completed successfully.
                 Option Element Type = STRING
                 Option Element Value = brslcs25
 Command completed successfully.
-EOL
+'.split("\n")
     parsed = @server.parse_options(to_parse)
     assert_equal 2, parsed.size
     assert_equal "brsla025.brs.someware.com", parsed[:nextServer]
@@ -222,7 +222,7 @@ EOL
   end
 
   def test_parse_vendor_options
-    to_parse = <<EOL
+    to_parse = '
         For vendor class [SPARC-Enterprise-T5120]:
         OptionId : 66
         Option Value:
@@ -245,7 +245,7 @@ EOL
                 Option Element Type = STRING
                 Option Element Value = brsla025.brs.someware.com
 Command completed successfully.
-EOL
+'.split("\n")
     parsed = @server.parse_options(to_parse)
     assert_equal 3, parsed.size
     assert_equal "<SPARC-Enterprise-T5120>", parsed[:vendor]
@@ -254,7 +254,7 @@ EOL
   end
 
   def test_parse_standard_and_vendor_options
-    to_parse = <<EOL
+    to_parse = '
         DHCP Standard Options :
         General Option Values:
         OptionId : 68
@@ -274,7 +274,7 @@ EOL
                 Option Element Type = STRING
                 Option Element Value = /vol/solgi_5.10/sol10_hw0910
 Command completed successfully.
-EOL
+'.split("\n")
     parsed = @server.parse_options(to_parse)
     assert_equal 3, parsed.size
     assert_equal "<SPARC-Enterprise-T5120>", parsed[:vendor]
