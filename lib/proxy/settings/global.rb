@@ -12,7 +12,6 @@ module ::Proxy::Settings
       :virsh_network => 'default',
       :log_buffer => 2000,
       :log_buffer_errors => 1000,
-      :log_buffer_level => "INFO"
     }
 
     HOW_TO_NORMALIZE = {

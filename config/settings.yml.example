@@ -57,7 +57,7 @@
 # WARN, DEBUG, ERROR, FATAL, INFO, UNKNOWN
 #:log_level: ERROR
 
-# Log buffer size and extra buffer size (for errors). Defaults to 1500 messages in total,
-# which is about 250 kB request.
-#:log_buffer: 1000
-#:log_buffer_errors: 500
+# Log buffer size and extra buffer size (for errors). Defaults to 3000 messages in total,
+# which is about 500 kB request.
+#:log_buffer: 2000
+#:log_buffer_errors: 1000
