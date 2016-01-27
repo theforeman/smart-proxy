@@ -16,7 +16,7 @@ module Proxy::Dns::Dnscmd
       if found = dns_find(fqdn)
         raise(Proxy::Dns::Collision, "#{fqdn} is already used by #{found}") if found != ip
       else
-        zone = fqdn.sub(/[^.]+./,'')
+        zone = match_zone(fqdn)
         msg = "Added DNS entry #{fqdn} => #{ip}"
         cmd = "/RecordAdd #{zone} #{fqdn}. A #{ip}"
         execute(cmd, msg)
@@ -33,7 +33,7 @@ module Proxy::Dns::Dnscmd
     def remove_a_record(fqdn)
       ip = dns_find(fqdn)
       raise Proxy::Dns::NotFound.new("Cannot find DNS entry for #{fqdn}") unless ip
-      zone = fqdn.sub(/[^.]+./,'')
+      zone = match_zone(fqdn)
       msg = "Removed DNS entry #{fqdn} => #{ip}"
       cmd = "/RecordDelete #{zone} #{fqdn}. A /f"
       execute(cmd, msg)
@@ -67,6 +67,7 @@ module Proxy::Dns::Dnscmd
         std_err.close unless std_in.nil?
       end
       report msg, response, error_only
+      response
     end
 
     def report msg, response, error_only
@@ -84,6 +85,38 @@ module Proxy::Dns::Dnscmd
     rescue
       logger.error "Dnscmd failed:\n" + (response.is_a?(Array) ? response.join("\n") : "Response was not an array! #{response}")
       raise Proxy::Dns::Error.new("Unknown error while processing '#{msg}'")
+    end
+
+    def match_zone(fqdn)
+      dns_zones = enum_zones
+      weight = 0 # sub zones might be independent from similar named parent zones; use weight for longest suffix match
+      matched_zone = nil
+
+      dns_zones.each do |zone|
+        zone_labels = zone.split(".").reverse
+        zone_weight = zone_labels.length
+        fqdn_labels = fqdn.split(".")
+        fqdn_labels.shift
+        is_match = zone_labels.all? { |zone_label| zone_label == fqdn_labels.pop }
+        # match only the longest zone suffix
+        if is_match && zone_weight >= weight
+          matched_zone = zone
+          weight = zone_weight
+        end
+      end
+      raise Proxy::Dns::NotFound.new("The DNS server has no authoritative zone for #{fqdn}") unless matched_zone
+      matched_zone
+    end
+
+    def enum_zones
+      zones = []
+      response = execute('/EnumZones')
+      response.each do |line|
+        next unless line =~  / Primary /
+        zones << line.sub(/^ +/, '').sub(/ +.*$/, '').chomp("\n")
+      end
+      logger.debug "Enumerated dns zones: #{zones}"
+      zones
     end
   end
 end
