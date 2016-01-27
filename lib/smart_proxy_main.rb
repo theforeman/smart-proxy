@@ -68,7 +68,8 @@ module Proxy
   require 'puppetca/puppetca'
   require 'puppet_proxy/puppet'
   require 'bmc/bmc'
-  require "realm/realm"
+  require 'realm/realm'
+  require 'logs/logs'
 
   def self.version
     {:version => VERSION}
