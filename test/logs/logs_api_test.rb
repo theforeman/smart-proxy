@@ -1,6 +1,6 @@
 require 'test_helper'
 require 'json'
-require 'root/logs_api'
+require 'logs/logs_api'
 
 ENV['RACK_ENV'] = 'test'
 

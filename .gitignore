@@ -5,7 +5,7 @@ config/settings.d/*.yml
 config/migration_state
 config_*/*
 .idea
-logs
+/logs
 *swp
 Gemfile.lock
 bundler.d/Gemfile.local.rb

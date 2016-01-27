@@ -30,6 +30,8 @@ module Proxy::LogBuffer
   end
 
   class Buffer
+    attr_reader :size, :size_tail
+
     def self.instance
       @@buffer ||= Buffer.new
     end
