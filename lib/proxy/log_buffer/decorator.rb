@@ -8,19 +8,17 @@ module Proxy::LogBuffer
       @buffer = buffer
     end
 
-    def add(severity, message = nil, progname = nil, backtrace = nil, a_module = 'core', &block)
+    def add(severity, message = nil, progname = nil, backtrace = nil)
       severity ||= UNKNOWN
-      progname ||= @logger.progname
       if message.nil?
         if block_given?
           message = yield
         else
           message = progname
-          progname = @logger.progname
         end
       end
       # add to the logger first
-      @logger.add(severity, message, progname)
+      @logger.add(severity, message)
       @logger.add(::Logger::Severity::DEBUG, backtrace) if backtrace
       # add add to the buffer
       if severity >= @logger.level
@@ -33,25 +31,25 @@ module Proxy::LogBuffer
     end
 
     def debug(msg_or_progname, exception_or_backtrace = nil, &block)
-      add(::Logger::Severity::DEBUG, nil, msg_or_progname, exception_or_backtrace, caller, &block)
+      add(::Logger::Severity::DEBUG, nil, msg_or_progname, exception_or_backtrace, &block)
     end
 
     def info(msg_or_progname, exception_or_backtrace = nil, &block)
-      add(::Logger::Severity::INFO, nil, msg_or_progname, exception_or_backtrace, caller, &block)
+      add(::Logger::Severity::INFO, nil, msg_or_progname, exception_or_backtrace, &block)
     end
     alias_method :write, :info
 
     def warn(msg_or_progname, exception_or_backtrace = nil, &block)
-      add(::Logger::Severity::WARN, nil, msg_or_progname, exception_or_backtrace, caller, &block)
+      add(::Logger::Severity::WARN, nil, msg_or_progname, exception_or_backtrace, &block)
     end
     alias_method :warning, :warn
 
     def error(msg_or_progname, exception_or_backtrace = nil, &block)
-      add(::Logger::Severity::ERROR, nil, msg_or_progname, exception_or_backtrace, caller, &block)
+      add(::Logger::Severity::ERROR, nil, msg_or_progname, exception_or_backtrace, &block)
     end
 
     def fatal(msg_or_progname, exception_or_backtrace = nil, &block)
-      add(::Logger::Severity::FATAL, nil, msg_or_progname, exception_or_backtrace, caller, &block)
+      add(::Logger::Severity::FATAL, nil, msg_or_progname, exception_or_backtrace, &block)
     end
 
     def method_missing(symbol, *args);
