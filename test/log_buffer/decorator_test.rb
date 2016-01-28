@@ -7,12 +7,36 @@ class DecoratorTest < Test::Unit::TestCase
   DEBUG = ::Logger::Severity::DEBUG
   INFO = ::Logger::Severity::INFO
   ERR = ::Logger::Severity::ERROR
+  FATAL = ::Logger::Severity::FATAL
 
   def setup
     @buffer = Proxy::LogBuffer::Buffer.new(SIZE, SIZE_TAIL, ERR)
     @logger = ::Logger.new("/dev/null")
     @logger.level = INFO
     @decorator = ::Proxy::LogBuffer::Decorator.new(@logger, @buffer)
+  end
+
+  def test_should_pass_logs
+    @logger.expects(:add).with(DEBUG, "message")
+    @decorator.debug("message")
+  end
+
+  def test_should_pass_logs_to_syslog
+    # nothing is actually logged to SYSLOG during the test
+    require 'syslog/logger'
+    @logger = ::Syslog::Logger.new 'decorator-test'
+    @decorator = ::Proxy::LogBuffer::Decorator.new(@logger, @buffer)
+    @logger.expects(:add).with(FATAL, "message")
+    @decorator.fatal("message")
+  rescue LoadError # rubocop:disable Lint/HandleExceptions
+    # skip the test - syslog isn't available on this platform
+  end
+
+  def test_should_pass_and_log_exception
+    e = Exception.new('exception')
+    @logger.expects(:add).with(DEBUG, "message")
+    @logger.expects(:add).with(DEBUG, e)
+    @decorator.debug("message", e)
   end
 
   def test_should_not_ignore_infos
