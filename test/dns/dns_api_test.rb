@@ -33,6 +33,7 @@ class DnsApiTest < Test::Unit::TestCase
 
   def test_create_a_record
     post '/', :fqdn => 'test.com', :value => '192.168.33.33', :type => 'A'
+    assert_equal 200, last_response.status
     assert_equal 'test.com', @server.fqdn
     assert_equal '192.168.33.33', @server.ip
     assert_equal 'A', @server.type
@@ -59,20 +60,23 @@ class DnsApiTest < Test::Unit::TestCase
   end
 
   def test_create_ptr_record
-    post '/', :fqdn => 'test.com', :value => '192.168.33.33', :type => 'PTR'
+    post '/', :fqdn => 'test.com', :value => '33.33.168.192.in-addr.arpa', :type => 'PTR'
+    assert_equal 200, last_response.status
     assert_equal 'test.com', @server.fqdn
-    assert_equal '192.168.33.33', @server.ip
+    assert_equal '33.33.168.192.in-addr.arpa', @server.ip
     assert_equal 'PTR', @server.type
   end
 
   def test_delete_a_record
     delete '/test.com'
+    assert_equal 200, last_response.status
     assert_equal 'test.com', @server.fqdn
     assert_equal 'A', @server.type
   end
 
   def test_delete_ptr_record
     delete '/33.33.168.192.in-addr.arpa'
+    assert_equal 200, last_response.status
     assert_equal '33.33.168.192.in-addr.arpa', @server.ip
     assert_equal 'PTR', @server.type
   end
