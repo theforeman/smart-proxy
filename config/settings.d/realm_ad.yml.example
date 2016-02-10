@@ -1,0 +1,25 @@
+---
+# Can be true, false, or http/https to enable just one of the protocols
+:enabled: false
+
+# Available providers:
+#   freeipa
+#   activedirectory
+:realm_provider: activedirectory
+
+# The OU computer accounts are added to. Defaults to domain default computer container
+# Warning: Fails if target DN does not exist
+#:computer_container: 'DN=computer,DC=domain,DC=com'
+
+# Syncs hostgroups to sub OUs inside :computer_container
+# Example: host 'a' in hostgroup sample/host/group will be created in 'OU=group,OU=host,OU=sample,DN=computer,DC=domain,DC=com'
+# Warning: Fails if target DN does not exist
+#:hostgroup_sync: false
+
+# Windows Remote Management endpoint: domain controller
+:winrm_endpoint: = 'http://localhost:5985/wsman'
+:winrm_user: administrator
+:winrm_password: P@55w0rd
+
+# command timeout in seconds
+#:winrm_timeout: 15

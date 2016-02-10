@@ -11,6 +11,9 @@ module Proxy::Realm
         when "freeipa"
           require 'realm/freeipa'
           @realm = Proxy::Realm::FreeIPA.new
+        when "activedirectory"
+          require 'realm/activedirectory'
+          @realm = Proxy::Realm::ActiveDirectory.new
         else
           log_halt 400, "Unrecognized Realm provider: #{Proxy::Realm::Plugin.settings.realm_provider}"
       end
