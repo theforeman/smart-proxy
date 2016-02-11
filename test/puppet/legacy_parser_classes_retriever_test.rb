@@ -1,5 +1,6 @@
 require 'test_helper'
 require 'puppet_proxy/puppet_plugin'
+require 'puppet'
 require 'puppet_proxy/initializer'
 require 'puppet_proxy/class_scanner'
 
@@ -15,7 +16,7 @@ module ClassScannerTestSuite
       include 'x::y'
     }
     EOF
-    klasses =  Proxy::Puppet::ClassScanner.new.scan_manifest(manifest)
+    klasses =  Proxy::Puppet::ClassScanner.new(nil).scan_manifest(manifest)
     assert_kind_of Array, klasses
     assert_equal 1, klasses.size
 
@@ -29,7 +30,7 @@ module ClassScannerTestSuite
     manifest = <<-EOF
       include 'x::y'
     EOF
-    klasses =  Proxy::Puppet::ClassScanner.new.scan_manifest(manifest)
+    klasses =  Proxy::Puppet::ClassScanner.new(nil).scan_manifest(manifest)
     assert klasses.empty?
   end
   def test_should_find_multiple_class_in_a_manifest
@@ -42,8 +43,7 @@ module ClassScannerTestSuite
     }
 
     EOF
-    klasses =  Proxy::Puppet::ClassScanner.new.scan_manifest(manifest)
-    assert_kind_of Array, klasses
+    klasses =  Proxy::Puppet::ClassScanner.new(nil).scan_manifest(manifest)
     assert_equal 2, klasses.size
     klasses.sort! { |k1,k2| k1.name <=> k2.name }
 
@@ -59,8 +59,7 @@ module ClassScannerTestSuite
   end
 
   def test_should_scan_and_return_empty_array_when_directory_does_not_exist
-    klasses =  Proxy::Puppet::ClassScanner.new.scan_directory('/tmp/no_such_dir', "example_env")
-    assert_kind_of Array, klasses
+    klasses =  Proxy::Puppet::ClassScanner.new(nil).scan_directory('/tmp/no_such_dir')
     assert klasses.empty?
   end
 
@@ -69,8 +68,7 @@ module ClassScannerTestSuite
     class foreman::install {
     }
     EOF
-    klasses = Proxy::Puppet::ClassScanner.new.scan_manifest(manifest)
-    assert_kind_of Array, klasses
+    klasses = Proxy::Puppet::ClassScanner.new(nil).scan_manifest(manifest)
     assert_equal 1, klasses.size
     klass = klasses.first
     assert_equal({}, klass.params)
@@ -81,8 +79,7 @@ module ClassScannerTestSuite
     class foreman::install () {
     }
     EOF
-    klasses = Proxy::Puppet::ClassScanner.new.scan_manifest(manifest)
-    assert_kind_of Array, klasses
+    klasses = Proxy::Puppet::ClassScanner.new(nil).scan_manifest(manifest)
     assert_equal 1, klasses.size
     klass = klasses.first
     assert_equal({}, klass.params)
@@ -93,8 +90,7 @@ module ClassScannerTestSuite
     class foreman::install ($mandatory) {
     }
     EOF
-    klasses = Proxy::Puppet::ClassScanner.new.scan_manifest(manifest)
-    assert_kind_of Array, klasses
+    klasses = Proxy::Puppet::ClassScanner.new(nil).scan_manifest(manifest)
     assert_equal 1, klasses.size
     klass = klasses.first
     assert_equal({'mandatory' => nil}, klass.params)
@@ -117,7 +113,7 @@ module ClassScannerTestSuite
     ) {
     }
     EOF
-    klasses = Proxy::Puppet::ClassScanner.new.scan_manifest(manifest)
+    klasses = Proxy::Puppet::ClassScanner.new(nil).scan_manifest(manifest)
     assert_kind_of Array, klasses
     assert_equal 1, klasses.size
     klass = klasses.first
@@ -137,7 +133,7 @@ module ClassScannerTestSuite
   end
 
   def test_should_handle_import_in_a_manifest
-    klasses =  Proxy::Puppet::ClassScanner.new.scan_directory(File.expand_path('../fixtures/modules_include', __FILE__), "example_env")
+    klasses =  Proxy::Puppet::ClassScanner.new(nil).scan_directory(File.expand_path('../fixtures/modules_include', __FILE__))
     assert_kind_of Array, klasses
     assert_equal 2, klasses.size
 
@@ -149,7 +145,7 @@ module ClassScannerTestSuite
   end
 
   def test_should_parse_puppet_classes_with_unicode_chars
-    classes = Proxy::Puppet::ClassScanner.new.scan_directory(File.expand_path('../fixtures/with_unicode_chars', __FILE__), "testing")
+    classes = Proxy::Puppet::ClassScanner.new(nil).scan_directory(File.expand_path('../fixtures/with_unicode_chars', __FILE__))
     assert_equal 1, classes.size
     assert_equal "unicodetest", classes.first.name
   end
@@ -157,8 +153,8 @@ module ClassScannerTestSuite
   #TODO add scans to a real puppet directory with modules
 end
 
-if Puppet::PUPPETVERSION.to_i < 4
-  class ClassScannerTest < Test::Unit::TestCase
+if Puppet::PUPPETVERSION < '4.0'
+  class LegacyParserClassesRetrieverTest < Test::Unit::TestCase
     include ClassScannerTestSuite
   end
 end

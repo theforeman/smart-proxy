@@ -1,8 +1,4 @@
-require 'puppet'
-require 'puppet_proxy/puppet_class'
-require 'puppet_proxy/class_scanner_base'
-
-if Puppet::PUPPETVERSION.to_f >= 3.2
+if Puppet::PUPPETVERSION >= "3.2"
   require 'puppet/pops'
 
   module Proxy::Puppet

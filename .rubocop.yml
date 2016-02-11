@@ -43,3 +43,6 @@ Style/SymbolProc:
 # Some logging methods need more params than usual
 Metrics/ParameterLists:
   Max: 8
+
+Style/Lambda:
+  Enabled: false

@@ -1,6 +1,3 @@
-require 'puppet_proxy/puppet_class'
-require 'puppet_proxy/class_scanner_base'
-
 module Proxy::Puppet
   class ClassScanner < ClassScannerBase
     def scan_manifest manifest, filename = ''

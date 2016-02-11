@@ -1,23 +1,19 @@
 require 'proxy/memory_store'
 require 'thread'
-require 'puppet_proxy/dependency_injection/container'
 
 module Proxy::Puppet
-  class PuppetCache
+  class PuppetCache < ClassScannerBase
     include Proxy::Log
-    extend Proxy::Puppet::DependencyInjection::Injectors
 
-    inject_attr :puppet_class_scanner_impl, :puppet_class_scanner
-
-    def initialize(classes_store = ::Proxy::MemoryStore.new, timestamps_store = ::Proxy::MemoryStore.new)
+    def initialize(environments_retriever, class_parser, classes_store = ::Proxy::MemoryStore.new, timestamps_store = ::Proxy::MemoryStore.new)
       @classes_cache = classes_store
       @timestamps = timestamps_store
+      @class_parser = class_parser
       @mutex = Mutex.new
+      super(environments_retriever)
     end
 
-    def scan_directory directory, environment
-      logger.debug("Running scan_directory on #{environment}: #{directory}")
-
+    def scan_directory directory
       @mutex.synchronize do
         tmp_classes = ::Proxy::MemoryStore.new
         tmp_timestamps = ::Proxy::MemoryStore.new
@@ -32,7 +28,7 @@ module Proxy::Puppet
             else
               logger.debug("Scanning #{puppetmodule} classes in #{filename}")
               f = File.open(filename, "r:UTF-8")
-              tmp_classes[directory, filename] = puppet_class_scanner.scan_manifest f.read, filename
+              tmp_classes[directory, filename] = @class_parser.scan_manifest f.read, filename
               tmp_timestamps[directory, filename] = File.mtime(filename).to_i
             end
           end

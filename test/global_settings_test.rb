@@ -12,7 +12,6 @@ class GlobalSettingsTest < Test::Unit::TestCase
   end
 
   def test_normalize_setting
-    # rubocop:disable Style/Lambda
     how_to = { :test => lambda { |value| value + 1 } }
     assert_equal 2, ::Proxy::Settings::Global.new({}).normalize_setting(:test, 1, how_to)
     assert_equal 3, ::Proxy::Settings::Global.new({}).normalize_setting(:test_2, 3, how_to)

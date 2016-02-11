@@ -96,6 +96,10 @@ module ::Proxy
       src = src.tr("-", "_")
       src.downcase
     end
+
+    def strip_ruby_symbol_encoding(astring)
+      astring.gsub("!ruby/symbol ", ":").gsub("!ruby/sym ", ":")
+    end
   end
 
   class Migrator

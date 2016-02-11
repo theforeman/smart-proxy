@@ -1,6 +1,10 @@
 require 'test_helper'
+require 'puppet'
 require 'puppet_proxy/puppet_plugin'
 require 'puppet_proxy/initializer'
+require 'puppet_proxy/environment'
+require 'puppet_proxy/puppet_class'
+require 'modules/puppet_proxy/class_scanner_base'
 require 'puppet_proxy/class_scanner_eparser'
 
 # this is needed in order to load (not execute!) the suite without "uninitialized constant" errors
@@ -22,7 +26,7 @@ module ClassScannerEParserTestSuite
     }
     EOF
     require 'puppet/pops'
-    klasses =  Proxy::Puppet::ClassScannerEParser.new.scan_manifest(manifest)
+    klasses =  Proxy::Puppet::ClassScannerEParser.new(nil).scan_manifest(manifest)
     assert_kind_of Array, klasses
     assert_equal 1, klasses.size
 
@@ -36,7 +40,7 @@ module ClassScannerEParserTestSuite
     manifest = <<-EOF
       include 'x::y'
     EOF
-    klasses =  Proxy::Puppet::ClassScannerEParser.new.scan_manifest(manifest)
+    klasses =  Proxy::Puppet::ClassScannerEParser.new(nil).scan_manifest(manifest)
     assert klasses.empty?
   end
 
@@ -50,7 +54,7 @@ module ClassScannerEParserTestSuite
     }
 
     EOF
-    klasses =  Proxy::Puppet::ClassScannerEParser.new.scan_manifest(manifest)
+    klasses =  Proxy::Puppet::ClassScannerEParser.new(nil).scan_manifest(manifest)
     assert_kind_of Array, klasses
     assert_equal 2, klasses.size
     klasses.sort! { |k1,k2| k1.name <=> k2.name }
@@ -68,7 +72,7 @@ module ClassScannerEParserTestSuite
 
   def test_should_scan_a_dir
 
-    klasses =  Proxy::Puppet::ClassScannerEParser.new.scan_directory('/tmp/no_such_dir', "example_env")
+    klasses =  Proxy::Puppet::ClassScannerEParser.new(nil).scan_directory('/tmp/no_such_dir')
     assert_kind_of Array, klasses
     assert klasses.empty?
   end
@@ -78,8 +82,7 @@ module ClassScannerEParserTestSuite
     class foreman::install {
     }
     EOF
-    klasses = Proxy::Puppet::ClassScannerEParser.new.scan_manifest(manifest)
-    assert_kind_of Array, klasses
+    klasses = Proxy::Puppet::ClassScannerEParser.new(nil).scan_manifest(manifest)
     assert_equal 1, klasses.size
     klass = klasses.first
     assert_equal({}, klass.params)
@@ -90,8 +93,7 @@ module ClassScannerEParserTestSuite
     class foreman::install () {
     }
     EOF
-    klasses = Proxy::Puppet::ClassScannerEParser.new.scan_manifest(manifest)
-    assert_kind_of Array, klasses
+    klasses = Proxy::Puppet::ClassScannerEParser.new(nil).scan_manifest(manifest)
     assert_equal 1, klasses.size
     klass = klasses.first
     assert_equal({}, klass.params)
@@ -102,8 +104,7 @@ module ClassScannerEParserTestSuite
     class foreman::install ($mandatory) {
     }
     EOF
-    klasses = Proxy::Puppet::ClassScannerEParser.new.scan_manifest(manifest)
-    assert_kind_of Array, klasses
+    klasses = Proxy::Puppet::ClassScannerEParser.new(nil).scan_manifest(manifest)
     assert_equal 1, klasses.size
     klass = klasses.first
     assert_equal({'mandatory' => nil}, klass.params)
@@ -127,7 +128,7 @@ module ClassScannerEParserTestSuite
     ) {
     }
     EOF
-    klasses = Proxy::Puppet::ClassScannerEParser.new.scan_manifest(manifest)
+    klasses = Proxy::Puppet::ClassScannerEParser.new(@environment_retriever).scan_manifest(manifest)
     assert_kind_of Array, klasses
     assert_equal 1, klasses.size
     klass = klasses.first
@@ -148,7 +149,7 @@ module ClassScannerEParserTestSuite
   end
 
   def test_should_handle_import_in_a_manifest_without_cache
-    klasses =  Proxy::Puppet::ClassScannerEParser.new.scan_directory(File.expand_path('../fixtures/modules_include', __FILE__), "example_env")
+    klasses =  Proxy::Puppet::ClassScannerEParser.new(nil).scan_directory(File.expand_path('../fixtures/modules_include', __FILE__))
     assert_equal 2, klasses.size
 
     klass = klasses.find {|k| k.name == "sub::foo" }
@@ -159,16 +160,30 @@ module ClassScannerEParserTestSuite
   end
 
   def test_should_parse_puppet_classes_with_unicode_chars
-    classes = Proxy::Puppet::ClassScannerEParser.new.scan_directory(File.expand_path('../fixtures/with_unicode_chars', __FILE__), "testing")
+    classes = Proxy::Puppet::ClassScannerEParser.new(nil).scan_directory(File.expand_path('../fixtures/with_unicode_chars', __FILE__))
     assert_equal 1, classes.size
     assert_equal "unicodetest", classes.first.name
+  end
+
+  class EnvironmentRetrieverForTesting
+    def get(an_environment)
+      raise "Unexpected environment name '#{an_environment}'" unless an_environment == 'first'
+      ::Proxy::Puppet::Environment.new('first', [File.expand_path('../fixtures/modules_include', __FILE__)])
+    end
+  end
+  def test_returns_classes_in_environment
+    classes = Proxy::Puppet::ClassScannerEParser.new(EnvironmentRetrieverForTesting.new).classes_in_environment('first')
+
+    assert_equal 2, classes.size
+    assert classes.any? {|k| k.name == "testinclude" }
+    assert classes.any? {|k| k.name == "sub::foo" }
   end
 
   #TODO add scans to a real puppet directory with modules
 end
 
-if Puppet::PUPPETVERSION.to_f >= 3.2
-  class ClassScannerEParserTest < Test::Unit::TestCase
+if Puppet::PUPPETVERSION >= '3.2'
+  class FutureParserClassesRetrieverTest < Test::Unit::TestCase
     include ClassScannerEParserTestSuite
   end
 end
