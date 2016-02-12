@@ -173,7 +173,7 @@ Command completed successfully.
     subnet = @server.find_subnet "172.29.205.0"
     @server.load_subnet_options subnet
 
-    assert subnet.options.size > 0
+    assert !subnet.options.empty?
   end
 
   def test_subnet_should_have_options_and_values
@@ -188,7 +188,7 @@ Command completed successfully.
     record = @subnet_service.all_hosts("172.29.205.0").first
     @server.loadRecordOptions record
 
-    assert record.options.size > 0
+    assert !record.options.empty?
   end
 
   def test_records_should_have_options_and_values

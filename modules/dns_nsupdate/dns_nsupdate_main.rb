@@ -87,7 +87,7 @@ module Proxy::Dns::Nsupdate
 
     def find_nsupdate
       @nsupdate = which("nsupdate")
-      unless File.exist?("#{@nsupdate}")
+      unless File.exist?(@nsupdate.to_s)
         logger.warn "unable to find nsupdate binary, maybe missing bind-utils package?"
         raise "unable to find nsupdate binary"
       end

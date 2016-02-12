@@ -252,7 +252,7 @@ module Proxy::BMC
         else
           logger.warn "Invalid BMC type: #{provider_type}, must be one of #{Proxy::BMC::IPMI.providers.join(',')}"
         end
-        if Proxy::BMC::IPMI.providers_installed.length > 0
+        if !Proxy::BMC::IPMI.providers_installed.empty?
           provider_type = Proxy::BMC::IPMI.providers_installed.first
           logger.warn "Using #{provider_type} as the default BMC provider"
         else

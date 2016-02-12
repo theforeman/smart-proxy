@@ -40,7 +40,7 @@ module Proxy::PuppetCa
       begin
         Proxy::PuppetCa.disable(certname)
       rescue Proxy::PuppetCa::NotPresent => e
-        log_halt 404, "#{e}"
+        log_halt 404, e.to_s
       rescue => e
         log_halt 406, "Failed to remove autosign for #{certname}: #{e}"
       end
@@ -62,7 +62,7 @@ module Proxy::PuppetCa
         certname = params[:certname]
         Proxy::PuppetCa.clean(certname)
       rescue Proxy::PuppetCa::NotPresent => e
-        log_halt 404, "#{e}"
+        log_halt 404, e.to_s
       rescue => e
         log_halt 406, "Failed to remove certificate(s) for #{certname}: #{e}"
       end

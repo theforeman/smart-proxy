@@ -232,9 +232,9 @@ module Proxy::DHCP::NativeMS
         msg.sub! /Queried/,    "query"
         msg  = "Failed to #{msg}"
         msg += "Vendor class not found" if response.grep /class name being used is unknown/
-        msg += ": No entry found" if response.grep(/not a reserved client/).size > 0
+        msg += ": No entry found" if !response.grep(/not a reserved client/).empty?
         match = response.grep(/used by another client/)
-        msg += ": #{match}" if match.size > 0
+        msg += ": #{match}" if !match.size.empty?
         raise Proxy::DHCP::Error.new(msg)
       else
         logger.info msg unless error_only
@@ -256,7 +256,7 @@ module Proxy::DHCP::NativeMS
       response.each do |line|
         line.chomp!
 
-        break if line.match(/^Command completed/)
+        break if line =~ /^Command completed/
 
         case line
           when /For vendor class \[([^\]]+)\]:/
@@ -302,7 +302,7 @@ module Proxy::DHCP::NativeMS
       classes = []
       response.each do |line|
         line.chomp!
-        break if line.match(/^Command completed/)
+        break if line =~ /^Command completed/
 
         case line
           when /Class \[([^\]]+)\]:/

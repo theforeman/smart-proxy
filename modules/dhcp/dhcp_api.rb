@@ -66,7 +66,7 @@ class Proxy::DhcpApi < ::Sinatra::Base
       load_subnet
       load_subnet_data
 
-      ({:ip => server.unused_ip(@subnet, params[:mac], params[:from], params[:to])}).to_json
+      {:ip => server.unused_ip(@subnet, params[:mac], params[:from], params[:to])}.to_json
     rescue => e
       log_halt 400, e
     end

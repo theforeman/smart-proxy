@@ -36,7 +36,7 @@ module Proxy::Realm
         content_type :json
         @realm.delete params[:realm], params[:hostname]
       rescue Proxy::Realm::NotFound => e
-        log halt 404, "#{e}"
+        log halt 404, e.to_s
       rescue Exception => e
         log_halt 400, e
       end

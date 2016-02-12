@@ -89,11 +89,12 @@ module Proxy::Realm
       # Determine if we're updating a host or creating a new one
       host = find params[:hostname]
       if host.nil?
-        options.merge!(:random => 1, :force => 1)
+        options[:random] = 1
+        options[:force] = 1
         operation = "host_add"
       else
         if params[:rebuild] == "true"
-          options.merge!(:random => 1)
+          options[:random] = 1
           # If the host is being rebuilt and is already enrolled, then
           # disable it in order to revoke existing certs, keytabs, etc.
           if host["result"]["has_keytab"]

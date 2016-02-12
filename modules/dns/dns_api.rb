@@ -28,7 +28,7 @@ module Proxy::Dns
     end
 
     delete "/:value" do
-      type = params[:value].match(/\.(in-addr|ip6)\.arpa$/) ? "PTR" : "A"
+      type = params[:value] =~ /\.(in-addr|ip6)\.arpa$/ ? "PTR" : "A"
 
       begin
         server.remove_a_record(params[:value]) if type == 'A'

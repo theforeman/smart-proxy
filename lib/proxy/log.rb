@@ -27,13 +27,13 @@ module Proxy
 
     def self.logger
       log_file = ::Proxy::SETTINGS.log_file
-      if log_file.upcase == 'STDOUT'
+      if log_file.casecmp('STDOUT').zero?
         if SETTINGS.daemon
           puts "Settings log_file=STDOUT and daemon=true are incompatible, exiting..."
           exit 1
         end
         logger = ::Logger.new(STDOUT)
-      elsif log_file.upcase == 'SYSLOG'
+      elsif log_file.casecmp('SYSLOG').zero?
         begin
           logger = ::Syslog::Logger.new 'foreman-proxy'
         rescue

@@ -5,10 +5,10 @@ class Proxy::Puppet::PuppetSSH < Proxy::Puppet::Runner
     cmd = []
     cmd.push(which('sudo')) if Proxy::Puppet::Plugin.settings.puppetssh_sudo
     cmd.push(which('ssh'))
-    cmd.push("-l", "#{Proxy::Puppet::Plugin.settings.puppetssh_user}") if Proxy::Puppet::Plugin.settings.puppetssh_user
+    cmd.push("-l", Proxy::Puppet::Plugin.settings.puppetssh_user.to_s) if Proxy::Puppet::Plugin.settings.puppetssh_user
     if (file = Proxy::Puppet::Plugin.settings.puppetssh_keyfile)
       if File.exist?(file)
-        cmd.push("-i", "#{file}")
+        cmd.push("-i", file.to_s)
       else
         logger.warn("Unable to access SSH private key:#{file}, ignoring...")
       end

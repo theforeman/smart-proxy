@@ -131,7 +131,7 @@ module Proxy::DHCP
     end
 
     def vendor_options_included? options
-      !(options.keys.grep(/^</).empty?)
+      !options.keys.grep(/^</).empty?
     end
 
     def vendor_options_supported?

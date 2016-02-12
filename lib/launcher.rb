@@ -99,7 +99,7 @@ module Proxy
 
     def write_pid
       FileUtils.mkdir_p(File.dirname(pid_path)) unless File.exist?(pid_path)
-      File.open(pid_path, ::File::CREAT | ::File::EXCL | ::File::WRONLY){|f| f.write("#{Process.pid}") }
+      File.open(pid_path, ::File::CREAT | ::File::EXCL | ::File::WRONLY){|f| f.write(Process.pid.to_s) }
       at_exit { File.delete(pid_path) if File.exist?(pid_path) }
     rescue Errno::EEXIST
       check_pid
