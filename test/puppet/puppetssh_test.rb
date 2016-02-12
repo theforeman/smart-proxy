@@ -17,13 +17,13 @@ class PuppetSshTest < Test::Unit::TestCase
                 "puppet agent --onetime --no-usecacheonfailure"
               end
     @puppetssh.
-        expects(:shell_command).
-        with(["/usr/bin/ssh", "host1", command], false).
-        returns(true)
+      expects(:shell_command).
+      with(["/usr/bin/ssh", "host1", command], false).
+      returns(true)
     @puppetssh.
-        expects(:shell_command).
-        with(["/usr/bin/ssh", "host2", command], false).
-        returns(true)
+      expects(:shell_command).
+      with(["/usr/bin/ssh", "host2", command], false).
+      returns(true)
     assert @puppetssh.run
   end
 

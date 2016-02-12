@@ -22,7 +22,7 @@ class Proxy::Puppet::PuppetConfigEnvironmentsRetriever
     else
       conf[:main][:environments].split(",").each { |e| env[e.to_sym] = conf[e.to_sym][:modulepath] unless conf[e.to_sym][:modulepath].nil? }
     end
-    if env.values.compact.size == 0
+    if env.values.compact.empty?
       # fall back to defaults - we probably don't use environments
       env[:production] = conf[:main][:modulepath] || conf[:master][:modulepath] || '/etc/puppet/modules'
       logger.warn "No environments found - falling back to defaults (production - #{env[:production]})"
@@ -36,7 +36,7 @@ class Proxy::Puppet::PuppetConfigEnvironmentsRetriever
 
     new_env = env.clone
     # are we using dynamic puppet environments?
-    env.each do|environment, modulepath|
+    env.each do |environment, modulepath|
       next unless modulepath
 
       # expand $confdir if defined and used in modulepath

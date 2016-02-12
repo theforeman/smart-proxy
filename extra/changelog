@@ -27,7 +27,7 @@ list_order.each do |i|
   id = i[:id]
   value = i[:value]
 
-  file.puts "#{id}"
+  file.puts id.to_s
   file.puts value.map { |e| "\t* #{e}" }.join("\n")
   file.puts "\n"
 end

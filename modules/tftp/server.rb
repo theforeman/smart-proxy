@@ -70,7 +70,7 @@ module Proxy::TFTP
 
   class Pxegrub < Server
     def pxeconfig_dir
-      "#{path}"
+      path.to_s
     end
     def pxe_default
       "#{pxeconfig_dir}/boot/grub/menu.lst"

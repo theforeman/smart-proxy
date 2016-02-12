@@ -135,7 +135,7 @@ module ::Proxy
     def execute_migrations(migrations)
       migrations.each do |migration|
         m = migration.new(working_dir_path)
-        puts "#{m.migration_name}"
+        puts m.migration_name.to_s
 
         m.create_migration_dirs
         if migration == migrations.first

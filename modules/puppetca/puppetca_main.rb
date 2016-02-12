@@ -112,7 +112,7 @@ module Proxy::PuppetCa
         @puppetca = which("puppet", default_path)
       end
 
-      unless File.exist?("#{@puppetca}")
+      unless File.exist?(@puppetca.to_s)
         logger.warn "unable to find puppetca binary"
         raise "unable to find puppetca"
       end
@@ -195,16 +195,12 @@ module Proxy::PuppetCa
       response = `#{command} 2>&1`
       if $?.success?
         logger.info "#{mode}ed puppet certificate for #{certname}"
+      elsif response =~ /Could not find client certificate/ || $?.exitstatus == 24
+        logger.info "Attempt to remove nonexistent client certificate for #{certname}"
+        raise NotPresent, "Attempt to remove nonexistent client certificate for #{certname}"
       else
-        # Later versions of puppetca return OK even if the certificate is not present
-        # However we can report this condition for 0.24 and not flag an error to foreman
-        if response =~ /Could not find client certificate/ || $?.exitstatus == 24
-          logger.info "Attempt to remove nonexistent client certificate for #{certname}"
-          raise NotPresent, "Attempt to remove nonexistent client certificate for #{certname}"
-        else
-          logger.warn "Failed to run puppetca: #{response}"
-          raise "Execution of puppetca failed, check log files"
-        end
+        logger.warn "Failed to run puppetca: #{response}"
+        raise "Execution of puppetca failed, check log files"
       end
       $?.success?
     end

@@ -15,7 +15,7 @@ class MigrateDhcpSettings < ::Proxy::Migration
 
   def remap_parameter(aparameter, avalue)
     module_name, parameter_name, converter =
-        KNOWN_PARAMETERS.has_key?(aparameter) ? KNOWN_PARAMETERS[aparameter] : [:unknown, aparameter]
+      KNOWN_PARAMETERS.has_key?(aparameter) ? KNOWN_PARAMETERS[aparameter] : [:unknown, aparameter]
 
     converter.nil? ? [module_name, parameter_name, avalue] : [module_name, parameter_name, send(converter, avalue)]
   end

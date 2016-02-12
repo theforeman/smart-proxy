@@ -267,10 +267,10 @@ module Proxy::DHCP::ISC
         msg.sub!(/Added/, "add")
         msg.sub!(/Enumerated/, "enumerate")
         msg  = "Failed to #{msg}"
-        msg += ": Entry already exists" if response && response.grep(/object: already exists/).size > 0
-        msg += ": No response from DHCP server" if response.nil? || response.grep(/not connected/).size > 0
-        raise Proxy::DHCP::Collision, "Hardware address conflict." if response && response.grep(/object: key conflict/).size > 0
-        raise Proxy::DHCP::InvalidRecord if response && response.grep(/can\'t open object: not found/).size > 0
+        msg += ": Entry already exists" if response && !response.grep(/object: already exists/).empty?
+        msg += ": No response from DHCP server" if response.nil? || !response.grep(/not connected/).empty?
+        raise Proxy::DHCP::Collision, "Hardware address conflict." if response && !response.grep(/object: key conflict/).empty?
+        raise Proxy::DHCP::InvalidRecord if response && !response.grep(/can\'t open object: not found/).empty?
         raise Proxy::DHCP::Error.new(msg)
       else
         logger.info msg

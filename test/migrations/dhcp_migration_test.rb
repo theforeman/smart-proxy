@@ -38,8 +38,8 @@ class ProxyDhcpMigrationTest < Test::Unit::TestCase
 
   def test_migrate_dhcp_configuration
     results =
-        @migration.migrate_dhcp_configuration(:enabled => true,
-                                              :dhcp_config => 'config/path', :dhcp_server => 'localhost')
+      @migration.migrate_dhcp_configuration(:enabled => true,
+                                            :dhcp_config => 'config/path', :dhcp_server => 'localhost')
 
     assert_equal true, results[:dhcp][:enabled]
     assert_equal 'config/path', results[:dhcp_isc][:config]

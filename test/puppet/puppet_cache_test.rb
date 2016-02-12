@@ -45,9 +45,9 @@ module PuppetCacheTestSuite
 
   def test_should_refresh_cache_when_dir_is_changed
     @classes_cache[module_path('modules_include'), module_path('modules_include/testinclude/manifests/init.pp')] =
-        [Proxy::Puppet::PuppetClass.new('testinclude'),
-         Proxy::Puppet::PuppetClass.new('another_testinclude'),
-         Proxy::Puppet::PuppetClass.new('yet_another_testinclude')]
+      [Proxy::Puppet::PuppetClass.new('testinclude'),
+       Proxy::Puppet::PuppetClass.new('another_testinclude'),
+       Proxy::Puppet::PuppetClass.new('yet_another_testinclude')]
     @timestamps[module_path('modules_include'), module_path('modules_include/testinclude/manifests/init.pp')] =
       1000
     assert_equal 3, @classes_cache.values(module_path('modules_include')).size
@@ -61,9 +61,9 @@ module PuppetCacheTestSuite
 
   def test_should_detect_module_removals
     @classes_cache[module_path('modules_include'), module_path('modules_include/removed_testinclude/manifests/init.pp')] =
-        [Proxy::Puppet::PuppetClass.new('testinclude')]
+      [Proxy::Puppet::PuppetClass.new('testinclude')]
     @timestamps[module_path('modules_include'), module_path('modules_include/removed_testinclude/manifests/init.pp')] =
-        Time.now.to_i + 10_000
+      Time.now.to_i + 10_000
     assert @classes_cache[module_path('modules_include'), module_path('modules_include/removed_testinclude/manifests/init.pp')]
 
     @scanner.scan_directory(module_path('modules_include'), 'example_env')
@@ -76,11 +76,11 @@ module PuppetCacheTestSuite
 
   def test_should_not_refresh_cache_when_cache_is_more_recent
     @classes_cache[module_path('modules_include'), module_path('modules_include/testinclude/manifests/init.pp')] =
-        [Proxy::Puppet::PuppetClass.new('testinclude'),
-         Proxy::Puppet::PuppetClass.new('another_testinclude'),
-         Proxy::Puppet::PuppetClass.new('yet_another_testinclude')]
+      [Proxy::Puppet::PuppetClass.new('testinclude'),
+       Proxy::Puppet::PuppetClass.new('another_testinclude'),
+       Proxy::Puppet::PuppetClass.new('yet_another_testinclude')]
     @timestamps[module_path('modules_include'), module_path('modules_include/testinclude/manifests/init.pp')] =
-        (current_time = Time.now.to_i + 10_000)
+      (current_time = Time.now.to_i + 10_000)
     assert_equal 3, @classes_cache.values(module_path('modules_include')).size
 
     @scanner.scan_directory(module_path('modules_include'), 'example_env')

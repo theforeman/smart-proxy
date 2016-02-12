@@ -122,7 +122,7 @@ class ServerIscTest < Test::Unit::TestCase
 
   def test_subnet_matching_with_declaration_and_parameter
     assert "subnet 192.168.123.0 netmask 255.255.255.192 {pool{range 192.168.42.200 192.168.42.254;}option subnet-mask 255.255.255.192;}".
-             match(Proxy::DHCP::ISC::Provider::SUBNET_BLOCK_REGEX)
+      match(Proxy::DHCP::ISC::Provider::SUBNET_BLOCK_REGEX)
   end
 
   def test_mathing_with_spaces_in_declarations

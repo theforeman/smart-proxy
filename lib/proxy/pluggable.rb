@@ -23,10 +23,10 @@ module Proxy::Pluggable
 
     def log_used_default_settings
       settings.defaults.select {|k,v| settings.used_defaults.include?(k)}.
-          inject({}) {|acc, c| acc[c[0].to_s] = c[1]; acc}.
-          sort.
-          collect {|c| ":#{c[0]}: #{c[1]}"}.
-          join(", ")
+        inject({}) {|acc, c| acc[c[0].to_s] = c[1]; acc}.
+        sort.
+        collect {|c| ":#{c[0]}: #{c[1]}"}.
+        join(", ")
     end
 
     def after_activation
@@ -46,10 +46,10 @@ module Proxy::Pluggable
 
     def validate_prerequisites_enabled!(prerequisites)
       prerequisites.each do |p|
-        if !(::Proxy::Plugins.find_plugin(p))
+        if !::Proxy::Plugins.find_plugin(p)
           raise ::Proxy::PluginMisconfigured, "Unable to find dependency '#{p}' of '#{plugin_name}'."
         end
-        if !(::Proxy::Plugins.plugin_enabled?(p))
+        if !::Proxy::Plugins.plugin_enabled?(p)
           raise ::Proxy::PluginMisconfigured, "Dependency '#{p}' of '#{plugin_name}' has not been enabled."
         end
       end
