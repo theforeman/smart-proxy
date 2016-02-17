@@ -11,14 +11,13 @@ end
 
 class DnsCmdTest < Test::Unit::TestCase
   def setup
-    @server = DnscmdForTesting.new([
-      "_msdcs.bar.domain.local",
-      "168.192.in-addr.arpa",
-      "33.168.192.in-addr.arpa",
-      "e.e.d.8.b.d.0.1.0.0.2.ip6.arpa",
-      "bar.domain.local",
-      "domain.local",
-      "TrustAnchors"])
+    @server = DnscmdForTesting.new(["_msdcs.bar.domain.local",
+                                    "168.192.in-addr.arpa",
+                                    "33.168.192.in-addr.arpa",
+                                    "e.e.d.8.b.d.0.1.0.0.2.ip6.arpa",
+                                    "bar.domain.local",
+                                    "domain.local",
+                                    "TrustAnchors"])
   end
 
   def test_dnscmd_provider_initialization
