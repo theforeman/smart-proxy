@@ -3,10 +3,13 @@ require 'dns_virsh/dns_virsh_plugin'
 require 'dns_virsh/dns_virsh_main'
 
 class DnsVirshTest < Test::Unit::TestCase
+  def test_default_settings
+    assert_equal 'default', Proxy::DHCP::Virsh::Provider.new.network
+  end
+
   def test_virsh_provider_initialization
-    ::Proxy::SETTINGS.stubs(:virsh_network).returns('some_network')
-    server = Proxy::Dns::Virsh::Record.new
-    assert_equal "some_network", server.network
+    ::Proxy::Dns::Virsh::Plugin.load_test_settings(:network => 'some_network')
+    assert_equal "some_network", Proxy::Dns::Virsh::Record.new.network
   end
 
   def test_virsh_entry_not_exists_returns_proxy_dns_notfound

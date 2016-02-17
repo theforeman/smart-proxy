@@ -4,6 +4,8 @@ module ::Proxy::Dns::Virsh
 
     requires :dns, ::Proxy::VERSION
 
+    default_settings :network => 'default'
+
     after_activation do
       require 'dns_virsh/dns_virsh_main'
       require 'dns_virsh/dependencies'

@@ -2,7 +2,9 @@
 #
 # Configuration file for libvirtd-specific 'virsh' dhcp provider
 #
-# There's currently no configuration options for this provider.
-# Virsh network name is a global parameter that can be set
-# in the main settings.yml file in 'virsh_network' parameter.
-#
+
+# Libvirt network to use
+#:network: default
+
+# Leases file (managed via /usr/libexec/libvirt_leaseshelper)
+#:leases: /var/lib/libvirt/dnsmasq/virbr0.status
