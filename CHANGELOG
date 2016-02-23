@@ -1,3 +1,16 @@
+2016-02-23	Dominic Cleal <dominic@cleal.org>
+	* Release 1.10.2
+
+2016-02-23	Goh Choon Ming <choon.ming@choonming.org>
+	* fixes #13522 - add correct path to puppet binary
+
+2016-02-23	Daniel Helgenberger <daniel.helgenberger@m-box.de>
+	* Fixes #13346 - use of .each_line on array
+
+2016-02-23	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #13219: force utf-8 external encoding on puppet classes
+	* Fixes #13129: fixes intermittent test failures in ms dhcp server
+
 2016-01-20	Dominic Cleal <dcleal@redhat.com>
 	* Release 1.10.1
 
