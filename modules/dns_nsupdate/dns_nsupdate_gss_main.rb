@@ -17,7 +17,7 @@ module Proxy::Dns::NsupdateGSS
       " -g "
     end
 
-    def nsupdate_connect cmd
+    def nsupdate_connect
       init_krb5_ccache(tsig_keytab, tsig_principal)
       super
     end
