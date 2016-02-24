@@ -1,3 +1,130 @@
+2016-02-24	Dominic Cleal <dominic@cleal.org>
+	* Release 1.11.0-RC1
+
+2016-02-19	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #13028: provider will not be configured if the main plugin is disabled
+
+2016-02-18	Dominic Cleal <dominic@cleal.org>
+	* refs #13638 - fix .empty? check in pkg:generate_source task
+
+2016-02-18	Brandon Weeks <weeks@squareup.com>
+	* Fixes #13638 - Enable rubocop 0.37.1 cops
+
+2016-02-17	Dominic Cleal <dominic@cleal.org>
+	* refs #13421 - change array layout to suit rubocop 0.37.1
+
+2016-02-15	Daniel Helgenberger <daniel.helgenberger@m-box.de>
+	* Fixes #13421 - Support for dnscmd zone names and sub zones
+
+2016-02-15	Marek Hulan <ares@igloonet.cz>
+	* Fixes #13701 - improve .gitignore
+
+2016-02-10	Goh Choon Ming <choon.ming@choonming.org>
+	* fixes #13522 - add correct path to puppet binary
+
+2016-02-10	Brandon Weeks <weeks@squareup.com>
+	* Fixes #13637 - Upgrade rubocop to 0.37.1
+
+2016-01-27	Lukas Zapletal <lzap+git@redhat.com>
+	* Refs #12715 - decoupled logs API from core
+
+2016-01-27	Daniel Helgenberger <daniel.helgenberger@m-box.de>
+	* Fixes #13346 - use of .each_line on array
+
+2016-01-27	Dominic Cleal <dcleal@redhat.com>
+	* refs #12715 - update default values of log_buffer settings
+
+2016-01-25	Lukas Zapletal <lzap+git@redhat.com>
+	* Fixes #12715 - simple log buffer and API
+
+2016-01-21	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #13219: force utf-8 external encoding on puppet classes
+	* Fixes #13129: fixes intermittent test failures in ms dhcp server
+
+2016-01-12	Dominic Cleal <dcleal@redhat.com>
+	* fixes #13062 - handle missing or non-IP fixed-address ISC fields
+
+2015-12-22	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #12555: switched to session-based freeipa api
+
+2015-12-10	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #11081: broke out dhcp providers into separate modules
+
+2015-12-10	Brandon Weeks <weeks@squareup.com>
+	* Fixes #12572 - refactor openssl settings
+
+2015-11-30	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #10378: smart-proxy service starts on windows now
+
+2015-11-26	Brandon Weeks <weeks@squareup.com>
+	* Fixes #12465 - remove deleted records from results
+
+2015-11-26	Shlomi Zadok <shlomi@ben-hanna.com>
+	* Fixes #12568 - Add module versions to /version
+
+2015-11-26	Aaron Stone <aaron@serendipity.cx>
+	* Fixes #12597: remove extraneous method definition in the DNS API tests
+
+2015-11-24	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #12209: introduced basic support for di in dns module
+
+2015-11-24	Brandon Weeks <weeks@squareup.com>
+	* Fixes #12574 - Upgrade rubocop to 0.35.1
+	* Fixes #12578 - set SSL_OP_CIPHER_SERVER_PREFERENCE
+	* Fixes #12580 - configure WEBrick to use ::Proxy::Log.logger
+
+2015-11-23	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #12466: isc dhcp provider handles subnet block declarations correctly now.
+
+2015-11-20	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #12546: smart-proxy now loads under bundler_ext
+
+2015-11-19	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #12146: moved core dependencies into gemspec
+
+2015-11-16	Brandon Weeks <weeks@squareup.com>
+	* Fixes #12469 - raise Proxy::DHCP::InvalidRecord
+
+2015-11-12	Baptiste Agasse <baptiste.agasse@lyra-network.com>
+	* Fixes #12211 - Improve DHCP subnets parsing to get more informations from DHCP server
+
+2015-11-12	Dominic Cleal <dcleal@redhat.com>
+	* fixes #12449 - load nsupdate_gss config from plugin settings
+
+2015-11-11	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #12136: load only Puppet dependencies that are required by the config
+
+2015-11-10	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #12254: pinned addressable gem to ~> 2.3.8
+	* Fixes #8946: Added a handler for SIGTERM
+
+2015-11-10	Ewoud Kohl van Wijngaarden <ewoud@kohlvanwijngaarden.nl>
+	* Fixes #12138: Add require statements to run from bundler
+
+2015-11-09	Lukas Zapletal <lzap+git@redhat.com>
+	* Fixes #12370 - proxy logs stacktrace on SIGTTIN
+
+2015-11-02	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #12319: fixed race condition in templates module
+
+2015-10-20	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #12217: support older versions of bundler
+
+2015-10-19	Timo Goebel <timo.goebel@dm.de>
+	* fixes #12178 - Smart Proxy Plugins do not handle rc versions well
+
+2015-10-19	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #12152: support for ruby 2.2.x
+
+2015-10-13	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #9974: do not attempt to open settings.d/foreman_proxy.yml
+
+2015-10-12	Daniel Helgenberger <daniel.helgenberger@m-box.de>
+	* Fixes #11783 - MS providers: add compat for ruby2.0
+
+2015-10-07	Dominic Cleal <dcleal@redhat.com>
+	* Bump version to 1.11-develop
+
 2015-10-01	Dmitri Dolguikh <dmitri@appliedlogic.ca>
 	* Fixes #12012: missing puppet module dependencies no longer crash smart-proxy on startup
 
