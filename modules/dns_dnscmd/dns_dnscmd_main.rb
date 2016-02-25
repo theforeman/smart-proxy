@@ -1,4 +1,3 @@
-require 'resolv'
 require 'open3'
 require 'dns_common/dns_common'
 
@@ -13,36 +12,49 @@ module Proxy::Dns::Dnscmd
     end
 
     def create_a_record(fqdn, ip)
-      if found = dns_find(fqdn)
-        raise(Proxy::Dns::Collision, "#{fqdn} is already used by #{found}") if found != ip
-      else
-        zone = match_zone(fqdn)
-        msg = "Added DNS entry #{fqdn} => #{ip}"
-        cmd = "/RecordAdd #{zone} #{fqdn}. A #{ip}"
-        execute(cmd, msg)
+      case a_record_conflicts(fqdn, ip) #returns -1, 0, 1
+        when 1 then
+          raise(Proxy::Dns::Collision, "'#{fqdn} 'is already in use")
+        when 0 then
+          return nil
+        else
+          zone = match_zone(fqdn, enum_zones)
+          msg = "Added DNS entry #{fqdn} => #{ip}"
+          cmd = "/RecordAdd #{zone} #{fqdn}. A #{ip}"
+          execute(cmd, msg)
+          nil
       end
     end
 
-    # noop
-    def create_ptr_record(fqdn, ip)
-      found = dns_find(ip)
-      raise(Proxy::Dns::Collision, "#{ip} is already used by #{found}") if found && found != fqdn
-      true
+    def create_ptr_record(fqdn, ptr)
+      case ptr_record_conflicts(fqdn, ptr_to_ip(ptr)) #returns -1, 0, 1
+        when 1 then
+          raise(Proxy::Dns::Collision, "'#{ptr}' is already in use")
+        when 0
+          return nil
+        else
+          zone = match_zone(ptr, enum_zones)
+          msg = "Added PTR entry #{ptr} => #{fqdn}"
+          cmd = "/RecordAdd #{zone} #{ptr}. PTR #{fqdn}."
+          execute(cmd, msg)
+          nil
+      end
     end
 
     def remove_a_record(fqdn)
-      ip = dns_find(fqdn)
-      raise Proxy::Dns::NotFound.new("Cannot find DNS entry for #{fqdn}") unless ip
-      zone = match_zone(fqdn)
-      msg = "Removed DNS entry #{fqdn} => #{ip}"
+      zone = match_zone(fqdn, enum_zones)
+      msg = "Removed DNS entry #{fqdn}"
       cmd = "/RecordDelete #{zone} #{fqdn}. A /f"
       execute(cmd, msg)
+      nil
     end
 
-    # noop
-    def remove_ptr_record(ip)
-      raise Proxy::Dns::NotFound.new("Cannot find DNS entry for #{ip}") unless dns_find(ip)
-      true
+    def remove_ptr_record(ptr)
+      zone = match_zone(ptr, enum_zones)
+      msg = "Removed PTR entry #{ptr}"
+      cmd = "/RecordDelete #{zone} #{ptr}. PTR /f"
+      execute(cmd, msg)
+      nil
     end
 
     def execute cmd, msg=nil, error_only=false
@@ -87,15 +99,13 @@ module Proxy::Dns::Dnscmd
       raise Proxy::Dns::Error.new("Unknown error while processing '#{msg}'")
     end
 
-    def match_zone(fqdn)
-      dns_zones = enum_zones
+    def match_zone(record, zone_list)
       weight = 0 # sub zones might be independent from similar named parent zones; use weight for longest suffix match
       matched_zone = nil
-
-      dns_zones.each do |zone|
+      zone_list.each do |zone|
         zone_labels = zone.split(".").reverse
         zone_weight = zone_labels.length
-        fqdn_labels = fqdn.split(".")
+        fqdn_labels = record.split(".")
         fqdn_labels.shift
         is_match = zone_labels.all? { |zone_label| zone_label == fqdn_labels.pop }
         # match only the longest zone suffix
@@ -104,18 +114,18 @@ module Proxy::Dns::Dnscmd
           weight = zone_weight
         end
       end
-      raise Proxy::Dns::NotFound.new("The DNS server has no authoritative zone for #{fqdn}") unless matched_zone
+      raise Proxy::Dns::NotFound.new("The DNS server has no authoritative zone for #{record}") unless matched_zone
       matched_zone
     end
 
     def enum_zones
       zones = []
-      response = execute('/EnumZones')
+      response = execute '/EnumZones', nil, true
       response.each do |line|
         next unless line =~  / Primary /
         zones << line.sub(/^ +/, '').sub(/ +.*$/, '').chomp("\n")
       end
-      logger.debug "Enumerated dns zones: #{zones}"
+      logger.debug "Enumerated authoritative dns zones: #{zones}"
       zones
     end
   end
