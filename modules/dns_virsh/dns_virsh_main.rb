@@ -8,8 +8,10 @@ module Proxy::Dns::Virsh
     include Proxy::Util
     include Proxy::Virsh
 
+    attr_reader :network
+
     def initialize(a_network = nil)
-      @network = a_network || ::Proxy::SETTINGS.virsh_network
+      @network = a_network || Proxy::Dns::Virsh::Plugin.settings.network
       raise "DNS virsh provider needs 'virsh_network' option" unless @network
       super(nil, nil)
     end

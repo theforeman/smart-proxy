@@ -7,7 +7,7 @@ class VirshProviderTest < Test::Unit::TestCase
   def setup
     @service = Proxy::DHCP::SubnetService.new
     @subnet_store = @service.subnets = Proxy::MemoryStore.new
-    @server = ::Proxy::DHCP::Virsh::Provider.new.initialize_for_testing(:virsh_network => 'default',
+    @server = ::Proxy::DHCP::Virsh::Provider.new.initialize_for_testing(:network => 'default',
                                                                         :name => "127.0.0.1", :service => @service)
     @dump_xml = <<EODUMPXML
 <network>
@@ -29,15 +29,24 @@ class VirshProviderTest < Test::Unit::TestCase
   </ip>
 </network>
 EODUMPXML
+
+    @json_leases = [{
+        "ip-address" => "192.168.122.22",
+        "mac-address" => "52:54:00:13:05:12",
+        "client-id" => "01:52:54:00:13:05:12",
+        "expiry-time" => 1_455_723_598
+    }]
   end
 
-  class DhcpVirshProviderForTesting <  Proxy::DHCP::Virsh::Provider
-    attr_reader :network
+  def test_default_settings
+    assert_equal 'default', Proxy::DHCP::Virsh::Provider.new.network
+    assert_equal '/var/lib/libvirt/dnsmasq/virbr0.status', Proxy::DHCP::Virsh::Provider.new.leases
   end
 
   def test_virsh_provider_initialization
-    Proxy::SETTINGS.stubs(:virsh_network).returns('another_one')
-    assert_equal 'another_one', DhcpVirshProviderForTesting.new.network
+    ::Proxy::DHCP::Virsh::Plugin.load_test_settings(:network => 'some_network', :leases => 'leases.txt')
+    assert_equal 'some_network', Proxy::DHCP::Virsh::Provider.new.network
+    assert_equal 'leases.txt', Proxy::DHCP::Virsh::Provider.new.leases
   end
 
   def test_should_load_subnets
@@ -50,10 +59,13 @@ EODUMPXML
 
   def test_should_load_subnet_data
     @server.expects(:dump_xml).returns(@dump_xml)
+    @server.expects(:parse_json_for_dhcp_leases).returns(@json_leases)
     @server.load_subnet_data(Proxy::DHCP::Subnet.new("192.168.122.0", "255.255.255.0"))
 
     assert @service.find_host_by_ip("192.168.122.0", "192.168.122.10")
     assert @service.find_host_by_ip("192.168.122.0", "192.168.122.11")
+    assert @service.find_lease_by_ip("192.168.122.0", "192.168.122.22")
+    assert @service.find_lease_by_mac("192.168.122.0", "52:54:00:13:05:12")
     assert_equal 2, @service.all_hosts.size
   end
 
