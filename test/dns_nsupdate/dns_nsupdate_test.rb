@@ -30,22 +30,19 @@ class DnsNsupdateTest < Test::Unit::TestCase
     Proxy::Dns::Nsupdate::Record.any_instance.expects(:nsupdate_connect).returns(true)
     Proxy::Dns::Nsupdate::Record.any_instance.expects(:nsupdate).with('update add 33.33.168.192.in-addr.arpa. 100 PTR some.host').returns(true)
     Proxy::Dns::Nsupdate::Record.any_instance.expects(:nsupdate_disconnect).returns(true)
-    Proxy::Dns::Nsupdate::Record.any_instance.expects(:dns_find).with('33.33.168.192.in-addr.arpa').returns(false)
+    Proxy::Dns::Nsupdate::Record.any_instance.expects(:ptr_record_conflicts).with('some.host', '192.168.33.33').returns(-1)
 
-    Proxy::Dns::Nsupdate::Record.new(nil, 100).create_ptr_record('some.host', '33.33.168.192.in-addr.arpa')
+    assert_nil Proxy::Dns::Nsupdate::Record.new(nil, 100).create_ptr_record('some.host', '33.33.168.192.in-addr.arpa')
   end
 
   def test_overwrite_ptr_record
-    Proxy::Dns::Nsupdate::Record.any_instance.expects(:nsupdate_connect).returns(true)
-    Proxy::Dns::Nsupdate::Record.any_instance.expects(:nsupdate_disconnect).returns(true)
-    Proxy::Dns::Nsupdate::Record.any_instance.expects(:dns_find).with('33.33.168.192.in-addr.arpa').returns('some.host')
+    Proxy::Dns::Nsupdate::Record.any_instance.expects(:ptr_record_conflicts).with('some.host', '192.168.33.33').returns(0)
 
-    Proxy::Dns::Nsupdate::Record.new(nil, 100).create_ptr_record('some.host', '33.33.168.192.in-addr.arpa')
+    assert_nil Proxy::Dns::Nsupdate::Record.new(nil, 100).create_ptr_record('some.host', '33.33.168.192.in-addr.arpa')
   end
 
   def test_create_duplicate_ptr_record_fails
-    Proxy::Dns::Nsupdate::Record.any_instance.expects(:nsupdate_connect).returns(true)
-    Proxy::Dns::Nsupdate::Record.any_instance.expects(:dns_find).with('33.33.168.192.in-addr.arpa').returns('another.host')
+    Proxy::Dns::Nsupdate::Record.any_instance.expects(:ptr_record_conflicts).with('some.host', '192.168.33.33').returns(1)
 
     assert_raise Proxy::Dns::Collision do
       Proxy::Dns::Nsupdate::Record.new(nil, 100).create_ptr_record('some.host', '33.33.168.192.in-addr.arpa')
@@ -56,22 +53,19 @@ class DnsNsupdateTest < Test::Unit::TestCase
     Proxy::Dns::Nsupdate::Record.any_instance.expects(:nsupdate_connect).returns(true)
     Proxy::Dns::Nsupdate::Record.any_instance.expects(:nsupdate).with('update add some.host. 100 A 192.168.33.33').returns(true)
     Proxy::Dns::Nsupdate::Record.any_instance.expects(:nsupdate_disconnect).returns(true)
-    Proxy::Dns::Nsupdate::Record.any_instance.expects(:dns_find).with('some.host').returns(false)
+    Proxy::Dns::Nsupdate::Record.any_instance.expects(:a_record_conflicts).with('some.host', '192.168.33.33').returns(-1)
 
-    Proxy::Dns::Nsupdate::Record.new(nil, 100).create_a_record('some.host', '192.168.33.33')
+    assert_nil Proxy::Dns::Nsupdate::Record.new(nil, 100).create_a_record('some.host', '192.168.33.33')
   end
 
   def test_overwrite_address_record
-    Proxy::Dns::Nsupdate::Record.any_instance.expects(:nsupdate_connect).returns(true)
-    Proxy::Dns::Nsupdate::Record.any_instance.expects(:nsupdate_disconnect).returns(true)
-    Proxy::Dns::Nsupdate::Record.any_instance.expects(:dns_find).with('some.host').returns('192.168.33.33')
+    Proxy::Dns::Nsupdate::Record.any_instance.expects(:a_record_conflicts).with('some.host', '192.168.33.33').returns(0)
 
-    Proxy::Dns::Nsupdate::Record.new(nil, 100).create_a_record('some.host', '192.168.33.33')
+    assert_nil Proxy::Dns::Nsupdate::Record.new(nil, 100).create_a_record('some.host', '192.168.33.33')
   end
 
   def test_create_duplicate_address_record_fails
-    Proxy::Dns::Nsupdate::Record.any_instance.expects(:nsupdate_connect).returns(true)
-    Proxy::Dns::Nsupdate::Record.any_instance.expects(:dns_find).with('some.host').returns('192.168.33.34')
+    Proxy::Dns::Nsupdate::Record.any_instance.expects(:a_record_conflicts).with('some.host', '192.168.33.33').returns(1)
 
     assert_raise Proxy::Dns::Collision do
       Proxy::Dns::Nsupdate::Record.new(nil, 100).create_a_record('some.host', '192.168.33.33')
@@ -84,7 +78,7 @@ class DnsNsupdateTest < Test::Unit::TestCase
     Proxy::Dns::Nsupdate::Record.any_instance.expects(:nsupdate_disconnect).returns(true)
     Proxy::Dns::Nsupdate::Record.any_instance.expects(:dns_find).with('33.33.168.192.in-addr.arpa').returns(true)
 
-    Proxy::Dns::Nsupdate::Record.new.remove_ptr_record('33.33.168.192.in-addr.arpa')
+    assert_nil Proxy::Dns::Nsupdate::Record.new.remove_ptr_record('33.33.168.192.in-addr.arpa')
   end
 
   def test_remove_address_record
@@ -93,7 +87,7 @@ class DnsNsupdateTest < Test::Unit::TestCase
     Proxy::Dns::Nsupdate::Record.any_instance.expects(:nsupdate_disconnect).returns(true)
     Proxy::Dns::Nsupdate::Record.any_instance.expects(:dns_find).with('some.host').returns(true)
 
-    Proxy::Dns::Nsupdate::Record.new.remove_a_record('some.host')
+    assert_nil Proxy::Dns::Nsupdate::Record.new.remove_a_record('some.host')
   end
 
   def test_remove_address_record_raises_exception_if_host_does_not_exist
