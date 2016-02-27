@@ -18,11 +18,14 @@ module Proxy::Dns
       log_halt(400, "'create' requires fqdn, value, and type parameters") if fqdn.nil? || value.nil? || type.nil?
 
       begin
+        validate_dns_name!(fqdn)
+
         case type
         when 'A'
           ip = IPAddr.new(value, Socket::AF_INET).to_s
           server.create_a_record(fqdn, ip)
         when 'PTR'
+          validate_reverse_dns_name!(value)
           server.create_ptr_record(fqdn, value)
         else
           log_halt(400, "unrecognized 'type' parameter: #{type}")
@@ -35,16 +38,35 @@ module Proxy::Dns
     end
 
     delete "/:value" do
-      type = params[:value] =~ /\.(in-addr|ip6)\.arpa$/ ? "PTR" : "A"
+      name = params[:value]
+      type = name =~ /\.(in-addr|ip6)\.arpa$/ ? "PTR" : "A"
 
       begin
-        server.remove_a_record(params[:value]) if type == 'A'
-        server.remove_ptr_record(params[:value]) if type == 'PTR'
+        validate_dns_name!(name)
+
+        case type
+        when 'A'
+          server.remove_a_record(name)
+        when 'PTR'
+          validate_reverse_dns_name!(name)
+          server.remove_ptr_record(name)
+        else
+          log_halt(400, "unrecognized 'type' parameter: #{type}")
+        end
       rescue Proxy::Dns::NotFound => e
         log_halt 404, e
       rescue => e
         log_halt 400, e
       end
+    end
+
+    def validate_dns_name!(name)
+      raise Proxy::Dns::Error.new("Invalid DNS name #{name}") unless name =~ /^([a-zA-Z0-9]([-a-zA-Z0-9]+)?\.?)+$/
+    end
+
+    def validate_reverse_dns_name!(name)
+      validate_dns_name!(name)
+      raise Proxy::Dns::Error.new("Invalid reverse DNS #{name}") unless name =~ /\.(in-addr|ip6)\.arpa$/
     end
   end
 end
