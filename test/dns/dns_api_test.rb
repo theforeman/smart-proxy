@@ -59,6 +59,16 @@ class DnsApiTest < Test::Unit::TestCase
     assert_equal 400, last_response.status
   end
 
+  def test_create_returns_error_if_invalid_name_for_a
+    post '/', :fqdn => '-test.com', :value => '33.33.168.192.in-addr.arpa', :type => 'A'
+    assert_equal 400, last_response.status
+  end
+
+  def test_create_returns_error_if_invalid_name_for_ptr
+    post '/', :fqdn => '-test.com', :value => '33.33.168.192.in-addr.arpa', :type => 'PTR'
+    assert_equal 400, last_response.status
+  end
+
   def test_create_returns_error_if_invalid_ip_for_a
     post '/', :fqdn => 'test.com', :value => '300.1.1.1', :type => 'A'
     assert_equal 400, last_response.status
@@ -66,6 +76,11 @@ class DnsApiTest < Test::Unit::TestCase
 
   def test_create_returns_error_if_ipv6_for_a
     post '/', :fqdn => 'test.com', :value => '2001:db8::1', :type => 'A'
+    assert_equal 400, last_response.status
+  end
+
+  def test_create_returns_error_if_invalid_reverse_dns
+    post '/', :fqdn => 'test.com', :value => '192.168.33.33', :type => 'PTR'
     assert_equal 400, last_response.status
   end
 
@@ -94,5 +109,10 @@ class DnsApiTest < Test::Unit::TestCase
   def test_delete_returns_error_if_value_is_missing
     delete '/'
     assert_equal 404, last_response.status
+  end
+
+  def test_delete_returns_error_on_invalid_name
+    delete '/-domain'
+    assert_equal 400, last_response.status
   end
 end
