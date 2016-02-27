@@ -59,6 +59,16 @@ class DnsApiTest < Test::Unit::TestCase
     assert_equal 400, last_response.status
   end
 
+  def test_create_returns_error_if_invalid_ip_for_a
+    post '/', :fqdn => 'test.com', :value => '300.1.1.1', :type => 'A'
+    assert_equal 400, last_response.status
+  end
+
+  def test_create_returns_error_if_ipv6_for_a
+    post '/', :fqdn => 'test.com', :value => '2001:db8::1', :type => 'A'
+    assert_equal 400, last_response.status
+  end
+
   def test_create_ptr_record
     post '/', :fqdn => 'test.com', :value => '33.33.168.192.in-addr.arpa', :type => 'PTR'
     assert_equal 200, last_response.status
