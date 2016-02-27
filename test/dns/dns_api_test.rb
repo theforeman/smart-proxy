@@ -11,11 +11,17 @@ class DnsApiTest < Test::Unit::TestCase
     def create_a_record(fqdn, ip)
       @fqdn = fqdn; @ip = ip; @type = 'A'
     end
+    def create_aaaa_record(fqdn, ip)
+      @fqdn = fqdn; @ip = ip; @type = 'AAAA'
+    end
     def create_ptr_record(fqdn, ip)
       @fqdn = fqdn; @ip = ip; @type = 'PTR'
     end
     def remove_a_record(fqdn)
       @fqdn = fqdn; @type = 'A'
+    end
+    def remove_aaaa_record(fqdn)
+      @fqdn = fqdn; @type = 'AAAA'
     end
     def remove_ptr_record(ip)
       @ip = ip; @type = 'PTR'
@@ -84,12 +90,46 @@ class DnsApiTest < Test::Unit::TestCase
     assert_equal 400, last_response.status
   end
 
-  def test_create_ptr_record
+  def test_create_returns_error_on_ipv4_for_aaaa
+    post '/', :fqdn => 'test.com', :value => '192.168.1.2', :type => "AAAA"
+    assert_equal 400, last_response.status
+  end
+
+  def test_create_returns_error_on_invalid_ipv6_for_aaaa
+    post '/', :fqdn => 'test.com', :value => 'xxxx::1', :type => "AAAA"
+    assert_equal 400, last_response.status
+  end
+
+  def test_create_ptr_v4_record
     post '/', :fqdn => 'test.com', :value => '33.33.168.192.in-addr.arpa', :type => 'PTR'
     assert_equal 200, last_response.status
     assert_equal 'test.com', @server.fqdn
     assert_equal '33.33.168.192.in-addr.arpa', @server.ip
     assert_equal 'PTR', @server.type
+  end
+
+  def test_create_ptr_v6_record
+    post '/', :fqdn => 'test.com', :value => '1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.8.b.d.0.1.0.0.2.ip6.arpa', :type => 'PTR'
+    assert_equal 200, last_response.status
+    assert_equal 'test.com', @server.fqdn
+    assert_equal '1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.8.b.d.0.1.0.0.2.ip6.arpa', @server.ip
+    assert_equal 'PTR', @server.type
+  end
+
+  def test_create_aaaa_record
+    post '/', :fqdn => 'test.com', :value => '2001:db8::1', :type => 'AAAA'
+    assert_equal 200, last_response.status
+    assert_equal 'test.com', @server.fqdn
+    assert_equal '2001:db8::1', @server.ip
+    assert_equal 'AAAA', @server.type
+  end
+
+  def test_create_aaaa_record_is_shortened
+    post '/', :fqdn => 'test.com', :value => '2001:0db8:0000:0000:0000:0000:0000:0001', :type => 'AAAA'
+    assert_equal 200, last_response.status
+    assert_equal 'test.com', @server.fqdn
+    assert_equal '2001:db8::1', @server.ip
+    assert_equal 'AAAA', @server.type
   end
 
   def test_delete_a_record
@@ -118,6 +158,13 @@ class DnsApiTest < Test::Unit::TestCase
     assert_equal 200, last_response.status
     assert_equal '33.33.168.192.in-addr.arpa', @server.ip
     assert_equal 'PTR', @server.type
+  end
+
+  def test_delete_aaaa_record
+    delete "/test.com/AAAA"
+    assert_equal 200, last_response.status
+    assert_equal 'test.com', @server.fqdn
+    assert_equal 'AAAA', @server.type
   end
 
   def test_delete_returns_error_if_value_is_missing

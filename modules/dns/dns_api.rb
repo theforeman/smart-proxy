@@ -24,6 +24,9 @@ module Proxy::Dns
         when 'A'
           ip = IPAddr.new(value, Socket::AF_INET).to_s
           server.create_a_record(fqdn, ip)
+        when 'AAAA'
+          ip = IPAddr.new(value, Socket::AF_INET6).to_s
+          server.create_aaaa_record(fqdn, ip)
         when 'PTR'
           validate_reverse_dns_name!(value)
           server.create_ptr_record(fqdn, value)
@@ -51,6 +54,8 @@ module Proxy::Dns
         case type
         when 'A'
           server.remove_a_record(name)
+        when 'AAAA'
+          server.remove_aaaa_record(name)
         when 'PTR'
           validate_reverse_dns_name!(name)
           server.remove_ptr_record(name)
