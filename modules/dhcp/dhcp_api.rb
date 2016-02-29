@@ -30,14 +30,10 @@ class Proxy::DhcpApi < ::Sinatra::Base
 
   get "/?" do
     begin
-      if request.accept? 'application/json'
-        content_type :json
+      content_type :json
 
-        log_halt 404, "No subnets found on server @{name}" unless server.subnets
-        server.subnets.map{|s| {:network => s.network, :netmask => s.netmask, :options => s.options}}.to_json
-      else
-        erb :"dhcp/index"
-      end
+      log_halt 404, "No subnets found on server @{name}" unless server.subnets
+      server.subnets.map{|s| {:network => s.network, :netmask => s.netmask, :options => s.options}}.to_json
     rescue => e
       log_halt 400, e
     end
@@ -48,12 +44,8 @@ class Proxy::DhcpApi < ::Sinatra::Base
       load_subnet
       load_subnet_data
 
-      if request.accept? 'application/json'
-        content_type :json
-        {:reservations => server.all_hosts(@subnet.network), :leases => server.all_leases(@subnet.network)}.to_json
-      else
-        erb :"dhcp/show"
-      end
+      content_type :json
+      {:reservations => server.all_hosts(@subnet.network), :leases => server.all_leases(@subnet.network)}.to_json
     rescue => e
       log_halt 400, e
     end

@@ -45,8 +45,6 @@ module Proxy
 
   ::Sinatra::Base.set :run, false
   ::Sinatra::Base.set :root, APP_ROOT
-  ::Sinatra::Base.set :views, APP_ROOT + '/views'
-  ::Sinatra::Base.set :public_folder, APP_ROOT + '/public'
   ::Sinatra::Base.set :logging, false # we are not going to use Rack::Logger
   ::Sinatra::Base.use ::Proxy::LoggerMiddleware # instead, we have our own logging middleware
   ::Sinatra::Base.use ::Rack::CommonLogger, ::Proxy::Log.logger
