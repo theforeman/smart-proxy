@@ -1,7 +1,0 @@
-<h2>Subnets</h2>
-<ul>
-  <% @subnets.sort.each do |subnet| %>
-    <a href="/dhcp/<%= subnet.network %>"><li><%= subnet %></li></a>
-  <% end %>
-</ul>
-<%="Total of #{@subnets.size} subnets" %>
