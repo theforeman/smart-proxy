@@ -20,6 +20,7 @@ module Proxy::Dns::Dnscmd
         msg = "Added DNS entry #{fqdn} => #{ip}"
         cmd = "/RecordAdd #{zone} #{fqdn}. A #{ip}"
         execute(cmd, msg)
+        nil
       end
     end
 
@@ -37,6 +38,7 @@ module Proxy::Dns::Dnscmd
       msg = "Removed DNS entry #{fqdn} => #{ip}"
       cmd = "/RecordDelete #{zone} #{fqdn}. A /f"
       execute(cmd, msg)
+      nil
     end
 
     # noop

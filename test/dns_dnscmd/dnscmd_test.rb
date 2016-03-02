@@ -32,7 +32,7 @@ class DnsCmdTest < Test::Unit::TestCase
   def test_create_address_record_with_longest_zone_match
     Proxy::Dns::Dnscmd::Record.any_instance.expects(:dns_find).with('host.foo.bar.domain.local').returns(false)
     Proxy::Dns::Dnscmd::Record.any_instance.expects(:execute).with('/RecordAdd bar.domain.local host.foo.bar.domain.local. A 192.168.33.33', anything).returns(true)
-    assert @server.create_a_record('host.foo.bar.domain.local', '192.168.33.33')
+    assert_equal nil, @server.create_a_record('host.foo.bar.domain.local', '192.168.33.33')
   end
 
   def test_overwrite_address_record_with_longest_zone_match
@@ -68,7 +68,7 @@ class DnsCmdTest < Test::Unit::TestCase
   def test_remove_address_record_with_longest_zone_match
     Proxy::Dns::Dnscmd::Record.any_instance.expects(:dns_find).with('host.foo.bar.domain.local').returns(true)
     Proxy::Dns::Dnscmd::Record.any_instance.expects(:execute).with('/RecordDelete bar.domain.local host.foo.bar.domain.local. A /f', anything).returns(true)
-    assert @server.remove_a_record('host.foo.bar.domain.local')
+    assert_equal nil, @server.remove_a_record('host.foo.bar.domain.local')
   end
 
   def test_remove_non_existent_address_record_raises_exception
