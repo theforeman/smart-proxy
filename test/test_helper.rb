@@ -19,3 +19,7 @@ require 'smart_proxy_for_testing'
 require 'provider_interface_validation/dhcp_provider'
 
 include DhcpProviderInterfaceValidation
+
+def hash_symbols_to_strings(hash)
+  Hash[hash.collect{|k,v| [k.to_s,v]}]
+end

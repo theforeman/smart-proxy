@@ -36,6 +36,8 @@
 :bmc: true
 :bmc_default_provider: ipmitool
 
+:virsh_network: mynetwork
+
 :chefproxy: true
 :chef_authenticate_nodes: true
 :chef_server_url: "https://foreman.example.com"
