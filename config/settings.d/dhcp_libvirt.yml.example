@@ -1,0 +1,8 @@
+---
+# Libvirt DHCP provider configuration
+
+# Libvirt network. Only one network is supported.
+#:network: default
+
+# Libvirt connection. Make sure proxy effective user have permission to connect.
+#:url: qemu:///system

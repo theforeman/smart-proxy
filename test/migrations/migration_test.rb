@@ -101,7 +101,7 @@ class MigrationTest < Test::Unit::TestCase
     @migration.migrations.first.any_instance.expects(:create_migration_dirs)
     migrator.expects(:copy_original_configuration).with(migration.src_dir)
 
-    migrator.execute_migrations([@migration.migrations.first])
+    migrator.execute_migrations([@migration.migrations.first], false)
 
     assert_equal 1, migrator.executed_migrations.size
     assert migrator.executed_migrations.first.instance_of?(@migration.migrations.first)

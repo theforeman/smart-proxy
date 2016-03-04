@@ -24,7 +24,8 @@ class MonolithicConfigMigrationTest < Test::Unit::TestCase
                  :daemon_pid      => "/var/run/foreman-proxy/foreman-proxy.pid",
                  :log_file        => "/var/log/foreman-proxy/proxy.log",
                  :log_level       => "DEBUG",
-                 :https_port      => 8443
+                 :https_port      => 8443,
+                 :virsh_network   => "mynetwork"
   end
 
   def test_output_has_correct_tftp_settings

@@ -132,10 +132,10 @@ module ::Proxy
       persist_migrations_state(executed_migrations, result_dir_path)
     end
 
-    def execute_migrations(migrations)
+    def execute_migrations(migrations, print_name_stdout = true)
       migrations.each do |migration|
         m = migration.new(working_dir_path)
-        puts m.migration_name.to_s
+        puts(m.migration_name.to_s) if print_name_stdout
 
         m.create_migration_dirs
         if migration == migrations.first

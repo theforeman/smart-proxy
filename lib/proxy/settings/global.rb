@@ -9,7 +9,6 @@ module ::Proxy::Settings
       :daemon_pid => "/var/run/foreman-proxy/foreman-proxy.pid",
       :forward_verify => true,
       :bind_host => "*",
-      :virsh_network => 'default',
       :log_buffer => 2000,
       :log_buffer_errors => 1000,
       :ssl_disabled_ciphers => []

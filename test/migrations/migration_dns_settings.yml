@@ -1,10 +1,5 @@
 ---
 :enabled: true
-# Valid providers:
-#   nsupdate
-#   nsupdate_gss (for GSS-TSIG support)
-#   virsh
-#   dnscmd
 :dns_provider: nsupdate
 :dns_key: /etc/bind/rndc.key
 :dns_server: 127.0.0.1
