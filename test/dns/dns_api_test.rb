@@ -99,8 +99,22 @@ class DnsApiTest < Test::Unit::TestCase
     assert_equal 'A', @server.type
   end
 
+  def test_delete_explicit_a_record
+    delete "/test.com/A"
+    assert_equal 200, last_response.status
+    assert_equal 'test.com', @server.fqdn
+    assert_equal 'A', @server.type
+  end
+
   def test_delete_ptr_record
     delete '/33.33.168.192.in-addr.arpa'
+    assert_equal 200, last_response.status
+    assert_equal '33.33.168.192.in-addr.arpa', @server.ip
+    assert_equal 'PTR', @server.type
+  end
+
+  def test_delete_explicit_ptr_record
+    delete '/33.33.168.192.in-addr.arpa/PTR'
     assert_equal 200, last_response.status
     assert_equal '33.33.168.192.in-addr.arpa', @server.ip
     assert_equal 'PTR', @server.type
@@ -113,6 +127,16 @@ class DnsApiTest < Test::Unit::TestCase
 
   def test_delete_returns_error_on_invalid_name
     delete '/-domain'
+    assert_equal 400, last_response.status
+  end
+
+  def test_delete_returns_error_on_invalid_reverse_dns
+    delete '/test.com/PTR'
+    assert_equal 400, last_response.status
+  end
+
+  def test_delete_returns_error_on_invalid_type
+    delete "/test.com/INVALID"
     assert_equal 400, last_response.status
   end
 end
