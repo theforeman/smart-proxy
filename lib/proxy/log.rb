@@ -14,19 +14,13 @@ Logger.class_eval { alias_method :write, :info }
 
 module Proxy
   module Log
-    @@logger = nil
-
     def logger
-      @@logger ||= ::Proxy::Log.logger
+      ::Proxy::LogBuffer::Decorator.instance
     end
+  end
 
-    def self.default_logger(log_file)
-      # We keep the last 6 10MB log files
-      ::Logger.new(log_file, 6, 1024*1024*10)
-    end
-
+  class LoggerFactory
     def self.logger
-      log_file = ::Proxy::SETTINGS.log_file
       if log_file.casecmp('STDOUT').zero?
         if SETTINGS.daemon
           puts "Settings log_file=STDOUT and daemon=true are incompatible, exiting..."
@@ -44,7 +38,16 @@ module Proxy
         logger = default_logger(log_file)
       end
       logger.level = ::Logger.const_get(::Proxy::SETTINGS.log_level.upcase)
-      ::Proxy::LogBuffer::Decorator.new(logger)
+      logger
+    end
+
+    def self.default_logger(log_file)
+      # We keep the last 6 10MB log files
+      ::Logger.new(log_file, 6, 1024*1024*10)
+    end
+
+    def self.log_file
+      ::Proxy::SETTINGS.log_file
     end
   end
 

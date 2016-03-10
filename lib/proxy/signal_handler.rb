@@ -8,6 +8,7 @@ class Proxy::SignalHandler
     handler.install_ttin_trap unless RUBY_PLATFORM =~ /mingw/
     handler.install_int_trap
     handler.install_term_trap
+    handler.install_usr1_trap
   end
 
   def install_ttin_trap
@@ -40,5 +41,11 @@ class Proxy::SignalHandler
 
   def install_term_trap
     trap(:TERM) { exit(0) }
+  end
+
+  def install_usr1_trap
+    trap(:USR1) do
+      ::Proxy::LogBuffer::Decorator.instance.roll_log
+    end
   end
 end
