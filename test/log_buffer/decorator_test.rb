@@ -1,6 +1,10 @@
 require 'test_helper'
 
 class DecoratorTest < Test::Unit::TestCase
+  class DecoratorForTesting < ::Proxy::LogBuffer::Decorator
+    attr_reader :logger
+  end
+
   SIZE = 10
   SIZE_TAIL = 5
 
@@ -13,7 +17,7 @@ class DecoratorTest < Test::Unit::TestCase
     @buffer = Proxy::LogBuffer::Buffer.new(SIZE, SIZE_TAIL, ERR)
     @logger = ::Logger.new("/dev/null")
     @logger.level = INFO
-    @decorator = ::Proxy::LogBuffer::Decorator.new(@logger, @buffer)
+    @decorator = ::Proxy::LogBuffer::Decorator.new(@logger, "STDOUT", @buffer)
   end
 
   def test_should_pass_logs
@@ -53,5 +57,33 @@ class DecoratorTest < Test::Unit::TestCase
     @logger.level = DEBUG
     1.step(5) { |i| @decorator.debug(i) }
     assert_equal [1, 2, 3, 4, 5], @buffer.to_a.collect(&:message)
+  end
+
+  def test_should_not_roll_log_if_stdout_is_used
+    ::Proxy::LoggerFactory.stubs(:logger).returns(::Logger.new("/dev/null"))
+    (d = DecoratorForTesting.new(@logger, "STDOUT", nil)).handle_log_rolling
+    assert_equal @logger, d.logger
+  end
+
+  def test_should_not_roll_log_if_syslog_is_used
+    ::Proxy::LoggerFactory.stubs(:logger).returns(::Logger.new("/dev/null"))
+    (d = DecoratorForTesting.new(@logger, "SYSLOG", nil)).handle_log_rolling
+    assert_equal @logger, d.logger
+  end
+
+  def test_should_roll_log_if_file_logger_is_used
+    ::Proxy::LoggerFactory.stubs(:logger).returns(::Logger.new("/dev/null"))
+    (d = DecoratorForTesting.new(@logger, "/dev/null", nil)).handle_log_rolling
+    assert_not_equal @logger, d.logger
+  end
+
+  def test_should_roll_log_if_flag_is_set
+    ::Proxy::LoggerFactory.stubs(:logger).returns(::Logger.new("/dev/null"))
+    d = DecoratorForTesting.new(@logger, "/dev/null", @buffer)
+
+    d.roll_log
+    d.add(DEBUG)
+
+    assert_not_equal @logger, d.logger
   end
 end
