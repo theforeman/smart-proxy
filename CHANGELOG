@@ -1,3 +1,18 @@
+2016-03-11	Dominic Cleal <dominic@cleal.org>
+	* Release 1.11.0-RC2
+
+2016-03-10	Dominic Cleal <dominic@cleal.org>
+	* fixes #14134 - update rubocop and pin for rake 11.x compatibility
+
+2016-03-10	cyrus-mc <cyrus-mc@users.noreply.github.com>
+	* Fixes #13841 - Smart Proxy DNS nsupdate GSS fails
+
+2016-03-10	Lukas Zapletal <lzap+git@redhat.com>
+	* Fixes #13427 - fixed log buffer with SYSLOG
+
+2016-03-02	Daniel Helgenberger <daniel.helgenberger@m-box.de>
+	* refs #13421 - fix regression: explicitly return nil
+
 2016-02-24	Dominic Cleal <dominic@cleal.org>
 	* Release 1.11.0-RC1
 
