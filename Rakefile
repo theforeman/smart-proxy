@@ -25,6 +25,7 @@ Rake::TestTask.new(:test) do |t|
   t.libs << 'test'
   t.test_files = FileList['test/**/*_test.rb']
   t.verbose = true
+  t.ruby_opts = ["-W1"]
 end
 
 desc 'Generate documentation for the Foreman Proxy plugin.'
