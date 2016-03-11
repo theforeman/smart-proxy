@@ -25,11 +25,15 @@ module Proxy::Helpers
 
   # read the HTTPS client certificate from the environment and extract its CN
   def https_cert_cn
-    certificate_raw = request.env['SSL_CLIENT_CERT'].to_s
-    log_halt 403, 'could not read client cert from environment' if certificate_raw.empty?
+	  certificate_raw        = request.env[Proxy::SETTINGS.ssl_client_cert_header]
+	  certificate_header     = "-----BEGIN CERTIFICATE-----\n"
+	  certificate_body       =  certificate_raw.to_s.split(/[ |\t]/)[2..-3].join("\n")
+	  certificate_footer     = "\n-----END CERTIFICATE-----"
+	  certificate_normalized = certificate_header + certificate_body + certificate_footer
+    log_halt 403, 'could not read client cert from environment' if certificate_normalized.empty?
 
     begin
-      certificate = OpenSSL::X509::Certificate.new certificate_raw
+      certificate = OpenSSL::X509::Certificate.new certificate_normalized
       if certificate.subject && certificate.subject.to_s =~ /CN=([^\s\/,]+)/i
         $1
       else

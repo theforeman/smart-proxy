@@ -6,6 +6,7 @@
 #:ssl_certificate: ssl/certs/fqdn.pem
 #:ssl_ca_file: ssl/certs/ca.pem
 #:ssl_private_key: ssl/private_keys/fqdn.key
+#:ssl_client_cert_header: SSL_CLIENT_CERT
 
 # Use this option only if you need to disable certain cipher suites.
 # Note: we use the OpenSSL suite name, take a look at:
