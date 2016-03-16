@@ -41,6 +41,10 @@
 # If you want to override the puppet_user above just for mco commands
 #:mcollective_user: peadmin
 
+# If you want to override the puppet server an agent will connect to when triggered with mco.
+# By default the agent will connect to the server defined in its local agent configuration file.
+#:mcollective_target_puppet_server: puppet.example.net:1234
+
 # URL of the puppet master itself for API requests
 #:puppet_url: https://puppet.example.com:8140
 # SSL certificates used to access the puppet master API

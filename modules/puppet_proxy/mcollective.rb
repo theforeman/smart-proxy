@@ -23,6 +23,13 @@ class Proxy::Puppet::MCollective < Proxy::Puppet::Runner
       return false
     end
 
-    shell_command(cmd + ["puppet", "runonce", "-I"] + shell_escaped_nodes)
+    cmd.push("puppet", "runonce")
+
+    server = Proxy::Puppet::Plugin.settings.mcollective_target_puppet_server
+    if server
+      cmd.push("--server", server)
+    end
+
+    shell_command(cmd + ["-I"] + shell_escaped_nodes)
   end
 end

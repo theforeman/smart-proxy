@@ -42,6 +42,14 @@ class MCollectiveTest < Test::Unit::TestCase
     assert @mcollective.run
   end
 
+  def test_run_command_with_mcollective_target_puppet_server_defined
+    @mcollective.stubs(:which).with("sudo", anything).returns("/usr/bin/sudo")
+    @mcollective.stubs(:which).with("mco", anything).returns("/usr/bin/mco")
+    Proxy::Puppet::Plugin.settings.stubs(:mcollective_target_puppet_server).returns("puppet.example.net:1234")
+    @mcollective.expects(:shell_command).with(["/usr/bin/sudo", "/usr/bin/mco", "puppet", "runonce", "--server", "puppet.example.net:1234", "-I", "host1", "host2"]).returns(true)
+    assert @mcollective.run
+  end
+
   def test_run_command_with_missing_sudo
     @mcollective.stubs(:which).with("sudo", anything).returns(false)
     @mcollective.stubs(:which).with("mco", anything).returns("/usr/bin/mco")
