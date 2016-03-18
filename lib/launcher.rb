@@ -16,49 +16,39 @@ module Proxy
 
     def http_app
       return nil if SETTINGS.http_port.nil?
-      app = Rack::Builder.new do
-        ::Proxy::Plugins.enabled_plugins.each do |p|
-          instance_eval(p.http_rackup)
-        end
-      end
 
-      Rack::Server.new(
-        :app => app,
-        :server => :webrick,
-        :Host => SETTINGS.bind_host,
-        :Port => SETTINGS.http_port,
-        :Logger => ::Proxy::LogBuffer::Decorator.instance,
-        :daemonize => false)
+      ::Thin::Logging.logger = ::Proxy::LogBuffer::Decorator.instance
+      ::Thin::Server.new(SETTINGS.bind_host, SETTINGS.http_port, :signals => false) do
+        ::Proxy::Plugins.enabled_plugins.each {|p| instance_eval(p.http_rackup)}
+      end
     end
 
     def https_app
-      unless https_enabled?
+      if !https_enabled?
         logger.warn "Missing SSL setup, https is disabled."
-        nil
-      else
-        app = Rack::Builder.new do
-          ::Proxy::Plugins.enabled_plugins.each {|p| instance_eval(p.https_rackup)}
-        end
-
-        ssl_options = OpenSSL::SSL::SSLContext::DEFAULT_PARAMS[:options]
-        ssl_options |= OpenSSL::SSL::OP_CIPHER_SERVER_PREFERENCE if defined?(OpenSSL::SSL::OP_CIPHER_SERVER_PREFERENCE)
-        ssl_options |= OpenSSL::SSL::OP_NO_TLSv1 if defined?(OpenSSL::SSL::OP_NO_TLSv1)
-        ssl_options |= OpenSSL::SSL::OP_NO_TLSv1_1 if defined?(OpenSSL::SSL::OP_NO_TLSv1_1)
-
-        Rack::Server.new(
-          :app => app,
-          :server => :webrick,
-          :Host => SETTINGS.bind_host,
-          :Port => SETTINGS.https_port,
-          :Logger => ::Proxy::LogBuffer::Decorator.instance,
-          :SSLEnable => true,
-          :SSLVerifyClient => OpenSSL::SSL::VERIFY_PEER,
-          :SSLPrivateKey => load_ssl_private_key(SETTINGS.ssl_private_key),
-          :SSLCertificate => load_ssl_certificate(SETTINGS.ssl_certificate),
-          :SSLCACertificateFile => SETTINGS.ssl_ca_file,
-          :SSLOptions => ssl_options,
-          :daemonize => false)
+        return nil
       end
+
+      ::Thin::Logging.logger = ::Proxy::LogBuffer::Decorator.instance
+      s = ::Thin::Server.new(SETTINGS.bind_host, SETTINGS.https_port, :signals => false) do
+        ::Proxy::Plugins.enabled_plugins.each {|p| instance_eval(p.https_rackup)}
+      end
+
+      ssl_version = ['TLSv1_2']
+      ssl_version << 'TLSv1_1' unless defined?(OpenSSL::SSL::OP_NO_TLSv1_1)
+      ssl_version << 'TLSv1' unless defined?(OpenSSL::SSL::OP_NO_TLSv1)
+      ciphers = <<-EOL
+ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-CBC-SHA:ECDHE-RSA-AES256-CBC-SHA:
+AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA
+EOL
+      s.ssl = true
+
+      s.ssl_options = {:private_key_file => SETTINGS.ssl_private_key,
+                       :cert_chain_file => SETTINGS.ssl_certificate,
+                       :verify_peer => true,
+                       :cipher_list => ciphers.gsub("\n", ""),
+                       :ssl_version => ssl_version}
+      s
     end
 
     def load_ssl_private_key(path)

@@ -16,6 +16,13 @@ module Proxy::LogBuffer
       @roll_log = false
     end
 
+    def level
+      @logger.level
+    end
+
+    def level=(level)
+    end
+
     # due to synchronization can't re-open the log from the signal trap
     def roll_log
       @roll_log = true
@@ -73,6 +80,10 @@ module Proxy::LogBuffer
 
     def fatal(msg_or_progname, exception_or_backtrace = nil, &block)
       add(::Logger::Severity::FATAL, nil, msg_or_progname, exception_or_backtrace, &block)
+    end
+
+    def unknown
+
     end
 
     def method_missing(symbol, *args);
