@@ -25,17 +25,7 @@ class Proxy::SignalHandler
   end
 
   def install_int_trap
-    if Rack.release < '1.6.4'
-      # Rack installs its own trap; Sleeping for 5 secs insures we overwrite it with our own
-      Thread.new do
-        sleep 5
-        begin
-          trap(:INT) { exit(0) }
-        rescue Exception => e
-          logger.warn "Unable to overwrite interrupt trap: #{e}"
-        end
-      end
-    end
+    trap(:INT) { exit(0) }
   end
 
   def install_term_trap

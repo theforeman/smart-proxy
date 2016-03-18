@@ -22,13 +22,14 @@ module Proxy
         end
       end
 
-      Rack::Server.new(
+      {
         :app => app,
         :server => :webrick,
-        :Host => SETTINGS.bind_host,
+        :BindAddress => SETTINGS.bind_host,
         :Port => SETTINGS.http_port,
         :Logger => ::Proxy::Log.logger,
-        :daemonize => false)
+        :daemonize => false
+      }
     end
 
     def https_app
@@ -45,10 +46,10 @@ module Proxy
         ssl_options |= OpenSSL::SSL::OP_NO_TLSv1 if defined?(OpenSSL::SSL::OP_NO_TLSv1)
         ssl_options |= OpenSSL::SSL::OP_NO_TLSv1_1 if defined?(OpenSSL::SSL::OP_NO_TLSv1_1)
 
-        Rack::Server.new(
+        {
           :app => app,
           :server => :webrick,
-          :Host => SETTINGS.bind_host,
+          :BindAddress => SETTINGS.bind_host,
           :Port => SETTINGS.https_port,
           :Logger => ::Proxy::Log.logger,
           :SSLEnable => true,
@@ -57,7 +58,8 @@ module Proxy
           :SSLCertificate => load_ssl_certificate(SETTINGS.ssl_certificate),
           :SSLCACertificateFile => SETTINGS.ssl_ca_file,
           :SSLOptions => ssl_options,
-          :daemonize => false)
+          :daemonize => false
+        }
       end
     end
 
@@ -110,6 +112,12 @@ module Proxy
       ::Proxy::Plugins.update(::Proxy::PluginInitializer.new.initialize_plugins(::Proxy::Plugins.loaded))
     end
 
+    def webrick_server(app)
+      server = ::WEBrick::HTTPServer.new(app)
+      server.mount "/", Rack::Handler::WEBrick, app[:app]
+      server
+    end
+
     def launch
       configure_plugins
 
@@ -123,8 +131,8 @@ module Proxy
         write_pid
       end
 
-      t1 = Thread.new { https_app.start } unless https_app.nil?
-      t2 = Thread.new { http_app.start } unless http_app.nil?
+      t1 = Thread.new { webrick_server(https_app).start } unless https_app.nil?
+      t2 = Thread.new { webrick_server(http_app).start } unless http_app.nil?
 
       Proxy::SignalHandler.install_traps
 
