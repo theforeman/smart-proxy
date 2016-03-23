@@ -12,6 +12,7 @@ module ::Proxy::Settings
       :virsh_network => 'default',
       :log_buffer => 2000,
       :log_buffer_errors => 1000,
+      :ssl_disabled_ciphers => []
     }
 
     HOW_TO_NORMALIZE = {
