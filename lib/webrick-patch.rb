@@ -1,6 +1,9 @@
 require 'webrick/https'
 
-CIPHERS = 'ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-CBC-SHA:ECDHE-RSA-AES256-CBC-SHA:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA'
+CIPHERS = ['ECDHE-RSA-AES128-GCM-SHA256','ECDHE-RSA-AES256-GCM-SHA384',
+           'ECDHE-RSA-AES128-CBC-SHA','ECDHE-RSA-AES256-CBC-SHA',
+           'AES128-GCM-SHA256','AES256-GCM-SHA384','AES128-SHA256',
+           'AES256-SHA256','AES128-SHA','AES256-SHA']
 
 module WEBrick
   class GenericServer
@@ -14,7 +17,7 @@ module WEBrick
       end
       ctx = OpenSSL::SSL::SSLContext.new
       ctx.set_params
-      ctx.ciphers = CIPHERS
+      ctx.ciphers = (CIPHERS - Proxy::SETTINGS.ssl_disabled_ciphers).join(':')
       ctx.key = config[:SSLPrivateKey]
       ctx.cert = config[:SSLCertificate]
       ctx.client_ca = config[:SSLClientCA]
