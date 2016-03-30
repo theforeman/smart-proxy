@@ -13,6 +13,12 @@ class CustomRunTest < Test::Unit::TestCase
     @customrun.run
   end
 
+  def test_customrun_with_nil_customrun_args
+    ::Proxy::Puppet::Plugin.load_test_settings(:customrun_cmd => "/bin/false", :customrun_args => nil)
+    @customrun.expects(:shell_command).with(["/bin/false", "host1", "host2"]).returns(true)
+    @customrun.run
+  end
+
   def test_customrun_with_array_command_args
     ::Proxy::Puppet::Plugin.load_test_settings(:customrun_cmd => "/bin/false", :customrun_args => ["-ay", "-f", "-s"])
     @customrun.expects(:shell_command).with(["/bin/false", "-ay", "-f", "-s", "host1", "host2"]).returns(true)
