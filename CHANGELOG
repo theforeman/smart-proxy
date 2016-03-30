@@ -1,3 +1,10 @@
+2016-03-30	Dominic Cleal <dominic@cleal.org>
+	* Release 1.10.3
+	* fixes #14134 - update rubocop and pin for rake 11.x compatibility
+
+2016-03-30	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #14159 - output to the console during tests reduced to the normal volume
+
 2016-02-23	Dominic Cleal <dominic@cleal.org>
 	* Release 1.10.2
 
