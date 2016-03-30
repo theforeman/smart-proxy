@@ -28,6 +28,7 @@ module Proxy
         :BindAddress => SETTINGS.bind_host,
         :Port => SETTINGS.http_port,
         :Logger => ::Proxy::LogBuffer::Decorator.instance,
+        :ServerSoftware => 'WEBrick',
         :daemonize => false
       }
     end
@@ -52,6 +53,7 @@ module Proxy
           :BindAddress => SETTINGS.bind_host,
           :Port => SETTINGS.https_port,
           :Logger => ::Proxy::LogBuffer::Decorator.instance,
+          :ServerSoftware => 'WEBrick',
           :SSLEnable => true,
           :SSLVerifyClient => OpenSSL::SSL::VERIFY_PEER,
           :SSLPrivateKey => load_ssl_private_key(SETTINGS.ssl_private_key),
