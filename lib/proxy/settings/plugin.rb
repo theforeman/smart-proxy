@@ -9,7 +9,5 @@ module ::Proxy::Settings
       @used_defaults = @defaults.keys - settings.keys
       super(@defaults.merge(settings))
     end
-
-    def method_missing(symbol, *args); nil; end
   end
 end
