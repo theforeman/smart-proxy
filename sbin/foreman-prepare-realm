@@ -59,7 +59,7 @@ else
     --permission='System: Manage Host Certificates' --permission='System: Modify Hosts' --permission='System: Remove Hosts' \
     --permission='System: Manage Host Keytab' --permission='Retrieve Certificates from the CA' --permission='System: Modify Services' \
     --permission='System: Manage Service Keytab' --permission='System: Add DNS Entries' --permission='System: Update DNS Entries' \
-    --permission='System: Remove DNS Entries' --permission='Add Host Enrollment Password'
+    --permission='System: Remove DNS Entries' --permission='System: Read DNS Entries' --permission='Add Host Enrollment Password'
 fi
 
 ipa role-add 'Smart Proxy Host Manager' --desc='Smart Proxy management'
