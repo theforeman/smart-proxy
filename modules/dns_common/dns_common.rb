@@ -42,7 +42,18 @@ module Proxy::Dns
     # no conflict: -1; conflict: 1, conflict but record / ip matches: 0
     def a_record_conflicts(fqdn, ip)
       if ip_addr = to_ipaddress(ip)
-        addresses = resolver.getaddresses(fqdn)
+        addresses = resolver.getaddresses(fqdn).select { |a| a =~ Resolv::IPv4::Regex }
+        return -1 if addresses.empty?
+        return 0 if addresses.any? {|a| IPAddr.new(a.to_s) == ip_addr}
+        1
+      else
+        raise Proxy::Dns::Error.new("Not an IP Address: '#{ip}'")
+      end
+    end
+
+    def aaaa_record_conflicts(fqdn, ip)
+      if ip_addr = to_ipaddress(ip)
+        addresses = resolver.getaddresses(fqdn).select { |a| a =~ Resolv::IPv6::Regex }
         return -1 if addresses.empty?
         return 0 if addresses.any? {|a| IPAddr.new(a.to_s) == ip_addr}
         1

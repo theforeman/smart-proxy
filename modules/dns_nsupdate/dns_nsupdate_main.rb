@@ -13,29 +13,53 @@ module Proxy::Dns::Nsupdate
     end
 
     def create_a_record(fqdn, ip)
-      do_create(fqdn, ip, "A")
+      case a_record_conflicts(fqdn, ip) #returns -1, 0, 1
+      when 1
+        raise(Proxy::Dns::Collision, "'#{fqdn} 'is already in use")
+      when 0 then
+        return nil
+      else
+        do_create(fqdn, ip, "A")
+      end
     end
 
-    def create_ptr_record(fqdn, ip)
-      do_create(ip, fqdn, "PTR")
+    def create_aaaa_record(fqdn, ip)
+      case aaaa_record_conflicts(fqdn, ip) #returns -1, 0, 1
+      when 1
+        raise(Proxy::Dns::Collision, "'#{fqdn} 'is already in use")
+      when 0 then
+        return nil
+      else
+        do_create(fqdn, ip, "AAAA")
+      end
+    end
+
+    def create_ptr_record(fqdn, ptr)
+      case ptr_record_conflicts(fqdn, ptr_to_ip(ptr)) #returns -1, 0, 1
+      when 1
+        raise(Proxy::Dns::Collision, "'#{fqdn} 'is already in use")
+      when 0 then
+        return nil
+      else
+        do_create(ptr, fqdn, "PTR")
+      end
     end
 
     def do_create(id, value, type)
       nsupdate_connect
-
-      if found = dns_find(id)
-        raise(Proxy::Dns::Collision, "#{id} is already used by #{found}") unless found == value
-      else
-        nsupdate "update add #{id}. #{@ttl} #{type} #{value}"
-      end
-
+      nsupdate "update add #{id}. #{@ttl} #{type} #{value}"
       nsupdate_disconnect
+      nil
     ensure
       @om.close unless @om.nil? || @om.closed?
     end
 
     def remove_a_record(fqdn)
       do_remove(fqdn, "A")
+    end
+
+    def remove_aaaa_record(fqdn)
+      do_remove(fqdn, "AAAA")
     end
 
     def remove_ptr_record(ip)
@@ -49,6 +73,7 @@ module Proxy::Dns::Nsupdate
       nsupdate "update delete #{id} #{type}"
 
       nsupdate_disconnect
+      nil
     end
 
     def nsupdate_args

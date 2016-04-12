@@ -29,10 +29,16 @@ class DnsCmdTest < Test::Unit::TestCase
     assert_equal 999, server.ttl
   end
 
-  def test_create_address_record_with_longest_zone_match
+  def test_create_a_record_with_longest_zone_match
     Proxy::Dns::Dnscmd::Record.any_instance.expects(:a_record_conflicts).with('host.foo.bar.domain.local', '192.168.33.33').returns(-1)
     Proxy::Dns::Dnscmd::Record.any_instance.expects(:execute).with('/RecordAdd bar.domain.local host.foo.bar.domain.local. A 192.168.33.33', anything).returns(true)
     assert_nil @server.create_a_record('host.foo.bar.domain.local', '192.168.33.33')
+  end
+
+  def test_create_aaaa_record_with_longest_zone_match
+    Proxy::Dns::Dnscmd::Record.any_instance.expects(:aaaa_record_conflicts).with('host.foo.bar.domain.local', '2001:db8:deef::1').returns(-1)
+    Proxy::Dns::Dnscmd::Record.any_instance.expects(:execute).with('/RecordAdd bar.domain.local host.foo.bar.domain.local. AAAA 2001:db8:deef::1', anything).returns(true)
+    assert_nil @server.create_aaaa_record('host.foo.bar.domain.local', '2001:db8:deef::1')
   end
 
   def test_overwrite_address_record_with_longest_zone_match
