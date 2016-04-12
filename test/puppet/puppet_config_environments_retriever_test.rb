@@ -1,5 +1,5 @@
 require 'test_helper'
-require 'puppet_proxy/dependency_injection/container'
+require 'puppet_proxy/puppet'
 require 'puppet_proxy/environment'
 require 'puppet_proxy/puppet_config_environments_retriever'
 
@@ -11,8 +11,7 @@ end
 class PuppetConfigEnvironmentsRetrieverTest < Test::Unit::TestCase
   def setup
     @puppet_configuration = PuppetConfigurationForTesting.new
-    @retriever =  Proxy::Puppet::PuppetConfigEnvironmentsRetriever.new
-    @retriever.puppet_configuration = @puppet_configuration
+    @retriever =  Proxy::Puppet::PuppetConfigEnvironmentsRetriever.new(@puppet_configuration)
   end
 
   def test_single_static_env
@@ -97,6 +96,23 @@ class PuppetConfigEnvironmentsRetrieverTest < Test::Unit::TestCase
     }
     env = @retriever.all
     assert_equal env.map { |e| e.name }, ['master']
+  end
+
+  def test_get_environment
+    @puppet_configuration.data = {
+        :main => {},
+        :production => { :modulepath => module_path('environments/prod') }
+    }
+
+    env = @retriever.get('production')
+    assert_equal 'production', env.name
+  end
+
+  def test_get_environment_raises_exception_if_environment_not_found
+    @puppet_configuration.data = {
+        :main => {}
+    }
+    assert_raise(Proxy::Puppet::EnvironmentNotFound) { @retriever.get('non_existent') }
   end
 
   def module_path(*relative_path)

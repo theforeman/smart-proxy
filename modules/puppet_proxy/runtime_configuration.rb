@@ -1,22 +1,33 @@
 require 'proxy/util'
-require 'puppet_proxy/puppet_config'
 
 module Proxy::Puppet::RuntimeConfiguration
   include Proxy::Util
 
-  def puppet_parser
-    use_future_parser = puppet_version.to_i >= 4 ||
-        (puppet_configuration[:main] && puppet_configuration[:main][:parser] == 'future') ||
-        (puppet_configuration[:master] && puppet_configuration[:master][:parser] == 'future')
-    use_future_parser ? :future_parser : :legacy_parser
+  def classes_retriever
+    return :api_v3 if Proxy::Puppet::Plugin.settings.puppet_version.to_s >= '4.0'
+
+    use_future_parser =
+      (puppet_configuration[:main] && puppet_configuration[:main][:parser] == 'future') ||
+      (puppet_configuration[:master] && puppet_configuration[:master][:parser] == 'future')
+
+    use_cache = !!Proxy::Puppet::Plugin.settings.use_cache
+
+    if use_cache && use_future_parser
+      :cached_future_parser
+    elsif use_cache && !use_future_parser
+      :cached_legacy_parser
+    elsif !use_cache && use_future_parser
+      :future_parser
+    else
+      :legacy_parser
+    end
   end
 
   def environments_retriever
-    force = to_bool(Proxy::Puppet::Plugin.settings.puppet_use_environment_api, nil)
+    return :api_v3 if Proxy::Puppet::Plugin.settings.puppet_version.to_s >= '4.0'
 
-    if puppet_version.to_i >= 4
-      :api_v3
-    elsif puppet_version.to_f < 3.2
+    force = to_bool(Proxy::Puppet::Plugin.settings.puppet_use_environment_api, nil)
+    if Proxy::Puppet::Plugin.settings.puppet_version.to_s < '3.2'
       :config_file
     elsif !force.nil? && force
       :api_v2
@@ -30,9 +41,5 @@ module Proxy::Puppet::RuntimeConfiguration
 
   def puppet_configuration
     Proxy::Puppet::PuppetConfig.new.get
-  end
-
-  def puppet_version
-    Puppet::PUPPETVERSION
   end
 end

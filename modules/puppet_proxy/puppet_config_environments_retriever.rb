@@ -1,15 +1,15 @@
-require 'puppet_proxy/dependency_injection/container'
-
-class Proxy::Puppet::PuppetConfigEnvironmentsRetriever
+class Proxy::Puppet::PuppetConfigEnvironmentsRetriever < Proxy::Puppet::EnvironmentsRetrieverBase
   include ::Proxy::Log
-  extend Proxy::Puppet::DependencyInjection::Injectors
 
-  inject_attr :puppet_configuration_impl, :puppet_configuration
-
-  def conf
-    puppet_configuration.get
+  def initialize(puppet_configuration)
+    @puppet_configuration = puppet_configuration
   end
 
+  def conf
+    @puppet_configuration.get
+  end
+
+  # rubocop:disable Metrics/PerceivedComplexity
   def all
     env = { }
     # query for the environments variable
@@ -24,7 +24,7 @@ class Proxy::Puppet::PuppetConfigEnvironmentsRetriever
     end
     if env.values.compact.empty?
       # fall back to defaults - we probably don't use environments
-      env[:production] = conf[:main][:modulepath] || conf[:master][:modulepath] || '/etc/puppet/modules'
+      env[:production] = (conf[:main][:modulepath] rescue nil) || (conf[:master][:modulepath] rescue nil) || '/etc/puppet/modules'
       logger.warn "No environments found - falling back to defaults (production - #{env[:production]})"
     end
     if env.size == 1 && env.keys.first == :master && !env.values.first.include?('$environment')
@@ -94,6 +94,6 @@ class Proxy::Puppet::PuppetConfigEnvironmentsRetriever
     end
 
     new_env.reject { |k, v| k.nil? || v.nil? }
-    new_env.map { |environment, path| Proxy::Puppet::Environment.new(:name => environment, :paths => path.split(":")) }
+    new_env.map { |environment, path| Proxy::Puppet::Environment.new(environment, path.split(":")) }
   end
 end

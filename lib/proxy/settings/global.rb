@@ -16,7 +16,6 @@ module ::Proxy::Settings
     }
 
     HOW_TO_NORMALIZE = {
-      # rubocop:disable Style/Lambda
       :foreman_url => lambda { |value| value.end_with?("/") ? value : value + "/" }
     }
 

@@ -41,16 +41,20 @@
 # If you want to override the puppet_user above just for mco commands
 #:mcollective_user: peadmin
 
-# URL of the puppet master itself for API requests
+# Override use of Puppet's API to list environments, by default it will use only if
+# environmentpath is given in puppet.conf, else will look for environments in puppet.conf
+# (Puppet versions prior to 4.0 only)
+#:puppet_use_environment_api: true
+
+# Puppet version used
+#:puppet_version: 4.1
+
+# URL of the puppet master itself for API requests. Required for puppet versions 4.0 and above.
 #:puppet_url: https://puppet.example.com:8140
 # SSL certificates used to access the puppet master API
 #:puppet_ssl_ca: /var/lib/puppet/ssl/certs/ca.pem
 #:puppet_ssl_cert: /var/lib/puppet/ssl/certs/puppet.example.com.pem
 #:puppet_ssl_key: /var/lib/puppet/ssl/private_keys/puppet.example.com.pem
 
-# Override use of Puppet's API to list environments, by default it will use only if
-# environmentpath is given in puppet.conf, else will look for environments in puppet.conf
-#:puppet_use_environment_api: true
-
-# Cache options
+# Enable/disable puppet class cache (Puppet versions prior to 4.0 only)
 #:use_cache: true

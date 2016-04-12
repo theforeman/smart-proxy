@@ -1,7 +1,9 @@
 require 'test_helper'
+require 'puppet'
 require 'puppet_proxy/puppet_plugin'
 require 'puppet_proxy/initializer'
 require 'puppet_proxy/puppet_class'
+require 'puppet_proxy/class_scanner_base'
 require 'puppet_proxy/puppet_cache'
 require 'tmpdir'
 
@@ -12,7 +14,7 @@ module PuppetCacheTestSuite
   end
 
   def test_should_refresh_classes_cache_when_dir_is_not_in_cache
-    @scanner.scan_directory(module_path('modules_include'), 'example_env')
+    @scanner.scan_directory(module_path('modules_include'))
 
     assert_equal Proxy::Puppet::PuppetClass.new('testinclude'),
                  @classes_cache[module_path('modules_include'), module_path('modules_include/testinclude/manifests/init.pp')].first
@@ -22,7 +24,7 @@ module PuppetCacheTestSuite
   end
 
   def test_should_refresh_timestamps_when_dir_is_not_in_cache
-    @scanner.scan_directory(module_path('modules_include'), 'example_env')
+    @scanner.scan_directory(module_path('modules_include'))
 
     assert @timestamps[module_path('modules_include'), module_path('modules_include/testinclude/manifests/sub/foo.pp')]
     assert @timestamps[module_path('modules_include'), module_path('modules_include/testinclude/manifests/init.pp')]
@@ -30,7 +32,7 @@ module PuppetCacheTestSuite
   end
 
   def test_scan_directory_response
-    cache = @scanner.scan_directory(module_path('modules_include'), 'example_env')
+    cache = @scanner.scan_directory(module_path('modules_include'))
 
     assert_kind_of Array, cache
     assert_equal 2, cache.size
@@ -52,7 +54,7 @@ module PuppetCacheTestSuite
       1000
     assert_equal 3, @classes_cache.values(module_path('modules_include')).size
 
-    @scanner.scan_directory(module_path('modules_include'), 'example_env')
+    @scanner.scan_directory(module_path('modules_include'))
 
     assert_equal 2, @classes_cache.values(module_path('modules_include')).size
     assert_equal 2, @timestamps.values(module_path('modules_include')).size
@@ -66,7 +68,7 @@ module PuppetCacheTestSuite
       Time.now.to_i + 10_000
     assert @classes_cache[module_path('modules_include'), module_path('modules_include/removed_testinclude/manifests/init.pp')]
 
-    @scanner.scan_directory(module_path('modules_include'), 'example_env')
+    @scanner.scan_directory(module_path('modules_include'))
 
     assert_nil @classes_cache[module_path('modules_include'), module_path('modules_include/removed_testinclude/manifests/init.pp')]
     assert_nil @timestamps[module_path('modules_include'), module_path('modules_include/removed_testinclude/manifests/init.pp')]
@@ -83,7 +85,7 @@ module PuppetCacheTestSuite
       (current_time = Time.now.to_i + 10_000)
     assert_equal 3, @classes_cache.values(module_path('modules_include')).size
 
-    @scanner.scan_directory(module_path('modules_include'), 'example_env')
+    @scanner.scan_directory(module_path('modules_include'))
     assert_equal 4, @classes_cache.values(module_path('modules_include')).size
     assert_equal 2, @timestamps.values(module_path('modules_include')).size
     assert @timestamps[module_path('modules_include'), module_path('modules_include/testinclude/manifests/init.pp')] == current_time
@@ -91,14 +93,25 @@ module PuppetCacheTestSuite
 
   def test_should_return_no_puppet_classes_when_environment_has_no_modules
     Dir.expects(:glob).with('empty_environment/*').returns([])
-    result = @scanner.scan_directory('empty_environment', 'example_env')
+    result = @scanner.scan_directory('empty_environment')
 
     assert result.empty?
   end
 
   def test_should_parse_puppet_classes_with_unicode_chars
-    @scanner.scan_directory(module_path('with_unicode_chars'), "testing")
+    @scanner.scan_directory(module_path('with_unicode_chars'))
     assert_equal 1,  @classes_cache.values(module_path('with_unicode_chars')).size
+  end
+
+  class EnvironmentRetrieverForTesting
+    def get(an_environment)
+      raise "Unexpected environment name '#{an_environment}'" unless an_environment == 'first'
+      ::Proxy::Puppet::Environment.new('first', [File.expand_path('modules_include', File.expand_path('../fixtures', __FILE__))])
+    end
+  end
+  def test_responds_to_classes_in_environment
+    @scanner.classes_in_environment('first')
+    assert_equal 2, @timestamps.values(File.expand_path('modules_include', File.expand_path('../fixtures', __FILE__))).size
   end
 
   def module_path(relative_path)
@@ -106,30 +119,28 @@ module PuppetCacheTestSuite
   end
 end
 
-if Puppet::PUPPETVERSION.to_i < 4
-  class PuppetCacheWithLegacyParserTest < Test::Unit::TestCase
+if Puppet::PUPPETVERSION < '4.0'
+  class CachingRetrieverWithLegacyParserTest < Test::Unit::TestCase
     include PuppetCacheTestSuite
 
     def setup
       super
       @classes_cache = ::Proxy::MemoryStore.new
       @timestamps = ::Proxy::MemoryStore.new
-      @scanner = ::Proxy::Puppet::PuppetCache.new(@classes_cache, @timestamps)
-      @scanner.puppet_class_scanner = ::Proxy::Puppet::ClassScanner.new
+      @scanner = ::Proxy::Puppet::PuppetCache.new(EnvironmentRetrieverForTesting.new, ::Proxy::Puppet::ClassScanner.new(nil), @classes_cache, @timestamps)
     end
   end
 end
 
-if Puppet::PUPPETVERSION.to_f >= 3.2
-  class PuppetCacheWithFutureParserTest < Test::Unit::TestCase
+if Puppet::PUPPETVERSION > '3.2'
+  class CachingRetrieverWithFutureParserTest < Test::Unit::TestCase
     include PuppetCacheTestSuite
 
     def setup
       super
       @classes_cache = ::Proxy::MemoryStore.new
       @timestamps = ::Proxy::MemoryStore.new
-      @scanner = ::Proxy::Puppet::PuppetCache.new(@classes_cache, @timestamps)
-      @scanner.puppet_class_scanner = ::Proxy::Puppet::ClassScannerEParser.new
+      @scanner = ::Proxy::Puppet::PuppetCache.new(EnvironmentRetrieverForTesting.new, ::Proxy::Puppet::ClassScannerEParser.new(nil), @classes_cache, @timestamps)
     end
   end
 end

@@ -8,15 +8,22 @@ module Proxy::Puppet
 
     plugin :puppet, ::Proxy::VERSION
 
-    validate_readable :puppet_conf
+    validate_presence :puppet_version
 
     after_activation do
-      require 'puppet_proxy/initializer'
-      require 'puppet_proxy/ssl_configuration_validator'
+      require 'puppet_proxy/puppet_config' if settings.puppet_version.to_s < '4.0'
+      require 'puppet_proxy/runtime_configuration'
 
-      ::Proxy::Puppet::Initializer.new.reset_puppet
-      ::Proxy::Puppet::SslConfigurationValidator.new.validate_ssl_paths!
+      require 'puppet_proxy/configuration_validator'
+      ::Proxy::Puppet::ConfigurationValidator.new(settings).validate!
 
+      require 'puppet' if settings.puppet_version.to_s < '4.0'
+      require 'puppet_proxy/initializer' if settings.puppet_version.to_s < '4.0'
+
+      require 'puppet_proxy/environments_retriever_base'
+      require 'puppet_proxy/class_scanner_base'
+      require 'puppet_proxy/environment'
+      require 'puppet_proxy/puppet_class'
       require 'puppet_proxy/dependency_injection/container'
       require 'puppet_proxy/dependency_injection/dependencies'
     end
