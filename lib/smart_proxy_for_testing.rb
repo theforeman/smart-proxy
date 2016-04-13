@@ -10,12 +10,13 @@ require 'proxy/settings/global'
 require 'proxy/dependency_injection'
 require 'proxy/util'
 require 'proxy/http_download'
-require 'proxy/memory_store'
 require 'proxy/helpers'
+require 'proxy/memory_store'
+require 'proxy/plugin_validators'
 require 'proxy/pluggable'
+require 'proxy/plugins'
 require 'proxy/plugin'
 require 'proxy/plugin_initializer'
-require 'proxy/plugin_validators'
 require 'proxy/provider_factory'
 require 'proxy/provider'
 require 'proxy/error'
@@ -31,9 +32,7 @@ Proxy::VERSION = File.read(File.join(File.dirname(__FILE__), '../VERSION')).chom
 ::Sinatra::Base.register ::Sinatra::Authorization
 
 module ::Proxy::Pluggable
-  module ClassMethods
-    def load_test_settings(a_hash)
-      @settings = ::Proxy::Settings::Plugin.new(plugin_default_settings, a_hash)
-    end
+  def load_test_settings(a_hash)
+    @settings = ::Proxy::Settings::Plugin.new(plugin_default_settings, a_hash)
   end
 end

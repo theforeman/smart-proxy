@@ -28,8 +28,7 @@ class ServerIscTest < Test::Unit::TestCase
     @subnet_service =  Proxy::DHCP::SubnetService.new
     @dhcp = Proxy::DHCP::ISC::Provider.new.initialize_for_testing(
         :name => '192.168.122.1', :config_file => './test/fixtures/dhcp/dhcp.conf',
-        :leases_file => './test/fixtures/dhcp/dhcp.leases',
-        :service => @subnet_service, :omapi_port => 999)
+        :leases_file => './test/fixtures/dhcp/dhcp.leases', :service => @subnet_service, :omapi_port => 999)
   end
 
   class DhcpIscProviderForTesting < ::Proxy::DHCP::ISC::Provider
@@ -56,8 +55,10 @@ class ServerIscTest < Test::Unit::TestCase
     omio = OMIO.new
     IO.expects(:popen).with("/bin/sh -c 'fakeshell 2>&1'", "r+").returns(omio)
     @dhcp.omcmd('connect')
-    assert_equal "port 999", omio.input_commands[1]
     assert_equal "server 192.168.122.1", omio.input_commands[0]
+    assert_equal "port 999", omio.input_commands[1]
+    assert_equal "connect", omio.input_commands[2]
+    assert_equal "new host", omio.input_commands[3]
   end
 
   def test_sparc_host_quirks

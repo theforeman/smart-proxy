@@ -20,4 +20,8 @@ module Proxy::Settings
     end
     ::Proxy::Settings::Plugin.new(defaults, settings)
   end
+
+  def self.read_settings_file(settings_file, settings_directory = nil)
+    YAML.load(File.read(File.join(settings_directory || ::Proxy::SETTINGS.settings_directory, settings_file))) || {}
+  end
 end
