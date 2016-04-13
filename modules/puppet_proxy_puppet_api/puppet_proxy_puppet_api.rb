@@ -1,0 +1,3 @@
+require 'puppet_proxy_common/custom_validators'
+require 'puppet_proxy_puppet_api/plugin_configuration'
+require 'puppet_proxy_puppet_api/puppet_proxy_puppet_api_plugin'

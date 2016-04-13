@@ -1,0 +1,7 @@
+---
+# Set :command to the full path of the script you want to run, instead of /bin/false
+#:command: /bin/false
+#
+# Set :command_arguments to any args you want to pass to your custom script. The hostname of the
+# system to run against will be appended after the custom commands.
+#:command_arguments: -ay -f -s

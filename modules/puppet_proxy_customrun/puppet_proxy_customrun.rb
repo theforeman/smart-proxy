@@ -1,0 +1,2 @@
+require 'puppet_proxy_customrun/plugin_configuration'
+require 'puppet_proxy_customrun/puppet_proxy_customrun_plugin'

@@ -1,7 +1,8 @@
 require 'test_helper'
-require 'puppet_proxy/dependency_injection/container'
-require 'puppet_proxy/environment'
-require 'puppet_proxy/puppet_config_environments_retriever'
+require 'puppet_proxy_common/environment'
+require 'puppet_proxy_common/environments_retriever_base'
+require 'puppet_proxy_common/errors'
+require 'puppet_proxy_legacy/puppet_config_environments_retriever'
 
 class PuppetConfigurationForTesting
   attr_accessor :data
@@ -11,13 +12,12 @@ end
 class PuppetConfigEnvironmentsRetrieverTest < Test::Unit::TestCase
   def setup
     @puppet_configuration = PuppetConfigurationForTesting.new
-    @retriever =  Proxy::Puppet::PuppetConfigEnvironmentsRetriever.new
-    @retriever.puppet_configuration = @puppet_configuration
+    @retriever =  Proxy::PuppetLegacy::PuppetConfigEnvironmentsRetriever.new(@puppet_configuration, "/etc/puppet/puppet.conf")
   end
 
   def test_single_static_env
     @puppet_configuration.data = {
-        :main => {},
+        :main => {}, :master => {},
         :production => { :modulepath => module_path('environments/prod') }
     }
 
@@ -37,7 +37,7 @@ class PuppetConfigEnvironmentsRetrieverTest < Test::Unit::TestCase
 
   def test_multiple_static_env
     @puppet_configuration.data = {
-        :main => {},
+        :main => {}, :master => {},
         :production  => { :modulepath => module_path('environments/prod') },
         :development => { :modulepath => module_path('environments/dev') }
     }
@@ -47,7 +47,7 @@ class PuppetConfigEnvironmentsRetrieverTest < Test::Unit::TestCase
 
   def test_multiple_modulepath_in_single_env_loads_all_classes
     @puppet_configuration.data = {
-        :main => {},
+        :main => {}, :master => {},
         :production  => { :modulepath => module_path('environments/dev', 'environments/prod') },
     }
     env = @retriever.all
@@ -97,6 +97,37 @@ class PuppetConfigEnvironmentsRetrieverTest < Test::Unit::TestCase
     }
     env = @retriever.all
     assert_equal env.map { |e| e.name }, ['master']
+  end
+
+  def test_missing_main_section_in_puppet_configuration_raises_exception
+    @puppet_configuration.data = {
+        :master => {}
+    }
+    assert_raise(Exception) { @retriever.all }
+  end
+
+  def test_missing_master_section_in_puppet_configuration_raises_exception
+    @puppet_configuration.data = {
+        :main => {}
+    }
+    assert_raise(Exception) { @retriever.all }
+  end
+
+  def test_get_environment
+    @puppet_configuration.data = {
+        :main => {}, :master => {},
+        :production => { :modulepath => module_path('environments/prod') }
+    }
+
+    env = @retriever.get('production')
+    assert_equal 'production', env.name
+  end
+
+  def test_get_environment_raises_exception_if_environment_not_found
+    @puppet_configuration.data = {
+        :master => {}, :main => {}
+    }
+    assert_raise(Proxy::Puppet::EnvironmentNotFound) { @retriever.get('non_existent') }
   end
 
   def module_path(*relative_path)
