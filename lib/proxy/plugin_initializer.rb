@@ -24,9 +24,13 @@ class ::Proxy::PluginGroup
     providers = all_plugins_and_providers.select {|p| used_providers.include?(p[:name].to_sym)}
 
     not_available = used_providers - providers.map {|p| p[:name].to_sym}
-    return @providers = providers.map {|p| p[:class]} if not_available.empty?
 
-    fail_group_with_message("Disabling all modules in the group '#{member_names.join(', ')}': following providers are not available #{not_available}")
+    if not_available.empty?
+      logger.debug "Providers #{printable_module_names(used_providers)} are going to be configured for '#{@plugin.plugin_name}'"
+      return @providers = providers.map {|p| p[:class]}
+    end
+
+    fail_group_with_message("Disabling all modules in the group #{printable_module_names(member_names)}: following providers are not available #{printable_module_names(not_available)}")
   end
 
   def members
@@ -35,6 +39,11 @@ class ::Proxy::PluginGroup
 
   def member_names
     members.map {|m| m.plugin_name }
+  end
+
+  def printable_module_names(names)
+    printable = names.map {|name| "'#{name}'"}.join(", ")
+    "[#{printable}]"
   end
 
   def load_plugin_settings
@@ -46,12 +55,10 @@ class ::Proxy::PluginGroup
   def load_provider_settings
     return if failed?
     providers.each do |p|
-      begin
         p.module_loader_class.new(p, di_container).load_settings(plugin.settings.marshal_dump)
-      rescue Exception => e
-        fail_group(e)
-      end
     end
+  rescue Exception => e
+    fail_group(e)
   end
 
   def configure
@@ -64,7 +71,7 @@ class ::Proxy::PluginGroup
   end
 
   def fail_group(an_exception)
-    fail_group_with_message("Disabling all modules in the group '#{member_names.join(', ')}' due to a failure in one of them: #{an_exception}", an_exception.backtrace)
+    fail_group_with_message("Disabling all modules in the group #{printable_module_names(member_names)} due to a failure in one of them: #{an_exception}", an_exception.backtrace)
   end
 
   def fail_group_with_message(a_message, a_backtrace = nil)
@@ -215,7 +222,7 @@ module ::Proxy::DefaultSettingsLoader
     main_plugin_settings.delete(:enabled)
     # all modules have 'enabled' setting, we ignore it when looking for duplicate setting names
     if !(overlap = main_plugin_settings.keys - (main_plugin_settings.keys - provider_settings.keys)).empty?
-      raise "Provider '#{plugin.plugin_name}' settings conflict with the main plugin's settings: #{overlap}"
+      raise Exception, "Provider '#{plugin.plugin_name}' settings conflict with the main plugin's settings: #{overlap}"
     end
     provider_settings.merge(main_plugin_settings)
   end
@@ -254,8 +261,8 @@ module ::Proxy::DefaultSettingsLoader
 
     validations.inject([]) do |all, validator|
       validator_class = available_validators[validator[:name]]
-      raise "Found an unknown validator '#{validator[:name]}' when validating '#{plugin.plugin_name}' module." if validator_class.nil?
-      validator_class.new(plugin, validator[:setting], validator[:args], validator[:predicate]).validate!(config)
+      raise Exception, "Encountered an unknown validator '#{validator[:name]}' when validating '#{plugin.plugin_name}' module." if validator_class.nil?
+      validator_class.new(plugin, validator[:setting], validator[:args], validator[:predicate]).evaluate_predicate_and_validate!(config)
       all << {:class => validator_class, :setting => validator[:setting], :args => validator[:args], :predicate => validator[:predicate]}
     end
   end

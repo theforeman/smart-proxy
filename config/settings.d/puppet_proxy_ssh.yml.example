@@ -1,0 +1,15 @@
+---
+# the command which will be sent to the host
+#:command: puppet agent --onetime --no-usecacheonfailure
+#
+# whether to use sudo before the ssh command
+#:use_sudo: false
+#
+# wait for the command to finish (and capture exit code), or detach process and return 0
+# Note: enabling this option causes the Foreman web UI to be blocked when executing puppetrun,
+# with timeout from the Browser and/or Foreman's REST client after 60 seconds.
+#:wait: false
+#
+# With which user should the proxy connect
+#:user: root
+#:keyfile: /etc/foreman-proxy/id_rsa

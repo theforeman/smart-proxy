@@ -13,7 +13,7 @@ class ModuleLoaderTest < Test::Unit::TestCase
   end
 
   def test_merge_settings_should_fail_when_duplicate_settings_detected
-    assert_raises(RuntimeError) { @loader.merge_settings({:duplicate => "first"}, :duplicate => "second")}
+    assert_raises(Exception) { @loader.merge_settings({:duplicate => "first"}, :duplicate => "second")}
   end
 
   def test_merge_settings_should_ignore_enabled
@@ -73,26 +73,27 @@ class ModuleLoaderTest < Test::Unit::TestCase
 
   class TestValidator < ::Proxy::PluginValidators::Base
     def validate!(settings)
-      raise "Predicate evaluated to false!" unless evaluate_predicate(settings)
       true
     end
   end
   class TestPluginWithCustomValidators < ::Proxy::Plugin
     load_validators :testing => TestValidator
-    validate :setting, :testing => {:arg1 => "arg1", :arg2 => "arg2"}
+    validate :setting, :testing => {:arg1 => "arg1", :arg2 => "arg2"}, :if => lambda {|settings| settings[:evaluate]}
   end
   def test_validate_runtime_config_executes_custom_validators
     loader = ::Proxy::DefaultModuleLoader.new(TestPluginWithCustomValidators, nil)
-    results = loader.validate_settings(TestPluginWithCustomValidators, :setting => "value")
-    assert_equal([{:class => TestValidator, :setting => :setting, :args => {:arg1 => "arg1", :arg2 => "arg2"}, :predicate => nil}], results)
-  end
+    results = loader.validate_settings(TestPluginWithCustomValidators, :setting => "value", :evaluate => true)
 
+    predicate = TestPluginWithCustomValidators.validations.first[:predicate]
+    assert_equal([{:class => TestValidator, :setting => :setting, :args => {:arg1 => "arg1", :arg2 => "arg2"}, :predicate => predicate}], results)
+  end
+  
   class AnotherTestPluginWithCustomValidators < ::Proxy::Plugin
     validate :setting, :non_existent => true
   end
   def test_validate_runtime_config_raises_exception_on_unknown_validator
     loader = ::Proxy::DefaultModuleLoader.new(AnotherTestPluginWithCustomValidators, nil)
-    assert_raises(RuntimeError) { loader.validate_settings(AnotherTestPluginWithCustomValidators, :setting => "value")}
+    assert_raises(Exception) { loader.validate_settings(AnotherTestPluginWithCustomValidators, :setting => "value")}
   end
 
   class TestDIWirings

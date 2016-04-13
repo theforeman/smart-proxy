@@ -15,12 +15,15 @@ module ::Proxy::PluginValidators
       return true if @predicate.nil?
       return @predicate.call(settings)
     end
+
+    def evaluate_predicate_and_validate!(settings)
+      return true unless evaluate_predicate(settings)
+      validate!(settings)
+    end
   end
 
   class FileReadable < Base
     def validate!(settings)
-      return true unless evaluate_predicate(settings)
-
       setting_value = settings[@setting_name]
       return true if !required_setting? && setting_value.nil? # validate optional settings only if they aren't nil
       raise ::Proxy::Error::ConfigurationError, "File at '#{setting_value}' defined in '#{@setting_name}' parameter doesn't exist or is unreadable" unless File.readable?(setting_value)
@@ -30,8 +33,6 @@ module ::Proxy::PluginValidators
 
   class Presence < Base
     def validate!(settings)
-      return true unless evaluate_predicate(settings)
-
       setting_value = settings[@setting_name]
       raise ::Proxy::Error::ConfigurationError, "Parameter '#{@setting_name}' is expected to have a non-empty value" if setting_value.to_s.empty?
       true

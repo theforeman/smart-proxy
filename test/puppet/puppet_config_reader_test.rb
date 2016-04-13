@@ -1,5 +1,5 @@
 require 'test_helper'
-require 'puppet_proxy/puppet_config'
+require 'puppet_proxy_legacy/puppet_config'
 
 class PuppetConfigReaderTest < Test::Unit::TestCase
   def setup
@@ -7,7 +7,7 @@ class PuppetConfigReaderTest < Test::Unit::TestCase
   end
 
   def build
-    Proxy::Puppet::ConfigReader.new(@puppet_conf)
+    Proxy::PuppetLegacy::ConfigReader.new(@puppet_conf)
   end
 
   def test_get_should_return_section_hash

@@ -1,18 +1,14 @@
 require 'test_helper'
-require 'puppet_proxy/puppet_plugin'
-require 'puppet_proxy/puppet_class'
-require 'puppet_proxy/initializer'
+require 'puppet_proxy_common/puppet_class'
 
 class PuppetClassTest < Test::Unit::TestCase
-  def setup
-    Proxy::Puppet::Plugin.load_test_settings(:use_cache => false)
-  end
-
   def test_should_parse_modulename_correctly
     klass = Proxy::Puppet::PuppetClass.new "foreman_proxy::install"
     assert_equal "foreman_proxy", klass.module
+
     klass = Proxy::Puppet::PuppetClass.new "dummy"
     assert_nil klass.module
+
     klass = Proxy::Puppet::PuppetClass.new "dummy::klass::nested"
     assert_equal "dummy", klass.module
   end
@@ -20,8 +16,10 @@ class PuppetClassTest < Test::Unit::TestCase
   def test_should_parse_puppet_class_correctly
     klass = Proxy::Puppet::PuppetClass.new "foreman_proxy::install"
     assert_equal "install", klass.name
+
     klass = Proxy::Puppet::PuppetClass.new "dummy"
     assert_equal "dummy", klass.name
+
     klass = Proxy::Puppet::PuppetClass.new "dummy::klass::nested"
     assert_equal "klass::nested", klass.name
   end

@@ -62,8 +62,4 @@ class MigrateDhcpSettings < ::Proxy::Migration
       end
     end
   end
-
-  def strip_ruby_symbol_encoding(astring)
-    astring.gsub("!ruby/symbol ", ":").gsub("!ruby/sym ", ":")
-  end
 end

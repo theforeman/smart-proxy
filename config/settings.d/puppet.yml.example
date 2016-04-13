@@ -3,54 +3,12 @@
 :enabled: false
 
 # valid providers:
-#   puppetrun   (for puppetrun/kick, deprecated in Puppet 3)
-#   mcollective (uses mco puppet)
-#   puppetssh   (run puppet over ssh)
-#   salt        (uses salt puppet.run)
-#   customrun   (calls a custom command with args)
-#:puppet_provider: puppetrun
+#   puppet_proxy_puppetrun   (for puppetrun/kick, deprecated in Puppet 3)
+#   puppet_proxy_mcollective (uses mco puppet)
+#   puppet_proxy_puppetssh   (run puppet over ssh)
+#   puppet_proxy_salt        (uses salt puppet.run)
+#   puppet_proxy_customrun   (calls a custom command with args)
+#:use_provider: puppet_proxy_puppetrun
 
-# Custom salt puppet.run command
-# Set :salt_puppetrun_cmd to 'puppet.run agent no-noop' to run in no-noop mode.
-# Default command is puppet.run.
-#:salt_puppetrun_cmd: puppet.run
-
-# Customrun command details
-# Set :customrun_cmd to the full path of the script you want to run, instead of /bin/false
-:customrun_cmd: /bin/false
-# Set :customrun_args to any args you want to pass to your custom script. The hostname of the
-# system to run against will be appended after the custom commands.
-:customrun_args: -ay -f -s
-
-:puppet_conf: /etc/puppet/puppet.conf
-# whether to use sudo before the ssh command
-:puppetssh_sudo: false
-# the command which will be sent to the host
-:puppetssh_command: /usr/bin/puppet agent --onetime --no-usecacheonfailure
-# wait for the command to finish (and capture exit code), or detach process and return 0
-# Note: enabling this option causes the Foreman web UI to be blocked when executing puppetrun,
-# with timeout from the Browser and/or Foreman's REST client after 60 seconds.
-:puppetssh_wait: false
-# With which user should the proxy connect
-#:puppetssh_user: root
-#:puppetssh_keyfile: /etc/foreman-proxy/id_rsa
-
-# Which user to invoke sudo as to run puppet commands
-#:puppet_user: root
-
-# If you want to override the puppet_user above just for mco commands
-#:mcollective_user: peadmin
-
-# URL of the puppet master itself for API requests
-#:puppet_url: https://puppet.example.com:8140
-# SSL certificates used to access the puppet master API
-#:puppet_ssl_ca: /var/lib/puppet/ssl/certs/ca.pem
-#:puppet_ssl_cert: /var/lib/puppet/ssl/certs/puppet.example.com.pem
-#:puppet_ssl_key: /var/lib/puppet/ssl/private_keys/puppet.example.com.pem
-
-# Override use of Puppet's API to list environments, by default it will use only if
-# environmentpath is given in puppet.conf, else will look for environments in puppet.conf
-#:puppet_use_environment_api: true
-
-# Cache options
-#:use_cache: true
+# Puppet version used
+#:puppet_version: 4.1
