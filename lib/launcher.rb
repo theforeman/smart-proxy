@@ -17,7 +17,7 @@ module Proxy
     def http_app
       return nil if SETTINGS.http_port.nil?
       app = Rack::Builder.new do
-        ::Proxy::Plugins.enabled_plugins.each do |p|
+        ::Proxy::Plugins.instance.enabled_plugins.each do |p|
           instance_eval(p.http_rackup)
         end
       end
@@ -38,7 +38,7 @@ module Proxy
         nil
       else
         app = Rack::Builder.new do
-          ::Proxy::Plugins.enabled_plugins.each {|p| instance_eval(p.https_rackup)}
+          ::Proxy::Plugins.instance.enabled_plugins.each {|p| instance_eval(p.https_rackup)}
         end
 
         ssl_options = OpenSSL::SSL::SSLContext::DEFAULT_PARAMS[:options]
@@ -110,10 +110,6 @@ module Proxy
       retry
     end
 
-    def configure_plugins
-      ::Proxy::Plugins.update(::Proxy::PluginInitializer.new.initialize_plugins(::Proxy::Plugins.loaded))
-    end
-
     def webrick_server(app)
       server = ::WEBrick::HTTPServer.new(app)
       server.mount "/", Rack::Handler::WEBrick, app[:app]
@@ -121,7 +117,7 @@ module Proxy
     end
 
     def launch
-      configure_plugins
+      ::Proxy::PluginInitializer.new(::Proxy::Plugins.instance).initialize_plugins
 
       http_app = http_app()
       https_app = https_app()

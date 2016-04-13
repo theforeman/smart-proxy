@@ -13,7 +13,7 @@ class RequestTest < Test::Unit::TestCase
     @foreman_url = 'https://foreman.example.com'
     Proxy::SETTINGS.stubs(:foreman_url).returns(@foreman_url)
     @template_url = 'http://proxy.lan:8443'
-    Proxy::Templates::Plugin.settings.stubs(:template_url).returns(@template_url)
+    Proxy::Templates::Plugin.load_test_settings(:template_url => @template_url)
     @request = Proxy::HttpRequest::ForemanRequest.new
   end
 

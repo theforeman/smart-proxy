@@ -13,7 +13,7 @@ class TftpApiTest < Test::Unit::TestCase
   end
 
   def setup
-    Proxy::TFTP::Plugin.settings.stubs(:tftproot).returns("/some/root")
+    Proxy::TFTP::Plugin.load_test_settings(:tftproot => "/some/root")
     @args = { :pxeconfig => "foo" }
   end
 
@@ -70,5 +70,4 @@ class TftpApiTest < Test::Unit::TestCase
 
   private
   attr_reader :args
-
 end

@@ -1,131 +1,182 @@
 module Proxy::Pluggable
-  def self.included(base)
-    base.send(:include, InstanceMethods)
-    base.send(:extend, ClassMethods)
+  attr_reader :plugin_name, :version, :after_activation_blk
+
+  # Methods below define DSL for defining plugins
+  def after_activation(&blk)
+    @after_activation_blk = blk
   end
 
-  module InstanceMethods
-    def plugin_name
-      self.class.plugin_name
-    end
-
-    def version
-      self.class.version
-    end
-
-    def bundler_group
-      self.class.bundler_group_name || self.plugin_name
-    end
-
-    def settings
-      self.class.settings
-    end
-
-    def log_used_default_settings
-      settings.defaults.select {|k,v| settings.used_defaults.include?(k)}.
-        inject({}) {|acc, c| acc[c[0].to_s] = c[1]; acc}.
-        sort.
-        collect {|c| ":#{c[0]}: #{c[1]}"}.
-        join(", ")
-    end
-
-    def after_activation
-      instance_eval(&self.class.after_activation_blk) if self.class.after_activation_blk
-    end
-
-    def validate!(all_plugins)
-      validate_dependencies!(all_plugins, self.class.dependencies)
-      execute_validators(self.class.plugin_default_settings.keys.map {|k| ::Proxy::PluginValidators::Presence.new(self.class, k)})
-      execute_validators(self.class.validators)
-    end
-
-    def execute_validators(validators)
-      validators.each { |validator| validator.validate! }
-    end
-
-    def validate_dependencies!(all_plugins, dependencies)
-      dependencies.each do |dep|
-        plugin = all_plugins.find {|p| p[:name] == dep.name}
-        raise ::Proxy::PluginNotFound, "Plugin '#{dep.name}' required by plugin '#{plugin_name}' could not be found." unless plugin
-        unless ::Gem::Dependency.new('', dep.version).match?('', self.class.cleanup_version(plugin[:instance].version))
-          raise ::Proxy::PluginVersionMismatch, "Available version '#{plugin[:instance].version}' of plugin '#{dep.name}' doesn't match version '#{dep.version}' required by plugin '#{plugin_name}'"
-        end
-      end
-    end
-
-    def loading_failed(message)
-      raise ::Proxy::PluginLoadingAborted, message
-    end
+  def requires(plugin_name, version_spec)
+    self.dependencies << ::Proxy::Dependency.new(plugin_name, cleanup_version(version_spec))
   end
 
-  module ClassMethods
-    attr_reader :plugin_name, :version, :after_activation_blk, :bundler_group_name
+  def bundler_group(name)
+    @bundler_group_name = name
+  end
 
-    # Methods below define DSL for defining plugins
-
-    def after_activation(&blk)
-      @after_activation_blk = blk
-    end
-
-    def requires(plugin_name, version_spec)
-      self.dependencies << ::Proxy::Dependency.new(plugin_name, cleanup_version(version_spec))
-    end
-
-    def bundler_group(name)
-      @bundler_group_name = name
-    end
-
-    # relative to ::Proxy::SETTINGS.settings_directory
-    def settings_file(apath = nil)
-      if apath.nil?
-        @settings_file || "#{plugin_name}.yml"
-      else
-        @settings = nil
-        @settings_file = apath
-      end
-    end
-
-    def default_settings(a_hash = {})
+  # relative to ::Proxy::SETTINGS.settings_directory
+  def settings_file(apath = nil)
+    if apath.nil?
+      @settings_file || "#{plugin_name}.yml"
+    else
       @settings = nil
-      @plugin_default_settings ||= {}
-      @plugin_default_settings.merge!(a_hash)
+      @settings_file = apath
     end
+  end
 
-    def initialize_after(*module_names)
-      raise "#{plugin_name}: 'initialize_after' method has been removed."
+  def default_settings(a_hash = {})
+    @settings = nil
+    @plugin_default_settings ||= {}
+    @plugin_default_settings.merge!(a_hash)
+  end
+
+  def initialize_after(*module_names)
+    raise "#{plugin_name}: 'initialize_after' method has been removed."
+  end
+
+  def validate_readable(*settings)
+    validate(*settings.push(:file_readable => true))
+  end
+
+  def validate_presence(*settings)
+    validate(*settings.push(:presence => true))
+  end
+
+  def validate(*settings)
+    validator_params = settings.pop
+    predicate = validator_params.delete(:if)
+    validator_name = validator_params.keys.first
+    validator_args = validator_params[validator_name]
+
+    settings.each {|setting| validations << {:name => validator_name, :predicate => predicate, :args => validator_args, :setting => setting} }
+  end
+
+  def load_validators(hash_of_validators)
+    @custom_validators = hash_of_validators
+  end
+
+  def load_dependency_injection_wirings(class_name_to_use = nil, &block_to_use)
+    @di_wirings_loader = class_name_to_use || block_to_use
+  end
+
+  def load_programmable_settings(class_name_to_use = nil, &block_to_use)
+    @programmable_settings = class_name_to_use || block_to_use
+  end
+
+  def load_classes(class_name_to_use = nil, &block_to_use)
+    @class_loader = class_name_to_use || block_to_use
+  end
+
+  def start_services(*di_labels)
+    @services = di_labels
+  end
+
+  #
+  # End of DSL
+  #
+
+  def settings
+    @settings ||= Proxy::Settings.load_plugin_settings(plugin_default_settings, settings_file)
+  end
+
+  def settings=(arg)
+    @settings = arg
+  end
+
+  def module_loader_class
+    @module_loader_class ||= after_activation_blk.nil? ? ::Proxy::DefaultModuleLoader : ::Proxy::LegacyModuleLoader
+  end
+
+  class ClassLoaderProcWrapper
+    def initialize(a_blk)
+      @a_blk = a_blk
     end
-
-    def validate_readable(*settings)
-      # Passing in plugin class and setting name is a bit awkward, but we need to delay the loading of module settings
-      # until after module's Plugin/Provider class has been loaded (to preserve order-independence of statements used in
-      # the class body of the Plugin.)
-      settings.each { |setting| validators << ::Proxy::PluginValidators::FileReadable.new(self, setting) }
+    def load_classes
+      @a_blk.call
     end
-
-    def validate_presence(*settings)
-      settings.each { |setting| validators << ::Proxy::PluginValidators::Presence.new(self, setting) }
+  end
+  def class_loader
+    return nil if @class_loader.nil?
+    case @class_loader
+    when String
+      eval(@class_loader).new
+    when Proc
+      ClassLoaderProcWrapper.new(@class_loader)
+    else
+      @class_loader.new
     end
+  end
 
-    # End of DSL
-
-    def dependencies
-      @dependencies ||= []
+  class SettingsProcWrapper
+    def initialize(a_blk)
+      @a_blk = a_blk
     end
-
-    def plugin_default_settings
-      @plugin_default_settings ||= {}
+    def load_programmable_settings(settings)
+      @a_blk.call(settings)
     end
-
-    def settings
-      @settings ||= Proxy::Settings.load_plugin_settings(plugin_default_settings, settings_file)
+  end
+  def programmable_settings
+    return nil if @programmable_settings.nil?
+    case @programmable_settings
+    when String
+      eval(@programmable_settings).new
+    when Proc
+      SettingsProcWrapper.new(@programmable_settings)
+    else
+      @programmable_settings.new
     end
+  end
 
-    def validators
-      @validators ||= []
+  class DiWiringsProcWrapper
+    def initialize(a_blk)
+      @a_blk = a_blk
     end
+    def load_dependency_injection_wirings(container, settings)
+      @a_blk.call(container, settings)
+    end
+  end
+  def di_wirings
+    return nil if @di_wirings_loader.nil?
 
-    def cleanup_version(version)
-      version.chomp('-develop').sub(/\-RC\d+$/, '')
+    case @di_wirings_loader
+    when String
+      eval(@di_wirings_loader).new
+    when Proc
+      DiWiringsProcWrapper.new(@di_wirings_loader)
+    else
+      @di_wirings_loader.new
     end
+  end
+
+  def custom_validators
+    @custom_validators || {}
+  end
+
+  def services
+    @services ||= []
+  end
+
+  def loading_failed(message)
+    raise ::Proxy::PluginLoadingAborted, message
+  end
+
+  def dependencies
+    @dependencies ||= []
+  end
+
+  def bundler_group_name
+    @bundler_group_name || plugin_name
+  end
+
+  def plugin_default_settings
+    @plugin_default_settings ||= {}
+  end
+
+  def validations
+    @validations ||= []
+  end
+
+  def cleanup_version(version)
+    version.chomp('-develop').sub(/\-RC\d+$/, '')
   end
 end

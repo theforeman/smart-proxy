@@ -1,7 +1,13 @@
 require 'test_helper'
 
-class TestDependencyOne; end
-class TestDependencyTwo; end
+class TestDependencyOne
+  attr_reader :arg
+  def initialize(arg = nil); @arg = arg; end
+end
+class TestDependencyTwo
+  attr_reader :arg
+  def initialize(arg = nil); @arg = arg; end
+end
 
 class TestContainer < Proxy::DependencyInjection::Container; end
 
@@ -21,7 +27,9 @@ class TestDependencies
   end
 
   dependency :test_dependency_one, TestDependencyOne
+  dependency :test_dependency_two, lambda { TestDependencyOne.new("a_parameter") }
   singleton_dependency :singleton_dependency, TestDependencyTwo
+  singleton_dependency :singleton_dependency_two, lambda { TestDependencyTwo.new("a_parameter") }
 end
 
 class TestDependsOne
@@ -50,19 +58,35 @@ class DependencyInjectionTest < Test::Unit::TestCase
   end
 
   def test_instance_var_dependency_uses_correct_wrapper
-    assert_instance_of Proxy::DependencyInjection::InstanceVariableWrapper, TestContainer.instance.get_dependency(:test_dependency_one)
+    assert_instance_of Proxy::DependencyInjection::InstanceVariableWrapper, TestContainer.instance.dependencies[:test_dependency_one]
   end
 
   def test_instance_var_dependency_instantiates_correct_class
-    assert_instance_of TestDependencyOne, TestContainer.instance.get_dependency(:test_dependency_one).instance
+    assert_instance_of TestDependencyOne, TestContainer.instance.get_dependency(:test_dependency_one)
+  end
+
+  def test_instance_var_dependency_defined_by_lambda
+    assert_instance_of TestDependencyOne, TestContainer.instance.get_dependency(:test_dependency_two)
+  end
+
+  def test_instance_var_dependency_lambda_receives_container_as_parameter
+    assert_equal "a_parameter", TestContainer.instance.get_dependency(:test_dependency_two).arg
   end
 
   def test_singleton_var_dependency_uses_correct_wrapper
-    assert_instance_of Proxy::DependencyInjection::SingletonWrapper, TestContainer.instance.get_dependency(:singleton_dependency)
+    assert_instance_of Proxy::DependencyInjection::SingletonWrapper, TestContainer.instance.dependencies[:singleton_dependency]
   end
 
   def test_singleton_var_dependency_instantiates_correct_class
-    assert_instance_of TestDependencyTwo, TestContainer.instance.get_dependency(:singleton_dependency).instance
+    assert_instance_of TestDependencyTwo, TestContainer.instance.get_dependency(:singleton_dependency)
+  end
+
+  def test_singleton_var_dependency_defined_by_lambda
+    assert_instance_of TestDependencyTwo, TestContainer.instance.get_dependency(:singleton_dependency_two)
+  end
+
+  def test_singleton_var_dependency_lambda_receives_container_as_parameter
+    assert_equal "a_parameter", TestContainer.instance.get_dependency(:singleton_dependency_two).arg
   end
 
   def test_instance_var_wiring

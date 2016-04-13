@@ -117,7 +117,7 @@ class BmcApiTest < Test::Unit::TestCase
   end
 
   def test_api_bmc_setup_returns_new_ipmi_proxy_given_freeipmi
-    Proxy::BMC::Plugin.settings.stubs(:bmc_default_provider).returns('freeipmi')
+    Proxy::BMC::Plugin.load_test_settings(:bmc_default_provider => 'freeipmi')
     Proxy::BMC::IPMI.any_instance.stubs(:poweron).returns(true)
     Proxy::BMC::IPMI.any_instance.expects(:connect).with(:host => 'host', :username => 'user', :password => 'pass',
                                                          :bmc_provider => 'freeipmi',
@@ -128,14 +128,14 @@ class BmcApiTest < Test::Unit::TestCase
 
   def test_api_bmc_setup_returns_new_shell_proxy_given_shell
     api = Proxy::BMC::Api.new!
-    Proxy::BMC::Plugin.settings.stubs(:bmc_default_provider).returns('freeipmi')
+    Proxy::BMC::Plugin.load_test_settings(:bmc_default_provider => 'freeipmi')
     api.stubs(:params).returns('bmc_provider' => 'shell', :host => :host)
     result = api.bmc_setup
     assert_kind_of(Proxy::BMC::Shell,result)
   end
 
   def test_api_uses_options_hash_from_body
-    Proxy::BMC::Plugin.settings.stubs(:bmc_default_provider).returns('freeipmi')
+    Proxy::BMC::Plugin.load_test_settings(:bmc_default_provider => 'freeipmi')
     Proxy::BMC::IPMI.any_instance.stubs(:poweron).returns(true)
     Proxy::BMC::IPMI.any_instance.expects(:connect).with(:host => 'host', :username => 'user', :password => 'pass',
                                                          :bmc_provider => 'freeipmi',
@@ -148,7 +148,7 @@ class BmcApiTest < Test::Unit::TestCase
   end
 
   def test_api_uses_options_hash_when_nil
-    Proxy::BMC::Plugin.settings.stubs(:bmc_default_provider).returns('freeipmi')
+    Proxy::BMC::Plugin.load_test_settings(:bmc_default_provider => 'freeipmi')
     Proxy::BMC::IPMI.any_instance.stubs(:poweron).returns(true)
     Proxy::BMC::IPMI.any_instance.expects(:connect).with(:host => 'host',:username => 'user', :password => 'pass',
                                                          :bmc_provider => 'freeipmi',
@@ -172,7 +172,7 @@ class BmcApiTest < Test::Unit::TestCase
   end
 
   def test_api_recovers_from_nil_provider
-    Proxy::BMC::Plugin.settings.stubs(:bmc_default_provider).returns(nil)
+    Proxy::BMC::Plugin.load_test_settings(:bmc_default_provider => nil)
     Proxy::BMC::IPMI.stubs(:providers_installed).returns(['freeipmi'])
     test_args = { 'bmc_provider' => nil }
     Proxy::BMC::IPMI.any_instance.stubs(:test).returns(true)
@@ -183,7 +183,7 @@ class BmcApiTest < Test::Unit::TestCase
   end
 
   def test_shell_provider_recovers_from_not_implemented_method_and_retruns_501_error
-    Proxy::BMC::Plugin.settings.stubs(:bmc_default_provider).returns('shell')
+    Proxy::BMC::Plugin.load_test_settings(:bmc_default_provider => 'shell')
     Proxy::BMC::IPMI.stubs(:providers_installed).returns(['shell'])
     test_args = { 'bmc_provider' => 'shell' }
     get "/#{host}/lan/gateway", test_args
@@ -241,7 +241,7 @@ class BmcApiTest < Test::Unit::TestCase
 
   def test_api_uses_default_smart_proxy_logger
     Proxy::BMC::IPMI.logger = nil
-    Proxy::BMC::Plugin.settings.stubs(:provider_log_level).returns(nil)
+    Proxy::BMC::Plugin.load_test_settings(:provider_log_level => nil)
     Proxy::BMC::IPMI.any_instance.stubs(:poweron?).returns(true)
     get "/#{host}/chassis/power/on", args
     assert_not_equal 'Rubyipmi', Proxy::BMC::IPMI.logger.progname
@@ -364,7 +364,7 @@ class BmcApiTest < Test::Unit::TestCase
   end
 
   def test_api_can_pass_empty_body_and_get_415_error
-    Proxy::BMC::Plugin.settings.stubs(:bmc_default_provider).returns('freeipmi')
+    Proxy::BMC::Plugin.load_test_settings(:bmc_default_provider => 'freeipmi')
     Proxy::BMC::IPMI.any_instance.stubs(:bootbios).returns(true)
     put "/#{@host}/chassis/config/bootdevice/bios", "".to_json, "CONTENT_TYPE" => "application/json"
     assert_equal last_response.status, 415
@@ -477,5 +477,4 @@ class BmcApiTest < Test::Unit::TestCase
 
   private
   attr_reader :host, :args
-
 end
