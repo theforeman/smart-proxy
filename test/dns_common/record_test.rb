@@ -86,6 +86,11 @@ class DnsRecordTest < Test::Unit::TestCase
     assert_equal 0, Proxy::Dns::Record.new.ptr_record_conflicts('some.host', '192.168.33.33')
   end
 
+  def test_aaaa_record_conflicts_is_case_insensetive
+    Resolv::DNS.any_instance.expects(:getaddresses).with('some.host').returns(['192.168.33.33', '2001:DB8:DEEF::1'])
+    assert_equal 0, Proxy::Dns::Record.new.aaaa_record_conflicts('some.host', '2001:db8:deef::1')
+  end
+
   def test_validate_ip
     assert_equal '192.168.33.33', Proxy::Dns::Record.new.to_ipaddress('192.168.33.33').to_s
     assert_equal '2001:db8:deef::1', Proxy::Dns::Record.new.to_ipaddress('2001:db8:deef::1').to_s
