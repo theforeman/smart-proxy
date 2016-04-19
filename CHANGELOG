@@ -1,3 +1,21 @@
+2016-04-19	Dominic Cleal <dominic@cleal.org>
+	* Release 1.11.1
+
+2016-04-18	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #14461 - removed :method_missing from Proxy::Settings::Plugin
+
+2016-04-18	Pieter Hollants <pieter@hollants.com>
+	* Fixes #10504 - Avoid splitting undefined customrun_args
+
+2016-04-18	Brandon Weeks <weeks@squareup.com>
+	* Fixes #14387 - correctly disable SSLv3 on Ruby 1.8.7
+
+2016-04-18	Ewoud Kohl van Wijngaarden <ewoud@kohlvanwijngaarden.nl>
+	* Fixes #13551: Add IP address validation in DNS API
+
+2016-04-18	Dominic Cleal <dominic@cleal.org>
+	* fixes #14142 - launch WEBrick directly, avoiding Rack::Server
+
 2016-03-31	Dominic Cleal <dominic@cleal.org>
 	* Release 1.11.0
 
