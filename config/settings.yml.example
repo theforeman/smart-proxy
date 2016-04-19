@@ -53,9 +53,6 @@
 # default values for https_port is 8443
 #:https_port: 8443
 
-# Shared options for virsh DNS/DHCP provider
-:virsh_network: default
-
 # Log configuration
 # Uncomment and modify if you want to change the location of the log file or use STDOUT or SYSLOG values
 #:log_file: /var/log/foreman-proxy/proxy.log

@@ -45,7 +45,7 @@ XMLFIXTURE
     assert_equal 'default', Proxy::DHCP::Libvirt::Provider.new(:libvirt_network => @libvirt_network).network
   end
 
-  def test_virsh_provider_initialization
+  def test_libvirt_provider_initialization
     ::Proxy::DHCP::Libvirt::Plugin.load_test_settings(:network => 'some_network')
     assert_equal 'some_network', Proxy::DHCP::Libvirt::Provider.new(:libvirt_network => @libvirt_network).network
   end

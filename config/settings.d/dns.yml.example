@@ -1,11 +1,11 @@
 ---
 # Can be true, false, or http/https to enable just one of the protocols
-:enabled: false 
+:enabled: false
 
 # Valid providers:
 #   dns_nsupdate
 #   dns_nsupdate_gss (for GSS-TSIG support)
-#   dns_virsh
+#   dns_libvirt
 #   dns_dnscmd
 #:use_provider: dns_nsupdate
 # use this setting if you want to override default TTL setting (86400)

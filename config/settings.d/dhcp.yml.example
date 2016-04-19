@@ -5,7 +5,7 @@
 # valid providers:
 #   - dhcp_isc (ISC dhcp server)
 #   - dhcp_native_ms (Microsoft native implementation)
-#   - dhcp_virsh (simple implementation for libvirt)
+#   - dhcp_libvirt
 #:use_provider: dhcp_isc
 #:server: 127.0.0.1
 # subnets restricts the subnets queried to a subset, to reduce the query time.
