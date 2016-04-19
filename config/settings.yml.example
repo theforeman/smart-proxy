@@ -13,6 +13,11 @@
 # for more information.
 #:ssl_disabled_ciphers: [CIPHER-SUITE-1, CIPHER-SUITE-2]
 
+# Use this option only if you need to enable TLSv1, the default value is false.
+# Note: setting this option will lower security as there are known vulnerabilities
+# with TLSv1, only set this if absolutely necessary.
+#:enable_tls_v1: false
+
 # Hosts which the proxy accepts connections from
 # commenting the following lines would mean every verified SSL connection allowed
 # HTTPS: test the certificate CN
