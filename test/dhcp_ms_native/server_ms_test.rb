@@ -3,16 +3,13 @@ require 'dhcp/dhcp'
 require 'dhcp_native_ms/dhcp_native_ms'
 require 'dhcp_native_ms/dhcp_native_ms_main'
 require 'dhcp/sparc_attrs'
-require 'dhcp_common/dependency_injection/dependencies'
 
 class DHCPServerMicrosoftTest < Test::Unit::TestCase
-
   # rubocop:disable Metrics/MethodLength
   def setup
-    ::Proxy::DhcpPlugin.load_test_settings({})
-    @subnet_service = Proxy::DHCP::SubnetService.new
-    @server = Proxy::DHCP::NativeMS::Provider.new.initialize_for_testing(:name => "1.2.3.4",
-                                                                         :service => @subnet_service)
+    @subnet_service = Proxy::DHCP::SubnetService.initialized_instance
+    @server = Proxy::DHCP::NativeMS::Provider.new("1.2.3.4", nil, @subnet_service)
+
     @server.stubs(:execute).with("show scope", "Enumerated the scopes on 1.2.3.4").returns('
 ==============================================================================
  Scope Address  - Subnet Mask    - State        - Scope Name          -  Comment
@@ -106,11 +103,6 @@ Options for the Reservation Address 192.168.216.25 in the Scope 192.168.216.0 :
 Command completed successfully.
 '.split("\n"))
     @server.load_subnets
-  end
-
-  def test_ms_provider_initialization
-    ::Proxy::DhcpPlugin.load_test_settings(:server => 'a_server')
-    assert_equal 'a_server', Proxy::DHCP::NativeMS::Provider.new.name
   end
 
   def test_should_load_subnets

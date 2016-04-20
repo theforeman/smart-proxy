@@ -6,8 +6,5 @@ class Proxy::DhcpPlugin < ::Proxy::Plugin
   default_settings :use_provider => 'dhcp_isc', :server => '127.0.0.1', :subnets => []
   plugin :dhcp, ::Proxy::VERSION
 
-  after_activation do
-    require 'dhcp_common/dependency_injection/container'
-    require 'dhcp/dhcp_api'
-  end
+  load_classes ::Proxy::DHCP::ConfigurationLoader
 end

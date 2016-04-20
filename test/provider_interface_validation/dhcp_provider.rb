@@ -1,6 +1,5 @@
 module DhcpProviderInterfaceValidation
-  def assert_dhcp_provider_interface(dhcp_provider_class)
-    dhcp_provider = dhcp_provider_class.new
+  def assert_dhcp_provider_interface(dhcp_provider)
     assert dhcp_provider.respond_to?(:load_subnets)
     assert dhcp_provider.respond_to?(:load_subnet_data)
     assert dhcp_provider.respond_to?(:find_subnet)

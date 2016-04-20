@@ -21,6 +21,10 @@ module Proxy
       path.empty? ? get_all_values(@root) : get_all_values(get(@root, path))
     end
 
+    def clear
+      @root.clear
+    end
+
     private
 
     def get(store, path)

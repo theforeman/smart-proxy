@@ -1,14 +1,12 @@
 require 'test_helper'
 require 'dhcp_common/dhcp_common'
 require 'dhcp_common/server'
-require 'dhcp_common/dependency_injection/dependencies'
 
 class DHCPServerTest < Test::Unit::TestCase
 
   def setup
-    @service = Proxy::DHCP::SubnetService.new
-    @server = Proxy::DHCP::Server.new("testcase", [])
-    @server.service = @service
+    @service = Proxy::DHCP::SubnetService.initialized_instance
+    @server = Proxy::DHCP::Server.new("testcase", nil, @service)
 
     @subnet = Proxy::DHCP::Subnet.new("192.168.0.0", "255.255.255.0")
     @service.add_subnet(@subnet)
@@ -63,7 +61,7 @@ class DHCPServerTest < Test::Unit::TestCase
   end
 
   def test_managed_subnet
-    @server = Proxy::DHCP::Server.new("testcase", ['192.168.1.0/255.255.255.0', '192.168.2.0/255.255.255.0'])
+    @server = Proxy::DHCP::Server.new("testcase", ['192.168.1.0/255.255.255.0', '192.168.2.0/255.255.255.0'], nil)
     assert @server.managed_subnet?('192.168.1.0/255.255.255.0')
     assert @server.managed_subnet?('192.168.2.0/255.255.255.0')
     assert !@server.managed_subnet?('192.168.3.0/255.255.255.0')

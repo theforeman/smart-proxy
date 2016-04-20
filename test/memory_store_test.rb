@@ -62,4 +62,13 @@ class MemoryStoreTest < Test::Unit::TestCase
 
     assert_equal [1, 3, 5].to_set, @store.values.to_set
   end
+
+  def test_should_clear_memory_store
+    @store["a"] = 1
+    @store["b", "d"] = 2
+    assert !@store.values.empty?
+
+    @store.clear
+    assert @store.values.empty?
+  end
 end

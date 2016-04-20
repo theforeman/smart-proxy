@@ -7,15 +7,8 @@ module Proxy::DHCP::NativeMS
   # executed on a Microsoft server under a service account
   class Provider < ::Proxy::DHCP::Server
 
-    def initialize_for_testing(params)
-      @name = params[:name] || @name
-      @service = params[:service] || service
-      @managed_subnets = params[:subnets] || @managed_subnets
-      self
-    end
-
-    def initialize
-      super(Proxy::DhcpPlugin.settings.server, Proxy::DhcpPlugin.settings.subnets)
+    def initialize(name, subnets, subnet_service)
+      super(name, subnets, subnet_service)
     end
 
     def del_record subnet, record

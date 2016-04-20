@@ -6,9 +6,7 @@ module ::Proxy::DHCP::NativeMS
 
     requires :dhcp, ::Proxy::VERSION
 
-    after_activation do
-      require 'dhcp_native_ms/dhcp_native_ms_main'
-      require 'dhcp_native_ms/dependencies'
-    end
+    load_classes ::Proxy::DHCP::NativeMS::PluginConfiguration
+    load_dependency_injection_wirings ::Proxy::DHCP::NativeMS::PluginConfiguration
   end
 end

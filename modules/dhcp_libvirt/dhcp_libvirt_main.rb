@@ -1,23 +1,14 @@
-require 'dhcp_libvirt/libvirt_dhcp_network'
 require 'rexml/document'
 require 'ipaddr'
-require 'dhcp_common/server'
 
 module Proxy::DHCP::Libvirt
   class Provider < ::Proxy::DHCP::Server
     attr_reader :libvirt_network, :network
 
-    def initialize(options = {})
-      @network = options[:network] || Proxy::DHCP::Libvirt::Plugin.settings.network
-      @libvirt_network = options[:libvirt_network] || ::Proxy::DHCP::Libvirt::LibvirtDHCPNetwork.new(
-        options[:url] || Proxy::DHCP::Libvirt::Plugin.settings.url,
-        @network)
-      super(@network, [])
-    end
-
-    def initialize_for_testing(params)
-      @service = params[:service] || service
-      self
+    def initialize(network, libvirt_network_impl, subnet_service)
+      @network = network
+      @libvirt_network = libvirt_network_impl
+      super(@network, nil, subnet_service)
     end
 
     def load_subnets
