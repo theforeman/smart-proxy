@@ -5,6 +5,8 @@ module Proxy
     include Proxy::Log
     include Proxy::Util
 
+    attr_reader :url, :network
+
     def initialize(url = nil, network = nil)
       @network = network
       @url = url

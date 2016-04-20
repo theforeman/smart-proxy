@@ -286,7 +286,8 @@ module ::Proxy::DefaultSettingsLoader
   end
 
   def load_programmable_settings(settings)
-    plugin.programmable_settings.nil? ? settings : plugin.programmable_settings.load_programmable_settings(settings)
+    plugin.programmable_settings.load_programmable_settings(settings) unless plugin.programmable_settings.nil?
+    settings
   end
 
   def load_classes

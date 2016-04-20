@@ -3,26 +3,25 @@ require "dhcp_common/record"
 require "dhcp_common/record/lease"
 require "dhcp_common/record/reservation"
 require 'dhcp_common/record/deleted_reservation'
-require "dhcp_common/subnet_service"
-require 'dhcp_common/dependency_injection/container'
 
 module Proxy::DHCP
   # represents a DHCP Server
   class Server
-    extend Proxy::DHCP::DependencyInjection::Injectors
-
-    inject_attr :subnet_service, :service
-    attr_reader :name
+    attr_reader :name, :service, :managed_subnets
     alias_method :to_s, :name
 
     include Proxy::DHCP
     include Proxy::Log
     include Proxy::Validations
 
-    def initialize(name, managed_subnets = nil)
+    def initialize(name, managed_subnets, subnet_service)
       @name = name
-      managed_subnets = Proxy::DhcpPlugin.settings.subnets if managed_subnets.nil?
-      @managed_subnets = (managed_subnets.is_a?(Enumerable) ? Set.new(managed_subnets) : Set.new([managed_subnets]))
+      @service = subnet_service
+      @managed_subnets = if managed_subnets.nil?
+                           Set.new
+                         else
+                           managed_subnets.is_a?(Enumerable) ? Set.new(managed_subnets) : Set.new([managed_subnets])
+                         end
     end
 
     def subnets

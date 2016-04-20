@@ -93,6 +93,10 @@ class Proxy::DHCPSubnetTest < Test::Unit::TestCase
     r = Proxy::DHCP::Reservation.new(:hostname => 'test', :subnet => @subnet, :ip => "192.168.0.1", :mac => "aa:bb:cc:dd:ee:ff")
 
     assert_equal "192.168.0.2", @subnet.unused_ip([r])
+    assert File.exist?('test/tmp/foreman-proxy_192.168.0.0_24.tmp')
+    assert_equal '1', File.read('test/tmp/foreman-proxy_192.168.0.0_24.tmp')
+  ensure
+    File.delete('test/tmp/foreman-proxy_192.168.0.0_24.tmp')
   end
 
   def test_unused_ip_should_return_ip_from_within_the_range
@@ -100,6 +104,8 @@ class Proxy::DHCPSubnetTest < Test::Unit::TestCase
     @subnet.stubs(:tcp_pingable?)
     r = Proxy::DHCP::Reservation.new(:hostname => 'test', :subnet => @subnet, :ip => "192.168.0.11", :mac => "aa:bb:cc:dd:ee:ff")
 
-    assert_equal '192.168.0.21', @subnet.unused_ip([r], :from => '192.168.0.20', :to => '192.168.0.30')
+    assert_equal '192.168.0.20', @subnet.unused_ip([r], :from => '192.168.0.20', :to => '192.168.0.30')
+  ensure
+    File.delete('test/tmp/foreman-proxy_192.168.0.0_24.tmp')
   end
 end

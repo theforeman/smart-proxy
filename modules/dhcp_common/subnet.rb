@@ -84,6 +84,11 @@ module Proxy::DHCP
       File.delete @lockfile
     end
 
+    #
+    # NOTE: stored index is indepndent of call parameters:
+    # Whether range is passed or not, the lookup starts with the address at the indexed position,
+    # Is the assumption that unused_ip is always called with the same parameters for a given subnet?
+    #
     # returns the next unused IP Address in a subnet
     # Pings the IP address as well (just in case its not in Proxy::DHCP)
     def unused_ip records, args = {}
@@ -197,10 +202,6 @@ module Proxy::DHCP
       # We failed to check this address so we should not use it
       logger.warn "Unable to icmp ping #{ip} because #{err.inspect}. Skipping this address..."
       true
-    end
-
-    def privileged_user
-      (PLATFORM =~ /linux/i && Process.uid == 0) || PLATFORM =~ /mingw/
     end
   end
 end

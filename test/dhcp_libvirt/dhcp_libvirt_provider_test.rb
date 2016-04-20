@@ -1,7 +1,6 @@
 require 'test_helper'
 require 'dhcp_libvirt/dhcp_libvirt'
 require 'dhcp_libvirt/dhcp_libvirt_main'
-require 'dhcp_common/dependency_injection/dependencies'
 
 class DhcpLibvirtProviderTest < Test::Unit::TestCase
   def setup
@@ -34,24 +33,10 @@ XMLFIXTURE
     @libvirt_network.stubs(:dump_xml).returns(fixture)
     @libvirt_network.stubs(:dhcp_leases).returns(@json_leases)
     @subnet = Proxy::DHCP::Subnet.new("192.168.122.0", "255.255.255.0")
-    @service = Proxy::DHCP::SubnetService.new
-    @subnet_store = @service.subnets = Proxy::MemoryStore.new
-    @subject = ::Proxy::DHCP::Libvirt::Provider.new(:network => 'default', :libvirt_network => @libvirt_network, :name => "127.0.0.1")
-    @subject.initialize_for_testing(:service => @service)
-  end
-
-  def test_default_settings
-    ::Proxy::DHCP::Libvirt::Plugin.load_test_settings({})
-    assert_equal 'default', Proxy::DHCP::Libvirt::Provider.new(:libvirt_network => @libvirt_network).network
-  end
-
-  def test_libvirt_provider_initialization
-    ::Proxy::DHCP::Libvirt::Plugin.load_test_settings(:network => 'some_network')
-    assert_equal 'some_network', Proxy::DHCP::Libvirt::Provider.new(:libvirt_network => @libvirt_network).network
-  end
-
-  def test_libvirt_network_class
-    assert_equal ::Proxy::DHCP::Libvirt::LibvirtDHCPNetwork, ::Proxy::DHCP::Libvirt::Provider.new.libvirt_network.class
+    @subnet_store = Proxy::MemoryStore.new
+    @service = Proxy::DHCP::SubnetService.new(@subnet_store, Proxy::MemoryStore.new, Proxy::MemoryStore.new,
+                                              Proxy::MemoryStore.new, Proxy::MemoryStore.new, Proxy::MemoryStore.new)
+    @subject = ::Proxy::DHCP::Libvirt::Provider.new('default', @libvirt_network, @service)
   end
 
   def test_should_load_subnets

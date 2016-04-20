@@ -1,5 +1,5 @@
 class Proxy::DhcpApi < ::Sinatra::Base
-  extend Proxy::DHCP::DependencyInjection::Injectors
+  extend Proxy::DHCP::DependencyInjection
 
   helpers ::Proxy::Helpers
   authorize_with_trusted_hosts
@@ -31,8 +31,6 @@ class Proxy::DhcpApi < ::Sinatra::Base
   get "/?" do
     begin
       content_type :json
-
-      log_halt 404, "No subnets found on server @{name}" unless server.subnets
       server.subnets.map{|s| {:network => s.network, :netmask => s.netmask, :options => s.options}}.to_json
     rescue => e
       log_halt 400, e
@@ -86,6 +84,7 @@ class Proxy::DhcpApi < ::Sinatra::Base
       load_subnet_data
 
       content_type :json
+      # NOTE: sinatra overwrites params[:network] (required by add_record call) with the :network url parameter
       server.add_record(params)
     rescue Proxy::DHCP::Collision => e
       log_halt 409, e
@@ -105,12 +104,6 @@ class Proxy::DhcpApi < ::Sinatra::Base
       record = server.find_record(@subnet.network, params[:record])
       log_halt 404, "Record #{params[:network]}/#{params[:record]} not found" unless record
       server.del_record @subnet, record
-      if request.accept? 'application/json'
-        content_type :json
-        {}
-      else
-        redirect "/dhcp/#{params[:network]}"
-      end
     rescue Proxy::DHCP::InvalidRecord
       log_halt 404, "Record #{params[:network]}/#{params[:record]} not found"
     rescue Exception => e

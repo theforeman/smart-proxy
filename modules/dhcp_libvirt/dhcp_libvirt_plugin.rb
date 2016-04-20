@@ -3,12 +3,9 @@ module ::Proxy::DHCP::Libvirt
     plugin :dhcp_libvirt, ::Proxy::VERSION
 
     requires :dhcp, ::Proxy::VERSION
-
     default_settings :url => "qemu:///system", :network => 'default'
 
-    after_activation do
-      require 'dhcp_libvirt/dhcp_libvirt_main'
-      require 'dhcp_libvirt/dependencies'
-    end
+    load_classes ::Proxy::DHCP::Libvirt::PluginConfiguration
+    load_dependency_injection_wirings ::Proxy::DHCP::Libvirt::PluginConfiguration
   end
 end
