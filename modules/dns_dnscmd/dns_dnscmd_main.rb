@@ -69,36 +69,35 @@ module Proxy::Dns::Dnscmd
       end
     end
 
-    def remove_a_record(fqdn)
-      zone = match_zone(fqdn, enum_zones)
-      msg = "Removed DNS entry #{fqdn}"
-      cmd = "/RecordDelete #{zone} #{fqdn}. A /f"
+    def remove_specific_record_from_zone(zone_name, node_name, record, type)
+      msg = "Removed #{record} #{type} record #{node_name} from #{zone_name}"
+      cmd = "/RecordDelete #{zone_name} #{node_name}. #{type} #{record} /f"
       execute(cmd, msg)
       nil
+    end
+
+    def remove_record(record, type)
+      zone = match_zone(record, enum_zones)
+      enum_records(zone, record, type).each do |specific_record|
+        remove_specific_record_from_zone(zone, record, specific_record, type)
+      end
+      nil
+    end
+
+    def remove_a_record(fqdn)
+      remove_record(fqdn,'A')
     end
 
     def remove_aaaa_record(fqdn)
-      zone = match_zone(fqdn, enum_zones)
-      msg = "Removed DNS entry #{fqdn}"
-      cmd = "/RecordDelete #{zone} #{fqdn}. AAAA /f"
-      execute(cmd, msg)
-      nil
+      remove_record(fqdn,'AAAA')
     end
 
     def remove_cname_record(fqdn)
-      zone = match_zone(fqdn, enum_zones)
-      msg = "Removed CNAME entry #{fqdn}"
-      cmd = "/RecordDelete #{zone} #{fqdn}. CNAME /f"
-      execute(cmd, msg)
-      nil
+      remove_record(fqdn, 'CNAME')
     end
 
     def remove_ptr_record(ptr)
-      zone = match_zone(ptr, enum_zones)
-      msg = "Removed PTR entry #{ptr}"
-      cmd = "/RecordDelete #{zone} #{ptr}. PTR /f"
-      execute(cmd, msg)
-      nil
+      remove_record(ptr, 'PTR')
     end
 
     def execute cmd, msg=nil, error_only=false
@@ -132,7 +131,7 @@ module Proxy::Dns::Dnscmd
         msg.sub! /Removed/,    "remove"
         msg.sub! /Added/,      "add"
         msg  = "Failed to #{msg}"
-        raise Proxy::Dns::Error.new(msg)
+        raise Proxy::Dns::Error.new(msg) unless response.grep(/DNS_ERROR_NAME_DOES_NOT_EXIST/).any? && msg == "Failed to EnumRecords"
       else
         logger.debug msg unless error_only
       end
@@ -171,6 +170,24 @@ module Proxy::Dns::Dnscmd
       end
       logger.debug "Enumerated authoritative dns zones: #{zones}"
       zones
+    end
+
+    def enum_records(zone_name, node_name, type)
+      records = []
+      response = execute "/EnumRecords #{zone_name} #{node_name}. /Type #{type}", "EnumRecords", true
+      response.each do |line|
+        line.chomp!
+        logger.debug "Extracting record from dnscmd output '#{line}'"
+        /^@?\s+\d+\s+(A|AAAA|PTR|CNAME)+\s+(?<record>\S+)/ =~ line
+        if record.nil?
+          logger.debug "No DNS record found in this line"
+        else
+          logger.debug "Found record '#{record}'"
+          records << record
+        end
+      end
+      logger.debug "Enumerated #{records.size} #{type} records for zone=#{zone_name} node=#{node_name} records=#{records}"
+      records
     end
   end
 end
