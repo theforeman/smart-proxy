@@ -8,13 +8,14 @@ module Proxy::TFTP
     helpers ::Proxy::Helpers
     authorize_with_trusted_hosts
     authorize_with_ssl_client
+    VARIANTS = ["Syslinux", "Pxegrub", "Pxegrub2", "Ztp", "Poap"].freeze
 
     helpers do
       def instantiate variant, mac=nil
         # Filenames must end in a hex representation of a mac address but only if mac is not empty
         log_halt 403, "Invalid MAC address: #{mac}"                  unless valid_mac?(mac) || mac.nil?
-        log_halt 403, "Unrecognized pxeboot config type: #{variant}" unless defined? variant.capitalize
-        eval "Proxy::TFTP::#{variant.capitalize}.new"
+        log_halt 403, "Unrecognized pxeboot config type: #{variant}" unless VARIANTS.include?(variant.capitalize)
+        Object.const_get("Proxy").const_get('TFTP').const_get(variant.capitalize).new
       end
 
       def create variant, mac

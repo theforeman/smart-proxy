@@ -17,6 +17,17 @@ class TftpApiTest < Test::Unit::TestCase
     @args = { :pxeconfig => "foo" }
   end
 
+  def test_instantiate_syslinux
+    obj = app.helpers.instantiate "syslinux", "AA:BB:CC:DD:EE:FF"
+    assert_equal "Proxy::TFTP::Syslinux", obj.class.name
+  end
+
+  def test_instantiate_nonexisting
+    subject = app
+    subject.helpers.expects(:log_halt).with(403, "Unrecognized pxeboot config type: Server").at_least(1)
+    subject.helpers.instantiate "Server", "AA:BB:CC:DD:EE:FF"
+  end
+
   def test_api_can_fetch_boot_file
     Proxy::Util::CommandTask.stubs(:new).returns(true)
     FileUtils.stubs(:mkdir_p).returns(true)
