@@ -57,12 +57,10 @@ module Proxy::TFTP
       create_default "syslinux"
     end
 
-    # Create a new TFTP reservation
     post "/:mac" do |mac|
       create "syslinux", mac
     end
 
-    # Delete a record from a network
     delete("/:mac") do |mac|
       delete "syslinux", mac
     end

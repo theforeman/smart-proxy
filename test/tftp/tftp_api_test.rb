@@ -14,12 +14,35 @@ class TftpApiTest < Test::Unit::TestCase
 
   def setup
     Proxy::TFTP::Plugin.load_test_settings(:tftproot => "/some/root")
-    @args = { :pxeconfig => "foo" }
+    @args = {
+      :pxeconfig => "foo",
+      :menu => "bar"
+    }
   end
 
   def test_instantiate_syslinux
     obj = app.helpers.instantiate "syslinux", "AA:BB:CC:DD:EE:FF"
     assert_equal "Proxy::TFTP::Syslinux", obj.class.name
+  end
+
+  def test_instantiate_pxegrub
+    obj = app.helpers.instantiate "pxegrub", "AA:BB:CC:DD:EE:FF"
+    assert_equal "Proxy::TFTP::Pxegrub", obj.class.name
+  end
+
+  def test_instantiate_pxegrub2
+    obj = app.helpers.instantiate "pxegrub2", "AA:BB:CC:DD:EE:FF"
+    assert_equal "Proxy::TFTP::Pxegrub2", obj.class.name
+  end
+
+  def test_instantiate_ztp
+    obj = app.helpers.instantiate "ztp", "AA:BB:CC:DD:EE:FF"
+    assert_equal "Proxy::TFTP::Ztp", obj.class.name
+  end
+
+  def test_instantiate_poap
+    obj = app.helpers.instantiate "poap", "AA:BB:CC:DD:EE:FF"
+    assert_equal "Proxy::TFTP::Poap", obj.class.name
   end
 
   def test_instantiate_nonexisting
@@ -28,46 +51,60 @@ class TftpApiTest < Test::Unit::TestCase
     subject.helpers.instantiate "Server", "AA:BB:CC:DD:EE:FF"
   end
 
+  def test_api_can_create_config
+    mac = "aa:bb:cc:dd:ee:ff"
+    Proxy::TFTP::Syslinux.any_instance.expects(:set).with(mac, @args[:pxeconfig]).returns(true)
+    result = post "/#{mac}", @args
+    assert last_response.ok?
+    assert_equal '', result.body
+  end
+
+  def test_api_can_create_config_64bit
+    mac = "aa:bb:cc:dd:ee:ff:00:11:22:33:44:55:66:77:88:99:aa:bb:cc:dd"
+    Proxy::TFTP::Syslinux.any_instance.expects(:set).with(mac, "foo").returns(true)
+    result = post "/#{mac}", @args
+    assert last_response.ok?
+    assert_equal '', result.body
+  end
+
+  def test_api_returns_error_when_invalid_mac
+    post "/aa:bb:cc:00:11:zz", @args
+    assert !last_response.ok?
+    assert_equal "Invalid MAC address: aa:bb:cc:00:11:zz", last_response.body
+  end
+
+  def test_api_can_read_config
+    mac = "aa:bb:cc:dd:ee:ff"
+    Proxy::TFTP::Syslinux.any_instance.expects(:get).with(mac).returns('foo')
+    result = get "/syslinux/#{mac}"
+    assert last_response.ok?
+    assert_equal 'foo', result.body
+  end
+
+  def test_api_can_remove_config
+    mac = "aa:bb:cc:dd:ee:ff"
+    Proxy::TFTP::Syslinux.any_instance.expects(:del).with(mac).returns(true)
+    result = delete "/#{mac}"
+    assert last_response.ok?
+    assert_equal '', result.body
+  end
+
+  def test_api_can_create_defatult
+    Proxy::TFTP::Syslinux.any_instance.expects(:create_default).with(@args[:menu]).returns(true)
+    post "/create_default", @args
+    assert last_response.ok?
+  end
+
   def test_api_can_fetch_boot_file
-    Proxy::Util::CommandTask.stubs(:new).returns(true)
-    FileUtils.stubs(:mkdir_p).returns(true)
     Proxy::TFTP.expects(:fetch_boot_file).with('/some/root/boot/file','http://localhost/file').returns(true)
     post "/fetch_boot_file", :prefix => '/some/root/boot/file', :path => 'http://localhost/file'
     assert last_response.ok?
   end
 
-  def test_api_can_create_syslinux_tftp_reservation
-    mac = "aa:bb:cc:00:11:22"
-    mac_filename = "aa-bb-cc-dd-ee-ff-00-11-22"
-    FileUtils.stubs(:mkdir_p).returns(true)
-    File.stubs(:open).with("/some/root/pxelinux.cfg/#{mac_filename}", 'w').returns(true)
-    Proxy::TFTP::Syslinux.any_instance.expects(:set).with(mac, args[:pxeconfig])
-    post "/#{mac}", args
+  def test_api_can_get_servername
+    Proxy::TFTP::Plugin.settings.stubs(:tftp_servername).returns("servername")
+    result = get "/serverName"
+    assert_match /servername/, result.body
     assert last_response.ok?
   end
-
-  def test_api_can_create_syslinux_tftp_reservation_for_64bit_mac
-    mac = "aa:bb:cc:dd:ee:ff:00:11:22:33:44:55:66:77:88:99:aa:bb:cc:dd"
-    mac_filename = "aa-bb-cc-dd-ee-ff-00-11-22-33-44-55-66-77-88-99-aa-bb-cc-dd"
-    FileUtils.stubs(:mkdir_p).returns(true)
-    File.stubs(:open).with("/some/root/pxelinux.cfg/#{mac_filename}", 'w').returns(true)
-    Proxy::TFTP::Syslinux.any_instance.expects(:set).with(mac, args[:pxeconfig])
-    post "/#{mac}", args
-    assert last_response.ok?
-  end
-
-  def test_api_returns_error_when_invalid_mac
-    post "/aa:bb:cc:00:11:zz", args
-    assert !last_response.ok?
-    assert_equal "Invalid MAC address: aa:bb:cc:00:11:zz", last_response.body
-  end
-
-  def test_api_can_create_default
-    params = { :menu => "foobar" }
-    Proxy::TFTP::Syslinux.any_instance.expects(:create_default).with(params[:menu])
-    post "/create_default", params
-  end
-
-  private
-  attr_reader :args
 end
