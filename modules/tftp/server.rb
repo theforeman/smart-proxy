@@ -7,52 +7,59 @@ module Proxy::TFTP
     # Creates TFTP pxeconfig file
     def set mac, config
       raise "Invalid parameters received" if mac.nil? || config.nil?
-
-      FileUtils.mkdir_p pxeconfig_dir
-
-      File.open(pxeconfig_file(mac), 'w') {|f| f.write(config) }
-      logger.debug "TFTP: entry for #{mac} created successfully"
+      pxeconfig_file(mac).each do |file|
+        write_file file, config
+      end
+      true
     end
 
     # Removes pxeconfig files
     def del mac
-      file = pxeconfig_file(mac)
-      if File.exist?(file)
-        FileUtils.rm_f file
-        logger.debug "TFTP: entry for #{mac} removed successfully"
-      else
-        logger.debug "TFTP: Skipping a request to delete a file which doesn't exists"
+      pxeconfig_file(mac).each do |file|
+        delete_file file
       end
+      true
     end
 
-    # Gets the contents of a pxeconfig file
+    # Gets the contents of one of pxeconfig files
     def get mac
-      file = pxeconfig_file(mac)
-      if File.exist?(file)
-        config = File.open(pxeconfig_file(mac), 'r') {|f| f.readlines }
-        logger.debug "TFTP: entry for #{mac} read successfully"
-      else
-        logger.debug "TFTP: Skipping a request to read a file which doesn't exists"
-        raise "File #{file} not found"
-      end
-      config
+      file = pxeconfig_file(mac).first
+      read_file(file)
     end
 
     # Creates a default menu file
     def create_default config
       raise "Default config not supplied" if config.nil?
-
-      FileUtils.mkdir_p File.dirname pxe_default
-      File.open(pxe_default, 'w') {|f| f.write(config) }
-      logger.debug "TFTP: #{pxe_default} entry created successfully"
+      pxe_default.each do |file|
+        write_file file, config
+      end
+      true
     end
 
-    protected
     # returns the absolute path
-    # TODO:
     def path(p = nil)
       p ||= Proxy::TFTP::Plugin.settings.tftproot
       return (p =~ /^\//) ? p : Pathname.new(File.expand_path(File.dirname(__FILE__))).join(p).to_s
+    end
+
+    def read_file(file)
+      raise("File #{file} not found") unless File.exist?(file)
+      File.open(file, 'r') {|f| f.readlines }
+    end
+
+    def write_file(file, contents)
+      FileUtils.mkdir_p(File.dirname(file))
+      File.open(file, 'w') {|f| f.write(contents)}
+      logger.debug "TFTP: #{file} created successfully"
+    end
+
+    def delete_file(file)
+      if File.exist?(file)
+        FileUtils.rm_f file
+        logger.debug "TFTP: #{file} removed successfully"
+      else
+        logger.debug "TFTP: Skipping a request to delete a file which doesn't exists"
+      end
     end
   end
 
@@ -61,22 +68,34 @@ module Proxy::TFTP
       "#{path}/pxelinux.cfg"
     end
     def pxe_default
-      "#{pxeconfig_dir}/default"
+      ["#{pxeconfig_dir}/default"]
     end
     def pxeconfig_file mac
-      "#{pxeconfig_dir}/01-"+mac.gsub(/:/,"-").downcase
+      ["#{pxeconfig_dir}/01-"+mac.gsub(/:/,"-").downcase]
     end
   end
 
   class Pxegrub < Server
     def pxeconfig_dir
-      path.to_s
+      "#{path}/grub"
     end
     def pxe_default
-      "#{pxeconfig_dir}/boot/grub/menu.lst"
+      ["#{pxeconfig_dir}/menu.lst", "#{pxeconfig_dir}/efidefault"]
     end
     def pxeconfig_file mac
-      "#{pxeconfig_dir}/menu.lst.01"+mac.gsub(/:/,"").upcase
+      ["#{pxeconfig_dir}/menu.lst.01"+mac.gsub(/:/,"").upcase, "#{pxeconfig_dir}/01-"+mac.gsub(/:/,'-').upcase]
+    end
+  end
+
+  class Pxegrub2 < Server
+    def pxeconfig_dir
+      "#{path}/grub2"
+    end
+    def pxe_default
+      ["#{pxeconfig_dir}/grub.cfg"]
+    end
+    def pxeconfig_file mac
+      ["#{pxeconfig_dir}/grub.cfg-"+mac.gsub(/:/,'-').downcase]
     end
   end
 
@@ -85,10 +104,10 @@ module Proxy::TFTP
       "#{path}/ztp.cfg"
     end
     def pxe_default
-      pxeconfig_dir
+      [pxeconfig_dir]
     end
     def pxeconfig_file mac
-      "#{pxeconfig_dir}/"+mac.gsub(/:/,"").upcase
+      ["#{pxeconfig_dir}/"+mac.gsub(/:/,"").upcase]
     end
   end
 
@@ -97,15 +116,14 @@ module Proxy::TFTP
       "#{path}/poap.cfg"
     end
     def pxe_default
-      pxeconfig_dir
+      [pxeconfig_dir]
     end
     def pxeconfig_file mac
-      "#{pxeconfig_dir}/"+mac.gsub(/:/,"").upcase
+      ["#{pxeconfig_dir}/"+mac.gsub(/:/,"").upcase]
     end
   end
 
   def self.fetch_boot_file dst, src
-
     filename    = boot_filename(dst, src)
     destination = Pathname.new(File.expand_path(filename, Proxy::TFTP::Plugin.settings.tftproot)).cleanpath
     tftproot    = Pathname.new(Proxy::TFTP::Plugin.settings.tftproot).cleanpath
