@@ -19,8 +19,10 @@ module Proxy::DHCP
     include Proxy::Log
     include Proxy::Validations
 
-    def initialize(name)
-      @name    = name
+    def initialize(name, managed_subnets = nil)
+      @name = name
+      managed_subnets = Proxy::DhcpPlugin.settings.subnets if managed_subnets.nil?
+      @managed_subnets = (managed_subnets.is_a?(Enumerable) ? Set.new(managed_subnets) : Set.new([managed_subnets]))
     end
 
     def subnets
@@ -139,10 +141,8 @@ module Proxy::DHCP
     end
 
     # Default: manage any subnet. If specified: manage only specified subnets.
-    def managed_subnet? subnet
-      managed_subnets = Proxy::DhcpPlugin.settings.subnets
-      return true unless managed_subnets
-      managed_subnets.include? subnet
+    def managed_subnet?(subnet)
+      @managed_subnets.empty? ? true : @managed_subnets.include?(subnet)
     end
   end
 end

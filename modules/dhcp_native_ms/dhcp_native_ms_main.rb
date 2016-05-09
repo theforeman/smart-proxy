@@ -10,11 +10,12 @@ module Proxy::DHCP::NativeMS
     def initialize_for_testing(params)
       @name = params[:name] || @name
       @service = params[:service] || service
+      @managed_subnets = params[:subnets] || @managed_subnets
       self
     end
 
     def initialize
-      super(Proxy::DhcpPlugin.settings.server)
+      super(Proxy::DhcpPlugin.settings.server, Proxy::DhcpPlugin.settings.subnets)
     end
 
     def del_record subnet, record

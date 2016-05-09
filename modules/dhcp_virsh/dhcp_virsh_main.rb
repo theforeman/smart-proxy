@@ -8,7 +8,7 @@ module Proxy::DHCP::Virsh
     include Proxy::Virsh
 
     def initialize
-      super("127.0.0.1")
+      super("127.0.0.1", [])
       @network = Proxy::SETTINGS.virsh_network
     end
 

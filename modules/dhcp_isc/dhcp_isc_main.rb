@@ -6,7 +6,7 @@ module Proxy::DHCP::ISC
     include Proxy::Util
 
     def initialize
-      super(Proxy::DhcpPlugin.settings.server)
+      super(Proxy::DhcpPlugin.settings.server, Proxy::DhcpPlugin.settings.subnets)
       @config_file = Proxy::DHCP::ISC::Plugin.settings.config
       @leases_file = Proxy::DHCP::ISC::Plugin.settings.leases
       # TODO: verify key name and secret
@@ -23,6 +23,7 @@ module Proxy::DHCP::ISC
       @key_name = params[:key_name] || @key_name
       @key_secret = params[:key_secret] || @key_secret
       @omapi_port = params[:omapi_port] || @omapi_port
+      @managed_subnets = params[:subnets] || @managed_subnets
       self
     end
 
@@ -167,7 +168,9 @@ module Proxy::DHCP::ISC
         network, netmask, subnet_config_lines = match
         ret_val << Proxy::DHCP::Subnet.new(network, netmask, parse_subnet_options(subnet_config_lines))
       end
-      ret_val
+
+      return ret_val if @managed_subnets.empty?
+      ret_val.select {|subnet| managed_subnet?("#{subnet.network}/#{subnet.netmask}")}
     end
 
     def parse_subnet_options(subnet_config_lines)
