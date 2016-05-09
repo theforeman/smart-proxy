@@ -12,7 +12,7 @@ module Proxy::DHCP::Libvirt
       @libvirt_network = options[:libvirt_network] || ::Proxy::DHCP::Libvirt::LibvirtDHCPNetwork.new(
         options[:url] || Proxy::DHCP::Libvirt::Plugin.settings.url,
         @network)
-      super(@network)
+      super(@network, [])
     end
 
     def initialize_for_testing(params)

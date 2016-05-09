@@ -7,7 +7,7 @@ class DHCPServerTest < Test::Unit::TestCase
 
   def setup
     @service = Proxy::DHCP::SubnetService.new
-    @server = Proxy::DHCP::Server.new("testcase")
+    @server = Proxy::DHCP::Server.new("testcase", [])
     @server.service = @service
 
     @subnet = Proxy::DHCP::Subnet.new("192.168.0.0", "255.255.255.0")
@@ -63,8 +63,7 @@ class DHCPServerTest < Test::Unit::TestCase
   end
 
   def test_managed_subnet
-    ::Proxy::DhcpPlugin.load_test_settings(:subnets => ['192.168.1.0/255.255.255.0', '192.168.2.0/255.255.255.0'])
-
+    @server = Proxy::DHCP::Server.new("testcase", ['192.168.1.0/255.255.255.0', '192.168.2.0/255.255.255.0'])
     assert @server.managed_subnet?('192.168.1.0/255.255.255.0')
     assert @server.managed_subnet?('192.168.2.0/255.255.255.0')
     assert !@server.managed_subnet?('192.168.3.0/255.255.255.0')
