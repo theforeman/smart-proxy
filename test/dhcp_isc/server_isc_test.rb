@@ -130,7 +130,7 @@ class ServerIscTest < Test::Unit::TestCase
     assert "subnet 192.168.1.0 netmask 255.255.255.128 { pool\n{ range abc ; } }".match(Proxy::DHCP::ISC::Provider::SUBNET_BLOCK_REGEX)
   end
 
-  def test_load_subnets_loads_managed_subnets
+  def test_parse_config_for_subnets
     subnets = @dhcp.parse_config_for_subnets
     assert_equal 4, subnets.size
   end
@@ -179,6 +179,19 @@ class ServerIscTest < Test::Unit::TestCase
     assert_equal nil, subnets[0].options[:range]
     assert_equal ["192.168.123.2", "192.168.123.62"], subnets[1].options[:range]
     assert_equal nil, subnets[2].options[:range]
+  end
+
+  def test_parse_config_loads_managed_subnets_only
+    @dhcp = Proxy::DHCP::ISC::Provider.new.initialize_for_testing(
+        :name => '192.168.122.1', :config_file => './test/fixtures/dhcp/dhcp.conf',
+        :leases_file => './test/fixtures/dhcp/dhcp.leases',
+        :service => @subnet_service, :omapi_port => 999, :subnets => ["192.168.122.0/255.255.255.0", "192.168.1.0/255.255.255.128"])
+
+    subnets = @dhcp.parse_config_for_subnets
+
+    assert_equal 2, subnets.size
+    assert_equal "192.168.122.0/255.255.255.0", subnets.first.to_s
+    assert_equal "192.168.1.0/255.255.255.128", subnets.last.to_s
   end
 
   def test_parse_config_and_leases

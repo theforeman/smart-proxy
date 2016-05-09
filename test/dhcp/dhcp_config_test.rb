@@ -6,5 +6,6 @@ class DhcpConfigTest < Test::Unit::TestCase
     Proxy::DhcpPlugin.load_test_settings({})
     assert_equal '127.0.0.1', Proxy::DhcpPlugin.settings.server
     assert_equal 'dhcp_isc', Proxy::DhcpPlugin.settings.use_provider
+    assert_equal [], Proxy::DhcpPlugin.settings.subnets
   end
 end
