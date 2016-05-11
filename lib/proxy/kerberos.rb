@@ -5,7 +5,7 @@ module Proxy::Kerberos
     krb5 = Kerberos::Krb5.new
     ccache = Kerberos::Krb5::CredentialsCache.new
 
-    logger.info "Requesting credentials for Kerberos principal #{principal} using keytab #{keytab}"
+    logger.debug "Requesting credentials for Kerberos principal #{principal} using keytab #{keytab}"
     begin
       krb5.get_init_creds_keytab principal, keytab, nil, ccache
     rescue => e

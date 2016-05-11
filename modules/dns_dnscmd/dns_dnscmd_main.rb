@@ -113,7 +113,7 @@ module Proxy::Dns::Dnscmd
         msg  = "Failed to #{msg}"
         raise Proxy::Dns::Error.new(msg)
       else
-        logger.info msg unless error_only
+        logger.debug msg unless error_only
       end
     rescue Proxy::Dns::Error
       raise

@@ -4,7 +4,7 @@ module ::Proxy::Settings
       :settings_directory => Pathname.new(__FILE__).join("..","..","..","..","config","settings.d").expand_path.to_s,
       :https_port => 8443,
       :log_file => "/var/log/foreman-proxy/proxy.log",
-      :log_level => "ERROR",
+      :log_level => "INFO",
       :daemon => false,
       :daemon_pid => "/var/run/foreman-proxy/foreman-proxy.pid",
       :forward_verify => true,

@@ -136,7 +136,7 @@ module Proxy
 
       (t1 || t2).join
     rescue SignalException => e
-      logger.info("Caught #{e}. Exiting")
+      logger.debug("Caught #{e}. Exiting")
       raise
     rescue SystemExit
       # do nothing. This is to prevent the exception handler below from catching SystemExit exceptions.

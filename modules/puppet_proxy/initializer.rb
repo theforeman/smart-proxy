@@ -14,7 +14,7 @@ module Proxy::Puppet
       end
 
       Puppet[:config] = Proxy::Puppet::Plugin.settings.puppet_conf
-      logger.info "Initializing from Puppet config file: #{Proxy::Puppet::Plugin.settings.puppet_conf}"
+      logger.debug "Initializing from Puppet config file: #{Proxy::Puppet::Plugin.settings.puppet_conf}"
 
       if Puppet::PUPPETVERSION.to_i >= 3
         Puppet.initialize_settings
