@@ -22,7 +22,7 @@ module Proxy::Templates
 
       # You get a 201 from the 'built' URL
       raise "Error retrieving #{kind} for #{opts.inspect} from #{uri.host}: #{res.class}" unless ["200", "201"].include?(res.code)
-      logger.info "Template: request for #{kind} using #{opts.inspect} at #{uri.host}"
+      logger.debug "Template: request for #{kind} using #{opts.inspect} at #{uri.host}"
       res.body
     end
 

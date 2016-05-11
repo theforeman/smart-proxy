@@ -18,17 +18,17 @@ module Proxy::Realm
       errors << "keytab not found: #{Proxy::Realm::Plugin.settings.realm_keytab}" unless Proxy::Realm::Plugin.settings.realm_keytab && File.exist?(Proxy::Realm::Plugin.settings.realm_keytab)
       errors << "principal not configured"                   unless Proxy::Realm::Plugin.settings.realm_principal
 
-      logger.info "freeipa: realm keytab is '#{Proxy::Realm::Plugin.settings.realm_keytab}' and using principal '#{Proxy::Realm::Plugin.settings.realm_principal}'"
+      logger.debug "freeipa: realm keytab is '#{Proxy::Realm::Plugin.settings.realm_keytab}' and using principal '#{Proxy::Realm::Plugin.settings.realm_principal}'"
 
       # Get FreeIPA Configuration
       if File.exist?(IPA_CONFIG)
         File.readlines(IPA_CONFIG).each do |line|
           if line =~ /xmlrpc_uri/
             @ipa_server = URI.parse line.split("=")[1].strip
-            logger.info "freeipa: server is #{@ipa_server}"
+            logger.debug "freeipa: server is #{@ipa_server}"
           elsif line =~ /realm/
             @realm_name = line.split("=")[1].strip
-            logger.info "freeipa: realm #{@realm_name}"
+            logger.debug "freeipa: realm #{@realm_name}"
           end
         end
       else
@@ -98,7 +98,7 @@ module Proxy::Realm
           # If the host is being rebuilt and is already enrolled, then
           # disable it in order to revoke existing certs, keytabs, etc.
           if host["result"]["has_keytab"]
-            logger.info "Attempting to disable host #{params[:hostname]} in FreeIPA"
+            logger.debug "Attempting to disable host #{params[:hostname]} in FreeIPA"
             @ipa.call("host_disable", [params[:hostname]])
           end
         end

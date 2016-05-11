@@ -36,9 +36,9 @@ module Proxy::PuppetCa
         autosign.write entries.join("\n")
         autosign.write "\n"
         autosign.close
-        logger.info "Removed #{certname} from autosign"
+        logger.debug "Removed #{certname} from autosign"
       else
-        logger.info "Attempt to remove nonexistent client autosign for #{certname}"
+        logger.debug "Attempt to remove nonexistent client autosign for #{certname}"
         raise NotPresent, "Attempt to remove nonexistent client autosign for #{certname}"
       end
     end
@@ -53,7 +53,7 @@ module Proxy::PuppetCa
       found = autosign.readlines.find { |line| line.chomp == certname }
       autosign.puts certname unless found
       autosign.close
-      logger.info "Added #{certname} to autosign"
+      logger.debug "Added #{certname} to autosign"
     end
 
     # list of hosts which are now allowed to be installed via autosign
@@ -194,9 +194,9 @@ module Proxy::PuppetCa
       logger.debug "Executing #{command}"
       response = `#{command} 2>&1`
       if $?.success?
-        logger.info "#{mode}ed puppet certificate for #{certname}"
+        logger.debug "#{mode}ed puppet certificate for #{certname}"
       elsif response =~ /Could not find client certificate/ || $?.exitstatus == 24
-        logger.info "Attempt to remove nonexistent client certificate for #{certname}"
+        logger.debug "Attempt to remove nonexistent client certificate for #{certname}"
         raise NotPresent, "Attempt to remove nonexistent client certificate for #{certname}"
       else
         logger.warn "Failed to run puppetca: #{response}"

@@ -11,7 +11,7 @@ module Proxy::TFTP
       FileUtils.mkdir_p pxeconfig_dir
 
       File.open(pxeconfig_file(mac), 'w') {|f| f.write(config) }
-      logger.info "TFTP: entry for #{mac} created successfully"
+      logger.debug "TFTP: entry for #{mac} created successfully"
     end
 
     # Removes pxeconfig files
@@ -21,7 +21,7 @@ module Proxy::TFTP
         FileUtils.rm_f file
         logger.debug "TFTP: entry for #{mac} removed successfully"
       else
-        logger.info "TFTP: Skipping a request to delete a file which doesn't exists"
+        logger.debug "TFTP: Skipping a request to delete a file which doesn't exists"
       end
     end
 
@@ -32,7 +32,7 @@ module Proxy::TFTP
         config = File.open(pxeconfig_file(mac), 'r') {|f| f.readlines }
         logger.debug "TFTP: entry for #{mac} read successfully"
       else
-        logger.info "TFTP: Skipping a request to read a file which doesn't exists"
+        logger.debug "TFTP: Skipping a request to read a file which doesn't exists"
         raise "File #{file} not found"
       end
       config
@@ -44,12 +44,12 @@ module Proxy::TFTP
 
       FileUtils.mkdir_p File.dirname pxe_default
       File.open(pxe_default, 'w') {|f| f.write(config) }
-      logger.info "TFTP: #{pxe_default} entry created successfully"
+      logger.debug "TFTP: #{pxe_default} entry created successfully"
     end
 
     protected
     # returns the absolute path
-    # TODO: 
+    # TODO:
     def path(p = nil)
       p ||= Proxy::TFTP::Plugin.settings.tftproot
       return (p =~ /^\//) ? p : Pathname.new(File.expand_path(File.dirname(__FILE__))).join(p).to_s

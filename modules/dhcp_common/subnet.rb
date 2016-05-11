@@ -100,7 +100,7 @@ module Proxy::DHCP
           free_ips.rotate(stored_index).each do |ip|
             logger.debug "Searching for free IP - pinging #{ip}"
             if tcp_pingable?(ip) || icmp_pingable?(ip)
-              logger.info "Found a pingable IP(#{ip}) address which does not have a Proxy::DHCP record"
+              logger.debug "Found a pingable IP(#{ip}) address which does not have a Proxy::DHCP record"
             else
               logger.debug "Found free IP #{ip} out of a total of #{free_ips.size} free IPs"
               @index = free_ips.index(ip)+1

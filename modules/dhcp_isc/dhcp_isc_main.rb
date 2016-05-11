@@ -273,7 +273,7 @@ module Proxy::DHCP::ISC
         raise Proxy::DHCP::InvalidRecord if response && !response.grep(/can\'t open object: not found/).empty?
         raise Proxy::DHCP::Error.new(msg)
       else
-        logger.info msg
+        logger.debug msg
       end
     end
 

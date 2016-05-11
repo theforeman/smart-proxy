@@ -58,7 +58,7 @@
 #:log_file: /var/log/foreman-proxy/proxy.log
 # Uncomment and modify if you want to change the log level
 # WARN, DEBUG, ERROR, FATAL, INFO, UNKNOWN
-#:log_level: ERROR
+#:log_level: INFO
 
 # Log buffer size and extra buffer size (for errors). Defaults to 3000 messages in total,
 # which is about 500 kB request.
