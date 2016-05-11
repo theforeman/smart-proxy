@@ -3,7 +3,7 @@ module ::Proxy::Settings
     DEFAULT_SETTINGS = {
       :settings_directory => Pathname.new(__FILE__).join("..","..","..","..","config","settings.d").expand_path.to_s,
       :https_port => 8443,
-      :log_file => "/var/log/foreman-proxy/proxy.log",
+      :log_file => ::PLATFORM =~ /mingw/ ? "STDOUT" : "/var/log/foreman-proxy/proxy.log",
       :log_level => "ERROR",
       :daemon => false,
       :daemon_pid => "/var/run/foreman-proxy/foreman-proxy.pid",
