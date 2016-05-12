@@ -15,7 +15,7 @@ class Proxy::Puppet::MCollective < Proxy::Puppet::Runner
       cmd.push("-u", user)
     end
 
-    cmd.push(which("mco", "/opt/puppet/bin"))
+    cmd.push(which("mco", ["/opt/puppet/bin", "/opt/puppetlabs/bin"]))
 
     if cmd.include?(false)
       logger.warn "sudo or the mco binary is missing."
