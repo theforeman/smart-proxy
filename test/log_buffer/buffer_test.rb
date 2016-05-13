@@ -12,6 +12,14 @@ class BufferTest < Test::Unit::TestCase
     @buffer = Proxy::LogBuffer::Buffer.new(SIZE, SIZE_TAIL, ERR)
   end
 
+  def test_size
+    assert_equal SIZE, @buffer.size
+  end
+
+  def test_size_tail
+    assert_equal SIZE_TAIL, @buffer.size_tail
+  end
+
   def log_event(*args)
     Proxy::LogBuffer::LogRecord.new(*args)
   end

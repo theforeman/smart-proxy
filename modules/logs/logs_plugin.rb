@@ -8,7 +8,7 @@ class ::Proxy::LogsPlugin < ::Proxy::Plugin
   after_activation do
     begin
       buffer = Proxy::LogBuffer::Buffer.instance
-      logger.debug "Log buffer API initialized, available capacity: #{buffer.size}/#{buffer.size_tail}"
+      logger.debug "Log buffer API initialized, available capacity: #{buffer}"
     end
   end
 end

@@ -30,8 +30,6 @@ module Proxy::LogBuffer
   end
 
   class Buffer
-    attr_reader :size, :size_tail
-
     def self.instance
       @@buffer ||= Buffer.new
     end
@@ -86,10 +84,22 @@ module Proxy::LogBuffer
       @failed_modules[a_module] = message
     end
 
+    def size
+      @main_buffer.size
+    end
+
+    def size_tail
+      @tail_buffer.size
+    end
+
+    def to_s
+      "#{size}/#{size_tail}"
+    end
+
     def info
       {
-        :size => @main_buffer.size,
-        :tail_size => @tail_buffer.size,
+        :size => size,
+        :tail_size => size_tail,
         :level => @level,
         :level_tail => @level_tail,
         :failed_modules => @failed_modules
