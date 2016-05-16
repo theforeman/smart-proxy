@@ -17,8 +17,8 @@ module Proxy
     def http_app
       return nil if SETTINGS.http_port.nil?
       app = Rack::Builder.new do
-        ::Proxy::Plugins.instance.enabled_plugins.each do |p|
-          instance_eval(p.http_rackup)
+        ::Proxy::Plugins.instance.select {|p| p[:state] == :running && p[:http_enabled]}.each do |p|
+          instance_eval(p[:class].http_rackup)
         end
       end
 
@@ -38,7 +38,9 @@ module Proxy
         nil
       else
         app = Rack::Builder.new do
-          ::Proxy::Plugins.instance.enabled_plugins.each {|p| instance_eval(p.https_rackup)}
+          ::Proxy::Plugins.instance.select {|p| p[:state] == :running && p[:https_enabled]}.each do |p|
+            instance_eval(p[:class].https_rackup)
+          end
         end
 
         ssl_options = OpenSSL::SSL::SSLContext::DEFAULT_PARAMS[:options]

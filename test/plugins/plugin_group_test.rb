@@ -1,6 +1,50 @@
 require 'test_helper'
 
 class PluginGroupTest < Test::Unit::TestCase
+  def test_group_initial_state
+    group = ::Proxy::PluginGroup.new(nil)
+
+    assert !group.inactive?
+    assert !group.http_enabled?
+    assert !group.https_enabled?
+  end
+
+  def test_group_listening_ports_when_enabled_setting_is_set_to_http
+    group = ::Proxy::PluginGroup.new(nil)
+    group.update_group_initial_state('http')
+
+    assert !group.inactive?
+    assert group.http_enabled?
+    assert !group.https_enabled?
+  end
+
+  def test_group_listening_ports_when_enabled_setting_is_set_to_https
+    group = ::Proxy::PluginGroup.new(nil)
+    group.update_group_initial_state('https')
+
+    assert !group.inactive?
+    assert !group.http_enabled?
+    assert group.https_enabled?
+  end
+
+  def test_group_listening_ports_when_group_is_disabled
+    group = ::Proxy::PluginGroup.new(nil)
+    group.update_group_initial_state(false)
+
+    assert group.inactive?
+    assert !group.http_enabled?
+    assert !group.https_enabled?
+  end
+
+  def test_group_listening_ports_when_group_failed
+    group = ::Proxy::PluginGroup.new(nil)
+    group.set_group_state_to_failed
+
+    assert group.inactive?
+    assert !group.http_enabled?
+    assert !group.https_enabled?
+  end
+
   class TestPlugin3 < Proxy::Plugin; plugin :test3, "1.0"; uses_provider; default_settings :enabled => true; end
   class TestPlugin4 < Proxy::Provider; plugin :test4, "1.0"; default_settings :enabled => true; end
   def test_resolve_providers
@@ -12,7 +56,6 @@ class PluginGroupTest < Test::Unit::TestCase
     providers = group.resolve_providers(loaded)
 
     assert_equal([TestPlugin4], providers)
-    assert_equal(:starting, group.state)
     assert_equal([TestPlugin4, TestPlugin3], group.members)
   end
 
@@ -39,11 +82,11 @@ class PluginGroupTest < Test::Unit::TestCase
 
     group1 = ::Proxy::PluginGroup.new(TestPlugin9)
     group1.validate_dependencies_or_fail(enabled)
-    assert_equal(:starting, group1.state)
+    assert !group1.inactive?
 
     group2 = ::Proxy::PluginGroup.new(TestPlugin10)
     group2.validate_dependencies_or_fail(enabled)
-    assert_equal(:starting, group2.state)
+    assert !group2.inactive?
   end
 
   class TestPlugin11 < Proxy::Plugin; plugin :test11, "1.0"; uses_provider; default_settings :enabled => true, :use_provider => :test12; end
@@ -52,7 +95,7 @@ class PluginGroupTest < Test::Unit::TestCase
   def test_validate_provider_dependencies
     group = ::Proxy::PluginGroup.new(TestPlugin11)
     group.validate_dependencies_or_fail(:test11 => TestPlugin11, :test12 => TestPlugin12, :test13 => TestPlugin13)
-    assert_equal(:starting, group.state)
+    assert !group.inactive?
   end
 
   class TestPlugin14 < Proxy::Plugin; plugin :test14, '1.0'; requires :test_non_existent, '1.0'; end
@@ -68,12 +111,27 @@ class PluginGroupTest < Test::Unit::TestCase
     group.validate_dependencies_or_fail(:test14 => TestPlugin14)
   end
 
+  class TestPluginForPassingLoadSettingsTest < ::Proxy::Plugin
+    default_settings :enabled => true
+  end
+  def test_load_plugin_settings_updates_group_initial_state
+    group = ::Proxy::PluginGroup.new(TestPluginForPassingLoadSettingsTest)
+    TestPluginForPassingLoadSettingsTest.module_loader_class.any_instance.expects(:load_settings).returns(:enabled => true)
+
+    assert !group.inactive?
+    group.load_plugin_settings
+
+    assert_equal :starting, group.state
+    assert group.http_enabled?
+    assert group.https_enabled?
+  end
+
   class TestPluginForFailingLoadSettingsTest < ::Proxy::Plugin; end
   def test_load_plugin_settings_changes_state_to_failed_on_failure
     TestPluginForFailingLoadSettingsTest.module_loader_class.any_instance.expects(:load_settings).raises("FAILURE")
     group = ::Proxy::PluginGroup.new(TestPluginForFailingLoadSettingsTest)
 
-    assert_equal :starting, group.state
+    assert !group.inactive?
     group.load_plugin_settings
     assert_equal :failed, group.state
   end
@@ -84,7 +142,7 @@ class PluginGroupTest < Test::Unit::TestCase
     TestPluginForFailingLoadSettingsTest.settings = OpenStruct.new(:use_provider => :test_provider, :enabled => true)
     group = ::Proxy::PluginGroup.new(TestPluginForFailingLoadSettingsTest, [TestProviderForFailingLoadSettingsTest])
 
-    assert_equal :starting, group.state
+    assert !group.inactive?
     group.load_provider_settings
     assert_equal :failed, group.state
   end
@@ -102,7 +160,7 @@ class PluginGroupTest < Test::Unit::TestCase
     group = ::Proxy::PluginGroup.new(PluginForFailingConfigureTest)
     PluginForFailingConfigureTest.module_loader_class.any_instance.expects(:configure_plugin).raises("FAILED")
 
-    assert_equal :starting, group.state
+    assert !group.inactive?
     group.configure
     assert_equal :failed, group.state
   end

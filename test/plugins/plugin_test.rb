@@ -7,39 +7,6 @@ class PluginTest < Test::Unit::TestCase
     assert_equal "", TestPlugin2.https_rackup
   end
 
-  class TestPlugin10 < Proxy::Plugin; plugin :test10, '1.0'; end
-  def test_enable_of_only_http_is_successful
-    TestPlugin10.load_test_settings(:enabled => 'http')
-    assert TestPlugin10.http_enabled?
-    assert !TestPlugin10.https_enabled?
-  end
-
-  class TestPlugin11 < Proxy::Plugin; plugin :test11, '1.0'; end
-  def test_enable_of_only_https_is_successful
-    TestPlugin11.load_test_settings(:enabled => 'https')
-    assert TestPlugin11.https_enabled?
-    assert !TestPlugin11.http_enabled?
-  end
-
-  class TestPlugin12 < Proxy::Plugin
-    http_rackup_path File.expand_path("http_config.ru", File.expand_path("../", __FILE__))
-    https_rackup_path File.expand_path("http_config.ru", File.expand_path("../", __FILE__))
-
-    default_settings :enabled => 'https'
-    plugin :test12, '1.0'
-  end
-  def test_plugin_loads_http_rack_path
-    assert !TestPlugin12.http_enabled?
-    assert TestPlugin12.https_enabled?
-    assert_equal :test12, TestPlugin12.plugin_name
-
-    # Ensure that the content is read from 'http_config.ru'
-    File.stubs(:read).returns("require 'test12/test12_api'")
-
-    assert_equal TestPlugin12.http_rackup, ''
-    assert_equal "require 'test12/test12_api'", TestPlugin12.https_rackup
-  end
-
   class TestBundlerGroupPlugin < ::Proxy::Plugin
     plugin :test_bundler_group, '1.0'
     bundler_group :test_group
