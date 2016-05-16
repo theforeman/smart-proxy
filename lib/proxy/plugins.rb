@@ -15,8 +15,19 @@ class ::Proxy::Plugins
     self.loaded += [{:name => a_name, :version => a_version, :class => a_class, :state => :uninitialized}]
   end
 
+  #
+  # each element of the list is a hash containing:
+  #
+  # :name: module name
+  # :version: module version
+  # :class: module class
+  # :state: one of :unitialized, :loaded, :staring, :running, :disabled, or :failed
+  # :di_container: dependency injection container used by the module
+  # :http_enabled: true or false (not used by providers)
+  # :https_enabled: true or false (not used by providers)
+  #
   def loaded
-    @loaded ||= [] # {:name, :version, :class, :factory, :state, :di_container}
+    @loaded ||= []
   end
 
   def loaded=(an_array)
@@ -36,13 +47,19 @@ class ::Proxy::Plugins
     end
   end
 
-  def enabled_plugins
-    loaded.select {|p| p[:state] == :running && p[:class].ancestors.include?(::Proxy::Plugin)}.map{|p| p[:class]}
+  def select
+    loaded.select do |plugin|
+      yield plugin
+    end
   end
 
   #
   # below are methods that are going to be removed/deprecated
   #
+
+  def enabled_plugins
+    loaded.select {|p| p[:state] == :running && p[:class].ancestors.include?(::Proxy::Plugin)}.map{|p| p[:class]}
+  end
 
   def plugin_enabled?(plugin_name)
     plugin = loaded.find {|p| p[:name] == plugin_name.to_sym}

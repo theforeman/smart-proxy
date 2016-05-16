@@ -37,20 +37,8 @@ class ::Proxy::Plugin
   class << self
     attr_reader :get_http_rackup_path, :get_https_rackup_path, :get_uses_provider
 
-    def enabled
-      @enabled ||= settings.enabled
-    end
-
-    def http_enabled?
-      [true,'http'].include?(self.enabled)
-    end
-
     def http_rackup_path(path)
       @get_http_rackup_path = path
-    end
-
-    def https_enabled?
-      [true,'https'].include?(self.enabled)
     end
 
     def https_rackup_path(path)
@@ -73,11 +61,11 @@ class ::Proxy::Plugin
     end
 
     def http_rackup
-      (http_enabled? && get_http_rackup_path) ? File.read(get_http_rackup_path) : ""
+      get_http_rackup_path ? File.read(get_http_rackup_path) : ""
     end
 
     def https_rackup
-      (https_enabled? && get_https_rackup_path) ? File.read(get_https_rackup_path) : ""
+      get_https_rackup_path ? File.read(get_https_rackup_path) : ""
     end
   end
 end

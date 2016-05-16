@@ -3,10 +3,10 @@ class Proxy::RootApi < Sinatra::Base
 
   get "/features" do
     begin
-      plugin_names = ::Proxy::Plugins.instance.enabled_plugins.collect(&:plugin_name).collect(&:to_s).sort
-      @features = plugin_names - ['foreman_proxy']
+      enabled_plugins = ::Proxy::Plugins.instance.select {|p| p[:state] == :running && p[:class].ancestors.include?(::Proxy::Plugin)}
+      enabled_plugin_names = (enabled_plugins.map {|p| p[:name].to_s} - ['foreman_proxy']).sort
       content_type :json
-      @features.to_json
+      enabled_plugin_names.to_json
     rescue => e
       log_halt 400, e
     end
@@ -15,7 +15,8 @@ class Proxy::RootApi < Sinatra::Base
   get "/version" do
     begin
       content_type :json
-      modules = Hash[::Proxy::Plugins.instance.enabled_plugins.collect {|plugin| [plugin.plugin_name.to_s, plugin.version.to_s]}].reject { |key| key == 'foreman_proxy' }
+      enabled_plugins = ::Proxy::Plugins.instance.select {|p| p[:state] == :running && p[:class].ancestors.include?(::Proxy::Plugin)}
+      modules = Hash[enabled_plugins.map {|plugin| [plugin[:name].to_s, plugin[:version].to_s]}].reject { |key| key == 'foreman_proxy' }
       {:version => Proxy::VERSION, :modules => modules}.to_json
     rescue => e
       log_halt 400, e

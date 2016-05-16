@@ -7,17 +7,27 @@ class ::Proxy::PluginGroup
 
   def initialize(a_plugin, providers = [], di_container = ::Proxy::DependencyInjection::Container.new)
     @plugin = a_plugin
-    @state = :starting
+    @state = :uninitialized # :uninitialized -> :starting -> :running, or :uninitialized -> :disabled, or :uninitialized -> :starting -> :failed
     @providers = providers
     @di_container = di_container
+    @http_enabled = false
+    @https_enabled = false
   end
 
-  def failed?
-    @state == :failed
+  def inactive?
+    @state == :failed || @state == :disabled
+  end
+
+  def http_enabled?
+    @http_enabled
+  end
+
+  def https_enabled?
+    @https_enabled
   end
 
   def resolve_providers(all_plugins_and_providers)
-    return if failed?
+    return if inactive?
     return unless @plugin.uses_provider?
 
     used_providers = [@plugin.settings.use_provider].flatten.map(&:to_sym)
@@ -47,22 +57,35 @@ class ::Proxy::PluginGroup
   end
 
   def load_plugin_settings
-    plugin.module_loader_class.new(plugin, di_container).load_settings
+    settings = plugin.module_loader_class.new(plugin, di_container).load_settings
+    update_group_initial_state(settings[:enabled])
   rescue Exception => e
     fail_group(e)
   end
 
+  def update_group_initial_state(enabled_setting)
+    @http_enabled = [true, 'http'].include?(enabled_setting) ? true : false
+    @https_enabled = [true, 'https'].include?(enabled_setting) ? true : false
+    @state = (http_enabled? || https_enabled?) ? :starting : :disabled
+  end
+
+  def set_group_state_to_failed
+    @http_enabled = false
+    @https_enabled = false
+    @state =  :failed
+  end
+
   def load_provider_settings
-    return if failed?
+    return if inactive?
     providers.each do |p|
-        p.module_loader_class.new(p, di_container).load_settings(plugin.settings.marshal_dump)
+      p.module_loader_class.new(p, di_container).load_settings(plugin.settings.marshal_dump)
     end
   rescue Exception => e
     fail_group(e)
   end
 
   def configure
-    return if failed?
+    return if inactive?
     members.each {|p| p.module_loader_class.new(p, di_container).configure_plugin }
     @state = :running
   rescue Exception => e
@@ -75,7 +98,7 @@ class ::Proxy::PluginGroup
   end
 
   def fail_group_with_message(a_message, a_backtrace = nil)
-    @state = :failed
+    set_group_state_to_failed
     logger.error(a_message, a_backtrace)
     members.each do |m|
       ::Proxy::LogBuffer::Buffer.instance.failed_module(m.plugin_name, a_message)
@@ -114,15 +137,16 @@ class ::Proxy::PluginInitializer
   end
 
   def initialize_plugins
-    # find all enabled plugins
-    enabled_plugins = plugins.loaded.select {|plugin| plugin[:class].ancestors.include?(::Proxy::Plugin) && plugin[:class].enabled}
+    loaded_plugins = plugins.loaded.select {|plugin| plugin[:class].ancestors.include?(::Proxy::Plugin)}
 
-    grouped_with_providers = enabled_plugins.map {|p| ::Proxy::PluginGroup.new(p[:class], [], Proxy::DependencyInjection::Container.new)}
+    grouped_with_providers = loaded_plugins.map {|p| ::Proxy::PluginGroup.new(p[:class], [], Proxy::DependencyInjection::Container.new)}
 
-    update_plugin_states(plugins, grouped_with_providers)
+    plugins.update(current_state_of_modules(plugins.loaded, grouped_with_providers))
 
     # load main plugin settings, as this may affect which providers will be selected
-    grouped_with_providers.each {|group| group.load_plugin_settings }
+    grouped_with_providers.each {|group| group.load_plugin_settings}
+
+    plugins.update(current_state_of_modules(plugins.loaded, grouped_with_providers))
 
     #resolve provider names to classes
     grouped_with_providers.each {|group| group.resolve_providers(plugins.loaded)}
@@ -130,34 +154,42 @@ class ::Proxy::PluginInitializer
     # load provider plugin settings
     grouped_with_providers.each {|group| group.load_provider_settings }
 
+    plugins.update(current_state_of_modules(plugins.loaded, grouped_with_providers))
+
     # configure each plugin & providers
     grouped_with_providers.each {|group| group.configure }
 
     # check prerequisites
     all_enabled = all_enabled_plugins_and_providers(grouped_with_providers)
     grouped_with_providers.each do |group|
-      next if group.failed?
+      next if group.inactive?
       group.validate_dependencies_or_fail(all_enabled)
     end
 
-    update_plugin_states(plugins, grouped_with_providers)
+    plugins.update(current_state_of_modules(plugins.loaded, grouped_with_providers))
   end
 
-  def update_plugin_states(all_plugins, all_groups)
-    to_update = all_plugins.loaded.dup
+  def current_state_of_modules(all_plugins, all_groups)
+    to_update = all_plugins.dup
     all_groups.each do |group|
-      group.members.each do |group_member|
+      # note that providers do not use http_enabled and https_enabled
+      updated = to_update.find {|loaded_plugin| loaded_plugin[:name] == group.plugin.plugin_name}
+      updated[:di_container] = group.di_container
+      updated[:state] = group.state
+      updated[:http_enabled] = group.http_enabled?
+      updated[:https_enabled] = group.https_enabled?
+      group.providers.each do |group_member|
         updated = to_update.find {|loaded_plugin| loaded_plugin[:name] == group_member.plugin_name}
         updated[:di_container] = group.di_container
         updated[:state] = group.state
       end
     end
-    all_plugins.update(to_update)
+    to_update
   end
 
   def all_enabled_plugins_and_providers(all_groups)
     all_groups.inject({}) do |all, group|
-      group.members.each {|p| all[p.plugin_name] = p} unless group.failed?
+      group.members.each {|p| all[p.plugin_name] = p} unless group.inactive?
       all
     end
   end
@@ -200,8 +232,11 @@ end
 
 module ::Proxy::DefaultSettingsLoader
   def load_settings(main_plugin_settings = {})
-    settings_file_config = load_configuration(plugin.settings_file)
-    merged_with_defaults = plugin.default_settings.merge(settings_file_config)
+    config_file_settings = load_configuration_file(plugin.settings_file)
+
+    merged_with_defaults = plugin.default_settings.merge(config_file_settings)
+
+    return merged_with_defaults unless module_enabled?(merged_with_defaults)
 
     # load dependencies before loading custom settings and running validators -- they may need those classes
     ::Proxy::BundlerHelper.require_groups(:default, plugin.bundler_group_name)
@@ -211,10 +246,26 @@ module ::Proxy::DefaultSettingsLoader
     settings = load_programmable_settings(config_merged_with_main)
 
     plugin.settings = ::Proxy::Settings::Plugin.new({}, settings)
-    logger.debug("'#{plugin.plugin_name}' settings: #{used_settings(settings)}")
+
+    log_used_settings(settings)
 
     validate_settings(plugin, settings)
 
+    settings
+  end
+
+  def module_enabled?(user_settings)
+    return true if plugin.ancestors.include?(::Proxy::Provider)
+    !!user_settings[:enabled]
+  end
+
+  def load_configuration_file(settings_file)
+    begin
+      settings = Proxy::Settings.read_settings_file(settings_file)
+    rescue Errno::ENOENT
+      logger.warn("Couldn't find settings file #{::Proxy::SETTINGS.settings_directory}/#{settings_file}. Using default settings.")
+      settings = {}
+    end
     settings
   end
 
@@ -227,20 +278,11 @@ module ::Proxy::DefaultSettingsLoader
     provider_settings.merge(main_plugin_settings)
   end
 
-  def used_settings(settings)
+  def log_used_settings(settings)
     default_settings = plugin.plugin_default_settings
     sorted_keys = settings.keys.map(&:to_s).sort.map(&:to_sym) # ruby 1.8.7 doesn't support sorting of symbols
-    sorted_keys.map {|k| "'%s': %s%s" % [k, settings[k], (default_settings.include?(k) && default_settings[k] == settings[k]) ? " (default)" : ""] }.join(", ")
-  end
-
-  def load_configuration(settings_file)
-    begin
-      settings = Proxy::Settings.read_settings_file(settings_file)
-    rescue Errno::ENOENT
-      logger.warn("Couldn't find settings file #{::Proxy::SETTINGS.settings_directory}/#{settings_file}. Using default settings.")
-      settings = {}
-    end
-    settings
+    to_log = sorted_keys.map {|k| "'%s': %s%s" % [k, settings[k], (default_settings.include?(k) && default_settings[k] == settings[k]) ? " (default)" : ""] }.join(", ")
+    logger.debug "'%s' settings: %s" % [plugin.plugin_name, to_log]
   end
 
   def load_programmable_settings(settings)

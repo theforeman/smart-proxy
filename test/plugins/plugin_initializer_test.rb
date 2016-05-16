@@ -28,12 +28,13 @@ class PluginInitializerTest < Test::Unit::TestCase
     assert all_but_uninitialized.all? {|p| p.has_key?(:di_container)}
 
     # filter out :di_container, can't use equality test with it
-    loaded = plugins.loaded.map {|p| [:name, :version, :class, :state].inject({}) {|a, c| a[c] = p[c]; a}}
+    loaded = plugins.loaded.map {|p| [:name, :version, :class, :state, :http_enabled, :https_enabled].inject({}) {|a, c| a[c] = p[c]; a}}
     assert_equal(
-        [{:name => :plugin_1, :version => '1.0', :class => TestPlugin1, :state => :running},
-         {:name => :plugin_2, :version => '1.0', :class => TestPlugin2, :state => :running},
-         {:name => :plugin_3, :version => '1.0', :class => TestPlugin3, :state => :running},
-         {:name => :plugin_4, :version => '1.0', :class => TestPlugin4, :state => :running},
-         {:name => :plugin_5, :version => '1.0', :class => TestPlugin5, :state => :uninitialized}], loaded)
+        [{:name => :plugin_1, :version => '1.0', :class => TestPlugin1, :state => :running, :http_enabled => true, :https_enabled => true},
+         {:name => :plugin_2, :version => '1.0', :class => TestPlugin2, :state => :running, :http_enabled => true, :https_enabled => true},
+         {:name => :plugin_3, :version => '1.0', :class => TestPlugin3, :state => :running, :http_enabled => true, :https_enabled => true},
+         # :http_enabled and :https_enabled are not defined for providers
+         {:name => :plugin_4, :version => '1.0', :class => TestPlugin4, :state => :running, :http_enabled => nil, :https_enabled => nil},
+         {:name => :plugin_5, :version => '1.0', :class => TestPlugin5, :state => :disabled, :http_enabled => false, :https_enabled => false}], loaded)
   end
 end
