@@ -1,3 +1,5 @@
+require 'ostruct'
+
 module Proxy::Pluggable
   attr_reader :plugin_name, :version, :after_activation_blk
 
@@ -25,7 +27,6 @@ module Proxy::Pluggable
   end
 
   def default_settings(a_hash = {})
-    @settings = nil
     @plugin_default_settings ||= {}
     @plugin_default_settings.merge!(a_hash)
   end
@@ -49,6 +50,15 @@ module Proxy::Pluggable
     validator_args = validator_params[validator_name]
 
     settings.each {|setting| validations << {:name => validator_name, :predicate => predicate, :args => validator_args, :setting => setting} }
+  end
+
+  def override_module_loader_class(a_class_or_a_class_name)
+    @module_loader_class = case a_class_or_a_class_name
+                           when String
+                             eval(a_class_or_a_class_name)
+                           else
+                             a_class_or_a_class_name
+                           end
   end
 
   def load_validators(hash_of_validators)
@@ -75,12 +85,9 @@ module Proxy::Pluggable
   # End of DSL
   #
 
+  attr_writer :settings
   def settings
-    @settings ||= Proxy::Settings.load_plugin_settings(plugin_default_settings, settings_file)
-  end
-
-  def settings=(arg)
-    @settings = arg
+    @settings ||= OpenStruct.new
   end
 
   def module_loader_class

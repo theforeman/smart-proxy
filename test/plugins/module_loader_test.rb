@@ -21,7 +21,7 @@ class ModuleLoaderTest < Test::Unit::TestCase
   end
 
   def test_load_configuration_returns_empty_hash_when_config_not_found
-    assert_equal({}, @loader.load_configuration("non_existent_config"))
+    assert_equal({}, @loader.load_configuration_file("non_existent_config"))
   end
 
   def test_compute_runtime_configuration_returns_original_settings_without_runtime_config_loader
@@ -83,11 +83,10 @@ class ModuleLoaderTest < Test::Unit::TestCase
   def test_validate_runtime_config_executes_custom_validators
     loader = ::Proxy::DefaultModuleLoader.new(TestPluginWithCustomValidators, nil)
     results = loader.validate_settings(TestPluginWithCustomValidators, :setting => "value", :evaluate => true)
-
     predicate = TestPluginWithCustomValidators.validations.first[:predicate]
     assert_equal([{:class => TestValidator, :setting => :setting, :args => {:arg1 => "arg1", :arg2 => "arg2"}, :predicate => predicate}], results)
   end
-  
+
   class AnotherTestPluginWithCustomValidators < ::Proxy::Plugin
     validate :setting, :non_existent => true
   end

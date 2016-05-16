@@ -1,6 +1,6 @@
 require 'test_helper'
 require 'json'
-require 'root/root_plugin'
+require 'root/root'
 require 'root/root_api'
 
 ENV['RACK_ENV'] = 'test'
@@ -25,16 +25,24 @@ class RootApiTest < Test::Unit::TestCase
   end
 
   def test_features
-    ::Proxy::Plugins.any_instance.stubs(:enabled_plugins).returns([TestPlugin2, TestPlugin3, TestPlugin0])
+    ::Proxy::Plugins.any_instance.expects(:loaded).returns(
+        [{:name => :foreman_proxy, :version => "0.0.1", :class => TestPlugin0, :state => :running},
+         {:name => :test2, :version => "0.0.1", :class => TestPlugin2, :state => :running},
+         {:name => :test2, :version => "0.0.1", :class => TestPlugin3, :state => :disabled}])
     get "/features"
-    assert_equal ['test2', 'test3'], JSON.parse(last_response.body)
+    assert_equal ['test2'], JSON.parse(last_response.body)
   end
 
   def test_version
-    ::Proxy::Plugins.any_instance.stubs(:enabled_plugins).returns([TestPlugin2, TestPlugin3, TestPlugin0])
+    all_modules = [{:name => :foreman_proxy, :version => "0.0.1", :class => TestPlugin0, :state => :running},
+                   {:name => :test2, :version => "0.0.1", :class => TestPlugin2, :state => :running},
+                   {:name => :test2, :version => "0.0.1", :class => TestPlugin3, :state => :disabled}]
+
+    ::Proxy::Plugins.any_instance.expects(:loaded).returns(all_modules)
+
     get "/version"
     assert_equal(Proxy::VERSION, JSON.parse(last_response.body)["version"])
-    modules = Hash[::Proxy::Plugins.instance.enabled_plugins.collect {|plugin| [plugin.plugin_name.to_s, plugin.version.to_s]}].reject { |key| key == 'foreman_proxy' }
+    modules = Hash[all_modules.collect {|plugin| [plugin[:name].to_s, plugin[:version].to_s]}].reject { |key| key == 'foreman_proxy' }
     assert_equal(modules, JSON.parse(last_response.body)["modules"])
   end
 end
