@@ -1,3 +1,22 @@
+2016-05-18	Dominic Cleal <dominic@cleal.org>
+	* Release 1.11.2
+
+2016-05-16	Lukas Zapletal <lzap+git@redhat.com>
+	* Fixes #15028 - log buffer capacity reported correctly
+	* Fixes #14931 - TFTP class instantiating fixed
+
+2016-05-16	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #14952 - isc_dhcp respects :subnets setting now.
+
+2016-05-16	Matthias Thubauville <matthias.thubo@gmail.com>
+	* Fixes #10015 - FreeIPA realm-proxy permissions do not allow for removing a DNS record at time of host delete
+
+2016-04-28	Ewoud Kohl van Wijngaarden <ewoud@kohlvanwijngaarden.nl>
+	* Fixes #13942: Backport {a,ptr}_record_conflicts functions
+
+2016-04-28	Michael Moll <kvedulv@kvedulv.de>
+	* Fixes #14862 - pin webmock version for Ruby <1.9.3
+
 2016-04-19	Dominic Cleal <dominic@cleal.org>
 	* Release 1.11.1
 
