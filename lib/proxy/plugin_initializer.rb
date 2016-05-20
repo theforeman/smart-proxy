@@ -229,8 +229,8 @@ module ::Proxy::DefaultSettingsLoader
 
   def used_settings(settings)
     default_settings = plugin.plugin_default_settings
-    sorted_keys = settings.keys.map(&:to_s).sort # ruby 1.8.7 doesn't support sorting of symbols
-    sorted_keys.map {|k| "'%s': %s%s" % [k, settings[k.to_sym], (default_settings.include?(k) && default_settings[k] == settings[k]) ? " (default)" : ""] }.join(", ")
+    sorted_keys = settings.keys.map(&:to_s).sort.map(&:to_sym) # ruby 1.8.7 doesn't support sorting of symbols
+    sorted_keys.map {|k| "'%s': %s%s" % [k, settings[k], (default_settings.include?(k) && default_settings[k] == settings[k]) ? " (default)" : ""] }.join(", ")
   end
 
   def load_configuration(settings_file)
