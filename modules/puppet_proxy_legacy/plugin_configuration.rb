@@ -111,7 +111,7 @@ module ::Proxy::PuppetLegacy
     end
 
     def use_environment_api?(puppet_config)
-      !([:main, :master].any? { |s| (puppet_config[s] && puppet_config[s][:environmentpath] && !puppet_config[s][:environmentpath].empty?) })
+      !!([:main, :master].any? { |s| (puppet_config[s] && puppet_config[s][:environmentpath] && !puppet_config[s][:environmentpath].empty?) })
     end
 
     def load_puppet_configuration(config)
