@@ -19,20 +19,20 @@ class PuppetLegacyProgrammableSettingsTest < Test::Unit::TestCase
   end
 
   def test_use_environment_api_when_main_environmentpath_is_set
-    assert !@configuration.use_environment_api?(:main => {:environmentpath => ["a/path"]})
+    assert @configuration.use_environment_api?(:main => {:environmentpath => ["a/path"]})
   end
 
   def test_use_environment_api_when_master_environmentpath_is_set
-    assert !@configuration.use_environment_api?(:master => {:environmentpath => ["a/path"]})
+    assert @configuration.use_environment_api?(:master => {:environmentpath => ["a/path"]})
   end
 
   def test_use_environment_api_when_main_and_master_are_missing
-    assert @configuration.use_environment_api?({})
+    assert !@configuration.use_environment_api?({})
   end
 
   def test_use_environment_api_when_no_environment_paths_are_present
     configuration = LegacyProviderConfigurationForTesting.new({})
-    assert configuration.use_environment_api?(:main => {}, :master => {})
+    assert !configuration.use_environment_api?(:main => {}, :master => {})
   end
 
   def test_puppet_conf_exists_is_used_in_load_programmable_settings_call
@@ -90,14 +90,14 @@ class PuppetLegacyProgrammableSettingsTest < Test::Unit::TestCase
     assert_equal :api_v2, configuration.load_programmable_settings(:puppet_version => "3.2", :use_environment_api => true)[:environments_retriever]
   end
 
-  def test_load_programmable_settings_sets_api_v2_for_environments_retriever_whithout_puppet_use_environment_api_and_environmentpath_missing
+  def test_load_programmable_settings_sets_config_file_for_environments_retriever_without_puppet_use_environment_api_and_environmentpath_missing
     configuration = LegacyProviderConfigurationForTesting.new(:master => {}, :main => {})
-    assert_equal :api_v2, configuration.load_programmable_settings(:puppet_version => "3.2")[:environments_retriever]
+    assert_equal :config_file, configuration.load_programmable_settings(:puppet_version => "3.2")[:environments_retriever]
   end
 
-  def test_load_programmable_settings_sets_api_v2_for_environments_retriever_whithout_puppet_use_environment_api_and_environmentpath_present
+  def test_load_programmable_settings_sets_api_v2_for_environments_retriever_without_puppet_use_environment_api_and_environmentpath_present
     configuration = LegacyProviderConfigurationForTesting.new(:master => {}, :main => {:environmentpath => ["a/path"]})
-    assert_equal :config_file, configuration.load_programmable_settings(:puppet_version => "3.2")[:environments_retriever]
+    assert_equal :api_v2, configuration.load_programmable_settings(:puppet_version => "3.2")[:environments_retriever]
   end
 end
 
