@@ -27,6 +27,8 @@ module Proxy::Dns
         when 'AAAA'
           ip = IPAddr.new(value, Socket::AF_INET6).to_s
           server.create_aaaa_record(fqdn, ip)
+        when 'CNAME'
+          server.create_cname_record(fqdn, value)
         when 'PTR'
           validate_reverse_dns_name!(value)
           server.create_ptr_record(fqdn, value)
@@ -56,6 +58,8 @@ module Proxy::Dns
           server.remove_a_record(name)
         when 'AAAA'
           server.remove_aaaa_record(name)
+        when 'CNAME'
+          server.remove_cname_record(name)
         when 'PTR'
           validate_reverse_dns_name!(name)
           server.remove_ptr_record(name)

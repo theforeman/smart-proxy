@@ -41,6 +41,21 @@ module Proxy::Dns::Dnscmd
       end
     end
 
+    def create_cname_record(fqdn, target)
+      case cname_record_conflicts(fqdn, target) #returns -1, 0, 1
+        when 1 then
+          raise(Proxy::Dns::Collision, "'#{fqdn} 'is already in use")
+        when 0 then
+          return nil
+        else
+          zone = match_zone(fqdn, enum_zones)
+          msg = "Added CNAME entry #{fqdn} => #{target}"
+          cmd = "/RecordAdd #{zone} #{fqdn}. CNAME #{target}"
+          execute(cmd, msg)
+          nil
+      end
+    end
+
     def create_ptr_record(fqdn, ptr)
       case ptr_record_conflicts(fqdn, ptr_to_ip(ptr)) #returns -1, 0, 1
         when 1 then
@@ -68,6 +83,14 @@ module Proxy::Dns::Dnscmd
       zone = match_zone(fqdn, enum_zones)
       msg = "Removed DNS entry #{fqdn}"
       cmd = "/RecordDelete #{zone} #{fqdn}. AAAA /f"
+      execute(cmd, msg)
+      nil
+    end
+
+    def remove_cname_record(fqdn)
+      zone = match_zone(fqdn, enum_zones)
+      msg = "Removed CNAME entry #{fqdn}"
+      cmd = "/RecordDelete #{zone} #{fqdn}. CNAME /f"
       execute(cmd, msg)
       nil
     end

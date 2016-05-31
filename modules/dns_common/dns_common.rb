@@ -62,6 +62,13 @@ module Proxy::Dns
       end
     end
 
+    def cname_record_conflicts(fqdn, target)
+      current = resolver.getresources(fqdn, Resolv::DNS::Resource::IN::CNAME)
+      return -1 if current.empty?
+      return 0 if current[0].name.to_s == target #There can only be one CNAME
+      1
+    end
+
     def ptr_record_conflicts(fqdn, ip)
       if ip_addr = to_ipaddress(ip)
         names = resolver.getnames(ip_addr.to_s)
@@ -75,6 +82,14 @@ module Proxy::Dns
 
     def to_ipaddress ip
       IPAddr.new(ip) rescue false
+    end
+
+    def create_cname_record(fqdn, target)
+      raise Proxy::Dns::Error.new("This DNS provider does not support CNAME management")
+    end
+
+    def remove_cname_record(fqdn)
+      raise Proxy::Dns::Error.new("This DNS provider does not support CNAME management")
     end
   end
 end

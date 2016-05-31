@@ -71,6 +71,24 @@ class DnsCmdTest < Test::Unit::TestCase
     end
   end
 
+  def test_create_cname_record
+    Proxy::Dns::Dnscmd::Record.any_instance.expects(:cname_record_conflicts).with('alias.foo.bar.domain.local', 'host.foo.bar.domain.local').returns(-1)
+    Proxy::Dns::Dnscmd::Record.any_instance.expects(:execute).with('/RecordAdd bar.domain.local alias.foo.bar.domain.local. CNAME host.foo.bar.domain.local', anything).returns(true)
+    assert_nil @server.create_cname_record('alias.foo.bar.domain.local', 'host.foo.bar.domain.local')
+  end
+
+  def test_overwrite_cname_record
+    Proxy::Dns::Dnscmd::Record.any_instance.expects(:cname_record_conflicts).with('alias.foo.bar.domain.local', 'host.foo.bar.domain.local').returns(0)
+    assert_nil @server.create_cname_record('alias.foo.bar.domain.local', 'host.foo.bar.domain.local')
+  end
+
+  def test_create_duplicate_cname_record_fails
+    Proxy::Dns::Dnscmd::Record.any_instance.expects(:cname_record_conflicts).with('alias.foo.bar.domain.local', 'host.foo.bar.domain.local').returns(1)
+    assert_raise Proxy::Dns::Collision do
+      @server.create_cname_record('alias.foo.bar.domain.local', 'host.foo.bar.domain.local')
+    end
+  end
+
   def test_remove_address_record_with_longest_zone_match
     Proxy::Dns::Dnscmd::Record.any_instance.expects(:execute).with('/RecordDelete bar.domain.local host.foo.bar.domain.local. A /f', anything).returns(true)
     assert_nil @server.remove_a_record('host.foo.bar.domain.local')
@@ -79,6 +97,11 @@ class DnsCmdTest < Test::Unit::TestCase
   def test_remove_ptr_record
     Proxy::Dns::Dnscmd::Record.any_instance.expects(:execute).with('/RecordDelete 33.168.192.in-addr.arpa 33.33.168.192.in-addr.arpa. PTR /f', anything).returns(true)
     assert_nil @server.remove_ptr_record('33.33.168.192.in-addr.arpa')
+  end
+
+  def test_remove_cname_record
+    Proxy::Dns::Dnscmd::Record.any_instance.expects(:execute).with('/RecordDelete bar.domain.local alias.foo.bar.domain.local. CNAME /f', anything).returns(true)
+    assert_nil @server.remove_cname_record('alias.foo.bar.domain.local')
   end
 
   def test_dns_zone_matches_second_best_match_if_zone_name_equals_host_name

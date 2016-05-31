@@ -7,7 +7,7 @@ ENV['RACK_ENV'] = 'test'
 
 class DnsApiTest < Test::Unit::TestCase
   class DnsApiTestProvider
-    attr_reader :fqdn, :ip, :type
+    attr_reader :fqdn, :ip, :type, :target
     def create_a_record(fqdn, ip)
       @fqdn = fqdn; @ip = ip; @type = 'A'
     end
@@ -17,6 +17,9 @@ class DnsApiTest < Test::Unit::TestCase
     def create_ptr_record(fqdn, ip)
       @fqdn = fqdn; @ip = ip; @type = 'PTR'
     end
+    def create_cname_record(fqdn, target)
+      @fqdn = fqdn; @target = target; @type = 'CNAME'
+    end
     def remove_a_record(fqdn)
       @fqdn = fqdn; @type = 'A'
     end
@@ -25,6 +28,9 @@ class DnsApiTest < Test::Unit::TestCase
     end
     def remove_ptr_record(ip)
       @ip = ip; @type = 'PTR'
+    end
+    def remove_cname_record(fqdn)
+      @fqdn = fqdn; @type = 'CNAME'
     end
   end
 
@@ -132,6 +138,14 @@ class DnsApiTest < Test::Unit::TestCase
     assert_equal 'AAAA', @server.type
   end
 
+  def test_create_cname_record
+    post '/', :fqdn => 'test.com', :value => 'test1.com', :type => 'CNAME'
+    assert_equal 200, last_response.status
+    assert_equal 'test.com', @server.fqdn
+    assert_equal 'test1.com', @server.target
+    assert_equal 'CNAME', @server.type
+  end
+
   def test_delete_a_record
     delete '/test.com'
     assert_equal 200, last_response.status
@@ -165,6 +179,13 @@ class DnsApiTest < Test::Unit::TestCase
     assert_equal 200, last_response.status
     assert_equal 'test.com', @server.fqdn
     assert_equal 'AAAA', @server.type
+  end
+
+  def test_delete_explicit_cname_record
+    delete "/test.com/CNAME"
+    assert_equal 200, last_response.status
+    assert_equal 'test.com', @server.fqdn
+    assert_equal 'CNAME', @server.type
   end
 
   def test_delete_returns_error_if_value_is_missing

@@ -72,6 +72,12 @@ class DnsNsupdateTest < Test::Unit::TestCase
     end
   end
 
+  def test_remove_cname_record_fails
+    assert_raise Proxy::Dns::Error do
+      Proxy::Dns::Nsupdate::Record.new(nil, 100).remove_cname_record('some.host')
+    end
+  end
+
   def test_create_aaaa_record
     Proxy::Dns::Nsupdate::Record.any_instance.expects(:nsupdate_connect).returns(true)
     Proxy::Dns::Nsupdate::Record.any_instance.expects(:nsupdate).with('update add some.host. 100 AAAA 2001:db8::1').returns(true)
