@@ -24,7 +24,10 @@ module ::Proxy::PluginValidators
 
   class Presence < Base
     def validate!
-      raise ::Proxy::Error::ConfigurationError, "Parameter '#{@setting_name}' is expected to have a non-empty value" if setting_value.nil? || setting_value.to_s.empty?
+      empty_value = setting_value.nil?
+      empty_value ||= setting_value.empty? if setting_value.is_a?(String)
+
+      raise ::Proxy::Error::ConfigurationError, "Parameter '#{@setting_name}' is expected to have a non-empty value" if empty_value
       true
     end
   end

@@ -10,6 +10,13 @@ class PresenceValidatorTest < Test::Unit::TestCase
     assert ::Proxy::PluginValidators::Presence.new(PresenceValidatorTestPlugin, 'a_setting').validate!
   end
 
+  def test_empty_string_treated_as_missing_value
+    PresenceValidatorTestPlugin.load_test_settings(:a_setting => '')
+    assert_raises ::Proxy::Error::ConfigurationError do
+      ::Proxy::PluginValidators::Presence.new(PresenceValidatorTestPlugin, 'a_setting').validate!
+    end
+  end
+
   def test_required_parameter_without_a_value_fails_validation
     PresenceValidatorTestPlugin.load_test_settings(:a_setting => nil)
     assert_raises ::Proxy::Error::ConfigurationError do
