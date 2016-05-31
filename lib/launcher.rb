@@ -116,6 +116,12 @@ module Proxy
       server
     end
 
+    def webrick_server(app)
+      server = ::WEBrick::HTTPServer.new(app)
+      server.mount "/", Rack::Handler::WEBrick, app[:app]
+      server
+    end
+
     def launch
       ::Proxy::PluginInitializer.new(::Proxy::Plugins.instance).initialize_plugins
 
