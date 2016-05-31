@@ -84,6 +84,7 @@
 #   salt        (uses salt puppet.run)
 #   customrun   (calls a custom command with args)
 :puppet_provider: puppetrun
+#:use_rvmsudo: false
 
 # customrun command details
 # Set :customrun_cmd to the full path of the script you want to run, instead of /bin/false
