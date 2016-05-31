@@ -122,4 +122,9 @@ module Proxy::TFTP
     # Do not append a '-' if the dst is a directory path
     dst.end_with?('/') ? dst + src.split("/")[-1] : dst + '-' + src.split("/")[-1]
   end
+
+  def self.boot_filename(dst, src)
+    # Do not append a '-' if the dst is a directory path
+    dst.end_with?('/') ? dst + src.split("/")[-1] : dst + '-' + src.split("/")[-1]
+  end
 end
