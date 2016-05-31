@@ -1,0 +1,5 @@
+# the location where foreman proxy is installed
+#FOREMAN_PROXY_HOME=/usr/share/foreman-proxy
+
+# the user which runs the web interface
+#FOREMAN_PROXY_USER=foreman-proxy
