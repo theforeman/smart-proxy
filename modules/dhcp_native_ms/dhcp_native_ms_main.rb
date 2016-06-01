@@ -91,28 +91,28 @@ module Proxy::DHCP::NativeMS
     private :find_or_create_vendor_name
 
     def find_subnet_dhcp_records(subnet)
-      cmd = "scope #{subnet.network} show reservedip"
+      cmd = "scope #{subnet.network} show client 1"
       msg = "Enumerated hosts on #{subnet.network}"
 
       to_return = []
       # Extract the data
       execute(cmd, msg).each do |line|
-        #     172.29.216.6      -    00-a0-e7-21-41-00-
-        if line =~ /^\s+([\w\.]+)\s+-\s+([-a-f\d]+)/
-          ip  = $1
+        #192.168.205.4    - 255.255.255.128- 00-1e-68-65-55-f8   -4/23/2013 6:41:21 PM   -D-
+        #192.168.205.5    - 255.255.255.128-00-1b-24-93-35-09   - NEVER EXPIRES        -U-  host.brs.company.com
+        if (match = line.match(/\A([\d\.]+)\s*-\s*[\d\.]+\s*- ?([-a-f\d]+)\s*-\s*([^-]+?)\s*-(\w)-\s*(.*)/))
+          ip, mac, expire, _, name  = match[1,5]
           next unless subnet.include?(ip)
-          mac = $2.gsub(/-/,":").match(/^(.*?).$/)[1]
+          # Some mac addresses appear to be more than 6 bytes!
+          mac = mac[0,17].gsub!(/-/, ':')
           begin
-            opts = {:subnet => subnet, :ip => ip, :mac => mac}
-            opts.merge!(loadRecordOptions(opts))
+            opts = {:subnet => subnet, :ip => ip, :mac => mac, :name => name}
             logger.debug opts.inspect
-            if opts.include? :hostname
+            if expire =~ /^INACTIVE|^NEVER/
+              opts.merge!(loadRecordOptions(opts))
               to_return << Proxy::DHCP::Reservation.new(opts.merge(:deleteable => true))
             else
-              # this is not a lease, rather reservation
-              # but we require option 12(hostname) to be defined for our leases
-              # workaround until #1172 is resolved.
-              to_return << Proxy::DHCP::Lease.new(opts)
+              opts[:name] = '*lease*' if opts[:name] == ''
+              to_return << Proxy::DHCP::Lease.new(opts.merge(:starts => 'unknown', :ends => expire, :state => 'unknown'))
             end
           rescue Exception => e
             logger.debug "Skipped #{line} - #{e}"
@@ -180,7 +180,7 @@ module Proxy::DHCP::NativeMS
 
       ret_val = []
       execute(cmd, msg).each do |line|
-        # 172.29.216.0   - 255.255.254.0  -Active        -DC BRS               -
+        # 192.168.216.0   - 255.255.254.0  -Active        -DC BRS               -
         if match = line.match(/^\s*([\d\.]+)\s*-\s*([\d\.]+)\s*-\s*(Active|Disabled)/)
           next unless managed_subnet? "#{match[1]}/#{match[2]}"
           ret_val << Proxy::DHCP::Subnet.new(match[1], match[2])
