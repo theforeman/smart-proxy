@@ -19,89 +19,46 @@ class DHCPServerMicrosoftTest < Test::Unit::TestCase
  Scope Address  - Subnet Mask    - State        - Scope Name          -  Comment
 ==============================================================================
 
- 172.24.166.0   - 255.255.255.128-Active        -WLAN SMW Clients BRS -WLAN range SMW
- 172.24.230.0   - 255.255.255.128-Active        -WLAN SMW Clients BRS -WLAN range SMW
- 172.29.204.0   - 255.255.255.0  -Active        -Client VLAN Scope    -DC Standardiza
- 172.29.205.0   - 255.255.255.128-Active        -Server VLAN Scope    -DC Standardiza
- 172.29.205.128 - 255.255.255.128-Active        -Management VLAN Scope-DC Standardiza
- 172.29.216.0   - 255.255.254.0  -Active        -DC BRS               -
+ 192.168.166.0   - 255.255.255.128-Active        -WLAN SMW Clients BRS -WLAN range SMW
+ 192.168.230.0   - 255.255.255.128-Active        -WLAN SMW Clients BRS -WLAN range SMW
+ 192.168.204.0   - 255.255.255.0  -Active        -Client VLAN Scope    -DC Standardiza
+ 192.168.205.0   - 255.255.255.128-Active        -Server VLAN Scope    -DC Standardiza
+ 192.168.205.128 - 255.255.255.128-Active        -Management VLAN Scope-DC Standardiza
+ 192.168.216.0   - 255.255.254.0  -Active        -DC BRS               -
 
  Total No. of Scopes = 6
 Command completed successfully.'.split("\n"))
-    @server.stubs(:execute).with("scope 172.29.205.0 show reservedip", "Enumerated hosts on 172.29.205.0").returns('
-Changed the current scope context to 172.29.205.0 scope.
+    @server.stubs(:execute).with("scope 192.168.216.0 show client 1", "Enumerated hosts on 192.168.216.0").returns('
 
-===============================================================
-  Reservation Address -    Unique ID
-===============================================================
+Changed the current scope context to 192.168.216.0 scope.
 
-    172.29.205.56     -    00-14-4f-40-e9-88-
-    172.29.205.30     -    00-0c-29-03-f4-24-
-    172.29.205.62     -    00-14-4f-41-09-e8-
-    172.29.205.83     -    00-1b-24-93-34-89-
-    172.29.205.34     -    00-1e-68-04-a4-8b-
-    172.29.205.29     -    00-0c-29-7b-05-ce-
-    172.29.205.32     -    00-0c-29-64-85-f0-
-    172.29.205.37     -    00-1e-68-04-a0-df-
-    172.29.205.35     -    00-1e-68-04-a0-eb-
-    172.29.205.36     -    00-1e-68-04-a7-0f-
-    172.29.205.38     -    00-1e-68-04-a0-db-
-    172.29.205.39     -    00-1e-68-04-a4-17-
-    172.29.205.44     -    00-14-4f-41-09-90-
-    172.29.205.45     -    00-14-4f-40-ea-98-
-    172.29.205.52     -    00-14-4f-41-0b-74-
-    172.29.205.53     -    00-14-4f-40-67-24-
-    172.29.205.54     -    00-14-4f-40-db-80-
-    172.29.205.55     -    00-14-4f-40-e1-f0-
-    172.29.205.58     -    00-14-4f-40-e2-54-
-    172.29.205.79     -    00-1b-24-1d-e6-60-
-    172.29.205.78     -    00-1b-24-1d-e6-c8-
-    172.29.205.77     -    00-1b-24-1d-e8-e0-
-    172.29.205.80     -    00-1b-24-5b-e0-62-
-    172.29.205.81     -    00-1b-24-93-34-39-
-    172.29.205.82     -    00-04-23-dd-29-98-
-    172.29.205.63     -    00-14-4f-41-09-cc-
-    172.29.205.5      -    01-01-01-00-00-05-
-    172.29.205.40     -    00-14-4f-41-0b-70-
-    172.29.205.43     -    00-14-4f-41-09-c0-
-    172.29.205.28     -    01-01-01-00-02-08-
-    172.29.205.85     -    00-21-28-57-42-ce-
-    172.29.205.86     -    00-21-28-57-41-c2-
-    172.29.205.87     -    00-21-28-57-44-2a-
-    172.29.205.88     -    00-14-4f-ca-ae-c8-
-    172.29.205.89     -    00-21-28-57-40-e2-
-    172.29.205.90     -    00-14-4f-ca-6a-70-
-    172.29.205.70     -    00-21-28-57-41-72-
-    172.29.205.31     -    99-10-10-11-12-12-
-    172.29.205.10     -    00-1b-24-1d-e9-e4-
-    172.29.205.57     -    00-14-4f-41-0a-18-
-    172.29.205.76     -    00-e0-81-bb-05-18-
-    172.29.205.71     -    00-14-4f-ca-91-48-
-    172.29.205.91     -    00-e0-81-d2-ea-12-
-    172.29.205.92     -    00-e0-81-d2-ea-06-
-    172.29.205.93     -    00-e0-81-d2-01-aa-
-    172.29.205.94     -    00-e0-81-d1-fe-2a-
-    172.29.205.95     -    00-e0-81-d2-e9-aa-
-    172.29.205.20     -    00-0c-29-e4-cd-0c-
-    172.29.205.21     -    00-0c-29-3b-ec-dc-
-    172.29.205.22     -    00-0c-29-cf-00-45-
-    172.29.205.24     -    00-0c-29-e9-83-09-
-    172.29.205.96     -    00-e0-81-d2-e9-56-
-    172.29.205.6      -    00-14-4f-82-9c-ea-
-    172.29.205.27     -    00-03-ba-45-79-31-
-    172.29.205.23     -    00-0c-29-f6-f9-ce-
-    172.29.205.25     -    00-0c-29-64-a1-f1-
-    172.29.205.26     -    00-0c-29-46-8f-10-
+Type : N - NONE, D - DHCP B - BOOTP, U - UNSPECIFIED, R - RESERVATION IP
+============================================================================================
+IP Address      - Subnet Mask    - Unique ID           - Lease Expires        -Type -Name
+============================================================================================
 
+192.168.216.25   - 255.255.254.0  -e4-11-5b-ad-a5-da   - NEVER EXPIRES        -U-  BRSSVM01L.brs.someware.com
+192.168.217.5    - 255.255.254.0  - 64-51-06-a1-66-b5   -6/13/2016 7:29:13 AM   -D-  BRSNCNU4309QH3.eu.someware.com
+192.168.217.6    - 255.255.254.0  - 10-0b-a9-02-30-e4   -6/12/2016 7:48:16 AM   -D-  BRSNCNU15112P6.eu.someware.com
+192.168.217.13   - 255.255.254.0  - e4-11-5b-2d-d4-fe   -6/13/2016 9:20:27 AM   -D-  BRSNCZC2050P23.eu.someware.com
+192.168.217.14   - 255.255.254.0  -00-08-02-8e-73-0e   - NEVER EXPIRES        -U-  brsw002a.eu.someware.com
+192.168.217.134  - 255.255.254.0  - 64-80-99-8a-e8-9b   -6/13/2016 11:18:24 AM  -D-  BRSN5CG54755H5.eu.someware.com
+192.168.217.138  - 255.255.254.0  - 3c-a8-2a-19-88-98   -6/11/2016 10:13:13 AM  -D-  brssvm03l.brs.someware.com
+192.168.217.140  - 255.255.254.0  - dc-4a-3e-63-96-fa   -6/13/2016 11:15:09 AM  -D-  BRSN5CG54755HT.eu.someware.com
+192.168.217.141  - 255.255.254.0  -00-0f-fe-59-db-a5   - NEVER EXPIRES        -U-  brsutest.brs.someware.com
+192.168.217.142  - 255.255.254.0  - 64-80-99-8a-e8-3c   -6/13/2016 11:20:33 AM  -D-  BRSN5CG54755FT.eu.someware.com
+192.168.217.144  - 255.255.254.0  - f4-ce-46-10-2a-d0   -6/12/2016 2:08:47 AM   -D-  BRSWCZC1045563.eu.someware.com
+192.168.217.148  - 255.255.254.0  - 70-5a-0f-d1-0a-78   -6/13/2016 9:52:27 AM   -D-  BRSN5CG616217K.eu.someware.com
 
-No of ReservedIPs : 57 in the Scope : 172.29.205.0.
+No of Clients(version 4): 12 in the Scope : 192.168.216.0.
 
 Command completed successfully.
-'.split("\n"))
-    @server.stubs(:execute).with("scope 172.29.205.0 Show OptionValue", "Queried 172.29.205.0 options").returns('
-Changed the current scope context to 172.29.205.0 scope.
 
-Options for Scope 172.29.205.0:
+'.split("\n"))
+    @server.stubs(:execute).with("scope 192.168.205.0 Show OptionValue", "Queried 192.168.205.0 options").returns('
+Changed the current scope context to 192.168.205.0 scope.
+
+Options for Scope 192.168.205.0:
 
         DHCP Standard Options :
         General Option Values:
@@ -120,15 +77,15 @@ Options for Scope 172.29.205.0:
         Option Value:
                 Number of Option Elements = 1
                 Option Element Type = IPADDRESS
-                Option Element Value = 172.29.205.1
+                Option Element Value = 192.168.205.1
 Command completed successfully.
     '.split("\n"))
     @server.stubs(:execute).with(
-        regexp_matches(/^scope 172.29.205.0 Show ReservedOptionValue 172.29.205.25/),
-        regexp_matches(/^Queried .+ options/)).returns('
-Changed the current scope context to 172.29.205.0 scope.
+        regexp_matches(/\Ascope 192.168.216.0 Show ReservedOptionValue 192.168.216.25/),
+        regexp_matches(/\AQueried .+ options/)).returns('
+Changed the current scope context to 192.168.216.0 scope.
 
-Options for the Reservation Address 172.29.205.25 in the Scope 172.29.205.0 :
+Options for the Reservation Address 192.168.216.25 in the Scope 192.168.216.0 :
 
         DHCP Standard Options :
         General Option Values:
@@ -136,7 +93,7 @@ Options for the Reservation Address 172.29.205.25 in the Scope 172.29.205.0 :
         Option Value:
                 Number of Option Elements = 1
                 Option Element Type = STRING
-                Option Element Value = brsla025.brs.someware.com
+                Option Element Value = BRSSVM01L.brs.someware.com
         OptionId : 67
         Option Value:
                 Number of Option Elements = 1
@@ -161,39 +118,45 @@ Command completed successfully.
     subnets = @subnet_service.all_subnets.map { |s| s.network }
 
     assert_equal 6, subnets.size
-    assert subnets.include?("172.24.166.0")
-    assert subnets.include?("172.24.230.0")
-    assert subnets.include?("172.29.204.0")
-    assert subnets.include?("172.29.205.0")
-    assert subnets.include?("172.29.205.128")
-    assert subnets.include?("172.29.216.0")
+    assert subnets.include?("192.168.166.0")
+    assert subnets.include?("192.168.230.0")
+    assert subnets.include?("192.168.204.0")
+    assert subnets.include?("192.168.205.0")
+    assert subnets.include?("192.168.205.128")
+    assert subnets.include?("192.168.216.0")
   end
 
   def test_subnet_should_have_options
-    subnet = @server.find_subnet "172.29.205.0"
+    subnet = @server.find_subnet "192.168.205.0"
     @server.load_subnet_options subnet
 
     assert !subnet.options.empty?
   end
 
   def test_subnet_should_have_options_and_values
-    subnet = @server.find_subnet "172.29.205.0"
+    subnet = @server.find_subnet "192.168.205.0"
     @server.load_subnet_options subnet
 
     assert !subnet.options.any? { |o,v| o.to_s.empty? || v.nil? || v.to_s.empty? }
   end
 
   def test_records_should_have_options
-    @server.load_subnet_data(@server.find_subnet("172.29.205.0"))
-    record = @subnet_service.all_hosts("172.29.205.0").first
+    @server.load_subnet_data(@server.find_subnet("192.168.216.0"))
+    record = @subnet_service.all_hosts("192.168.216.0").first
     @server.loadRecordOptions record
 
     assert !record.options.empty?
   end
 
+  def test_records_are_correct_type
+    @server.load_subnet_data(@server.find_subnet('192.168.216.0'))
+    assert @subnet_service.find_lease_by_mac('192.168.216.0','64:51:06:a1:66:b5').ip == '192.168.217.5'
+    assert @subnet_service.find_host_by_mac('192.168.216.0', 'e4:11:5b:ad:a5:da').ip == '192.168.216.25'
+  end
+
   def test_records_should_have_options_and_values
-    @server.load_subnet_data(@server.find_subnet("172.29.205.0"))
-    record = @subnet_service.all_hosts("172.29.205.0").first
+    @server.load_subnet_data(@server.find_subnet("192.168.216.0"))
+    record = @subnet_service.all_hosts("192.168.216.0").first
     @server.loadRecordOptions record
 
     assert !record.options.any? { |o,v| o.to_s.empty? || v.nil? || v.to_s.empty? }
@@ -243,7 +206,7 @@ Command completed successfully.
         Option Value:
                 Number of Option Elements = 1
                 Option Element Type = IPADDRESS
-                Option Element Value = 172.29.205.1
+                Option Element Value = 192.168.205.1
         OptionId : 3
         Option Value:
                 Number of Option Elements = 1
@@ -254,7 +217,7 @@ Command completed successfully.
     parsed = @server.parse_options(to_parse)
     assert_equal 3, parsed.size
     assert_equal "<SPARC-Enterprise-T5120>", parsed[:vendor]
-    assert_equal "172.29.205.1", parsed[:root_server_ip]
+    assert_equal "192.168.205.1", parsed[:root_server_ip]
     assert_equal "brsla025.brs.someware.com", parsed[:root_server_hostname]
   end
 
