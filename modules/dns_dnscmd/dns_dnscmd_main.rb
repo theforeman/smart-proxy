@@ -126,9 +126,9 @@ module Proxy::Dns::Dnscmd
       weight = 0 # sub zones might be independent from similar named parent zones; use weight for longest suffix match
       matched_zone = nil
       zone_list.each do |zone|
-        zone_labels = zone.split(".").reverse
+        zone_labels = zone.downcase.split(".").reverse
         zone_weight = zone_labels.length
-        fqdn_labels = record.split(".")
+        fqdn_labels = record.downcase.split(".")
         fqdn_labels.shift
         is_match = zone_labels.all? { |zone_label| zone_label == fqdn_labels.pop }
         # match only the longest zone suffix
