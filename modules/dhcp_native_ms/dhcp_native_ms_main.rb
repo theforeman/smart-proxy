@@ -213,8 +213,8 @@ module Proxy::DHCP::NativeMS
         raise Proxy::DHCP::Error.new("Netsh did not respond within #{tsecs} seconds")
       ensure
         std_in.close  unless std_in.nil?
-        std_out.close unless std_in.nil?
-        std_err.close unless std_in.nil?
+        std_out.close unless std_out.nil?
+        std_err.close unless std_err.nil?
       end
       report msg, response, error_only
       response
