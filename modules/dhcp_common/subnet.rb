@@ -188,13 +188,14 @@ module Proxy::DHCP
       # Always shell to ping, instead of using net-ping
     if PLATFORM =~ /mingw/
       # Windows uses different options for ping and does not have /dev/null
-      system("ping -n 1 -w 1 #{ip} > NUL")
+      system("ping -n 1 -w 1000 #{ip} > NUL")
     else
       # Default to Linux ping options and send to /dev/null
       system("ping -c 1 -W 1 #{ip} > /dev/null")
     end
-    rescue
+    rescue => err
       # We failed to check this address so we should not use it
+      logger.warn "Unable to icmp ping #{ip} because #{err.inspect}. Skipping this address..."
       true
     end
 
