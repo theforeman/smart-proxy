@@ -102,4 +102,16 @@ class Proxy::DHCPSubnetTest < Test::Unit::TestCase
 
     assert_equal '192.168.0.21', @subnet.unused_ip([r], :from => '192.168.0.20', :to => '192.168.0.30')
   end
+
+  def test_usage
+    r = Proxy::DHCP::Reservation.new(:hostname => 'test', :subnet => @subnet, :ip => "192.168.0.11", :mac => "aa:bb:cc:dd:ee:ff")
+    expected = {:free=>253, :size=>254, :used=>1}
+    assert_equal expected, @subnet.usage([r])
+  end
+
+  def test_usage_should_respect_range
+    r = Proxy::DHCP::Reservation.new(:hostname => 'test', :subnet => @subnet, :ip => "192.168.0.11", :mac => "aa:bb:cc:dd:ee:ff")
+    expected = {:free=>11, :size=>11, :used=>0}
+    assert_equal expected, @subnet.usage([r], :from => '192.168.0.20', :to => '192.168.0.30')
+  end
 end

@@ -76,6 +76,11 @@ module Proxy::DHCP
                        :from => from_address, :to => to_address)
     end
 
+    def usage(subnet, from_address, to_address)
+      subnet.usage(all_hosts(subnet.network) + all_leases(subnet.network),
+                   :from => from_address, :to => to_address)
+    end
+
     def ip_by_mac_address_and_range(subnet, mac_address, from_address, to_address)
       r = service.find_host_by_mac(subnet.network, mac_address) ||
           service.find_lease_by_mac(subnet.network, mac_address)

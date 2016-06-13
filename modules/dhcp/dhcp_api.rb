@@ -64,6 +64,19 @@ class Proxy::DhcpApi < ::Sinatra::Base
     end
   end
 
+  get "/:network/usage" do
+    begin
+      content_type :json
+
+      load_subnet
+      load_subnet_data
+
+      server.usage(@subnet, params[:from], params[:to]).to_json
+    rescue => e
+      log_halt 400, e
+    end
+  end
+
   get "/:network/:record" do
     begin
       content_type :json

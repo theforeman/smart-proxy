@@ -210,6 +210,14 @@ class DhcpApiTest < Test::Unit::TestCase
     assert_equal expected, last_response.body
   end
 
+  def test_api_11_get_network_usage
+    get "/192.168.122.0/usage"
+    assert last_response.ok?, "Last response was not ok: #{last_response.status} #{last_response.body}"
+    data = JSON.parse(last_response.body)
+    expected = {"free" => 246, "size" => 254, "used" => 8}
+    assert_equal expected, data
+  end
+
   def test_sparc_host_creation
     sub = Proxy::DHCP::Subnet.new('192.168.122.0','255.255.255.0')
 

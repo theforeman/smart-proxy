@@ -84,6 +84,13 @@ module Proxy::DHCP
       File.delete @lockfile
     end
 
+    def usage records, args = {}
+      range = valid_range(args)
+      used_ips = records.collect{|record| record.ip}.select{|ip| range.include? ip}
+      free_ips = range - used_ips
+      {:used => used_ips.count, :size => range.count, :free => free_ips.count}
+    end
+
     # returns the next unused IP Address in a subnet
     # Pings the IP address as well (just in case its not in Proxy::DHCP)
     def unused_ip records, args = {}
