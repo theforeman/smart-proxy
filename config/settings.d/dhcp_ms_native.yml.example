@@ -1,6 +1,0 @@
----
-#
-# Configuration file for Windows-specific 'netsh' dhcp provider
-#
-# There's currently no configuration options for this provider.
-# use :server setting in dhcp.yml if you are managing a dhcp server which is not localhost
