@@ -1,0 +1,13 @@
+---
+#
+# Configuration file for Windows-specific 'netsh' dhcp provider
+#
+# This parameter informs the proxy that you wish to disable dynamic DNS updates for all hosts
+# that the smart proxy creates. This will slightly slow the host creation process but will
+# ensure that the DHCP server will not create or delete DNS entries on behalf of these clients.
+# If you can turn this feature off at the scope level then that would be a better solution.
+# Can be true or false. Defaults to true.
+#
+# :disable_ddns: true
+#
+# use :server setting in dhcp.yml if you are managing a dhcp server which is not localhost

@@ -60,6 +60,7 @@ module Proxy::DHCP::NativeMS
           execute "scope #{record.subnet.network} set reservedoptionvalue #{record.ip} #{k[:code]} #{k[:kind]} \"#{value}\"", msg, true
         end
       end
+      execute("scope #{record.subnet.network} set dnsconfig #{record.ip} 0 0 0 0", 'disable Dynamic DNS', true) if Proxy::DHCP::NativeMS::Plugin.settings.disable_ddns
 
       record
     end

@@ -2,6 +2,8 @@ module ::Proxy::DHCP::NativeMS
   class Plugin < ::Proxy::Provider
     plugin :dhcp_native_ms, ::Proxy::VERSION
 
+    default_settings :disable_ddns => true
+
     requires :dhcp, ::Proxy::VERSION
 
     after_activation do
