@@ -1,3 +1,15 @@
+2016-06-20	Dominic Cleal <dominic@cleal.org>
+	* Release 1.12.0-RC2
+
+2016-06-20	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #15434 - pin ruby-libvirt to > 0.6.0
+
+2016-06-17	Dominic Cleal <dominic@cleal.org>
+	* fixes #15323 - correct Puppet SSH provider name
+
+2016-06-17	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #15025 - do not show foreman_proxy startup messages.
+
 2016-06-03	Dominic Cleal <dominic@cleal.org>
 	* Release 1.12.0-RC1
 
