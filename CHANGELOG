@@ -1,3 +1,9 @@
+2016-06-21	Dominic Cleal <dominic@cleal.org>
+	* Release 1.11.3
+
+2016-06-03	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #15240 - empty arrays no longer trigger validation failures
+
 2016-05-18	Dominic Cleal <dominic@cleal.org>
 	* Release 1.11.2
 
