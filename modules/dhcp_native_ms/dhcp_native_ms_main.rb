@@ -11,10 +11,12 @@ module Proxy::DHCP::NativeMS
       @name = params[:name] || @name
       @service = params[:service] || service
       @managed_subnets = params[:subnets] || @managed_subnets
+      @options_cache = {}
       self
     end
 
     def initialize
+      @options_cache = {}
       super(Proxy::DhcpPlugin.settings.server, Proxy::DhcpPlugin.settings.subnets)
     end
 
@@ -28,7 +30,9 @@ module Proxy::DHCP::NativeMS
       msg = "Removed DHCP reservation for #{record.name} => #{record.ip} - #{record.mac}"
       cmd = "scope #{subnet.network} delete reservedip #{record.ip} #{mac}"
 
-      execute(cmd, msg)
+      to_return = execute(cmd, msg)
+      @options_cache.delete record.ip
+      to_return
     end
 
     def add_record options={}
@@ -38,6 +42,9 @@ module Proxy::DHCP::NativeMS
       execute(cmd, "Added DHCP reservation for #{record}")
 
       options = {"PXEClient" => ""}.merge(record.options)
+      options_no_subnet = options.dup
+      options_no_subnet.delete(:subnet)
+      @options_cache[record.ip] = options_no_subnet
       ignored_attributes = [:ip, :mac, :name, :subnet]
       options.delete_if{|k,v| ignored_attributes.include?(k.to_sym) }
       return if options.empty?  # This reservation is just for an IP and MAC
@@ -139,18 +146,14 @@ module Proxy::DHCP::NativeMS
     def load_subnet_options subnet
       super subnet
       raise "invalid Subnet" unless subnet.is_a? Proxy::DHCP::Subnet
-      cmd = "scope #{subnet.network} Show OptionValue"
-      msg = "Queried #{subnet.network} options"
 
-      subnet.options = parse_options(execute(cmd, msg))
+      subnet.options = parse_options(subnet)
     end
 
     def loadRecordOptions opts
       raise "unable to find subnet for #{opts[:ip]}" if opts[:subnet].nil?
-      cmd = "scope #{opts[:subnet].network} Show ReservedOptionValue #{opts[:ip]}"
-      msg = "Queried #{opts[:ip]} options"
 
-      parse_options(execute(cmd, msg))
+      parse_options(opts[:ip])
     end
 
     def installVendorClass vendor_class
@@ -195,11 +198,12 @@ module Proxy::DHCP::NativeMS
       service.add_subnets(*find_all_subnets)
     end
 
-    def execute cmd, msg=nil, error_only=false
-      tsecs = 5
+    def execute cmd, msg=nil, error_only=false, dumping=false
+      tsecs = 10
       response = nil
-      interpreter = Proxy::SETTINGS.x86_64 ? 'c:\windows\sysnative\cmd.exe' : 'c:\windows\system32\cmd.exe'
-      command  = interpreter + ' /c c:\Windows\System32\netsh.exe -c dhcp ' + "server #{name} #{cmd}"
+      root = ENV['SystemRoot']
+      interpreter = Proxy::SETTINGS.x86_64 ? root + '\sysnative\cmd.exe' : root + '\system32\cmd.exe'
+      command  = interpreter + ' /c ' + root + '\System32\netsh.exe -c dhcp ' + "server #{name} #{cmd}"
 
       std_in = std_out = std_err = nil
       begin
@@ -210,13 +214,13 @@ module Proxy::DHCP::NativeMS
           response += std_err.readlines
         end
       rescue TimeoutError
-        raise Proxy::DHCP::Error.new("Netsh did not respond within #{tsecs} seconds")
+        raise Proxy::DHCP::Error.new("Netsh #{command} did not respond within #{tsecs} seconds")
       ensure
         std_in.close  unless std_in.nil?
         std_out.close unless std_out.nil?
         std_err.close unless std_err.nil?
       end
-      report msg, response, error_only
+      report msg, response, error_only unless dumping
       response
     end
 
@@ -247,38 +251,44 @@ module Proxy::DHCP::NativeMS
       raise Proxy::DHCP::Error.new("Unknown error while processing '#{msg}'")
     end
 
-    def parse_options response
-      option_id = nil
-      vendor_class = nil
-      option_element_value = nil
-      option_name = nil
-      options  = {}
+    def build_options(options, id, vendor, value)
+      option_id = id.to_i
+      options[:vendor] = "<#{vendor}>" if vendor
+      title = vendor ? sunw_option(option_id) : standard_option_name(option_id)
+      return false unless title
+      options[title] = value
+    end
 
-      response.each do |line|
-        line.chomp!
-
-        break if line =~ /^Command completed/
-
-        case line
-          when /For vendor class \[([^\]]+)\]:/
-            # we only support a single vendor per record, and it's SUNW-based one
-            vendor_class = "<#{$1}>"
-            options[option_name] = option_element_value unless option_name.nil? || option_element_value.nil?
-            option_id = option_name = option_element_value = nil
-          when /OptionId : (\d+)/
-            options[option_name] = option_element_value unless option_name.nil? || option_element_value.nil?
-            option_element_value = nil
-            option_id = $1.to_i
-            option_name = vendor_class.nil? ? standard_option_name(option_id) : sunw_option(option_id)
-          when /Option Element Value = (\S+)/
-            option_element_value = $1
+    def parse_options(ip_or_subnet)
+      dump_file = "#{Dir::tmpdir}/#{name}.dump"
+      dump = nil
+      if !File.exist?(dump_file) || Time.now > File.mtime(dump_file) + 5 * 60
+        dump = execute("dump", "dummy message", false, true)
+        File.open(dump_file, 'w') {|f| f.write dump.join("\n")}
+        @options_cache = {}
+      end
+      if @options_cache.empty?
+        dump = File.open(dump_file).readlines if dump.nil?
+        dump.each do |line|
+          if match = line.match(/^Dhcp.*?set reservedoptionvalue ([\d\.]+) (\d+) (\w+) (?:vendor="([^"]+)" )?"(.*?)"/)
+            # Dhcp Server \\192.168.216.54 Scope 192.168.216.0 set reservedoptionvalue
+            # 192.168.216.182 4 STRING vendor="Fire-V240" "/vol/s02/solgi_5.10/sol10_hw0910_sparc/Solaris_10/Tools/Boot"
+            options  = @options_cache[match[1]] || {}
+            next unless build_options(options,  match[2], match[4], match[5])
+            @options_cache[match[1]] = options
+          elsif match = line.match(/^Dhcp.*? Scope ([\d\.]+) set optionvalue (\d+) (\w+) (?:vendor="([^"]+)" )?"(.*?)"/)
+            #Dhcp Server \\172.29.216.54 Scope 172.24.166.0 set optionvalue 241 IPADDRESS vendor="Cisco Aironet 1130" "172.23.74.37" "172.23.74.21"
+            #Dhcp Server \\172.29.216.54 Scope 172.24.166.0 set optionvalue 3 IPADDRESS "172.24.166.1"
+            @options_cache[:scope] = {} unless @options_cache.has_key? :scope
+            options = @options_cache[:scope][match[1]] || {}
+            next unless build_options(options, match[2], match[4], match[5])
+            @options_cache[:scope][match[1]] = options
+          end
         end
       end
-
-      options[option_name] = option_element_value unless option_name.nil? || option_element_value.nil?
-      options[:vendor] = vendor_class unless vendor_class.nil?
-      options
+      (ip_or_subnet.is_a?(Proxy::DHCP::Subnet) ? @options_cache[:scope][ip_or_subnet.network] : @options_cache[ip_or_subnet]) || {}
     end
+
 
     def standard_option_name(option_id)
       @standard_options_by_id ||= generate_standard_options_by_id

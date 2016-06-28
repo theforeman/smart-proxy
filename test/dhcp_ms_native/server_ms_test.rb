@@ -92,64 +92,61 @@ Changed the current scope context to 172.29.205.0 scope.
     172.29.205.23     -    00-0c-29-f6-f9-ce-
     172.29.205.25     -    00-0c-29-64-a1-f1-
     172.29.205.26     -    00-0c-29-46-8f-10-
+    172.29.205.42     -    00-03-ba-05-51-7d-
 
 
 No of ReservedIPs : 57 in the Scope : 172.29.205.0.
 
 Command completed successfully.
 '.split("\n"))
-    @server.stubs(:execute).with("scope 172.29.205.0 Show OptionValue", "Queried 172.29.205.0 options").returns('
-Changed the current scope context to 172.29.205.0 scope.
+    @server.stubs(:execute).with('dump', 'dummy message', false, true).returns('
+   # ======================================================================
+   #  Start Add OptionValues to the Scope : 172.29.205.0, Server : 172.29.216.54
+   # ======================================================================
 
-Options for Scope 172.29.205.0:
 
-        DHCP Standard Options :
-        General Option Values:
-        OptionId : 81
-        Option Value:
-                Number of Option Elements = 1
-                Option Element Type = DWORD
-                Option Element Value = 0
-        OptionId : 51
-        Option Value:
-                Number of Option Elements = 1
-                Option Element Type = DWORD
-                Option Element Value = 691200
-        For vendor class [SPARC-Enterprise-T5120]:
-        OptionId : 3
-        Option Value:
-                Number of Option Elements = 1
-                Option Element Type = IPADDRESS
-                Option Element Value = 172.29.205.1
-Command completed successfully.
-    '.split("\n"))
-    @server.stubs(:execute).with(
-        regexp_matches(/^scope 172.29.205.0 Show ReservedOptionValue 172.29.205.25/),
-        regexp_matches(/^Queried .+ options/)).returns('
-Changed the current scope context to 172.29.205.0 scope.
+Dhcp Server \\172.29.216.54 Scope 172.29.205.0 set optionvalue 51 DWORD "691200"
+Dhcp Server \\172.29.216.54 Scope 172.29.205.0 set optionvalue 3 IPADDRESS "172.29.205.1"
+Dhcp Server \\172.29.216.54 Scope 172.29.205.0 set optionvalue 66 STRING "tftp"
 
-Options for the Reservation Address 172.29.205.25 in the Scope 172.29.205.0 :
+   # ======================================================================
+   #  End   Add OptionValues to the Scope : 172.29.205.0, Server : 172.29.216.54
+   # ======================================================================
 
-        DHCP Standard Options :
-        General Option Values:
-        OptionId : 66
-        Option Value:
-                Number of Option Elements = 1
-                Option Element Type = STRING
-                Option Element Value = brsla025.brs.someware.com
-        OptionId : 67
-        Option Value:
-                Number of Option Elements = 1
-                Option Element Type = STRING
-                Option Element Value = gi-install/pxelinux.0
-        OptionId : 12
-        Option Value:
-                Number of Option Elements = 1
-                Option Element Type = STRING
-                Option Element Value = brslcs25
-Command completed successfully.
+
+   # ======================================================================
+   #  Start Add ReservedIp to the Scope : 172.29.205.0, Server : 172.29.216.54
+   # ======================================================================
+
+
+Dhcp Server \\172.29.216.54 Scope 172.29.205.0 Add reservedip 172.29.205.32 000c296485f0 "brsla032.brs.someware.com" "DHCP" "DHCP"
+Dhcp Server \\172.29.216.54 Scope 172.29.205.0 set reservedoptionvalue 172.29.205.32 12 STRING "brsla032"
+Dhcp Server \\172.29.216.54 Scope 172.29.205.0 set reservedoptionvalue 172.29.205.32 67 STRING "gi-install/pxelinux.0"
+Dhcp Server \\172.29.216.54 Scope 172.29.205.0 set reservedoptionvalue 172.29.205.32 66 STRING "puppet.brs.someware.com"
+Dhcp Server \\172.29.216.54 Scope 172.29.205.0 Add reservedip 172.29.205.42 0003ba05517d "brsucs02.brs.someware.com" "" "DHCP"
+Dhcp Server \\172.29.216.54 Scope 172.29.205.0 set reservedoptionvalue 172.29.205.42 12 STRING vendor="Fire-V240" "/vol/s02/5.8/sol8_0204_sparc"
+Dhcp Server \\172.29.216.54 Scope 172.29.205.0 set reservedoptionvalue 172.29.205.42 10 IPADDRESS vendor="Fire-V240" "172.29.216.245"
+Dhcp Server \\172.29.216.54 Scope 172.29.205.0 set reservedoptionvalue 172.29.205.42 13 STRING vendor="Fire-V240" "172.29.216.245:/vol/s02/foreman_jumpstart_development/sysidcfg/sysidcfg_primary"
+Dhcp Server \\172.29.216.54 Scope 172.29.205.0 set reservedoptionvalue 172.29.205.42 11 STRING vendor="Fire-V240" "s02"
+Dhcp Server \\172.29.216.54 Scope 172.29.205.0 set reservedoptionvalue 172.29.205.42 14 STRING vendor="Fire-V240" "172.29.216.245:/vol/s02/foreman_jumpstart_development"
+Dhcp Server \\172.29.216.54 Scope 172.29.205.0 set reservedoptionvalue 172.29.205.42 2 IPADDRESS vendor="Fire-V240" "172.29.216.245"
+Dhcp Server \\172.29.216.54 Scope 172.29.205.0 set reservedoptionvalue 172.29.205.42 3 STRING vendor="Fire-V240" "s02"
+Dhcp Server \\172.29.216.54 Scope 172.29.205.0 set reservedoptionvalue 172.29.205.42 4 STRING vendor="Fire-V240" "/vol/s02/5.8/sol8_0204_sparc/Solaris_8/Tools/Boot"
+Dhcp Server \\172.29.216.54 Scope 172.29.205.0 set reservedoptionvalue 172.29.205.42 66 STRING "172.29.205.31"
+Dhcp Server \\172.29.216.54 Scope 172.29.205.0 set reservedoptionvalue 172.29.205.42 67 STRING "Solaris-5.8-0204-SUN4U-inetboot"
+Dhcp Server \\172.29.216.54 Scope 172.29.205.0 set reservedoptionvalue 172.29.205.42 12 STRING "brsucs02.brs.infineon.com"
+
+   # ======================================================================
+   #  End   Add ReservedIp to the Scope : 172.29.205.0, Server : 172.29.216.54
+   # ======================================================================
 '.split("\n"))
     @server.load_subnets
+    @dump_file = "#{Dir::tmpdir}/#{@server.name}.dump"
+    File.delete(@dump_file) if File.exist? @dump_file
+  end
+
+  def teardown
+    File.delete(@dump_file) if File.exist? @dump_file
   end
 
   def test_ms_provider_initialization
@@ -200,90 +197,23 @@ Command completed successfully.
   end
 
   def test_parse_standard_options
-    to_parse = '
-        DHCP Standard Options :
-        General Option Values:
-        OptionId : 66
-        Option Value:
-                Number of Option Elements = 1
-                Option Element Type = STRING
-                Option Element Value = brsla025.brs.someware.com
-        OptionId : 67
-        Option Value:
-                Number of Option Elements = 1
-                Option Element Type = STRING
-                Option Element Value = gi-install/pxelinux.0
-        OptionId : 13
-        Option Value:
-                Number of Option Elements = 1
-                Option Element Type = STRING
-                Option Element Value = brslcs25
-Command completed successfully.
-'.split("\n")
-    parsed = @server.parse_options(to_parse)
-    assert_equal 2, parsed.size
-    assert_equal "brsla025.brs.someware.com", parsed[:nextServer]
-    assert_equal "gi-install/pxelinux.0", parsed[:filename]
+    @server.load_subnet_data(@server.find_subnet("172.29.205.0"))
+    record = @subnet_service.all_hosts("172.29.205.0").first
+    @server.loadRecordOptions record
+
+    assert_equal 6, record.options.size
+    assert_equal "puppet.brs.someware.com", record.options[:nextServer]
+    assert_equal "gi-install/pxelinux.0", record.options[:filename]
   end
 
   def test_parse_vendor_options
-    to_parse = '
-        For vendor class [SPARC-Enterprise-T5120]:
-        OptionId : 66
-        Option Value:
-                Number of Option Elements = 1
-                Option Element Type = STRING
-                Option Element Value = brsla025.brs.someware.com
-        OptionId : 67
-        Option Value:
-                Number of Option Elements = 1
-                Option Element Type = STRING
-                Option Element Value = gi-install/pxelinux.0
-        OptionId : 2
-        Option Value:
-                Number of Option Elements = 1
-                Option Element Type = IPADDRESS
-                Option Element Value = 172.29.205.1
-        OptionId : 3
-        Option Value:
-                Number of Option Elements = 1
-                Option Element Type = STRING
-                Option Element Value = brsla025.brs.someware.com
-Command completed successfully.
-'.split("\n")
-    parsed = @server.parse_options(to_parse)
-    assert_equal 3, parsed.size
-    assert_equal "<SPARC-Enterprise-T5120>", parsed[:vendor]
-    assert_equal "172.29.205.1", parsed[:root_server_ip]
-    assert_equal "brsla025.brs.someware.com", parsed[:root_server_hostname]
-  end
+    @server.load_subnet_data(@server.find_subnet("172.29.205.0"))
+    record = @subnet_service.all_hosts("172.29.205.0")[1]
+    @server.loadRecordOptions record
 
-  def test_parse_standard_and_vendor_options
-    to_parse = '
-        DHCP Standard Options :
-        General Option Values:
-        OptionId : 68
-        Option Value:
-                Number of Option Elements = 1
-                Option Element Type = STRING
-                Option Element Value = brsla025.brs.someware.com
-        OptionId : 12
-        Option Value:
-                Number of Option Elements = 1
-                Option Element Type = STRING
-                Option Element Value = brslcs25
-        For vendor class [SPARC-Enterprise-T5120]:
-        OptionId : 12
-        Option Value:
-                Number of Option Elements = 1
-                Option Element Type = STRING
-                Option Element Value = /vol/solgi_5.10/sol10_hw0910
-Command completed successfully.
-'.split("\n")
-    parsed = @server.parse_options(to_parse)
-    assert_equal 3, parsed.size
-    assert_equal "<SPARC-Enterprise-T5120>", parsed[:vendor]
-    assert_equal "brslcs25", parsed[:hostname]
-    assert_equal "/vol/solgi_5.10/sol10_hw0910", parsed[:install_path]
+    assert_equal 15, record.options.size
+    assert_equal "<Fire-V240>", record.options[:vendor]
+    assert_equal "172.29.216.245", record.options[:root_server_ip]
+    assert_equal "s02", record.options[:root_server_hostname]
   end
 end
