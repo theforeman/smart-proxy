@@ -5,7 +5,6 @@ require "dhcp_common/record/reservation"
 require 'dhcp_common/record/deleted_reservation'
 
 module Proxy::DHCP
-  # represents a DHCP Server
   class Server
     attr_reader :name, :service, :managed_subnets
     alias_method :to_s, :name
@@ -94,27 +93,19 @@ module Proxy::DHCP
     # Delete keys with string names before adding them back with symbol names,
     # otherwise there will be duplicate information.
     def add_record options = {}
-      # dup the hash before modifying it locally
-      options = options.dup
-      options.delete("captures")
-      options.delete("splat")
+      options = clean_up_add_record_parameters(options)
 
-      ip = validate_ip options.delete("ip")
-      mac = validate_mac options.delete("mac")
+      validate_ip(options[:ip])
+      validate_mac(options[:mac])
+      raise(Proxy::DHCP::Error, "Must provide hostname") unless options[:hostname]
 
-      name = options.delete("name")
-      hostname = options.delete("hostname")
-      raise(Proxy::DHCP::Error, "Must provide hostname") unless hostname || name
+      subnet = find_subnet(options[:subnet]) || raise(Proxy::DHCP::Error, "No Subnet detected for: #{options[:subnet]}")
+      options[:subnet] = subnet
 
-      options.delete("subnet") # Not a valid key; remove it to prevent conflict with :subnet
-      net = options.delete("network")
-      subnet = find_subnet(net) || raise(Proxy::DHCP::Error, "No Subnet detected for: #{net.inspect}")
       raise(Proxy::DHCP::Error, "DHCP implementation does not support Vendor Options") if vendor_options_included?(options) && !vendor_options_supported?
 
-      options.merge!(:hostname => hostname || name, :subnet => subnet, :ip => ip, :mac => mac)
-
       # try to figure out if we already have this record
-      record = service.find_host_by_ip(subnet.network, ip) || service.find_host_by_mac(subnet.network, mac)
+      record = service.find_host_by_ip(subnet.network, options[:ip]) || service.find_host_by_mac(subnet.network, options[:mac])
       unless record.nil?
         if Record.compare_options(record.options, options)
           # we already got this record, no need to do anything
@@ -124,11 +115,29 @@ module Proxy::DHCP
           logger.warn "Request to create a conflicting DHCP record"
           logger.debug "request: #{options.inspect}"
           logger.debug "local:   #{record.options.inspect}"
-          raise Proxy::DHCP::Collision, "DHCP record #{net}/#{ip} already exists"
+          raise Proxy::DHCP::Collision, "Record #{subnet.network}/#{options[:ip]} already exists"
         end
       end
 
       Proxy::DHCP::Reservation.new(options)
+    end
+
+    def clean_up_add_record_parameters(in_options)
+      to_return = in_options.dup
+
+      to_return.delete("captures")
+      to_return.delete("splat")
+
+      ip = to_return.delete("ip")
+      mac = to_return.delete("mac")
+
+      name = to_return.delete("name")
+      hostname = to_return.delete("hostname")
+
+      to_return.delete("subnet") # Not a valid key; remove it to prevent conflict with :subnet
+      subnet = to_return.delete("network")
+
+      to_return.merge!(:hostname => hostname || name, :subnet => subnet, :ip => ip, :mac => mac)
     end
 
     def vendor_options_included? options

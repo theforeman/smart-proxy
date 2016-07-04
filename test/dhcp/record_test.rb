@@ -50,8 +50,8 @@ class Proxy::DHCPRecordTest < Test::Unit::TestCase
   end
 
   def test_equality
-    assert_equal Proxy::DHCP::Record.new(:subnet => @subnet, :ip => @ip, :mac => @mac, :option1 => 'one'),
-                 Proxy::DHCP::Record.new(:subnet => @subnet, :ip => @ip, :mac => @mac, :option1 => 'one')
+    assert_equal Proxy::DHCP::Record.new(:subnet => Proxy::DHCP::Subnet.new("192.168.0.0","255.255.255.0"), :ip => @ip, :mac => @mac, :option1 => 'one'),
+                 Proxy::DHCP::Record.new(:subnet => Proxy::DHCP::Subnet.new("192.168.0.0","255.255.255.0"), :ip => @ip, :mac => @mac, :option1 => 'one')
     assert_not_equal Proxy::DHCP::Record.new(:subnet => @subnet, :ip => @ip, :mac => @mac, :option1 => 'one'),
                      Proxy::DHCP::Record.new(:subnet => @subnet, :ip => '1.1.1.1', :mac => @mac, :option1 => 'one')
     assert_not_equal Proxy::DHCP::Record.new(:subnet => @subnet, :ip => @ip, :mac => @mac, :option1 => 'one'),

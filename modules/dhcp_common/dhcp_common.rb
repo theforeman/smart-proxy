@@ -1,9 +1,14 @@
 module Proxy::DHCP
   Standard = {
+    :routers               => {:code => 3,  :kind => "IPAddress", :is_list => true },
+    :domain_name_servers   => {:code => 6,  :kind => "IPAddress", :is_list => true },
     :hostname              => {:code => 12, :kind => "String"    }, # The host's name
+    :domain_name           => {:code => 15, :kind => "String"    },
     :PXEClient             => {:code => 60, :kind => "String"    }, # Needs to be empty for foreman to function
     :nextServer            => {:code => 66, :kind => "String"    }, # From where we download the pxeboot image via TFTP
-    :filename              => {:code => 67, :kind => "String"    }  # The pxeboot image
+    :filename              => {:code => 67, :kind => "String"    },  # The pxeboot image
+    :ntp_servers           => {:code => 4,  :kind => "String", :is_list => true },
+    :interface_mtu         => {:code => 26, :kind => "String"    }
   }
 
   SUNW = {

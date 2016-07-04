@@ -1,6 +1,6 @@
 ---
 #
-# Configuration file for Windows-specific 'netsh' dhcp provider
+# Configuration file for Windows-specific dhcp provider
 #
 # This parameter informs the proxy that you wish to disable dynamic DNS updates for all hosts
 # that the smart proxy creates. This will slightly slow the host creation process but will

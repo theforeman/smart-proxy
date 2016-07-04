@@ -1,7 +1,6 @@
 require 'dhcp_common/record'
 
 module Proxy::DHCP
-  # represent a DHCP Lease
   class Lease < Record
     attr_reader :starts, :ends, :state
 
@@ -14,6 +13,10 @@ module Proxy::DHCP
 
     def deletable?
       false
+    end
+
+    def ==(other)
+      starts == other.starts && ends == other.ends && state == other.state && super(other)
     end
 
     def to_json(*options)

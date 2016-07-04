@@ -1,7 +1,6 @@
 require 'dhcp_common/record'
 
 module Proxy::DHCP
-  # represent a DHCP Record
   class Reservation < Record
     attr_reader :name
 
@@ -16,6 +15,10 @@ module Proxy::DHCP
 
     def method_missing arg
       options[arg]
+    end
+
+    def ==(other)
+      name == other.name && super(other)
     end
 
     def to_json(*options)

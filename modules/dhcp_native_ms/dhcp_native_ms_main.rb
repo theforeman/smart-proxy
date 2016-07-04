@@ -3,284 +3,235 @@ require 'open3'
 require 'dhcp_common/server'
 
 module Proxy::DHCP::NativeMS
-  # Represents Microsoft DHCP Server manipulated via the netsh command
-  # executed on a Microsoft server under a service account
   class Provider < ::Proxy::DHCP::Server
+    attr_reader :dhcpsapi, :disable_ddns
 
-    def initialize(name, subnets, subnet_service)
-      super(name, subnets, subnet_service)
+    def initialize(dhcpsapi, subnets, disable_ddns)
+      super('ms dhcp server', subnets, nil)
+      @dhcpsapi = dhcpsapi
+      @disable_ddns = disable_ddns
     end
 
-    def del_record subnet, record
-      validate_subnet subnet
-      validate_record record
-      # TODO: Refactor this into the base class
-      raise InvalidRecord, "#{record} is static - unable to delete" unless record.deleteable?
-
-      mac = record.mac.gsub(/:/,"")
-      msg = "Removed DHCP reservation for #{record.name} => #{record.ip} - #{record.mac}"
-      cmd = "scope #{subnet.network} delete reservedip #{record.ip} #{mac}"
-
-      execute(cmd, msg)
-    end
-
-    def add_record options={}
-      record = super(options)
-
-      cmd = "scope #{record.subnet.network} add reservedip #{record.ip} #{record.mac.gsub(/:/,"")} #{record.name}"
-      execute(cmd, "Added DHCP reservation for #{record}")
-
-      options = {"PXEClient" => ""}.merge(record.options)
-      ignored_attributes = [:ip, :mac, :name, :subnet]
-      options.delete_if{|k,v| ignored_attributes.include?(k.to_sym) }
-      return if options.empty?  # This reservation is just for an IP and MAC
-
-      # TODO: Refactor these execs into a popen
-      alternate_vendor_name = nil
-      for key, value in options
-        if match = key.to_s.match(/^<([^>]+)>(.*)/)
-          vendor, attr = match[1,2].map(&:to_sym)
-          msg = "set value for #{key}"
-          begin
-            execute "scope #{record.subnet.network} set reservedoptionvalue #{record.ip} #{SUNW[attr][:code]} #{SUNW[attr][:kind]} vendor=#{alternate_vendor_name || vendor} \"#{value}\"", msg, true
-          rescue Proxy::DHCP::Error => e
-            alternate_vendor_name = find_or_create_vendor_name vendor.to_s, e
-            retry
-          end
-        else
-          logger.debug "key: " + key.inspect
-          k = Standard[key] || Standard[key.to_sym]
-          begin
-            execute "scope #{record.subnet.network} set reservedoptionvalue #{record.ip} #{k[:code]} #{k[:kind]} \"#{value}\"", msg, true
-          rescue Proxy::DHCP::Error => e
-            raise(e) unless key.to_s == "PXEClient"
-          end
-        end
-      end
-      execute("scope #{record.subnet.network} set dnsconfig #{record.ip} 0 0 0 0", 'disable Dynamic DNS', true) if Proxy::DHCP::NativeMS::Plugin.settings.disable_ddns
-
-      record
-    end
-
-    # We did not find the vendor name we wish to use registered on the DHCP server so we attempt to find if there is a vendor class using an abbreviated name.
-    # E.G. We failed to find Sun-Fire-V440 so check if there is a class Fire-V440
-    # If this is not available then register the supplied vendor class
-    # [+vendor+]    : String containing the vendor class we wish to use
-    # [+exception+] : Exception detected during the previous vendor class operation
-    # Returns       : String containing the abbreviated vendor class OR nil to indicate that we registered the original longer vendor class
-    def find_or_create_vendor_name vendor, exception
-      if exception.message =~ /Vendor class not found/
-        # Try a heuristic to find an alternative vendor class
-        classes = loadVendorClasses
-        short_vendor = vendor.gsub(/^sun-/i, "")
-        if short_vendor != vendor && !(short_vendor = classes.grep(/#{short_vendor}/i)).empty?
-          short_vendor = short_vendor[0]
-        else
-          # OK. There does not appear to be a class with an abbreviated vendor name so lets try
-          # and add the class and hope that it does not conflict with the same entry under another name
-          installVendorClass vendor
-          short_vendor = nil
-        end
+    def del_record _, record
+      logger.debug "Deleting '#{record}'"
+      if record.is_a?(::Proxy::DHCP::Reservation)
+        dhcpsapi.delete_reservation(record.ip, record.subnet_address, record.mac)
       else
-        raise exception
-      end
-      short_vendor
-    end
-    private :find_or_create_vendor_name
-
-    def find_subnet_dhcp_records(subnet)
-      cmd = "scope #{subnet.network} show client 1"
-      msg = "Enumerated hosts on #{subnet.network}"
-
-      to_return = []
-      # Extract the data
-      execute(cmd, msg).each do |line|
-        #192.168.205.4    - 255.255.255.128- 00-1e-68-65-55-f8   -4/23/2013 6:41:21 PM   -D-
-        #192.168.205.5    - 255.255.255.128-00-1b-24-93-35-09   - NEVER EXPIRES        -U-  host.brs.company.com
-        if (match = line.match(/\A([\d\.]+)\s*-\s*[\d\.]+\s*- ?([-a-f\d]+)\s*-\s*([^-]+?)\s*-(\w)-\s*(.*)/))
-          ip, mac, expire, _, name  = match[1,5]
-          next unless subnet.include?(ip)
-          # Some mac addresses appear to be more than 6 bytes!
-          mac = mac[0,17].gsub!(/-/, ':')
-          begin
-            opts = {:subnet => subnet, :ip => ip, :mac => mac, :name => name}
-            logger.debug opts.inspect
-            if expire =~ /^INACTIVE|^NEVER/
-              opts.merge!(loadRecordOptions(opts))
-              to_return << Proxy::DHCP::Reservation.new(opts.merge(:deleteable => true))
-            else
-              opts[:name] = '*lease*' if opts[:name] == ''
-              to_return << Proxy::DHCP::Lease.new(opts.merge(:starts => 'unknown', :ends => expire, :state => 'unknown'))
-            end
-          rescue Exception => e
-            logger.debug "Skipped #{line} - #{e}"
-          end
-        end
-      end
-
-      to_return
-    end
-
-    def load_subnet_data subnet
-      super
-      records = find_subnet_dhcp_records(subnet)
-      records.each do |record|
-        case record
-          when Proxy::DHCP::Reservation
-            service.add_host(record.subnet_address, record)
-          when Proxy::DHCP::Lease
-            service.add_lease(record.subnet_address, record)
-        end
+        dhcpsapi.delete_client_by_ip_address(record.ip)
       end
     end
 
-    def load_subnet_options subnet
-      super subnet
-      raise "invalid Subnet" unless subnet.is_a? Proxy::DHCP::Subnet
-      cmd = "scope #{subnet.network} Show OptionValue"
-      msg = "Queried #{subnet.network} options"
+    def add_record(options)
+      to_add = clean_up_add_record_parameters(options)
 
-      subnet.options = parse_options(execute(cmd, msg))
+      validate_ip(to_add[:ip])
+      validate_mac(to_add[:mac])
+      raise(Proxy::DHCP::Error, "Must provide hostname") unless to_add[:hostname]
+      subnet = retrieve_subnet_from_server(to_add[:subnet])
+
+      create_reservation(to_add[:ip], subnet.netmask, to_add[:mac], to_add[:hostname])
+      set_option_values(to_add[:ip], subnet.network, build_option_values(to_add))
+      dhcpsapi.set_reservation_dns_config(to_add[:ip], subnet.network, false, false, false, false, false) if @disable_ddns
     end
 
-    def loadRecordOptions opts
-      raise "unable to find subnet for #{opts[:ip]}" if opts[:subnet].nil?
-      cmd = "scope #{opts[:subnet].network} Show ReservedOptionValue #{opts[:ip]}"
-      msg = "Queried #{opts[:ip]} options"
+    def create_reservation(ip_address, subnet_mask, mac_address, hostname)
+      dhcpsapi.create_reservation(ip_address, subnet_mask, mac_address, hostname)
+    rescue  DhcpsApi::Error => e
+      raise e if e.error_code != 20_022 # reservation already exists
+      begin
+        r = dhcpsapi.get_client_by_ip_address(ip_address)
+      rescue Exception
+        raise e
+      end
 
-      parse_options(execute(cmd, msg))
-    end
-
-    def installVendorClass vendor_class
-      cmd = "show class"
-      msg = "Queried vendor classes"
-      classes = parse_classes(execute(cmd, msg))
-      return if classes.include? vendor_class
-      cls = "SUNW.#{vendor_class}"
-
-      execute("add class #{vendor_class} \"Vendor class for #{vendor_class}\" \"#{cls}\" 1", "Added class #{vendor_class}")
-      for option in [:root_server_ip, :root_server_hostname, :root_path_name, :install_server_ip, :install_server_name,
-                     :install_path, :sysid_server_path, :jumpstart_server_path]
-        cmd = "add optiondef #{SUNW[option][:code]} #{option} #{SUNW[option][:kind]} 0 vendor=#{vendor_class}"
-        execute cmd, "Added vendor option #{option}"
+      if mac_address.casecmp(r[:client_hardware_address]) != 0 ||
+          hostname != r[:client_name] || subnet_mask != r[:subnet_mask]
+        raise Proxy::DHCP::Collision, "Record #{ip_address}/#{subnet_mask} conflicts with an existing record."
+      else
+        raise Proxy::DHCP::AlreadyExists, "Record #{ip_address}/#{subnet_mask} already exists."
       end
     end
 
-    def loadVendorClasses
-      cmd = "show class"
-      msg = "Queried vendor classes"
-      parse_classes(execute(cmd, msg))
+    def build_option_values(options)
+      (options_only = options.clone).delete_if {|k,v| [:ip, :mac, :subnet].include?(k.to_sym) }
+      options_only[:PXEClient] = '' unless (dhcpsapi.get_option(Standard[:PXEClient][:code]) rescue nil).nil?
+      options_only
     end
 
-    def find_all_subnets
-      cmd = "show scope"
-      msg = "Enumerated the scopes on #{@name}"
-
-      ret_val = []
-      execute(cmd, msg).each do |line|
-        # 192.168.216.0   - 255.255.254.0  -Active        -DC BRS               -
-        if match = line.match(/^\s*([\d\.]+)\s*-\s*([\d\.]+)\s*-\s*(Active|Disabled)/)
-          next unless managed_subnet? "#{match[1]}/#{match[2]}"
-          ret_val << Proxy::DHCP::Subnet.new(match[1], match[2])
-        end
+    def set_option_values(ip_address, subnet_address, option_values)
+      for key, value in option_values
+        k = Standard[key] || Standard[key.to_sym]
+        next if k.nil?
+        dhcpsapi.set_reserved_option_value(
+            k[:code],
+            ip_address,
+            subnet_address,
+            dhcps_option_type_from_sunw_kind(k[:kind]),
+            [value].flatten)
       end
+    end
 
-      ret_val
+    def unused_ip(subnet, mac_address, from_address, to_address)
+      client = dhcpsapi.get_client_by_mac_address(subnet.network, mac_address) rescue nil
+      return client[:client_ip_address] unless client.nil?
+
+      return dhcpsapi.get_free_ip_address(subnet.network, from_address, to_address).first
+    end
+
+    def retrieve_subnet_from_server(subnet_address)
+      subnet = dhcpsapi.get_subnet(subnet_address)
+      # no need for subnet options here, as we only make the call to figure out the subnet mask
+      ::Proxy::DHCP::Subnet.new(subnet[:subnet_address], subnet[:subnet_mask])
+    end
+
+    def find_vendor(vendor)
+      classes = list_vendor_class_names
+      shortened_vendor_name = vendor.gsub(/^sun-/i, '')
+      classes.find {|cls| cls.include?(shortened_vendor_name)}
+    end
+
+    def find_subnet(subnet_address)
+      ::Proxy::DHCP::Subnet.new(subnet_address, '255.255.255.0')
     end
 
     def load_subnets
-      super
-      service.add_subnets(*find_all_subnets)
     end
 
-    def execute cmd, msg=nil, error_only=false
-      tsecs = 5
-      response = nil
-      interpreter = Proxy::SETTINGS.x86_64 ? 'c:\windows\sysnative\cmd.exe' : 'c:\windows\system32\cmd.exe'
-      command  = interpreter + ' /c c:\Windows\System32\netsh.exe -c dhcp ' + "server #{name} #{cmd}"
-
-      std_in = std_out = std_err = nil
-      begin
-        timeout(tsecs) do
-          logger.debug "executing: #{command}"
-          std_in, std_out, std_err  = Open3.popen3(command)
-          response  = std_out.readlines
-          response += std_err.readlines
-        end
-      rescue TimeoutError
-        raise Proxy::DHCP::Error.new("Netsh did not respond within #{tsecs} seconds")
-      ensure
-        std_in.close  unless std_in.nil?
-        std_out.close unless std_out.nil?
-        std_err.close unless std_err.nil?
-      end
-      report msg, response, error_only
-      response
+    def load_subnet_data(subnet)
     end
 
-    def report msg, response, error_only
-      if response.grep(/completed successfully/).empty?
-        if !response.grep(/class name being used is unknown/).empty?
-          logger.warn "Vendor class not found"
-        else
-          logger.error "Netsh failed:\n" + response.join()
-        end
-        msg.sub! /Removed/,    "remove"
-        msg.sub! /Added/,      "add"
-        msg.sub! /Enumerated/, "enumerate"
-        msg.sub! /Queried/,    "query"
-        msg  = "Failed to #{msg}"
-        msg += "Vendor class not found" if !response.grep(/class name being used is unknown/).empty?
-        msg += ": No entry found" if !response.grep(/not a reserved client/).empty?
-        match = response.grep(/used by another client/)
-        msg += ": #{match}" unless match.empty?
-        raise Proxy::DHCP::Error.new(msg)
+    def find_record(subnet_address, ip_or_mac_address)
+      client = if ip_or_mac_address =~ Resolv::IPv4::Regex
+                 dhcpsapi.get_client_by_ip_address(ip_or_mac_address)
+               else
+                 dhcpsapi.get_client_by_mac_address(subnet_address, ip_or_mac_address)
+               end
+
+      reservation_subnet_elements_ips = Set.new(dhcpsapi
+                                                    .list_subnet_elements(subnet_address, DhcpsApi::DHCP_SUBNET_ELEMENT_TYPE::DhcpReservedIps)
+                                                    .map {|r| r[:element][:reserved_ip_address]})
+      if reservation_subnet_elements_ips.include?(client[:client_ip_address])
+        standard_option_values = standard_option_values(dhcpsapi.list_reserved_option_values(client[:client_ip_address], subnet_address))
+        build_reservation(client, standard_option_values)
       else
-        logger.debug msg unless error_only
+        standard_option_values = standard_option_values(dhcpsapi.list_subnet_option_values(subnet_address))
+        build_lease(client, standard_option_values)
       end
-    rescue Proxy::DHCP::Error
-      raise
-    rescue
-      logger.error "Netsh failed:\n" + (response.is_a?(Array) ? response.join("\n") : "Response was not an array! #{response}")
-      raise Proxy::DHCP::Error.new("Unknown error while processing '#{msg}'")
+    rescue DhcpsApi::Error => e
+      return nil if e.error_code == 20_013 # not found
+      raise e
     end
 
-    def parse_options response
-      option_id = nil
-      vendor_class = nil
-      option_element_value = nil
-      option_name = nil
-      options  = {}
+    def subnets
+      subnets = dhcpsapi.list_subnets
 
-      response.each do |line|
-        line.chomp!
+      subnets.select {|subnet| managed_subnet?("#{subnet[:subnet_address]}/#{subnet[:subnet_mask]}")}.map do |subnet|
+        standard_option_values = standard_option_values(dhcpsapi.list_subnet_option_values(subnet[:subnet_address]))
+        Proxy::DHCP::Subnet.new(subnet[:subnet_address], subnet[:subnet_mask], standard_option_values)
+      end
+    end
 
-        break if line =~ /^Command completed/
+    def all_hosts(subnet_address)
+      reservation_subnet_elements_ips = Set.new(dhcpsapi
+                                                    .list_subnet_elements(subnet_address, DhcpsApi::DHCP_SUBNET_ELEMENT_TYPE::DhcpReservedIps)
+                                                    .map {|r| r[:element][:reserved_ip_address]})
+      clients = dhcpsapi.list_clients_2008(subnet_address)
+      clients.select {|client| reservation_subnet_elements_ips.include?(client[:client_ip_address])}.map {|client| build_reservation(client, {})}.compact
+    end
 
-        case line
-          when /For vendor class \[([^\]]+)\]:/
-            # we only support a single vendor per record, and it's SUNW-based one
-            vendor_class = "<#{$1}>"
-            options[option_name] = option_element_value unless option_name.nil? || option_element_value.nil?
-            option_id = option_name = option_element_value = nil
-          when /OptionId : (\d+)/
-            options[option_name] = option_element_value unless option_name.nil? || option_element_value.nil?
-            option_element_value = nil
-            option_id = $1.to_i
-            option_name = vendor_class.nil? ? standard_option_name(option_id) : sunw_option(option_id)
-          when /Option Element Value = (\S+)/
-            option_element_value = $1
+    def build_reservation(client, options)
+      opts = {:subnet => client_subnet(client[:client_ip_address], client[:subnet_mask]),
+              :ip => client[:client_ip_address],
+              :mac => client[:client_hardware_address].downcase, #foreman expects lower-case mac address
+              :name => client[:client_name],
+              :hostname => client[:client_name],
+              :deleteable => true}
+      opts.merge!(options)
+      logger.debug opts.inspect
+      Proxy::DHCP::Reservation.new(opts)
+    rescue Exception
+      logger.debug("Skipping a reservation as it failed validation: '%s'" % [opts.inspect])
+      nil
+    end
+
+    def client_subnet(ip_address, ip_mask)
+      ::Proxy::DHCP::Subnet.new((IPAddr.new("#{ip_address}/#{ip_mask}") & ip_mask).to_s, ip_mask)
+    end
+
+    def all_leases(subnet_address)
+      reservation_subnet_elements_ips = Set.new(dhcpsapi
+                                                    .list_subnet_elements(subnet_address, DhcpsApi::DHCP_SUBNET_ELEMENT_TYPE::DhcpReservedIps)
+                                                    .map {|r| r[:element][:reserved_ip_address]})
+      clients = dhcpsapi.list_clients_2008(subnet_address)
+      clients.select {|client| !reservation_subnet_elements_ips.include?(client[:client_ip_address])}.map {|client| build_lease(client, {})}.compact
+    end
+
+    def build_lease(client, options)
+      opts = {:subnet => client_subnet(client[:client_ip_address], client[:subnet_mask]),
+              :ip => client[:client_ip_address],
+              :mac => client[:client_hardware_address].downcase, #foreman expects lower-case mac address
+              :name => (client[:client_name] || '*lease*'),
+              :ends => client[:client_lease_expires]}
+      opts.merge!(options)
+      logger.debug opts.inspect
+      Proxy::DHCP::Lease.new(opts)
+    rescue Exception
+      logger.debug("Skipping a lease as it failed validation: '%s'" % [opts.inspect])
+      nil
+    end
+
+    def standard_option_values(option_values)
+      option_values.inject({}) do |all, current|
+        current_values = current[:value].map {|v| v[:element]}
+        if standard_option_names.key?(current[:option_id])
+          all[n = standard_option_names[current[:option_id]]] = Standard[n][:is_list] ? current_values : current_values.first
+        else
+          all[current[:option_id]] = current_values.size > 1 ? current_values : current_values.first
         end
+        all
       end
-
-      options[option_name] = option_element_value unless option_name.nil? || option_element_value.nil?
-      options[:vendor] = vendor_class unless vendor_class.nil?
-      options
     end
 
-    def standard_option_name(option_id)
+    def vendor_option_values(option_values, vendor)
+      return {} if vendor.nil?
+      to_return = option_values.inject({}) do |all, current|
+        current_values = current[:value].map {|v| v[:element]}
+        all[sunw_option(current[:option_id]) || current[:option_id]] = (current_values.size > 1 ? current_values : current_values.first)
+        all
+      end
+      to_return.empty? ? to_return : to_return.merge(:vendor => vendor)
+    end
+
+    def install_vendor_class(vendor_class)
+      dhcpsapi.create_class(vendor_class, "Vendor class for #{vendor_class}", true, "SUNW.#{vendor_class}")
+      for option in [:root_server_ip, :root_server_hostname, :root_path_name, :install_server_ip, :install_server_name,
+                     :install_path, :sysid_server_path, :jumpstart_server_path]
+        dhcpsapi.create_option(SUNW[option][:code], option.to_s, "", dhcps_option_type_from_sunw_kind(SUNW[option][:kind]), false, vendor_class)
+      end
+      vendor_class
+    end
+
+    def dhcps_option_type_from_sunw_kind(kind)
+      case kind
+      when "IPAddress"
+       DhcpsApi::DHCP_OPTION_DATA_TYPE::DhcpIpAddressOption
+      when "String"
+       DhcpsApi::DHCP_OPTION_DATA_TYPE::DhcpStringDataOption
+      else
+       raise "Unknown option type '#{kind}'"
+      end
+    end
+
+    def list_vendor_class_names
+      dhcpsapi.list_classes.select {|cls| cls[:is_vendor]}.map {|cls| cls[:class_name]}
+    end
+
+    def list_non_standard_vendor_class_names
+      list_vendor_class_names - ['Microsoft Windows 2000 Options', 'Microsoft Windows 98 Options', 'Microsoft Options']
+    end
+
+    def standard_option_names
       @standard_options_by_id ||= generate_standard_options_by_id
-      @standard_options_by_id[option_id]
     end
 
     def generate_standard_options_by_id
@@ -294,24 +245,6 @@ module Proxy::DHCP::NativeMS
 
     def generate_sunw_options_by_id
       SUNW.inject({}) { |all, current| all[current[1][:code]] = current[0]; all }
-    end
-
-    def parse_classes response
-      klass   = nil
-      classes = []
-      response.each do |line|
-        line.chomp!
-        break if line =~ /^Command completed/
-
-        case line
-          when /Class \[([^\]]+)\]:/
-            klass = $1
-          when /Isvendor= TRUE/
-            classes << klass
-        end
-      end
-      logger.debug "found the following classes: #{classes.join(", ")}"
-      return classes
     end
 
     def vendor_options_supported?
