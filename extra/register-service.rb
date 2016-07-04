@@ -22,7 +22,7 @@ default_user         = ENV["USERNAME"]
 default_user         = ENV["USERDOMAIN"] + '\\' + default_user if ENV["USERDOMAIN"]
 default_service_name = 'smart proxy'
 
-puts "This service must run as a user with permission to execute the netsh dhcp script"
+puts "This service must be run under an account that is a member of 'DHCP Administrators' group"
 puts 'The acount can be local or a domain account. If it is a domain account then use the domain\account syntax'
 service_name = ask("Enter the name of the service ")  {|s| s.default = default_service_name}
 user         = ask("Run this service as this user? ") {|u| u.default = default_user}

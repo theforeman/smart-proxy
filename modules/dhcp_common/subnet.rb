@@ -8,9 +8,8 @@ require 'timeout'
 require 'tmpdir'
 
 module Proxy::DHCP
-  # Represents a DHCP Subnet
   class Subnet
-    attr_reader :network, :netmask, :server, :timestamp
+    attr_reader :network, :netmask, :server
     attr_accessor :options
 
     include Proxy::DHCP
@@ -28,8 +27,6 @@ module Proxy::DHCP
       @options[:ntp_servers] = options[:ntp_servers].each{|ip| validate_ip ip } if options[:ntp_servers]
       @options[:interface_mtu] = options[:interface_mtu].to_i if options[:interface_mtu]
       @options[:range] = options[:range] if options[:range] && options[:range][0] && options[:range][1] && valid_range(:from => options[:range][0], :to => options[:range][1])
-
-      @timestamp     = Time.now
     end
 
     def include? ip
@@ -143,6 +140,10 @@ module Proxy::DHCP
 
     def ==(other)
       network == other.network && netmask == other.netmask && options == other.options
+    end
+
+    def eql?(other)
+      self == other
     end
 
     def broadcast
