@@ -223,20 +223,20 @@ module Proxy::DHCP::NativeMS
 
     def report msg, response, error_only
       if response.grep(/completed successfully/).empty?
-        if response.grep /class name being used is unknown/
+        if !response.grep(/class name being used is unknown/).empty?
           logger.warn "Vendor class not found"
         else
-          logger.error "Netsh failed:\n" + response.join("\n")
+          logger.error "Netsh failed:\n" + response.join()
         end
         msg.sub! /Removed/,    "remove"
         msg.sub! /Added/,      "add"
         msg.sub! /Enumerated/, "enumerate"
         msg.sub! /Queried/,    "query"
         msg  = "Failed to #{msg}"
-        msg += "Vendor class not found" if response.grep /class name being used is unknown/
+        msg += "Vendor class not found" if !response.grep(/class name being used is unknown/).empty?
         msg += ": No entry found" if !response.grep(/not a reserved client/).empty?
         match = response.grep(/used by another client/)
-        msg += ": #{match}" if !match.size.empty?
+        msg += ": #{match}" unless match.empty?
         raise Proxy::DHCP::Error.new(msg)
       else
         logger.debug msg unless error_only
