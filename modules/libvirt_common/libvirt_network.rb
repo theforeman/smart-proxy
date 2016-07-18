@@ -14,7 +14,6 @@ module Proxy
 
     def connection
       @connection ||= ::Libvirt::open(@url)
-      @connection
     end
 
     def dump_xml
@@ -25,10 +24,10 @@ module Proxy
       connection.lookup_network_by_name(@network)
     end
 
-    def network_update command, section, xml
+    def network_update(command, section, xml, index = -1)
       flags = ::Libvirt::Network::NETWORK_UPDATE_AFFECT_LIVE | ::Libvirt::Network::NETWORK_UPDATE_AFFECT_CONFIG
       logger.debug "Libvirt update: #{xml}"
-      find_network.update command, section, -1, xml, flags
+      find_network.update command, section, index, xml, flags
     rescue ::Libvirt::Error => e
       logger.error "Error calling libvirt update: #{e}"
       logger.debug xml

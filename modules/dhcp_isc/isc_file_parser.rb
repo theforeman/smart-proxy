@@ -7,10 +7,11 @@ module Proxy::DHCP::ISC
   class FileParser
     include Common
 
-    attr_reader :service
+    attr_reader :service, :subnet_block_body_regex
 
     def initialize(subnet_service)
       @service = subnet_service
+      @subnet_block_body_regex = /\s*\{\s*([\w-]+\s*\{[^{}]*\}\s*|[\w-][^{}]*;\s*)*\}/
     end
 
     def parse_config_and_leases_for_records(conf)
@@ -48,7 +49,7 @@ module Proxy::DHCP::ISC
           body.split(";").each do |data|
             opts.merge! parse_record_options(data)
           end
-          next if opts[:mac].nil?
+          next if opts[:mac].nil? && opts[:uid].nil?
           subnet = service.find_subnet(ip)
           next unless subnet
           ret_val << Proxy::DHCP::Lease.new(opts.merge(:subnet => subnet, :ip => ip))
@@ -58,47 +59,28 @@ module Proxy::DHCP::ISC
       ret_val
     end
 
-    SUBNET_BLOCK_REGEX = /subnet\s+([\d\.]+)\s+netmask\s+([\d\.]+)\s*\{\s*([\w-]+\s*\{[^{}]*\}\s*|[\w-][^{}]*;\s*)*\}/
-    def parse_config_for_subnets(read_config)
-      ret_val = []
-      # Extract subnets config block
-      read_config.scan(SUBNET_BLOCK_REGEX) do |match|
-        network, netmask, subnet_config_lines = match
-        ret_val << Proxy::DHCP::Subnet.new(network, netmask, parse_subnet_options(subnet_config_lines))
-      end
-      ret_val
-    end
-
-    def parse_subnet_options(subnet_config_lines)
+    def parse_subnet_options(subnet_config_lines, &block)
       return {} unless subnet_config_lines
-
       options = {}
       subnet_config_lines.split(';').each do |option|
         option = option.split('#').first.strip # remove comments, left and right whitespace
         next if option.empty?
-        case option
-          when /^option\s+routers\s+[\d\.]+/
-            options[:routers] = get_ip_list_from_config_line(option)
-          when /^option\s+domain\-name\-servers\s+[\d\.]+/
-            options[:domain_name_servers] = get_ip_list_from_config_line(option)
-          when /^range\s+[\d\.]+\s+[\d\.]+/
-            # get IP addr range used for this subnet
-            options[:range] = get_range_from_config_line(option)
-        end
+        yield option, options if block_given?
       end
+      options.reject{ |key, value| value.nil? || value.empty? }
+    end
 
-      options.reject{|key, value| value.nil? || value.empty? }
+    def read_config_for_subnets(read_config)
+      read_config.scan(subnet_block_regex)
     end
 
     def parse_record_options text
-      text = text.strip
+      text.strip!
       options = {}
       case text
         # standard record values
         when /^hardware\s+ethernet\s+(\S+)/
           options[:mac] = $1
-        when /^fixed-address\s+(\S+)/
-          options[:ip] = $1
         when /^next-server\s+(\S+)/
           options[:nextServer] = $1
         when /^filename\s+(\S+)/
@@ -118,26 +100,9 @@ module Proxy::DHCP::ISC
         # OMAPI settings
         when /^deleted/
           options[:deleted] = true
-        when /^supersede server.next-server\s+=\s+(\S+)/
-          begin
-            ns = validate_ip hex2ip($1)
-          rescue
-            ns = $1.gsub("\"","")
-          end
-          options[:nextServer] = ns
-        when /^supersede server.filename\s+=\s+"(\S+)"/
-          options[:filename] = $1
-        when "dynamic"
-          options[:deleteable] = true
-        #TODO: check if adding a new reservation with omshell for a free lease still
-        #generates a conflict
       end
       options.merge!(solaris_options_parser(text))
       options
-    end
-
-    def hex2ip hex
-      hex.split(":").map{|h| h.to_i(16).to_s}.join(".")
     end
 
     # ISC stores timestamps in UTC, therefor forcing the time to load from GMT/UTC TZ
@@ -172,16 +137,6 @@ module Proxy::DHCP::ISC
           options[:jumpstart_server_path] = $1
       end
       options
-    end
-
-    # Get all IPv4 addresses provided by the ISC DHCP config line following the pattern "my-config-option-or-directive IPv4_ADDR[, IPv4_ADDR] [...];" and return an array.
-    def get_ip_list_from_config_line(option_line)
-      option_line.scan(/\s*((?:(?:\d{1,3}\.){3}\d{1,3})\s*(?:,\s*(?:(?:\d{1,3}\.){3}\d{1,3})\s*)*)/).first.first.gsub(/\s/,'').split(",").reject{|value| value.nil? || value.empty? }
-    end
-
-    # Get IPv4 range provided by the ISC DHCP config line following the pattern "range IPv4_ADDR IPv4_ADDR;" and return an array.
-    def get_range_from_config_line(range_line)
-      range_line.scan(/\s*((?:\d{1,3}\.){3}\d{1,3})\s*((?:\d{1,3}\.){3}\d{1,3})\s*/).first
     end
   end
 end

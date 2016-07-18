@@ -11,7 +11,7 @@ module Proxy::DHCP
     end
 
     def to_s
-      "#{name} (#{ip} / #{mac})"
+      "#{name} (#{ip} / #{mac}#{uid})"
     end
 
     def method_missing arg
@@ -19,7 +19,7 @@ module Proxy::DHCP
     end
 
     def to_json(*options)
-      Hash[[:hostname, :ip, :mac].map{|s| [s, send(s)]}].to_json(*options)
+      Hash[[:hostname, :ip, :mac, :uid].map{|s| [s, send(s)]}].to_json(*options)
     end
   end
 end

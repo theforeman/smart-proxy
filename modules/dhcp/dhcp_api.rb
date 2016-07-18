@@ -31,7 +31,7 @@ class Proxy::DhcpApi < ::Sinatra::Base
   get "/?" do
     begin
       content_type :json
-      server.subnets.map{|s| {:network => s.network, :netmask => s.netmask, :options => s.options}}.to_json
+      server.subnets.map{|s| {:network => s.network, :netmask => s.netmask, :options => s.options, :prefix => s.prefix}}.to_json
     rescue => e
       log_halt 400, e
     end

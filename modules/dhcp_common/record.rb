@@ -5,7 +5,7 @@ module Proxy::DHCP
   # represent a DHCP Record
   class Record
 
-    attr_reader :ip, :mac, :subnet, :options
+    attr_reader :ip, :mac, :uid, :subnet, :options
     include Proxy::DHCP
     include Proxy::Log
     include Proxy::Validations
@@ -13,7 +13,7 @@ module Proxy::DHCP
     def initialize options = {}
       @subnet  = validate_subnet options[:subnet]
       @ip      = validate_ip options[:ip]
-      @mac     = validate_mac options[:mac]
+      set_mac_or_uid(validate_mac_or_uid options[:mac], options[:uid])
       @deleteable = options.delete(:deleteable) if options[:deleteable]
       @options = options
     end
@@ -22,8 +22,12 @@ module Proxy::DHCP
       @subnet.network
     end
 
+    def v6?
+      subnet.v6?
+    end
+
     def to_s
-      "#{ip} / #{mac}"
+      "#{ip} / #{prefix}"
     end
 
     def inspect
@@ -54,5 +58,11 @@ module Proxy::DHCP
       true
     end
 
+    private
+
+    def set_mac_or_uid(hash)
+      var = hash.keys.first
+      instance_variable_set "@#{var}", hash[var]
+    end
   end
 end

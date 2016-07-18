@@ -10,16 +10,15 @@ require 'tmpdir'
 module Proxy::DHCP
   # Represents a DHCP Subnet
   class Subnet
-    attr_reader :network, :netmask, :server, :timestamp
+    attr_reader :network, :server, :timestamp
     attr_accessor :options
 
     include Proxy::DHCP
     include Proxy::Log
     include Proxy::Validations
 
-    def initialize network, netmask, options = {}
+    def initialize network, options = {}
       @network = validate_ip network
-      @netmask = validate_ip netmask
       @options = {}
 
       @options[:routers] = options[:routers].each{|ip| validate_ip ip } if options[:routers]
@@ -48,15 +47,27 @@ module Proxy::DHCP
     end
 
     def to_s
-      "#{network}/#{netmask}"
+      raise NotImplementedError, "Method 'to_s' must be implemented"
     end
 
-    def cidr
-      IPAddr.new(netmask).to_i.to_s(2).count("1")
+    def prefix
+      raise NotImplementedError, "Method 'prefix' must be implemented"
+    end
+
+    def netmask
+      raise NotImplementedError, "Method 'netmask' must be implemented"
+    end
+
+    def valid_range
+      raise NotImplementedError, "Method 'valid_range' must be implemented"
+    end
+
+    def v6?
+      is_a? Proxy::DHCP::Ipv6
     end
 
     def range
-      r=valid_range
+      r = valid_range
       "#{r.first}-#{r.last}"
     end
 
@@ -74,7 +85,7 @@ module Proxy::DHCP
       @file = File.new(@filename,'r+') rescue File.new(@filename,'w+')
 
       # this returns the index in the file
-      return @file.readlines.first.to_i rescue 0
+      return index_from_file(@file)
     end
 
     def write_index_and_unlock index
@@ -84,57 +95,8 @@ module Proxy::DHCP
       File.delete @lockfile
     end
 
-    #
-    # NOTE: stored index is indepndent of call parameters:
-    # Whether range is passed or not, the lookup starts with the address at the indexed position,
-    # Is the assumption that unused_ip is always called with the same parameters for a given subnet?
-    #
-    # returns the next unused IP Address in a subnet
-    # Pings the IP address as well (just in case its not in Proxy::DHCP)
     def unused_ip records, args = {}
-      free_ips = valid_range(args) - records.collect{|record| record.ip}
-      if free_ips.empty?
-        logger.warn "No free IPs at #{self}"
-        return nil
-      else
-        @index = 0
-        begin
-          # Read and lock the storage file
-          stored_index = get_index_and_lock("foreman-proxy_#{network}_#{cidr}.tmp")
-
-          free_ips.rotate(stored_index).each do |ip|
-            logger.debug "Searching for free IP - pinging #{ip}"
-            if tcp_pingable?(ip) || icmp_pingable?(ip)
-              logger.debug "Found a pingable IP(#{ip}) address which does not have a Proxy::DHCP record"
-            else
-              logger.debug "Found free IP #{ip} out of a total of #{free_ips.size} free IPs"
-              @index = free_ips.index(ip)+1
-              return ip
-            end
-          end
-          logger.warn "No free IPs at #{self}"
-        rescue Exception => e
-          logger.debug e.message
-        ensure
-          # ensure we unlock the storage file
-          write_index_and_unlock @index
-        end
-        nil
-      end
-    end
-
-    def valid_range args = {}
-      logger.debug "trying to find an ip address, we got #{args.inspect}"
-      if args[:from] && (from=validate_ip(args[:from])) && args[:to] && (to=validate_ip(args[:to]))
-        raise Proxy::DHCP::Error, "Range does not belong to provided subnet" unless self.include?(from) && self.include?(to)
-        from = IPAddr.new(from)
-        to   = IPAddr.new(to)
-        raise Proxy::DHCP::Error, "#{from} can't be lower IP address than #{to} - change the order?" if from > to
-        from..to
-      else
-        IPAddr.new(to_s).to_range
-      # remove broadcast and network address
-      end.map(&:to_s) - [network, broadcast]
+      raise NotImplementedError, "Method 'unused_ip' needs to be implemented"
     end
 
     def inspect
@@ -145,11 +107,25 @@ module Proxy::DHCP
       network <=> other.network
     end
 
-    def broadcast
-      IPAddr.new(to_s).to_range.last.to_s
+    private
+
+    def index_from_file file
+      raise NotImplementedError, "Method 'index_from_file' needs to be implemented"
     end
 
-    private
+    def total_range args = {}
+      logger.debug "trying to find an ip address, we got #{args.inspect}"
+      if args[:from] && (from = validate_ip(args[:from])) && args[:to] && (to = validate_ip(args[:to]))
+        raise Proxy::DHCP::Error, "Range does not belong to provided subnet" unless self.include?(from) && self.include?(to)
+        from = IPAddr.new(from)
+        to   = IPAddr.new(to)
+        raise Proxy::DHCP::Error, "#{from} can't be lower IP address than #{to} - change the order?" if from > to
+        from..to
+      else
+        IPAddr.new(to_s).to_range
+      end
+    end
+
     def tcp_pingable? ip
       # This code is from net-ping, and stripped down for use here
       # We don't need all the ldap dependencies net-ping brings in
@@ -194,6 +170,9 @@ module Proxy::DHCP
     if PLATFORM =~ /mingw/
       # Windows uses different options for ping and does not have /dev/null
       system("ping -n 1 -w 1000 #{ip} > NUL")
+    elsif self.is_a? Subnet::Ipv6
+      # use ping6 for IPv6
+      system("ping6 -c 1 -W 1 #{ip} > /dev/null")
     else
       # Default to Linux ping options and send to /dev/null
       system("ping -c 1 -W 1 #{ip} > /dev/null")
