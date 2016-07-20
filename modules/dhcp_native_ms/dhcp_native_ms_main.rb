@@ -57,7 +57,11 @@ module Proxy::DHCP::NativeMS
         else
           logger.debug "key: " + key.inspect
           k = Standard[key] || Standard[key.to_sym]
-          execute "scope #{record.subnet.network} set reservedoptionvalue #{record.ip} #{k[:code]} #{k[:kind]} \"#{value}\"", msg, true
+          begin
+            execute "scope #{record.subnet.network} set reservedoptionvalue #{record.ip} #{k[:code]} #{k[:kind]} \"#{value}\"", msg, true
+          rescue Proxy::DHCP::Error => e
+            raise(e) unless key.to_s == "PXEClient"
+          end
         end
       end
       execute("scope #{record.subnet.network} set dnsconfig #{record.ip} 0 0 0 0", 'disable Dynamic DNS', true) if Proxy::DHCP::NativeMS::Plugin.settings.disable_ddns
