@@ -13,7 +13,6 @@ class DHCPServerMicrosoftTest < Test::Unit::TestCase
     @subnet_service = Proxy::DHCP::SubnetService.new
     @server = Proxy::DHCP::NativeMS::Provider.new.initialize_for_testing(:name => "1.2.3.4",
                                                                          :service => @subnet_service)
-
     @server.stubs(:execute).with("show scope", "Enumerated the scopes on 1.2.3.4").returns('
 ==============================================================================
  Scope Address  - Subnet Mask    - State        - Scope Name          -  Comment
@@ -286,4 +285,29 @@ Command completed successfully.
     assert_equal "brslcs25", parsed[:hostname]
     assert_equal "/vol/solgi_5.10/sol10_hw0910", parsed[:install_path]
   end
+
+  def test_should_add_record
+    to_add = { "hostname" => "test.example.com", "ip" => "192.168.166.11",
+               "mac" => "00:11:bb:cc:dd:ee", "network" => "192.168.166.0/255.255.255.0",
+               "PXEClient" => "pxeclientval" }
+
+    @server.expects(:execute).with('scope 192.168.166.0 add reservedip 192.168.166.11 0011bbccddee test.example.com', 'Added DHCP reservation for test.example.com (192.168.166.11 / 00:11:bb:cc:dd:ee)')
+    @server.expects(:execute).with('scope 192.168.166.0 set reservedoptionvalue 192.168.166.11 12 String "test.example.com"', nil, true)
+    @server.expects(:execute).with('scope 192.168.166.0 set reservedoptionvalue 192.168.166.11 60 String "pxeclientval"', nil, true)
+    @server.add_record(to_add)
+  end
+
+  def test_should_raise_on_option_error
+    to_add = { "hostname" => "test.example.com", "ip" => "192.168.166.11",
+               "mac" => "00:11:bb:cc:dd:ee", "network" => "192.168.166.0/255.255.255.0",
+             }
+
+    @server.expects(:execute).with('scope 192.168.166.0 add reservedip 192.168.166.11 0011bbccddee test.example.com', 'Added DHCP reservation for test.example.com (192.168.166.11 / 00:11:bb:cc:dd:ee)')
+    @server.expects(:execute).with('scope 192.168.166.0 set reservedoptionvalue 192.168.166.11 12 String "test.example.com"', nil, true).raises(Proxy::DHCP::Error)
+    @server.expects(:execute).with('scope 192.168.166.0 set reservedoptionvalue 192.168.166.11 60 String ""', nil, true)
+    assert_raises ::Proxy::DHCP::Error do
+      @server.add_record(to_add)
+    end
+  end
+
 end
