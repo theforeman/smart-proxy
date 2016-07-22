@@ -304,10 +304,8 @@ Command completed successfully.
 
     @server.expects(:execute).with('scope 172.24.166.0 add reservedip 172.24.166.11 0011bbccddee test.example.com', 'Added DHCP reservation for test.example.com (172.24.166.11 / 00:11:bb:cc:dd:ee)')
     @server.expects(:execute).with('scope 172.24.166.0 set reservedoptionvalue 172.24.166.11 12 String "test.example.com"', nil, true).raises(Proxy::DHCP::Error)
-    @server.expects(:execute).with('scope 172.24.166.0 set reservedoptionvalue 172.24.166.11 60 String ""', nil, true)
-    assert_raises ::Proxy::DHCP::Error do
-      @server.add_record(to_add)
-    end
+    @server.stubs(:execute).with('scope 172.24.166.0 set reservedoptionvalue 172.24.166.11 60 String ""', nil, true)
+    assert_raises(::Proxy::DHCP::Error) { @server.add_record(to_add) }
   end
 
 end
