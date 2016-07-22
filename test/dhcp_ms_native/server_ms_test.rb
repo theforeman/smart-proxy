@@ -287,24 +287,24 @@ Command completed successfully.
   end
 
   def test_should_add_record
-    to_add = { "hostname" => "test.example.com", "ip" => "192.168.166.11",
-               "mac" => "00:11:bb:cc:dd:ee", "network" => "192.168.166.0/255.255.255.0",
+    to_add = { "hostname" => "test.example.com", "ip" => "172.24.166.11",
+               "mac" => "00:11:bb:cc:dd:ee", "network" => "172.24.166.0/255.255.255.0",
                "PXEClient" => "pxeclientval" }
 
-    @server.expects(:execute).with('scope 192.168.166.0 add reservedip 192.168.166.11 0011bbccddee test.example.com', 'Added DHCP reservation for test.example.com (192.168.166.11 / 00:11:bb:cc:dd:ee)')
-    @server.expects(:execute).with('scope 192.168.166.0 set reservedoptionvalue 192.168.166.11 12 String "test.example.com"', nil, true)
-    @server.expects(:execute).with('scope 192.168.166.0 set reservedoptionvalue 192.168.166.11 60 String "pxeclientval"', nil, true)
+    @server.expects(:execute).with('scope 172.24.166.0 add reservedip 172.24.166.11 0011bbccddee test.example.com', 'Added DHCP reservation for test.example.com (172.24.166.11 / 00:11:bb:cc:dd:ee)')
+    @server.expects(:execute).with('scope 172.24.166.0 set reservedoptionvalue 172.24.166.11 12 String "test.example.com"', nil, true)
+    @server.expects(:execute).with('scope 172.24.166.0 set reservedoptionvalue 172.24.166.11 60 String "pxeclientval"', nil, true)
     @server.add_record(to_add)
   end
 
   def test_should_raise_on_option_error
-    to_add = { "hostname" => "test.example.com", "ip" => "192.168.166.11",
-               "mac" => "00:11:bb:cc:dd:ee", "network" => "192.168.166.0/255.255.255.0",
+    to_add = { "hostname" => "test.example.com", "ip" => "172.24.166.11",
+               "mac" => "00:11:bb:cc:dd:ee", "network" => "172.24.166.0/255.255.255.0",
              }
 
-    @server.expects(:execute).with('scope 192.168.166.0 add reservedip 192.168.166.11 0011bbccddee test.example.com', 'Added DHCP reservation for test.example.com (192.168.166.11 / 00:11:bb:cc:dd:ee)')
-    @server.expects(:execute).with('scope 192.168.166.0 set reservedoptionvalue 192.168.166.11 12 String "test.example.com"', nil, true).raises(Proxy::DHCP::Error)
-    @server.expects(:execute).with('scope 192.168.166.0 set reservedoptionvalue 192.168.166.11 60 String ""', nil, true)
+    @server.expects(:execute).with('scope 172.24.166.0 add reservedip 172.24.166.11 0011bbccddee test.example.com', 'Added DHCP reservation for test.example.com (172.24.166.11 / 00:11:bb:cc:dd:ee)')
+    @server.expects(:execute).with('scope 172.24.166.0 set reservedoptionvalue 172.24.166.11 12 String "test.example.com"', nil, true).raises(Proxy::DHCP::Error)
+    @server.expects(:execute).with('scope 172.24.166.0 set reservedoptionvalue 172.24.166.11 60 String ""', nil, true)
     assert_raises ::Proxy::DHCP::Error do
       @server.add_record(to_add)
     end
