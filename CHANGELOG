@@ -1,3 +1,17 @@
+2016-07-22	Dominic Cleal <dominic@cleal.org>
+	* Release 1.12.1
+	* refs #13575 - update test IP ranges
+
+2016-07-22	Guido Günther <agx@sigxcpu.org>
+	* fixes #13575 - Don't fail on missing PXEClient dhcp opt
+
+2016-07-22	Paul Kelly <paul.ian.kelly@gmail.com>
+	* fixes #15373 - windows ping called with very small timeout
+	* fixes #15348 - close check is now correct for std_out and std_err
+
+2016-07-22	Jack Watroba <jack@build.com>
+	* fixes #15341 - case sensitivity issues with dnscmd (cherry picked from commit e182f9a097e636ca4c15c50e320ed8362f574515)
+
 2016-07-08	Dominic Cleal <dominic@cleal.org>
 	* Release 1.12.0
 
