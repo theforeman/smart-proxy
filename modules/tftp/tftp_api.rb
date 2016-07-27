@@ -8,7 +8,7 @@ module Proxy::TFTP
     helpers ::Proxy::Helpers
     authorize_with_trusted_hosts
     authorize_with_ssl_client
-    VARIANTS = ["Syslinux", "Pxegrub", "Pxegrub2", "Ztp", "Poap"].freeze
+    VARIANTS = ["Syslinux", "Pxelinux", "Pxegrub", "Pxegrub2", "Ztp", "Poap"].freeze
 
     helpers do
       def instantiate variant, mac=nil
