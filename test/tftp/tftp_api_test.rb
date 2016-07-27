@@ -25,6 +25,11 @@ class TftpApiTest < Test::Unit::TestCase
     assert_equal "Proxy::TFTP::Syslinux", obj.class.name
   end
 
+  def test_instantiate_pxelinux
+    obj = app.helpers.instantiate "pxelinux", "AA:BB:CC:DD:EE:FF"
+    assert_equal "Proxy::TFTP::Pxelinux", obj.class.name
+  end
+
   def test_instantiate_pxegrub
     obj = app.helpers.instantiate "pxegrub", "AA:BB:CC:DD:EE:FF"
     assert_equal "Proxy::TFTP::Pxegrub", obj.class.name

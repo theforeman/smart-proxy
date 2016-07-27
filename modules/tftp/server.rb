@@ -74,6 +74,7 @@ module Proxy::TFTP
       ["#{pxeconfig_dir}/01-"+mac.gsub(/:/,"-").downcase]
     end
   end
+  class Pxelinux < Syslinux; end
 
   class Pxegrub < Server
     def pxeconfig_dir
