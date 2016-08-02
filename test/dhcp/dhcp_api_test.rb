@@ -177,7 +177,7 @@ class DhcpApiTest < Test::Unit::TestCase
     }
     post "/192.168.122.0", params
     assert last_response.client_error?, "Last response was not ok: #{last_response.status} #{last_response.body}"
-    expected = 'Record 192.168.122.0/192.168.122.1 already exists'
+    expected = 'DHCP record 192.168.122.0/192.168.122.1 already exists'
     assert_equal expected, last_response.body
     assert_equal 409, last_response.status
   end
@@ -206,7 +206,7 @@ class DhcpApiTest < Test::Unit::TestCase
   def test_api_10_delete_record_notfound
     delete "/192.168.122.0/192.168.122.11"
     assert last_response.not_found?, "Last response was not ok: #{last_response.status} #{last_response.body}"
-    expected = 'Record 192.168.122.0/192.168.122.11 not found'
+    expected = 'DHCP record 192.168.122.0/192.168.122.11 not found'
     assert_equal expected, last_response.body
   end
 

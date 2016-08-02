@@ -72,7 +72,7 @@ class Proxy::DhcpApi < ::Sinatra::Base
       load_subnet_data
 
       record = server.find_record(@subnet.network, params[:record])
-      log_halt 404, "Record #{params[:network]}/#{params[:record]} not found" unless record
+      log_halt 404, "DHCP record #{params[:network]}/#{params[:record]} not found" unless record
       record.options.to_json
     rescue => e
       log_halt 400, e
@@ -103,7 +103,7 @@ class Proxy::DhcpApi < ::Sinatra::Base
       load_subnet_data
 
       record = server.find_record(@subnet.network, params[:record])
-      log_halt 404, "Record #{params[:network]}/#{params[:record]} not found" unless record
+      log_halt 404, "DHCP record #{params[:network]}/#{params[:record]} not found" unless record
       server.del_record @subnet, record
       if request.accept? 'application/json'
         content_type :json
@@ -112,7 +112,7 @@ class Proxy::DhcpApi < ::Sinatra::Base
         redirect "/dhcp/#{params[:network]}"
       end
     rescue Proxy::DHCP::InvalidRecord
-      log_halt 404, "Record #{params[:network]}/#{params[:record]} not found"
+      log_halt 404, "DHCP record #{params[:network]}/#{params[:record]} not found"
     rescue Exception => e
       log_halt 400, e
     end

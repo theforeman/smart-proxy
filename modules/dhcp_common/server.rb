@@ -81,7 +81,7 @@ module Proxy::DHCP
           service.find_lease_by_mac(subnet.network, mac_address)
 
       if r && subnet.valid_range(:from => from_address, :to => to_address).include?(r.ip)
-        logger.debug "Found an existing dhcp record #{r}, reusing..."
+        logger.debug "Found an existing DHCP record #{r}, reusing..."
         return r.ip
       end
     end
@@ -122,10 +122,10 @@ module Proxy::DHCP
           logger.debug "We already got the same DHCP record - skipping"
           raise Proxy::DHCP::AlreadyExists
         else
-          logger.warn "Request to create a conflicting record"
+          logger.warn "Request to create a conflicting DHCP record"
           logger.debug "request: #{options.inspect}"
           logger.debug "local:   #{record.options.inspect}"
-          raise Proxy::DHCP::Collision, "Record #{net}/#{ip} already exists"
+          raise Proxy::DHCP::Collision, "DHCP record #{net}/#{ip} already exists"
         end
       end
 
