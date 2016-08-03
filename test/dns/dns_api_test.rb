@@ -1,46 +1,56 @@
 require 'test_helper'
-require 'dns_common/dependency_injection/container'
-require 'dns/dns_api'
-
 
 ENV['RACK_ENV'] = 'test'
 
-class DnsApiTest < Test::Unit::TestCase
-  class DnsApiTestProvider
-    attr_reader :fqdn, :ip, :type, :target
-    def create_a_record(fqdn, ip)
-      @fqdn = fqdn; @ip = ip; @type = 'A'
-    end
-    def create_aaaa_record(fqdn, ip)
-      @fqdn = fqdn; @ip = ip; @type = 'AAAA'
-    end
-    def create_ptr_record(fqdn, ip)
-      @fqdn = fqdn; @ip = ip; @type = 'PTR'
-    end
-    def create_cname_record(fqdn, target)
-      @fqdn = fqdn; @target = target; @type = 'CNAME'
-    end
-    def remove_a_record(fqdn)
-      @fqdn = fqdn; @type = 'A'
-    end
-    def remove_aaaa_record(fqdn)
-      @fqdn = fqdn; @type = 'AAAA'
-    end
-    def remove_ptr_record(ip)
-      @ip = ip; @type = 'PTR'
-    end
-    def remove_cname_record(fqdn)
-      @fqdn = fqdn; @type = 'CNAME'
+class DnsApiTestProvider
+  attr_reader :fqdn, :ip, :type, :target
+  def create_a_record(fqdn, ip)
+    @fqdn = fqdn; @ip = ip; @type = 'A'
+  end
+  def create_aaaa_record(fqdn, ip)
+    @fqdn = fqdn; @ip = ip; @type = 'AAAA'
+  end
+  def create_ptr_record(fqdn, ip)
+    @fqdn = fqdn; @ip = ip; @type = 'PTR'
+  end
+  def create_cname_record(fqdn, target)
+    @fqdn = fqdn; @target = target; @type = 'CNAME'
+  end
+  def remove_a_record(fqdn)
+    @fqdn = fqdn; @type = 'A'
+  end
+  def remove_aaaa_record(fqdn)
+    @fqdn = fqdn; @type = 'AAAA'
+  end
+  def remove_ptr_record(ip)
+    @ip = ip; @type = 'PTR'
+  end
+  def remove_cname_record(fqdn)
+    @fqdn = fqdn; @type = 'CNAME'
+  end
+end
+
+module Proxy::Dns
+  module DependencyInjection
+    include Proxy::DependencyInjection::Accessors
+    def container_instance
+      Proxy::DependencyInjection::Container.new do |c|
+        c.dependency :dns_provider, DnsApiTestProvider
+      end
     end
   end
+end
 
+
+require 'dns/dns_api'
+
+class DnsApiTest < Test::Unit::TestCase
   include Rack::Test::Methods
 
   def app
-    app = Proxy::Dns::Api.new
-    @server = DnsApiTestProvider.new
-    app.helpers.server = @server
-    app
+    @app = Proxy::Dns::Api.new
+    @server = @app.helpers.server
+    @app
   end
 
   def test_create_a_record

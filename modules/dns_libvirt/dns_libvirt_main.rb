@@ -1,6 +1,4 @@
-require 'dns_libvirt/libvirt_dns_network'
 require 'rexml/document'
-require 'dns_common/dns_common'
 
 module Proxy::Dns::Libvirt
   class Record < ::Proxy::Dns::Record
@@ -9,11 +7,9 @@ module Proxy::Dns::Libvirt
 
     attr_reader :libvirt_network, :network
 
-    def initialize(options = {})
-      @network = options[:network] || Proxy::Dns::Libvirt::Plugin.settings.network
-      @libvirt_network = options[:libvirt_network] || ::Proxy::Dns::Libvirt::LibvirtDNSNetwork.new(
-        options[:url] || Proxy::Dns::Libvirt::Plugin.settings.url,
-        @network)
+    def initialize(network, libvirt_network)
+      @network = network
+      @libvirt_network = libvirt_network
       super(@network)
     end
 

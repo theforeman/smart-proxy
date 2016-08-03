@@ -6,11 +6,10 @@ module Proxy::Dns::NsupdateGSS
     include Proxy::Kerberos
     attr_reader :tsig_keytab, :tsig_principal
 
-    def initialize(a_server = nil, a_ttl = nil)
-      @tsig_keytab = ::Proxy::Dns::NsupdateGSS::Plugin.settings.dns_tsig_keytab
-      @tsig_principal = ::Proxy::Dns::NsupdateGSS::Plugin.settings.dns_tsig_principal
-      super(a_server || ::Proxy::Dns::NsupdateGSS::Plugin.settings.dns_server,
-            a_ttl || ::Proxy::Dns::Plugin.settings.dns_ttl)
+    def initialize(a_server, a_ttl, tsig_keytab, tsig_principal)
+      @tsig_keytab = tsig_keytab
+      @tsig_principal = tsig_principal
+      super(a_server, a_ttl, nil)
     end
 
     def nsupdate_args

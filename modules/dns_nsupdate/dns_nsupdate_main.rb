@@ -1,15 +1,15 @@
 require 'resolv'
-require 'dns_common/dns_common'
 
 module Proxy::Dns::Nsupdate
   class Record < ::Proxy::Dns::Record
-
     include Proxy::Log
     include Proxy::Util
 
-    def initialize(a_server = nil, a_ttl = nil)
-      super(a_server || ::Proxy::Dns::Nsupdate::Plugin.settings.dns_server,
-            a_ttl || ::Proxy::Dns::Plugin.settings.dns_ttl)
+    attr_reader :dns_key
+
+    def initialize(a_server, a_ttl, dns_key)
+      @dns_key = dns_key
+      super(a_server, a_ttl)
     end
 
     def create_a_record(fqdn, ip)
@@ -77,9 +77,7 @@ module Proxy::Dns::Nsupdate
     end
 
     def nsupdate_args
-      args = ""
-      args = "-k #{Proxy::Dns::Nsupdate::Plugin.settings.dns_key} " if Proxy::Dns::Nsupdate::Plugin.settings.dns_key
-      args
+      dns_key.nil? ? '' : "-k #{dns_key} "
     end
 
     def nsupdate_connect
