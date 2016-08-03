@@ -1,4 +1,3 @@
-require 'proxy/log_buffer/decorator'
 require 'proxy/log_buffer/buffer'
 require 'thread'
 
