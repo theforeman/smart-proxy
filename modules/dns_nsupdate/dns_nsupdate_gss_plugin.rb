@@ -10,9 +10,7 @@ module ::Proxy::Dns::NsupdateGSS
 
     validate_readable :dns_tsig_keytab
 
-    after_activation do
-      require 'dns_nsupdate/dns_nsupdate_gss_main'
-      require 'dns_nsupdate/nsupdate_gss_dependencies'
-    end
+    load_classes ::Proxy::Dns::NsupdateGSS::PluginConfiguration
+    load_dependency_injection_wirings ::Proxy::Dns::NsupdateGSS::PluginConfiguration
   end
 end

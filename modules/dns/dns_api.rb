@@ -1,9 +1,8 @@
-require 'dns_common/dns_common'
 require 'ipaddr'
 
 module Proxy::Dns
   class Api < ::Sinatra::Base
-    extend Proxy::Dns::DependencyInjection::Injectors
+    extend Proxy::Dns::DependencyInjection
     inject_attr :dns_provider, :server
 
     helpers ::Proxy::Helpers

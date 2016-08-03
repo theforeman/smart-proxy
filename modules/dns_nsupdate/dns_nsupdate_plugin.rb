@@ -8,9 +8,7 @@ module ::Proxy::Dns::Nsupdate
 
     validate_readable :dns_key
 
-    after_activation do
-      require 'dns_nsupdate/dns_nsupdate_main'
-      require 'dns_nsupdate/nsupdate_dependencies'
-    end
+    load_classes ::Proxy::Dns::Nsupdate::PluginConfiguration
+    load_dependency_injection_wirings ::Proxy::Dns::Nsupdate::PluginConfiguration
   end
 end
