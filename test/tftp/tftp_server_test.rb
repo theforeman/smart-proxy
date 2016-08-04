@@ -113,7 +113,7 @@ class TftpPxegrub2ServerTest < Test::Unit::TestCase
 
   def setup_paths
     @subject = Proxy::TFTP::Pxegrub2.new
-    @pxe_config_files = ["grub2/grub.cfg-aa-bb-cc-dd-ee-ff"]
+    @pxe_config_files = ["grub2/grub.cfg-01-aa-bb-cc-dd-ee-ff"]
     @pxe_default_files = ["grub2/grub.cfg"]
   end
 end
