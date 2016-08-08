@@ -124,6 +124,18 @@ module Proxy::TFTP
     end
   end
 
+  class Ipxe < Server
+    def pxeconfig_dir
+      "#{path}/pxelinux.cfg"
+    end
+    def pxe_default
+      ["#{pxeconfig_dir}/default.ipxe"]
+    end
+    def pxeconfig_file mac
+      ["#{pxeconfig_dir}/01-"+mac.gsub(/:/,"-").downcase+".ipxe"]
+    end
+  end
+ 
   def self.fetch_boot_file dst, src
     filename    = boot_filename(dst, src)
     destination = Pathname.new(File.expand_path(filename, Proxy::TFTP::Plugin.settings.tftproot)).cleanpath

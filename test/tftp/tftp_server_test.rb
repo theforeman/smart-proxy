@@ -143,3 +143,13 @@ class TftpZtpServerTest < Test::Unit::TestCase
     # default template not supported in this case
   end
 end
+
+class TftpIpxeServerTest < Test::Unit::TestCase
+  include TftpGenericServerSuite
+
+  def setup_paths
+    @subject = Proxy::TFTP::Ipxe.new
+    @pxe_config_files = ["pxelinux.cfg/01-aa-bb-cc-dd-ee-ff.ipxe"]
+    @pxe_default_files = ["pxelinux.cfg/default.ipxe"]
+  end
+end
