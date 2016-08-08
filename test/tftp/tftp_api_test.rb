@@ -50,6 +50,11 @@ class TftpApiTest < Test::Unit::TestCase
     assert_equal "Proxy::TFTP::Poap", obj.class.name
   end
 
+  def test_instantiate_ipxe
+    obj = app.helpers.instantiate "ipxe", "AA:BB:CC:DD:EE:FF"
+    assert_equal "Proxy::TFTP::Ipxe", obj.class.name
+  end
+
   def test_instantiate_nonexisting
     subject = app
     subject.helpers.expects(:log_halt).with(403, "Unrecognized pxeboot config type: Server").at_least(1)
