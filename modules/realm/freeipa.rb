@@ -67,7 +67,7 @@ module Proxy::Realm
     end
 
     def find hostname
-      @ipa.call("host_show", [hostname])
+      ipa_call("host_show", [hostname])
     rescue XMLRPC::FaultException => e
       if e.message =~ /not found/
         nil
@@ -99,14 +99,14 @@ module Proxy::Realm
           # disable it in order to revoke existing certs, keytabs, etc.
           if host["result"]["has_keytab"]
             logger.debug "Attempting to disable host #{params[:hostname]} in FreeIPA"
-            @ipa.call("host_disable", [params[:hostname]])
+            ipa_call("host_disable", [params[:hostname]])
           end
         end
         operation = "host_mod"
       end
 
       begin
-        result = @ipa.call(operation, [params[:hostname]], options)
+        result = ipa_call(operation, [params[:hostname]], options)
       rescue => e
         if e.message =~ /no modifications/
           result = {"result" => {"message" => "nothing to do"}}
@@ -122,17 +122,42 @@ module Proxy::Realm
       check_realm realm
       raise Proxy::Realm::NotFound, "Host #{hostname} not found in realm!" unless find hostname
       begin
-        result = @ipa.call("host_del", [hostname], "updatedns" => Proxy::Realm::Plugin.settings.freeipa_remove_dns)
+        result = ipa_call("host_del", [hostname], "updatedns" => Proxy::Realm::Plugin.settings.freeipa_remove_dns)
       rescue
         if Proxy::Realm::Plugin.settings.freeipa_remove_dns
           # If the host doesn't have a DNS record (e.g. deleting a system in Foreman before it's built)
           # the above call will fail.  Try again with updatedns => false
-          result = @ipa.call("host_del", [hostname], "updatedns" => false)
+          result = ipa_call("host_del", [hostname], "updatedns" => false)
         else
           raise
         end
       end
       JSON.pretty_generate(result)
+    end
+
+    def self.ensure_utf(object)
+      case object
+      when String
+        if object.respond_to?(:force_encoding)
+          object.dup.force_encoding('UTF-8')
+        else
+          object
+        end
+      when Hash
+        object.reduce({}) do |h, (key, val)|
+          h.update(ensure_utf(key) => ensure_utf(val))
+        end
+      when Array
+        object.map { |val| ensure_utf(val) }
+      else
+        object
+      end
+    end
+
+    private
+
+    def ipa_call(*args)
+      self.class.ensure_utf(@ipa.call(*args))
     end
   end
 end
