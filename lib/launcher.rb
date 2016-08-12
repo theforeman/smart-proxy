@@ -10,12 +10,16 @@ module Proxy
       SETTINGS.daemon_pid
     end
 
+    def http_enabled?
+      !SETTINGS.http_port.nil?
+    end
+
     def https_enabled?
       SETTINGS.ssl_private_key && SETTINGS.ssl_certificate && SETTINGS.ssl_ca_file
     end
 
     def http_app
-      return nil if SETTINGS.http_port.nil?
+      return nil unless http_enabled?
       app = Rack::Builder.new do
         ::Proxy::Plugins.instance.select {|p| p[:state] == :running && p[:http_enabled]}.each do |p|
           instance_eval(p[:class].http_rackup)
@@ -35,36 +39,36 @@ module Proxy
     def https_app
       unless https_enabled?
         logger.warn "Missing SSL setup, https is disabled."
-        nil
-      else
-        app = Rack::Builder.new do
-          ::Proxy::Plugins.instance.select {|p| p[:state] == :running && p[:https_enabled]}.each do |p|
-            instance_eval(p[:class].https_rackup)
-          end
-        end
-
-        ssl_options = OpenSSL::SSL::SSLContext::DEFAULT_PARAMS[:options]
-        ssl_options |= OpenSSL::SSL::OP_CIPHER_SERVER_PREFERENCE if defined?(OpenSSL::SSL::OP_CIPHER_SERVER_PREFERENCE)
-        # This is required to disable SSLv3 on Ruby 1.8.7
-        ssl_options |= OpenSSL::SSL::OP_NO_SSLv2 if defined?(OpenSSL::SSL::OP_NO_SSLv2)
-        ssl_options |= OpenSSL::SSL::OP_NO_SSLv3 if defined?(OpenSSL::SSL::OP_NO_SSLv3)
-        ssl_options |= OpenSSL::SSL::OP_NO_TLSv1 if defined?(OpenSSL::SSL::OP_NO_TLSv1)
-
-        {
-          :app => app,
-          :server => :webrick,
-          :BindAddress => SETTINGS.bind_host,
-          :Port => SETTINGS.https_port,
-          :Logger => ::Proxy::LogBuffer::Decorator.instance,
-          :SSLEnable => true,
-          :SSLVerifyClient => OpenSSL::SSL::VERIFY_PEER,
-          :SSLPrivateKey => load_ssl_private_key(SETTINGS.ssl_private_key),
-          :SSLCertificate => load_ssl_certificate(SETTINGS.ssl_certificate),
-          :SSLCACertificateFile => SETTINGS.ssl_ca_file,
-          :SSLOptions => ssl_options,
-          :daemonize => false
-        }
+        return nil
       end
+
+      app = Rack::Builder.new do
+        ::Proxy::Plugins.instance.select {|p| p[:state] == :running && p[:https_enabled]}.each do |p|
+          instance_eval(p[:class].https_rackup)
+        end
+      end
+
+      ssl_options = OpenSSL::SSL::SSLContext::DEFAULT_PARAMS[:options]
+      ssl_options |= OpenSSL::SSL::OP_CIPHER_SERVER_PREFERENCE if defined?(OpenSSL::SSL::OP_CIPHER_SERVER_PREFERENCE)
+      # This is required to disable SSLv3 on Ruby 1.8.7
+      ssl_options |= OpenSSL::SSL::OP_NO_SSLv2 if defined?(OpenSSL::SSL::OP_NO_SSLv2)
+      ssl_options |= OpenSSL::SSL::OP_NO_SSLv3 if defined?(OpenSSL::SSL::OP_NO_SSLv3)
+      ssl_options |= OpenSSL::SSL::OP_NO_TLSv1 if defined?(OpenSSL::SSL::OP_NO_TLSv1)
+
+      {
+        :app => app,
+        :server => :webrick,
+        :BindAddress => SETTINGS.bind_host,
+        :Port => SETTINGS.https_port,
+        :Logger => ::Proxy::LogBuffer::Decorator.instance,
+        :SSLEnable => true,
+        :SSLVerifyClient => OpenSSL::SSL::VERIFY_PEER,
+        :SSLPrivateKey => load_ssl_private_key(SETTINGS.ssl_private_key),
+        :SSLCertificate => load_ssl_certificate(SETTINGS.ssl_certificate),
+        :SSLCACertificateFile => SETTINGS.ssl_ca_file,
+        :SSLOptions => ssl_options,
+        :daemonize => false
+      }
     end
 
     def load_ssl_private_key(path)
@@ -119,17 +123,18 @@ module Proxy
     end
 
     def launch
-      ::Proxy::PluginInitializer.new(::Proxy::Plugins.instance).initialize_plugins
-
-      http_app = http_app()
-      https_app = https_app()
-      raise Exception.new("Both http and https are disabled, unable to start.") if http_app.nil? && https_app.nil?
+      raise Exception.new("Both http and https are disabled, unable to start.") unless http_enabled? || https_enabled?
 
       if SETTINGS.daemon
         check_pid
         Process.daemon
         write_pid
       end
+
+      ::Proxy::PluginInitializer.new(::Proxy::Plugins.instance).initialize_plugins
+
+      http_app = http_app()
+      https_app = https_app()
 
       t1 = Thread.new { webrick_server(https_app).start } unless https_app.nil?
       t2 = Thread.new { webrick_server(http_app).start } unless http_app.nil?
