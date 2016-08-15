@@ -6,9 +6,7 @@ module ::Proxy::Dns::Libvirt
 
     default_settings :url => "qemu:///system", :network => 'default'
 
-    after_activation do
-      require 'dns_libvirt/dns_libvirt_main'
-      require 'dns_libvirt/dependencies'
-    end
+    load_classes ::Proxy::Dns::Libvirt::PluginConfiguration
+    load_dependency_injection_wirings ::Proxy::Dns::Libvirt::PluginConfiguration
   end
 end

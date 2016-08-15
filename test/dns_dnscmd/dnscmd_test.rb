@@ -20,15 +20,6 @@ class DnsCmdTest < Test::Unit::TestCase
                                     "TrustAnchors"])
   end
 
-  def test_dnscmd_provider_initialization
-    Proxy::Dns::Dnscmd::Plugin.load_test_settings(:dns_server => 'a_server')
-    Proxy::Dns::Plugin.load_test_settings(:dns_ttl => 999)
-    server = Proxy::Dns::Dnscmd::Record.new
-
-    assert_equal "a_server", server.server
-    assert_equal 999, server.ttl
-  end
-
   def test_create_a_record_with_longest_zone_match
     Proxy::Dns::Dnscmd::Record.any_instance.expects(:a_record_conflicts).with('host.foo.bar.domain.local', '192.168.33.33').returns(-1)
     Proxy::Dns::Dnscmd::Record.any_instance.expects(:execute).with('/RecordAdd bar.domain.local host.foo.bar.domain.local. A 192.168.33.33', anything).returns(true)
@@ -109,7 +100,7 @@ class DnsCmdTest < Test::Unit::TestCase
   end
 
   def test_dns_zone_matches_sole_available_zone
-    assert_equal('sole.domain', Proxy::Dns::Dnscmd::Record.new.match_zone('host.foo.bar.sole.domain', ["sole.domain"]))
+    assert_equal('sole.domain', Proxy::Dns::Dnscmd::Record.new('server', 999).match_zone('host.foo.bar.sole.domain', ["sole.domain"]))
   end
 
   def test_dns_non_authoritative_zone_raises_exception
@@ -151,6 +142,6 @@ Command completed successfully.'.split("\n")
       "f.e.e.d.8.b.d.0.1.0.0.2.ip6.arpa",
       "bar.domain.local",
       "domain.local",
-      "TrustAnchors"], Proxy::Dns::Dnscmd::Record.new.enum_zones
+      "TrustAnchors"], Proxy::Dns::Dnscmd::Record.new('server', 999).enum_zones
   end
 end

@@ -1,4 +1,5 @@
 require 'test_helper'
+require 'dns_libvirt/plugin_configuration'
 require 'dns_libvirt/dns_libvirt_plugin'
 require 'dns_libvirt/dns_libvirt_main'
 
@@ -23,23 +24,7 @@ class DnsLibvirtProviderTest < Test::Unit::TestCase
 XMLFIXTURE
     @libvirt_network = mock()
     @libvirt_network.stubs(:dump_xml).returns(fixture)
-    @subject = Proxy::Dns::Libvirt::Record.new(
-      :libvirt_network => @libvirt_network
-    )
-  end
-
-  def test_default_settings
-    ::Proxy::Dns::Libvirt::Plugin.load_test_settings({})
-    assert_equal 'default', Proxy::Dns::Libvirt::Plugin.settings.network
-  end
-
-  def test_provider_initialization
-    ::Proxy::Dns::Libvirt::Plugin.load_test_settings(:network => 'some_network')
-    assert_equal "some_network", Proxy::Dns::Libvirt::Record.new(:libvirt_network => @libvirt_network).network
-  end
-
-  def test_libvirt_network_class
-    assert_equal ::Proxy::Dns::Libvirt::LibvirtDNSNetwork, ::Proxy::Dns::Libvirt::Record.new.libvirt_network.class
+    @subject = Proxy::Dns::Libvirt::Record.new('default', @libvirt_network)
   end
 
   def test_add_a_record

@@ -6,9 +6,7 @@ module ::Proxy::Dns::Dnscmd
 
     requires :dns, ::Proxy::VERSION
 
-    after_activation do
-      require 'dns_dnscmd/dns_dnscmd_main'
-      require 'dns_dnscmd/dependencies'
-    end
+    load_classes ::Proxy::Dns::Dnscmd::PluginConfiguration
+    load_dependency_injection_wirings ::Proxy::Dns::Dnscmd::PluginConfiguration
   end
 end

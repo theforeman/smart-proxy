@@ -7,9 +7,6 @@ module Proxy::Dns
     default_settings :use_provider => 'dns_nsupdate', :dns_ttl => 86_400
     plugin :dns, ::Proxy::VERSION
 
-    after_activation do
-      require 'dns_common/dependency_injection/container'
-      require 'dns_common/dependency_injection/dependencies'
-    end
+    load_classes ::Proxy::Dns::ConfigurationLoader
   end
 end

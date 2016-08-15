@@ -1,14 +1,12 @@
 require 'open3'
-require 'dns_common/dns_common'
 
 module Proxy::Dns::Dnscmd
   class Record < ::Proxy::Dns::Record
     include Proxy::Log
     include Proxy::Util
 
-    def initialize(a_server = nil, a_ttl = nil)
-      super(a_server || ::Proxy::Dns::Dnscmd::Plugin.settings.dns_server,
-            a_ttl || ::Proxy::Dns::Plugin.settings.dns_ttl)
+    def initialize(a_server, a_ttl)
+      super(a_server, a_ttl)
     end
 
     def create_a_record(fqdn, ip)
