@@ -13,14 +13,18 @@ module ::Proxy::DHCP::ISC
 
     def monitor_leases
       @notifier = INotify::Notifier.new
-      @notifier.watch(leases_filename, :modify) do |event|
-        logger.debug "caught :modify event on #{event.absolute_name}"
-        observer.leases_modified
-      end
-      @notifier.watch(File.dirname(leases_filename), :moved_to) do |event|
+      @notifier.watch(File.dirname(leases_filename), :modify, :moved_to) do |event|
         if event.absolute_name == leases_filename
-          logger.debug "caught :moved_to event on #{event.absolute_name}"
-          observer.leases_recreated
+          event.flags.each do |flag|
+            case flag
+            when :modify
+              logger.debug "caught :modify event on #{event.absolute_name}."
+              observer.leases_modified
+            when :moved_to
+              logger.debug "caught :moved_to event on #{event.absolute_name}."
+              observer.leases_recreated
+            end
+          end
         end
       end
 
