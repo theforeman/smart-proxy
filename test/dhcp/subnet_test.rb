@@ -100,4 +100,18 @@ class Proxy::DHCPSubnetTest < Test::Unit::TestCase
   ensure
     File.delete('test/tmp/foreman-proxy_192.168.0.0_24.tmp')
   end
+
+  def test_options_should_be_a_hash
+    assert_kind_of Hash, @subnet.options
+  end
+
+  def test_equality
+    assert_equal ::Proxy::DHCP::Subnet.new(@network, @netmask, :domain_name => 'a.b.c'), ::Proxy::DHCP::Subnet.new(@network, @netmask, :domain_name => 'a.b.c')
+    assert_not_equal ::Proxy::DHCP::Subnet.new(@network, @netmask, :domain_name => 'a.b.c'),
+                     ::Proxy::DHCP::Subnet.new('1.1.1.0', @netmask, :domain_name => 'a.b.c')
+    assert_not_equal ::Proxy::DHCP::Subnet.new(@network, @netmask, :domain_name => 'a.b.c'),
+                     ::Proxy::DHCP::Subnet.new(@network, '255.255.255.128', :domain_name => 'a.b.c')
+    assert_not_equal ::Proxy::DHCP::Subnet.new(@network, @netmask, :domain_name => 'a.b.c'),
+                     ::Proxy::DHCP::Subnet.new(@network, @netmask, :domain_name => 'd.e.f')
+  end
 end

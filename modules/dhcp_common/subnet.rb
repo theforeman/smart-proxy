@@ -137,12 +137,12 @@ module Proxy::DHCP
       end.map(&:to_s) - [network, broadcast]
     end
 
-    def inspect
-      self
-    end
-
     def <=> other
       network <=> other.network
+    end
+
+    def ==(other)
+      network == other.network && netmask == other.netmask && options == other.options
     end
 
     def broadcast
