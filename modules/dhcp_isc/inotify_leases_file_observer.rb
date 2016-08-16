@@ -13,21 +13,26 @@ module ::Proxy::DHCP::ISC
 
     def monitor_leases
       @notifier = INotify::Notifier.new
-      @notifier.watch(File.dirname(leases_filename), :all_events) do |event|
-        event.flags.each do |flag|
-          case flag
-          when :modify
-            logger.debug "caught :modify event on #{event.absolute_name}."
-            observer.leases_modified if event.absolute_name == leases_filename
-          when :move
-            next unless event.absolute_name == leases_filename
-            logger.debug "caught :move event on #{event.absolute_name}."
-            observer.leases_recreated
+      @notifier.watch(File.dirname(leases_filename), :modify, :moved_to) do |event|
+        if event.absolute_name == leases_filename
+          event.flags.each do |flag|
+            case flag
+            when :modify
+              logger.debug "caught :modify event on #{event.absolute_name}."
+              observer.leases_modified
+            when :moved_to
+              logger.debug "caught :moved_to event on #{event.absolute_name}."
+              observer.leases_recreated
+            end
           end
         end
       end
 
       @notifier.run
+    rescue INotify::QueueOverflowError => e
+      logger.warn "Queue overflow occured when monitoring #{leases_filename}, restarting monitoring", e
+      observer.leases_recreated
+      retry
     rescue Exception => e
       logger.error "Error occured when monitoring #{leases_filename}", e
     end
