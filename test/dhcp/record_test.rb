@@ -1,6 +1,7 @@
 require 'test_helper'
 require 'dhcp_common/dhcp_common'
-require 'dhcp_common/server'
+require 'dhcp_common/record'
+require 'dhcp_common/subnet'
 
 class Proxy::DHCPRecordTest < Test::Unit::TestCase
 
@@ -46,5 +47,18 @@ class Proxy::DHCPRecordTest < Test::Unit::TestCase
     assert_raise Proxy::Validations::Error do
       Proxy::DHCP::Record.new(:subnet => subnet, :ip => @ip, :mac => @mac)
     end
+  end
+
+  def test_equality
+    assert_equal Proxy::DHCP::Record.new(:subnet => @subnet, :ip => @ip, :mac => @mac, :option1 => 'one'),
+                 Proxy::DHCP::Record.new(:subnet => @subnet, :ip => @ip, :mac => @mac, :option1 => 'one')
+    assert_not_equal Proxy::DHCP::Record.new(:subnet => @subnet, :ip => @ip, :mac => @mac, :option1 => 'one'),
+                     Proxy::DHCP::Record.new(:subnet => @subnet, :ip => '1.1.1.1', :mac => @mac, :option1 => 'one')
+    assert_not_equal Proxy::DHCP::Record.new(:subnet => @subnet, :ip => @ip, :mac => @mac, :option1 => 'one'),
+                     Proxy::DHCP::Record.new(:subnet => @subnet, :ip => @ip, :mac => '00:01:02:03:04:05', :option1 => 'one')
+    assert_not_equal Proxy::DHCP::Record.new(:subnet => @subnet, :ip => @ip, :mac => @mac, :option1 => 'one'),
+                     Proxy::DHCP::Record.new(:subnet => @subnet, :ip => @ip, :mac => @mac, :option2 => 'two')
+    assert_not_equal Proxy::DHCP::Record.new(:subnet => @subnet, :ip => @ip, :mac => @mac, :option1 => 'one'),
+                     Proxy::DHCP::Record.new(:subnet => ::Proxy::DHCP::Subnet.new("192.168.0.0","255.255.255.128"), :ip => @ip, :mac => @mac, :option1 => 'one')
   end
 end

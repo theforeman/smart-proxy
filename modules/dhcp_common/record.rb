@@ -26,10 +26,6 @@ module Proxy::DHCP
       "#{ip} / #{mac}"
     end
 
-    def inspect
-      self
-    end
-
     def [] opt
       options[opt.to_sym]
     rescue
@@ -43,6 +39,10 @@ module Proxy::DHCP
 
     def <=>(other)
       self.ip <=> other.ip
+    end
+
+    def ==(other)
+      options == other.options
     end
 
     # compare between incoming request and our existing record
