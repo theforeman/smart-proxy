@@ -13,10 +13,6 @@ class Proxy::DHCPSubnetTest < Test::Unit::TestCase
     assert_equal @subnet.to_s, "#{@network}/#{@netmask}"
   end
 
-  def test_should_have_a_logger
-    assert_respond_to @subnet, :logger
-  end
-
   def test_should_not_save_invalid_network_addresses
     assert_raise Proxy::Validations::Error do
       Proxy::DHCP::Subnet.new("1..1.1", @netmask)
@@ -61,10 +57,6 @@ class Proxy::DHCPSubnetTest < Test::Unit::TestCase
     assert_raise Proxy::Validations::Error do
       Proxy::DHCP::Subnet.new(@network, netmask)
     end
-  end
-
-  def test_options_should_be_a_hash
-    assert_kind_of Hash, @subnet.options
   end
 
   def test_subnet_includes_ip
