@@ -15,18 +15,10 @@ class Proxy::DHCPRecordTest < Test::Unit::TestCase
     assert_kind_of Proxy::DHCP::Subnet, @record.subnet
   end
 
-  def test_should_return_a_record_kind
-    assert_equal @record.kind, "record"
-  end
-
   def test_should_convert_to_string
     ip = "1.1.1.1"
     mac = "aa:bb:cc:dd:ea:ff"
     assert_equal Proxy::DHCP::Record.new(:subnet => @subnet, :ip => ip, :mac => mac).to_s, "#{ip} / #{mac}"
-  end
-
-  def test_should_have_a_logger
-    assert_respond_to @record, :logger
   end
 
   def test_should_not_save_invalid_ip_addresses
@@ -54,9 +46,5 @@ class Proxy::DHCPRecordTest < Test::Unit::TestCase
     assert_raise Proxy::Validations::Error do
       Proxy::DHCP::Record.new(:subnet => subnet, :ip => @ip, :mac => @mac)
     end
-  end
-
-  def test_options_should_be_a_hash
-    assert_kind_of Hash, @record.options
   end
 end
