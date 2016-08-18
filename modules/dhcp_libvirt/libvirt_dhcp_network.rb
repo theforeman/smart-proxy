@@ -3,6 +3,8 @@ require 'libvirt_common/libvirt_network'
 
 module ::Proxy::DHCP::Libvirt
   class LibvirtDHCPNetwork < Proxy::LibvirtNetwork
+    attr_accessor :index_v4, :index_v6
+
     def dhcp_leases
       find_network.dhcp_leases
     rescue ArgumentError
@@ -12,15 +14,41 @@ module ::Proxy::DHCP::Libvirt
     end
 
     def add_dhcp_record(record)
-      nametag = "name=\"#{record.name}\"" if record.name
-      xml = "<host mac=\"#{record.mac}\" ip=\"#{record.ip}\" #{nametag}/>"
-      network_update ::Libvirt::Network::UPDATE_COMMAND_ADD_LAST, ::Libvirt::Network::NETWORK_SECTION_IP_DHCP_HOST, xml
+      xml = change_xml record
+      network_update ::Libvirt::Network::UPDATE_COMMAND_ADD_LAST, ::Libvirt::Network::NETWORK_SECTION_IP_DHCP_HOST, xml, index(record)
     end
 
     def del_dhcp_record(record)
+      xml = change_xml record
+      network_update ::Libvirt::Network::UPDATE_COMMAND_DELETE, ::Libvirt::Network::NETWORK_SECTION_IP_DHCP_HOST, xml, index(record)
+    end
+
+    private
+
+    def index(record)
+      record.v6? ? index_v6 : index_v4
+    end
+
+    def change_xml(record)
       nametag = "name=\"#{record.name}\"" if record.name
-      xml = "<host mac=\"#{record.mac}\" ip=\"#{record.ip}\" #{nametag}/>"
-      network_update ::Libvirt::Network::UPDATE_COMMAND_DELETE, ::Libvirt::Network::NETWORK_SECTION_IP_DHCP_HOST, xml
+      change_record(record, nametag)
+    end
+
+    def change_record(record, nametag)
+      if record.v6?
+        change_dhcpv6_record record, nametag
+      else
+        change_dhcpv4_record record, nametag
+      end
+    end
+
+    def change_dhcpv6_record(record, nametag)
+      idtag = "id=\"#{record.id}\"" if record.id
+      "<host #{idtag} ip=\"#{record.ip}\" #{nametag}/>"
+    end
+
+    def change_dhcpv4_record(record, nametag)
+     "<host mac=\"#{record.mac}\" ip=\"#{record.ip}\" #{nametag}/>"
     end
   end
 end
