@@ -1,3 +1,16 @@
+2016-08-24	Dominic Cleal <dominic@cleal.org>
+	* Release 1.12.2
+
+2016-08-23	Ivan Nečas <inecas@redhat.com>
+	* Fixes #10581 - ensure string from IPA XML-RPM is marked as UTF8
+
+2016-08-23	Guido Günther <agx@sigxcpu.org>
+	* Fixes #15944 - Make it obvious that messages come from DHCP
+
+2016-08-23	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #15865 - pin json_pure to < 2.0.0 for RUBY_VERSION < 2.0.0
+	* Fixes #15791 - no more intermittent test failures in ms dhcp test
+
 2016-07-22	Dominic Cleal <dominic@cleal.org>
 	* Release 1.12.1
 	* refs #13575 - update test IP ranges
