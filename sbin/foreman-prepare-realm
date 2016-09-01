@@ -22,7 +22,7 @@ die()   { echo "$@" 1>&2; exit 1; }
 [ ! -z $1 ] || usage
 [ ! -z $2 ] || usage
 
-SERVER=$(grep server /etc/ipa/default.conf | cut -f2 -d"=")
+SERVER=$(grep '^server\s*=' /etc/ipa/default.conf | cut -f2 -d"=")
 
 if ipa --version 2>&1 | grep -q 'VERSION'
 then
