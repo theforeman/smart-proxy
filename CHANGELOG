@@ -1,3 +1,86 @@
+2016-09-01	Dmitry Vasilets <pronix.service@gmail.com>
+	* Fixes #16410 - handle several instances of "server" in ipa config
+
+2016-08-18	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #16099 - in daemon mode module threads continue to execute
+	* Fixes #16122 - added equality method
+	* Fixes #16145 - Removed unnecessary tests for common dhcp entities
+
+2016-08-17	Dominic Cleal <dominic@cleal.org>
+	* refs #16021 - monitor modifications on entire directory
+	* fixes #16021 - restart inotify monitoring on queue overflow
+
+2016-08-16	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #15942 - dns module and providers use updated di config.
+
+2016-08-15	Konstantin Orekhov <korekhov@ebaysf.com>
+	* fixes #16009 - added support for native iPXE variant
+
+2016-08-15	Ivan Nečas <inecas@redhat.com>
+	* Fixes #10581 - ensure string from IPA XML-RPM is marked as UTF8
+
+2016-08-09	Timo Goebel <timo.goebel@dm.de>
+	* fixes #15985 - Pxegrub2 tftp filename prefix
+
+2016-08-04	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #15959 - removed recursive require
+
+2016-08-04	Guido Günther <agx@sigxcpu.org>
+	* Fixes #15944 - Make it obvious that messages come from DHCP
+
+2016-07-29	Lukas Zapletal <lzap+git@redhat.com>
+	* Fixes #15864 - Pxelinux alias variant for Syslinux
+
+2016-07-29	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #2687: Leases file is no longer parsed on every request
+	* Fixes #15865 - pin json_pure to < 2.0.0 for RUBY_VERSION < 2.0.0
+
+2016-07-25	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #15791 - no more intermittent test failures in ms dhcp test
+
+2016-07-21	Guido Günther <agx@sigxcpu.org>
+	* fixes #13575 - Don't fail on missing PXEClient dhcp opt
+
+2016-07-05	Paul Kelly <paul.ian.kelly@gmail.com>
+	* fixes #15572 - incorrect missing vendor class check in native ms
+
+2016-07-01	Paul Kelly <paul.ian.kelly@gmail.com>
+	* fixes #15452 - disable DDNS updates for Native MS DHCP provider
+
+2016-06-28	Paul Kelly <paul.ian.kelly@gmail.com>
+	* fixes #1172 - proxy should return leases and reservations
+	* fixes #15244 - provide a CNAME api
+
+2016-06-20	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #15434 - pin ruby-libvirt to > 0.6.0
+
+2016-06-13	Paul Kelly <paul.ian.kelly@gmail.com>
+	* fixes #15373 - windows ping called with very small timeout
+
+2016-06-09	Paul Kelly <paul.ian.kelly@gmail.com>
+	* fixes #15348 - close check is now correct for std_out and std_err
+
+2016-06-08	Jack Watroba <jack@build.com>
+	* fixes #15341 - case sensitivity issues with dnscmd
+
+2016-06-07	Dominic Cleal <dominic@cleal.org>
+	* fixes #15323 - correct Puppet SSH provider name
+
+2016-06-06	Dominic Cleal <dominic@cleal.org>
+	* fixes #15300 - change rubygems.org API endpoint to HTTPS
+
+2016-06-06	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #15025 - do not show foreman_proxy startup messages.
+
+2016-06-03	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #15240 - empty arrays no longer trigger validation failures
+
+2016-06-02	Lukas Zapletal <lzap+git@redhat.com>
+	* Fixes #12633 - Pxegrub2 variant and multiple configs
+
+2016-05-31	Dominic Cleal <dominic@cleal.org>
+	* Bump version to 1.13-develop
+
 2016-05-23	Dmitri Dolguikh <dmitri@appliedlogic.ca>
 	* Fixes #15130 - use puppet apiv2 when 'environmentpath' is present
 	* Fixes #15110 - used default setting values are marked now.
