@@ -1,3 +1,9 @@
+2016-09-20	Dominic Cleal <dominic@cleal.org>
+	* Release 1.12.3
+
+2016-09-19	Dmitry Vasilets <pronix.service@gmail.com>
+	* Fixes #16410 - handle several instances of "server" in ipa config
+
 2016-08-24	Dominic Cleal <dominic@cleal.org>
 	* Release 1.12.2
 
