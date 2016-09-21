@@ -13,11 +13,12 @@ module Proxy::Puppet
       @ssl_key = ssl_key
     end
 
-    def send_request(path)
-      uri              = URI.parse(url)
-      http             = Net::HTTP.new(uri.host, uri.port)
-      http.use_ssl     = uri.scheme == 'https'
+    def send_request(path, timeout = 60, additional_headers = {})
+      uri = URI.parse(url)
+      http = Net::HTTP.new(uri.host, uri.port)
+      http.use_ssl = uri.scheme == 'https'
       http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+      http.read_timeout = timeout
 
       if http.use_ssl?
         if ssl_ca && !ssl_ca.to_s.empty?
@@ -34,6 +35,7 @@ module Proxy::Puppet
       path = [uri.path.chomp("/"), path.start_with?("/") ? path.slice(1..-1) : path].join('/')
       req = Net::HTTP::Get.new(path)
       req.add_field('Accept', 'application/json')
+      additional_headers.each_key {|k| req[k] = additional_headers[k]}
       http.request(req)
     end
 
