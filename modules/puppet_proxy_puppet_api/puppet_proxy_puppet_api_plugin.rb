@@ -11,5 +11,7 @@ module Proxy::PuppetApi
 
     validate :puppet_url, :url => true
     validate_readable :puppet_ssl_ca, :puppet_ssl_cert, :puppet_ssl_key
+
+    start_services :class_cache_initializer
   end
 end

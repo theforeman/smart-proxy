@@ -26,3 +26,10 @@ class Proxy::PuppetApi::V3ClassesRetriever
     raise e
   end
 end
+
+# A dummy noop service
+class Proxy::PuppetApi::NoopClassesCacheInitializer
+  def start_service
+    # nothing to do, we don't cache classes in this implementation
+  end
+end
