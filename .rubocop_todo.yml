@@ -217,13 +217,6 @@ Style/FormatString:
 Style/GuardClause:
   Enabled: false
 
-# Offense count: 723
-# Cop supports --auto-correct.
-# Configuration parameters: SupportedStyles, UseHashRocketsWithSymbolValues.
-# SupportedStyles: ruby19, ruby19_no_mixed_keys, hash_rockets
-Style/HashSyntax:
-  EnforcedStyle: hash_rockets
-
 # Offense count: 9
 # Cop supports --auto-correct.
 # Configuration parameters: MaxLineLength.
