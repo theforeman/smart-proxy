@@ -148,6 +148,14 @@ module Proxy
         host.bmc.lan.netmask
       end
 
+      def sensors
+        sensors = host.sensors
+        {
+          :fan => sensors.fanlist,
+          :temp => sensors.templist
+        }
+      end
+
     end
   end
 end

@@ -108,6 +108,11 @@ module Proxy
         raise NotImplementedError.new
       end
 
+      # return sensors data from the bmc device
+      def sensors
+        raise NotImplementedError.new
+      end
+
       protected
       attr_reader :host
     end

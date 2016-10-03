@@ -35,7 +35,7 @@ module Proxy::BMC
 
     # returns host operations
     get "/:host" do
-      { :actions => %w[chassis lan test] }.to_json
+      { :actions => %w[chassis lan test sensors] }.to_json
     end
 
     # runs a test against the bmc device and returns true if the connection was successful
@@ -240,6 +240,18 @@ module Proxy::BMC
       end
     end
 
+    get "/:host/sensors" do
+
+      bmc_setup
+      begin
+        @bmc.sensors.to_json
+      rescue NotImplementedError => e
+        log_halt 501, e
+      rescue => e
+        log_halt 400, e
+      end
+    end
+
     # returns a provider type by validating the given type.  If for some reason the type is invalid
     # this function will try and find the first available provider that could be used.  If there are no providers available
     # lets halt and notify the user.
@@ -303,6 +315,7 @@ module Proxy::BMC
     # if the user does not set the content type to application/json we will just assume there is garbage in the body
     # also if the user decides to do http://127.0.0.1/bmc/192.168.1.6/test?bmc_provider=freeipmi as well as pass in
     # a json encode body with the parameters, all of these items will be merged together
+
     def body_parameters
       @body_parameters ||= parse_json_body.merge(params)
     end
