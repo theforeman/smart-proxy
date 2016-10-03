@@ -5,5 +5,5 @@ group :puppet_proxy_legacy do
 end
 
 group :puppet_proxy_puppet_api do
-  gem 'concurrent-ruby', '~> 1.0'
+  gem 'concurrent-ruby', '~> 1.0', require: 'concurrent'
 end
