@@ -51,29 +51,31 @@ module Proxy::Dns::Nsupdate
       nsupdate_disconnect
       nil
     ensure
-      @om.close unless @om.nil? || @om.closed?
+      nsupdate_close
     end
 
     def remove_a_record(fqdn)
+      get_ipv4_address!(fqdn)
       do_remove(fqdn, "A")
     end
 
     def remove_aaaa_record(fqdn)
+      get_ipv6_address!(fqdn)
       do_remove(fqdn, "AAAA")
     end
 
     def remove_ptr_record(ip)
+      get_name!(ip)
       do_remove(ip, "PTR")
     end
 
     def do_remove(id, type)
       nsupdate_connect
-
-      raise Proxy::Dns::NotFound.new("Cannot find DNS entry for #{id}") unless dns_find(id)
       nsupdate "update delete #{id} #{type}"
-
       nsupdate_disconnect
       nil
+    ensure
+      nsupdate_close
     end
 
     def nsupdate_args
@@ -101,6 +103,10 @@ module Proxy::Dns::Nsupdate
         logger.debug "nsupdate: errors\n" + status.join("\n")
         raise Proxy::Dns::Error.new("Update errors: #{status.join("\n")}")
       end
+    end
+
+    def nsupdate_close
+      @om.close unless @om.nil? || @om.closed?
     end
 
     def nsupdate cmd
