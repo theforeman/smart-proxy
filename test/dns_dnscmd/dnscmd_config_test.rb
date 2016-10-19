@@ -16,10 +16,11 @@ class DnsCmdWiringTest < Test::Unit::TestCase
   end
 
   def test_dns_provider_wiring
-    @config.load_dependency_injection_wirings(@container, :dns_server => 'dnscmd_test', :dns_ttl => 999)
+    @config.load_dependency_injection_wirings(@container, :dns_server => 'dnscmd_test', :dns_ttl => 999, :dns_ptr_rewritemap => {'a' => 'b'})
     provider = @container.get_dependency(:dns_provider)
 
     assert_equal 'dnscmd_test', provider.server
     assert_equal 999, provider.ttl
+    assert_equal ({'a' => 'b'}), provider.ptr_rewritemap
   end
 end

@@ -5,3 +5,7 @@
 
 # use this setting if you are managing a dns server which is not localhost though this proxy
 #:dns_server: dns.domain.com
+# use this setting if you have classless reverse delegation as described in rfc2317
+#:dns_ptr_rewritemap:
+#   '2\.0\.192\.in-addr\.arpa$': '2.0.192.in-addr.yourdomain.tld'
+#   '100\.51\.198\.in-addr\.arpa$': '128/25.\1'

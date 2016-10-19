@@ -7,11 +7,14 @@ module Proxy::Dns
   class Collision < RuntimeError; end
 
   class Record
-    attr_reader :server, :ttl
+    attr_reader :server, :ttl, :ptr_rewritemap
 
-    def initialize(server = nil, ttl = nil)
+    def initialize(server = nil, ttl = nil, ptr_rewritemap = nil)
       @server = server || "localhost"
       @ttl    = ttl || "86400"
+      @ptr_rewritemap = ptr_rewritemap || {}
+      # call the method once so it fails during init if the map is broken
+      rewrite_ptr('')
     end
 
     def resolver
@@ -36,6 +39,16 @@ module Proxy::Dns
      else
        raise Proxy::Dns::Error.new("Not a PTR record: '#{ptr}'")
      end
+    end
+
+    def rewrite_ptr(a_ptr)
+      return a_ptr if ptr_rewritemap.nil?
+      # copy string so we don't mess up caller's version
+      ptr = String.new a_ptr
+      ptr_rewritemap.each_pair do |pattern,replacement|
+        ptr.gsub!(Regexp.new(pattern), replacement)
+      end
+      return ptr
     end
 
     # conflict methods return values:
