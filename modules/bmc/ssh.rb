@@ -60,6 +60,36 @@ module Proxy
       def powercycle
         ssh(@powercycle)
       end
+
+      def ip
+        host
+      end
+
+      # the following are dummy implementations
+
+      def mac
+        ''
+      end
+
+      def gateway
+        ''
+      end
+
+      def netmask
+        ''
+      end
+
+      def bootpxe(reboot=false, persistent=false)
+      end
+
+      def bootdisk(reboot=false, persistent=false)
+      end
+
+      def bootbios(reboot=false, persistent=false)
+      end
+
+      def bootcdrom(reboot=false, persistent=false)
+      end
     end
   end
 end

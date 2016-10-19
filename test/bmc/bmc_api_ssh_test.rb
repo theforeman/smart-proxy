@@ -46,4 +46,52 @@ class BmcApiShellTest < Test::Unit::TestCase
     put "/#{@host}/chassis/power/cycle", @args
     assert_equal 200, last_response.status
   end
+
+  def test_lan_ip
+    Proxy::BMC::SSH.any_instance.expects(:ip).returns('')
+    get "/#{@host}/lan/ip", @args
+    assert_equal 200, last_response.status
+  end
+
+  def test_lan_mac
+    Proxy::BMC::SSH.any_instance.expects(:mac).returns('')
+    get "/#{@host}/lan/mac", @args
+    assert_equal 200, last_response.status
+  end
+
+  def test_lan_gateway
+    Proxy::BMC::SSH.any_instance.expects(:gateway).returns('')
+    get "/#{@host}/lan/gateway", @args
+    assert_equal 200, last_response.status
+  end
+
+  def test_lan_netmask
+    Proxy::BMC::SSH.any_instance.expects(:netmask).returns('')
+    get "/#{@host}/lan/netmask", @args
+    assert_equal 200, last_response.status
+  end
+
+  def test_chassis_config_bootdevice_pxe
+    Proxy::BMC::SSH.any_instance.expects(:bootpxe).returns('')
+    put "/#{@host}/chassis/config/bootdevice/pxe", @args
+    assert_equal 200, last_response.status
+  end
+
+  def test_chassis_config_bootdevice_disk
+    Proxy::BMC::SSH.any_instance.expects(:bootdisk).returns('')
+    put "/#{@host}/chassis/config/bootdevice/disk", @args
+    assert_equal 200, last_response.status
+  end
+
+  def test_chassis_config_bootdevice_bios
+    Proxy::BMC::SSH.any_instance.expects(:bootbios).returns('')
+    put "/#{@host}/chassis/config/bootdevice/bios", @args
+    assert_equal 200, last_response.status
+  end
+
+  def test_chassis_config_bootdevice_cdrom
+    Proxy::BMC::SSH.any_instance.expects(:bootcdrom).returns('')
+    put "/#{@host}/chassis/config/bootdevice/cdrom", @args
+    assert_equal 200, last_response.status
+  end
 end
