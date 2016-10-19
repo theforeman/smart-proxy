@@ -7,9 +7,9 @@ module Proxy::Dns::Nsupdate
 
     attr_reader :dns_key
 
-    def initialize(a_server, a_ttl, dns_key)
+    def initialize(a_server, a_ttl, a_rewritemap, dns_key)
       @dns_key = dns_key
-      super(a_server, a_ttl)
+      super(a_server, a_ttl, a_rewritemap)
     end
 
     def create_a_record(fqdn, ip)
@@ -41,7 +41,7 @@ module Proxy::Dns::Nsupdate
       when 0 then
         return nil
       else
-        do_create(ptr, fqdn, "PTR")
+        do_create(rewrite_ptr(ptr), fqdn, "PTR")
       end
     end
 
@@ -62,16 +62,15 @@ module Proxy::Dns::Nsupdate
       do_remove(fqdn, "AAAA")
     end
 
-    def remove_ptr_record(ip)
-      do_remove(ip, "PTR")
+    def remove_ptr_record(ptr)
+      do_remove(rewrite_ptr(ptr), "PTR", ptr)
     end
 
-    def do_remove(id, type)
+    def do_remove(id, type, a_realid = nil)
+      realid = a_realid || id
+      raise Proxy::Dns::NotFound.new("Cannot find DNS entry for #{realid}") unless dns_find(realid)
       nsupdate_connect
-
-      raise Proxy::Dns::NotFound.new("Cannot find DNS entry for #{id}") unless dns_find(id)
       nsupdate "update delete #{id} #{type}"
-
       nsupdate_disconnect
       nil
     end

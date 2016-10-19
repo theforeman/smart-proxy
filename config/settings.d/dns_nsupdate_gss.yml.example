@@ -9,3 +9,7 @@
 # Secure Dynamic Updates, or BIND as used in FreeIPA.  Set dns_provider to nsupdate_gss.
 #:dns_tsig_keytab: /usr/share/foreman-proxy/dns.keytab
 #:dns_tsig_principal: DNS/host.example.com@EXAMPLE.COM
+# use this setting if you have classless reverse delegation as described in rfc2317
+#:dns_ptr_rewritemap:
+#   '2\.0\.192\.in-addr\.arpa$': '2.0.192.in-addr.yourdomain.tld'
+#   '100\.51\.198\.in-addr\.arpa$': '128/25.\1'

@@ -5,8 +5,8 @@ module Proxy::Dns::Dnscmd
     include Proxy::Log
     include Proxy::Util
 
-    def initialize(a_server, a_ttl)
-      super(a_server, a_ttl)
+    def initialize(a_server, a_ttl, a_rewritemap)
+      super(a_server, a_ttl, a_rewritemap)
     end
 
     def create_a_record(fqdn, ip)
@@ -61,6 +61,7 @@ module Proxy::Dns::Dnscmd
         when 0
           return nil
         else
+          ptr = rewrite_ptr(ptr)
           zone = match_zone(ptr, enum_zones)
           msg = "Added PTR entry #{ptr} => #{fqdn}"
           cmd = "/RecordAdd #{zone} #{ptr}. PTR #{fqdn}."
@@ -97,7 +98,7 @@ module Proxy::Dns::Dnscmd
     end
 
     def remove_ptr_record(ptr)
-      remove_record(ptr, 'PTR')
+      remove_record(rewrite_ptr(ptr), 'PTR')
     end
 
     def execute cmd, msg=nil, error_only=false

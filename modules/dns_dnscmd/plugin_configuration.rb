@@ -6,7 +6,7 @@ module ::Proxy::Dns::Dnscmd
     end
 
     def load_dependency_injection_wirings(container_instance, settings)
-      container_instance.dependency :dns_provider, lambda {::Proxy::Dns::Dnscmd::Record.new(settings[:dns_server], settings[:dns_ttl]) }
+      container_instance.dependency :dns_provider, lambda {::Proxy::Dns::Dnscmd::Record.new(settings[:dns_server], settings[:dns_ttl], settings[:dns_ptr_rewritemap]) }
     end
   end
 end
