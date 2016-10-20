@@ -8,15 +8,17 @@ module Proxy::Templates
     include Proxy::Log
 
     def get_template(kind, env, params)
-      url = Proxy::Templates::Plugin.settings.template_url
-      proxy_ip = URI.parse(url).host
-      opts = params.clone.merge(:url => url)
+      template_url = Proxy::Templates::Plugin.settings.template_url
+      proxy_ip = URI.parse(template_url).host
+      opts = params.clone.merge(:url => template_url)
       opts.delete("kind")
+      opts.delete("template")
+      opts.delete("hostgroup")
       opts.delete("splat")
       opts.delete("captures")
       proxy_headers = extract_request_headers(env).merge("X-Forwarded-For" => "#{env['REMOTE_ADDR']}, #{proxy_ip}")
       proxy_req = request_factory.create_get("/unattended/#{kind}", opts, proxy_headers)
-      logger.debug "Retrieving a template from %s/%s" % [url, proxy_req.path]
+      logger.debug "Retrieving a template from %s%s" % [uri, proxy_req.path]
       logger.debug "HTTP headers: #{proxy_headers.inspect}"
       res = send_request(proxy_req)
 
