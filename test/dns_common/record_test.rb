@@ -44,7 +44,7 @@ class DnsRecordTest < Test::Unit::TestCase
 
   def test_get_name_with_unknown_ip
     Resolv::DNS.any_instance.expects(:getname).with('127.13.0.2').raises(Resolv::ResolvError)
-    assert_false Proxy::Dns::Record.new.get_name('2.0.13.127.in-addr.arpa')
+    assert_equal false, Proxy::Dns::Record.new.get_name('2.0.13.127.in-addr.arpa')
   end
 
   def test_get_address_with_sideeffect
@@ -64,7 +64,7 @@ class DnsRecordTest < Test::Unit::TestCase
 
   def test_get_address_with_unknown_fqdn
     Resolv::DNS.any_instance.expects(:getaddresses).with('some.host').raises(Resolv::ResolvError)
-    assert_false Proxy::Dns::Record.new.get_address('some.host')
+    assert_equal false, Proxy::Dns::Record.new.get_address('some.host')
   end
 
   def test_get_ipv4_address_with_sideeffects
@@ -84,7 +84,7 @@ class DnsRecordTest < Test::Unit::TestCase
 
   def test_get_ipv4_address_when_no_ipv4_are_present
     Resolv::DNS.any_instance.expects(:getaddresses).with('some.host').returns(ips('2A00:1450:400C:C04::6A'))
-    assert_false Proxy::Dns::Record.new.get_ipv4_address('some.host')
+    assert_equal false, Proxy::Dns::Record.new.get_ipv4_address('some.host')
   end
 
   def test_get_ipv6_address_with_sideeffects
@@ -104,7 +104,7 @@ class DnsRecordTest < Test::Unit::TestCase
 
   def test_get_ipv6_address_when_no_ipv6_are_present
     Resolv::DNS.any_instance.expects(:getaddresses).with('some.host').returns(ips('127.13.0.2'))
-    assert_false Proxy::Dns::Record.new.get_ipv6_address('some.host')
+    assert_equal false, Proxy::Dns::Record.new.get_ipv6_address('some.host')
   end
 
   def test_dns_find_key_not_found
