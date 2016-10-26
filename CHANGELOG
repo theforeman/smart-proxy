@@ -1,3 +1,12 @@
+2016-10-26	Dominic Cleal <dominic@cleal.org>
+	* Release 1.13.1
+
+2016-10-25	Dominic Cleal <dominic@cleal.org>
+	* refs #16964 - replace assert_false for Ruby 1.8.7 test-unit
+
+2016-10-25	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #16964 - Proxy::Dns::Record#dns_find works with ipv6 params
+
 2016-10-05	Dominic Cleal <dominic@cleal.org>
 	* Release 1.13.0
 
