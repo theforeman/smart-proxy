@@ -1,18 +1,35 @@
 require 'test_helper'
 require 'json'
+require 'tftp/plugin_configuration'
 require 'tftp/tftp_plugin'
+require 'tftp/dependency_injection'
+require 'tftp/server'
 require 'tftp/tftp_api'
+require 'tftp/http_downloads'
 
 ENV['RACK_ENV'] = 'test'
 
 class TftpApiTest < Test::Unit::TestCase
   include Rack::Test::Methods
 
+  class HttpDownloadsForTesting < ::Proxy::TFTP::HttpDownloads; attr_accessor :id_to_download; end
+  class HttpDownloadForTesting < ::Proxy::TFTP::HttpDownload; attr_accessor :status; end
+  class HttpDownloadStatusForTesting < ::Proxy::TFTP::HttpDownload::Status
+    def initialize(length, downloaded, timestamp)
+      super(timestamp)
+      @file_length = length
+      @downloaded = downloaded
+    end
+  end
+
   def app
-    Proxy::TFTP::Api.new
+    app = Proxy::TFTP::Api.new
+    app.helpers.boot_file_downloader = @boot_file_downloader
+    app
   end
 
   def setup
+    @boot_file_downloader = HttpDownloadsForTesting.new('/some/root')
     Proxy::TFTP::Plugin.load_test_settings(:tftproot => "/some/root")
     @args = {
       :pxeconfig => "foo",
@@ -105,10 +122,24 @@ class TftpApiTest < Test::Unit::TestCase
     assert last_response.ok?
   end
 
-  def test_api_can_fetch_boot_file
-    Proxy::TFTP.expects(:fetch_boot_file).with('/some/root/boot/file','http://localhost/file').returns(true)
-    post "/fetch_boot_file", :prefix => '/some/root/boot/file', :path => 'http://localhost/file'
+  def test_api_can_download_boot_file
+    @boot_file_downloader.expects(:download).with('/some/root/boot/file','http://localhost/file').returns('123456')
+    result = post "/fetch_boot_file", :prefix => '/some/root/boot/file', :path => 'http://localhost/file'
     assert last_response.ok?
+    assert_equal '123456', result.body
+  end
+
+  def test_get_download_status
+    status = HttpDownloadStatusForTesting.new(100, 50, now = Time.now)
+    @boot_file_downloader.id_to_download['123456'] = ::Proxy::TFTP::HttpDownload.new('test', 'http://localhost', status)
+    result = get "/fetch_boot_file_status/123456"
+    assert_equal({:file_length => 100, :downloaded => 50, :progress => 50, :timestamp => now, :last_error => nil}.to_json, result.body)
+  end
+
+  def test_get_download_status_returns_404_if_id_is_unknown
+    get "/fetch_boot_file_status/123456"
+    assert_false last_response.ok?
+    assert_equal 404, last_response.status
   end
 
   def test_api_can_get_servername

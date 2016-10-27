@@ -1,11 +1,14 @@
-require 'tftp/server'
 require 'proxy/validations'
 
 module Proxy::TFTP
   class Api < ::Sinatra::Base
+    extend Proxy::TFTP::DependencyInjection
     include ::Proxy::Log
     include ::Proxy::Validations
     helpers ::Proxy::Helpers
+
+    inject_attr :http_downloads, :boot_file_downloader
+
     authorize_with_trusted_hosts
     authorize_with_ssl_client
     VARIANTS = ["Syslinux", "Pxelinux", "Pxegrub", "Pxegrub2", "Ztp", "Poap", "Ipxe"].freeze
@@ -33,7 +36,14 @@ module Proxy::TFTP
     end
 
     post "/fetch_boot_file" do
-      log_halt(400, "TFTP: Failed to fetch boot file: ") {Proxy::TFTP.fetch_boot_file(params[:prefix], params[:path])}
+      log_halt(400, "TFTP: Failed to fetch boot file: ") {boot_file_downloader.download(params[:prefix], params[:path])}
+    end
+
+    get "/fetch_boot_file_status/:id" do |id|
+      content_type :json
+      status = boot_file_downloader.status(id)
+      log_halt 404, "Could not find status for download '#{id}'" if status.nil?
+      status.to_hash.to_json
     end
 
     post "/:variant/create_default" do |variant|

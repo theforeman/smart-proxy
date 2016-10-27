@@ -135,22 +135,4 @@ module Proxy::TFTP
       ["#{pxeconfig_dir}/01-"+mac.gsub(/:/,"-").downcase+".ipxe"]
     end
   end
- 
-  def self.fetch_boot_file dst, src
-    filename    = boot_filename(dst, src)
-    destination = Pathname.new(File.expand_path(filename, Proxy::TFTP::Plugin.settings.tftproot)).cleanpath
-    tftproot    = Pathname.new(Proxy::TFTP::Plugin.settings.tftproot).cleanpath
-    raise "TFTP destination outside of tftproot" unless destination.to_s.start_with?(tftproot.to_s)
-
-    # Ensure that our image directory exists
-    # as the dst might contain another sub directory
-    FileUtils.mkdir_p destination.parent
-
-    ::Proxy::HttpDownload.new(src.to_s, destination.to_s).start
-  end
-
-  def self.boot_filename(dst, src)
-    # Do not append a '-' if the dst is a directory path
-    dst.end_with?('/') ? dst + src.split("/")[-1] : dst + '-' + src.split("/")[-1]
-  end
 end
