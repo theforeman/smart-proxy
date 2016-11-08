@@ -41,7 +41,7 @@ module Proxy::Helpers
   end
 
   # parses the body as json and returns a hash of the body
-  # returns empty hash if there is a json parse error or body is empty
+  # returns empty hash if there is a json parse error, the body is empty or is not a hash
   # request.env["CONTENT_TYPE"] must contain application/json in order for the json to be parsed
   def parse_json_body
     json_data = {}
@@ -57,6 +57,8 @@ module Proxy::Helpers
       rescue => e
         log_halt 415, "Invalid JSON content in body of request: \n#{e.message}"
       end
+
+      log_halt 415, "Invalid JSON content in body of request: data must be a hash, not #{json_data.class.name}" unless json_data.is_a?(Hash)
     end
     json_data
   end
