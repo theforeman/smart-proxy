@@ -366,8 +366,25 @@ class BmcApiTest < Test::Unit::TestCase
   def test_api_can_pass_empty_body_and_get_415_error
     Proxy::BMC::Plugin.load_test_settings(:bmc_default_provider => 'freeipmi')
     Proxy::BMC::IPMI.any_instance.stubs(:bootbios).returns(true)
+    put "/#{@host}/chassis/config/bootdevice/bios", "", "CONTENT_TYPE" => "application/json"
+    assert_equal 415, last_response.status
+    assert_match /Invalid JSON content in body of request:/, last_response.body
+  end
+
+  def test_api_can_pass_invalid_json_and_get_415_error
+    Proxy::BMC::Plugin.load_test_settings(:bmc_default_provider => 'freeipmi')
+    Proxy::BMC::IPMI.any_instance.stubs(:bootbios).returns(true)
+    put "/#{@host}/chassis/config/bootdevice/bios", "{", "CONTENT_TYPE" => "application/json"
+    assert_equal 415, last_response.status
+    assert_match /Invalid JSON content in body of request:/, last_response.body
+  end
+
+  def test_api_can_pass_wrong_data_type_and_get_415_error
+    Proxy::BMC::Plugin.load_test_settings(:bmc_default_provider => 'freeipmi')
+    Proxy::BMC::IPMI.any_instance.stubs(:bootbios).returns(true)
     put "/#{@host}/chassis/config/bootdevice/bios", "".to_json, "CONTENT_TYPE" => "application/json"
-    assert_equal last_response.status, 415
+    assert_equal 415, last_response.status
+    assert_match /Invalid JSON content in body of request:/, last_response.body
   end
 
   def test_api_returns_actions_for_power_get

@@ -1,5 +1,9 @@
 inherit_from: .rubocop_todo.yml
 
+Metrics/ClassLength:
+  Exclude:
+    - 'test/**/*'
+
 # Offense count: 11
 Lint/AmbiguousRegexpLiteral:
   Enabled: false
