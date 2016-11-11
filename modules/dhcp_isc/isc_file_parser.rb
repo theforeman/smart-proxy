@@ -58,7 +58,19 @@ module Proxy::DHCP::ISC
       ret_val
     end
 
-    SUBNET_BLOCK_REGEX = /subnet\s+([\d\.]+)\s+netmask\s+([\d\.]+)\s*\{\s*([\w-]+\s*\{[^{}]*\}\s*|[\w-][^{}]*;\s*)*\}/
+    SUBNET_BLOCK_REGEX = %r{
+      subnet\s+(?<subnet>[\d\.]+)\s+
+      netmask\s+(?<netmask>[\d\.]+)\s*
+        (?<body>
+          \{
+            (?:
+              (?> [^{}]+ )
+              |
+              \g<body>
+            )*
+          \}
+        )
+      }x
     def parse_config_for_subnets(read_config)
       ret_val = []
       # Extract subnets config block
@@ -69,19 +81,32 @@ module Proxy::DHCP::ISC
       ret_val
     end
 
+    # "pool { ... }" blocks are ignored
+    POOL_BLOCK_REGEX = %r{
+      pool\s*
+        (?<body>
+          \{
+            (?:
+              (?> [^{}]+ )
+              |
+              \g<body>
+            )*
+          \}
+        )
+      }x
     def parse_subnet_options(subnet_config_lines)
       return {} unless subnet_config_lines
 
       options = {}
-      subnet_config_lines.split(';').each do |option|
+      subnet_config_lines.gsub(POOL_BLOCK_REGEX, '').split(';').each do |option|
         option = option.split('#').first.strip # remove comments, left and right whitespace
         next if option.empty?
         case option
-          when /^option\s+routers\s+[\d\.]+/
+          when /^[\s{]*option\s+routers\s+[\d\.]+/
             options[:routers] = get_ip_list_from_config_line(option)
-          when /^option\s+domain\-name\-servers\s+[\d\.]+/
+          when /^[\s{]*option\s+domain\-name\-servers\s+[\d\.]+/
             options[:domain_name_servers] = get_ip_list_from_config_line(option)
-          when /^range\s+[\d\.]+\s+[\d\.]+/
+          when /^[\s{]*range\s+[\d\.]+\s+[\d\.]+/
             # get IP addr range used for this subnet
             options[:range] = get_range_from_config_line(option)
         end
