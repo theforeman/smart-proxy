@@ -31,6 +31,17 @@ subnet 192.168.124.0 netmask 255.255.255.0 {
 }
 
 subnet 192.168.1.0 netmask 255.255.255.128 {
+  class "pxeclients" {
+    if option pxe-system-type = 00:02 {
+      filename "xyz";
+    }
+  }
+  # random stuff
+  host hostinsidesubnet {
+    server-name "hostinsidesubnet";
+    hardware ethernet 00:18:dd:01:9e:2e;
+    fixed-address 10.253.2.127;
+  }
 }
 
 host test.example.com {
