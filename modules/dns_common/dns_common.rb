@@ -24,7 +24,7 @@ module Proxy::Dns
       logger.warn(%q{Proxy::Dns::Record#dns_find has been deprecated and will be removed in future versions of Smart-Proxy.
                       Please use ::Proxy::Dns::Record#get_name or ::Proxy::Dns::Record#get_address instead.})
       if key =~ /\.in-addr\.arpa$/ || key =~ /\.ip6\.arpa$/
-        resolver.getname(ptr_to_ip(key)).to_s
+        get_name(key)
       else
         resolver.getaddress(key).to_s
       end
@@ -33,45 +33,39 @@ module Proxy::Dns
     end
 
     def get_name(a_ptr)
-      resolver.getname(ptr_to_ip(a_ptr))
-    rescue Resolv::ResolvError
-      false
+      get_resource_as_string(a_ptr, Resolv::DNS::Resource::IN::PTR, :name)
     end
 
     def get_name!(a_ptr)
-      resolver.getname(ptr_to_ip(a_ptr))
-    rescue Resolv::ResolvError
-      raise Proxy::Dns::NotFound.new("Cannot find DNS entry for #{a_ptr}")
+      get_resource_as_string!(a_ptr, Resolv::DNS::Resource::IN::PTR, :name)
     end
 
     def get_ipv4_address!(fqdn)
-      get_address!(fqdn, Resolv::IPv4::Regex)
+      get_resource_as_string!(fqdn, Resolv::DNS::Resource::IN::A, :address)
     end
 
     def get_ipv4_address(fqdn)
-      get_address(fqdn, Resolv::IPv4::Regex)
+      get_resource_as_string(fqdn, Resolv::DNS::Resource::IN::A, :address)
     end
 
     def get_ipv6_address!(fqdn)
-      get_address!(fqdn, Resolv::IPv6::Regex)
+      get_resource_as_string!(fqdn, Resolv::DNS::Resource::IN::AAAA, :address)
     end
 
     def get_ipv6_address(fqdn)
-      get_address(fqdn, Resolv::IPv6::Regex)
+      get_resource_as_string(fqdn, Resolv::DNS::Resource::IN::AAAA, :address)
     end
 
-    def get_address(a_fqdn, should_match = nil)
-      addresses = getaddresses(a_fqdn)
-      found = should_match.nil? ? addresses.first : addresses.find {|a| a =~ should_match}
-      found || false
+    def get_resource_as_string(value, resource_type, attr)
+      resolver.getresource(value, resource_type).send(attr).to_s
     rescue Resolv::ResolvError
       false
     end
 
-    def get_address!(a_fqdn, should_match = nil)
-      found = get_address(a_fqdn, should_match)
-      raise Proxy::Dns::NotFound.new("Cannot find DNS entry for #{a_fqdn}") unless found
-      found
+    def get_resource_as_string!(value, resource_type, attr)
+      resolver.getresource(value, resource_type).send(attr).to_s
+    rescue Resolv::ResolvError
+      raise Proxy::Dns::NotFound.new("Cannot find DNS entry for #{value}")
     end
 
     def ptr_to_ip ptr
@@ -88,9 +82,9 @@ module Proxy::Dns
     # no conflict: -1; conflict: 1, conflict but record / ip matches: 0
     def a_record_conflicts(fqdn, ip)
       if ip_addr = to_ipaddress(ip)
-        addresses = getaddresses(fqdn).select { |a| a =~ Resolv::IPv4::Regex }
+        addresses = resolver.getresources(fqdn, Resolv::DNS::Resource::IN::A).map {|r| IPAddr.new(r.address.to_s)}
         return -1 if addresses.empty?
-        return 0 if addresses.any? {|a| IPAddr.new(a.to_s) == ip_addr}
+        return 0 if addresses.any? {|a| a == ip_addr}
         1
       else
         raise Proxy::Dns::Error.new("Not an IP Address: '#{ip}'")
@@ -99,9 +93,9 @@ module Proxy::Dns
 
     def aaaa_record_conflicts(fqdn, ip)
       if ip_addr = to_ipaddress(ip)
-        addresses = getaddresses(fqdn).select { |a| a =~ Resolv::IPv6::Regex }
+        addresses = resolver.getresources(fqdn, Resolv::DNS::Resource::IN::AAAA).map {|r| IPAddr.new(r.address.to_s)}
         return -1 if addresses.empty?
-        return 0 if addresses.any? {|a| IPAddr.new(a.to_s) == ip_addr}
+        return 0 if addresses.any? {|a| a == ip_addr}
         1
       else
         raise Proxy::Dns::Error.new("Not an IP Address: '#{ip}'")
@@ -116,14 +110,16 @@ module Proxy::Dns
     end
 
     def ptr_record_conflicts(fqdn, ip)
-      if ip_addr = to_ipaddress(ip)
-        names = resolver.getnames(ip_addr.to_s)
-        return -1 if names.empty?
-        return 0 if names.any? {|n| n.to_s.casecmp(fqdn) == 0}
-        1
-      else
-        raise Proxy::Dns::Error.new("Not an IP Address: '#{ip}'")
-      end
+      names = if ip.match(Resolv::IPv4::Regex) || ip.match(Resolv::IPv6::Regex)
+                logger.warn(%q{Proxy::Dns::Record#ptr_record_conflicts with a non-ptr record parameter has been deprecated and will be removed in future versions of Smart-Proxy.
+                      Please use ::Proxy::Dns::Record#ptr_record_conflicts('101.212.58.216.in-addr.arpa') format instead.})
+                resolver.getnames(ip).map {|r| r.to_s}
+              else
+                resolver.getresources(ip, Resolv::DNS::Resource::IN::PTR).map {|r| r.name.to_s}
+              end
+      return -1 if names.empty?
+      return 0 if names.any? {|n| n.casecmp(fqdn) == 0}
+      1
     end
 
     def to_ipaddress ip
@@ -136,10 +132,6 @@ module Proxy::Dns
 
     def remove_cname_record(fqdn)
       raise Proxy::Dns::Error.new("This DNS provider does not support CNAME management")
-    end
-
-    def getaddresses(fqdn)
-      resolver.getaddresses(fqdn).map(&:to_s)
     end
   end
 end

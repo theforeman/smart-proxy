@@ -2,109 +2,83 @@ require 'test_helper'
 require 'dns_common/dns_common'
 
 class DnsRecordTest < Test::Unit::TestCase
+  def setup
+    @record = Proxy::Dns::Record.new
+  end
+
   def test_dns_find_with_ip_parameter
-    Resolv::DNS.any_instance.expects(:getname).with('127.13.0.2').returns('not_existing.example.com')
-    assert 'not_existing.example.com', Proxy::Dns::Record.new.dns_find('2.0.13.127.in-addr.arpa')
+    @record.expects(:get_name).with('2.0.13.127.in-addr.arpa').returns('not_existing.example.com')
+    assert_equal 'not_existing.example.com', @record.dns_find('2.0.13.127.in-addr.arpa')
   end
 
   def test_dns_find_with_ipv6_parameter
-    Resolv::DNS.any_instance.expects(:getname).with('2001:0db8:deef:0000:0000:0000:0000:0001').returns('not_existing.example.com')
-    assert 'not_existing.example.com', Proxy::Dns::Record.new.dns_find('1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.f.e.e.d.8.b.d.0.1.0.0.2.ip6.arpa')
+    @record.expects(:get_name).with('1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.f.e.e.d.8.b.d.0.1.0.0.2.ip6.arpa').returns('not_existing.example.com')
+    assert_equal 'not_existing.example.com', @record.dns_find('1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.f.e.e.d.8.b.d.0.1.0.0.2.ip6.arpa')
   end
 
   def test_dns_find_with_fqdn_parameter
-    Resolv::DNS.any_instance.expects(:getaddress).with('some.host').returns(ips('127.13.0.2'))
-    assert '127.13.0.2', Proxy::Dns::Record.new.dns_find('some.host')
+    Resolv::DNS.any_instance.expects(:getaddress).with('some.host').returns(Resolv::IPv4.create('127.13.0.2'))
+    assert_equal '127.13.0.2', Proxy::Dns::Record.new.dns_find('some.host')
   end
 
   def test_get_name_with_sideeffect_for_ipv4
-    Resolv::DNS.any_instance.expects(:getname).with('127.13.0.2').returns('not_existing.example.com')
-    assert 'not_existing.example.com', Proxy::Dns::Record.new.get_name!('2.0.13.127.in-addr.arpa')
+    @record.expects(:get_resource_as_string!).with('2.0.13.127.in-addr.arpa', Resolv::DNS::Resource::IN::PTR, :name).returns('not_existing.example.com')
+    assert 'not_existing.example.com', @record.get_name!('2.0.13.127.in-addr.arpa')
   end
 
   def test_get_name_with_sideeffect_for_ipv6
-    Resolv::DNS.any_instance.expects(:getname).with('2001:0db8:deef:0000:0000:0000:0000:0001').returns('not_existing.example.com')
-    assert 'not_existing.example.com', Proxy::Dns::Record.new.get_name!('1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.f.e.e.d.8.b.d.0.1.0.0.2.ip6.arpa')
-  end
-
-  def test_get_name_with_sideeffect_raises_exception_when_ip_is_unknown
-    Resolv::DNS.any_instance.expects(:getname).with('127.13.0.2').raises(Resolv::ResolvError)
-    assert_raises(Proxy::Dns::NotFound) { Proxy::Dns::Record.new.get_name!('2.0.13.127.in-addr.arpa') }
+    @record.expects(:get_resource_as_string!).with('1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.f.e.e.d.8.b.d.0.1.0.0.2.ip6.arpa', Resolv::DNS::Resource::IN::PTR, :name).returns('not_existing.example.com')
+    assert 'not_existing.example.com', @record.get_name!('1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.f.e.e.d.8.b.d.0.1.0.0.2.ip6.arpa')
   end
 
   def test_get_name_for_ipv4
-    Resolv::DNS.any_instance.expects(:getname).with('127.13.0.2').returns('not_existing.example.com')
-    assert 'not_existing.example.com', Proxy::Dns::Record.new.get_name('2.0.13.127.in-addr.arpa')
+    @record.expects(:get_resource_as_string).with('2.0.13.127.in-addr.arpa', Resolv::DNS::Resource::IN::PTR, :name).returns('not_existing.example.com')
+    assert 'not_existing.example.com', @record.get_name('2.0.13.127.in-addr.arpa')
   end
 
   def test_get_name_for_ipv6
-    Resolv::DNS.any_instance.expects(:getname).with('2001:0db8:deef:0000:0000:0000:0000:0001').returns('not_existing.example.com')
-    assert 'not_existing.example.com', Proxy::Dns::Record.new.get_name('1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.f.e.e.d.8.b.d.0.1.0.0.2.ip6.arpa')
-  end
-
-  def test_get_name_with_unknown_ip
-    Resolv::DNS.any_instance.expects(:getname).with('127.13.0.2').raises(Resolv::ResolvError)
-    assert_false Proxy::Dns::Record.new.get_name('2.0.13.127.in-addr.arpa')
-  end
-
-  def test_get_address_with_sideeffect
-    Resolv::DNS.any_instance.expects(:getaddresses).with('some.host').returns(ips('127.13.0.2', '127.14.0.2'))
-    assert '127.13.0.2', Proxy::Dns::Record.new.get_address!('some.host')
-  end
-
-  def test_get_address_with_sideeffect_raises_exception_when_fqdn_is_unknown
-    Resolv::DNS.any_instance.expects(:getaddresses).with('some.host').raises(Resolv::ResolvError)
-    assert_raises(Proxy::Dns::NotFound) { Proxy::Dns::Record.new.get_address!('some.host') }
-  end
-
-  def test_get_address
-    Resolv::DNS.any_instance.expects(:getaddresses).with('some.host').returns(ips('127.13.0.2', '127.14.0.2'))
-    assert '127.13.0.2', Proxy::Dns::Record.new.get_address('some.host')
-  end
-
-  def test_get_address_with_unknown_fqdn
-    Resolv::DNS.any_instance.expects(:getaddresses).with('some.host').raises(Resolv::ResolvError)
-    assert_false Proxy::Dns::Record.new.get_address('some.host')
+    @record.expects(:get_resource_as_string).with('1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.f.e.e.d.8.b.d.0.1.0.0.2.ip6.arpa', Resolv::DNS::Resource::IN::PTR, :name).returns('not_existing.example.com')
+    assert 'not_existing.example.com', @record.get_name('1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.f.e.e.d.8.b.d.0.1.0.0.2.ip6.arpa')
   end
 
   def test_get_ipv4_address_with_sideeffects
-    Resolv::DNS.any_instance.expects(:getaddresses).with('some.host').returns(ips('127.13.0.2', '2A00:1450:400C:C04::6A'))
-    assert '127.13.0.2', Proxy::Dns::Record.new.get_ipv4_address!('some.host')
+    @record.expects(:get_resource_as_string!).with('some.host', Resolv::DNS::Resource::IN::A, :address).returns('127.13.0.2')
+    assert '127.13.0.2', @record.get_ipv4_address!('some.host')
   end
 
   def test_get_ipv4_address
-    Resolv::DNS.any_instance.expects(:getaddresses).with('some.host').returns(ips('127.13.0.2', '2A00:1450:400C:C04::6A'))
-    assert '127.13.0.2', Proxy::Dns::Record.new.get_ipv4_address('some.host')
-  end
-
-  def test_get_ipv4_address_with_sideeffects_when_no_ipv4_are_present
-    Resolv::DNS.any_instance.expects(:getaddresses).with('some.host').returns(ips('2A00:1450:400C:C04::6A'))
-    assert_raises(Proxy::Dns::NotFound) { Proxy::Dns::Record.new.get_ipv4_address!('some.host') }
-  end
-
-  def test_get_ipv4_address_when_no_ipv4_are_present
-    Resolv::DNS.any_instance.expects(:getaddresses).with('some.host').returns(ips('2A00:1450:400C:C04::6A'))
-    assert_false Proxy::Dns::Record.new.get_ipv4_address('some.host')
+    @record.expects(:get_resource_as_string).with('some.host', Resolv::DNS::Resource::IN::A, :address).returns('127.13.0.2')
+    assert '127.13.0.2', @record.get_ipv4_address('some.host')
   end
 
   def test_get_ipv6_address_with_sideeffects
-    Resolv::DNS.any_instance.expects(:getaddresses).with('some.host').returns(ips('127.13.0.2', '2A00:1450:400C:C04::6A'))
-    assert '2A00:1450:400C:C04::6A', Proxy::Dns::Record.new.get_ipv6_address!('some.host')
+    @record.expects(:get_resource_as_string!).with('some.host', Resolv::DNS::Resource::IN::AAAA, :address).returns('2A00:1450:400C:C04::6A')
+    assert '2A00:1450:400C:C04::6A', @record.get_ipv6_address!('some.host')
   end
 
   def test_get_ipv6_address
-    Resolv::DNS.any_instance.expects(:getaddresses).with('some.host').returns(ips('127.13.0.2', '2A00:1450:400C:C04::6A'))
-    assert '2A00:1450:400C:C04::6A', Proxy::Dns::Record.new.get_ipv6_address('some.host')
+    @record.expects(:get_resource_as_string).with('some.host', Resolv::DNS::Resource::IN::AAAA, :address).returns('2A00:1450:400C:C04::6A')
+    assert '2A00:1450:400C:C04::6A', @record.get_ipv6_address('some.host')
   end
 
-  def test_get_ipv6_address_with_sideeffects_when_no_ipv6_are_present
-    Resolv::DNS.any_instance.expects(:getaddresses).with('some.host').returns(ips('127.13.0.2'))
-    assert_raises(Proxy::Dns::NotFound) { Proxy::Dns::Record.new.get_ipv6_address!('some.host') }
+  def test_get_resource_as_string_with_sideeffects
+    Resolv::DNS.any_instance.expects(:getresource).with('some.host', Resolv::DNS::Resource::IN::A).returns(Resolv::DNS::Resource::IN::A.new('127.13.0.2'))
+    assert_equal '127.13.0.2', @record.get_resource_as_string!('some.host', Resolv::DNS::Resource::IN::A, :address)
   end
 
-  def test_get_ipv6_address_when_no_ipv6_are_present
-    Resolv::DNS.any_instance.expects(:getaddresses).with('some.host').returns(ips('127.13.0.2'))
-    assert_false Proxy::Dns::Record.new.get_ipv6_address('some.host')
+  def test_get_resource_as_string_with_sideeffects_raises_exception_when_resource_is_not_found
+    Resolv::DNS.any_instance.expects(:getresource).with('some.host', Resolv::DNS::Resource::IN::A).raises(Resolv::ResolvError)
+    assert_raises(Proxy::Dns::NotFound) { @record.get_resource_as_string!('some.host', Resolv::DNS::Resource::IN::A, :address) }
+  end
+
+  def test_get_resource_as_string
+    Resolv::DNS.any_instance.expects(:getresource).with('some.host', Resolv::DNS::Resource::IN::A).returns(Resolv::DNS::Resource::IN::A.new('127.13.0.2'))
+    assert_equal '127.13.0.2', @record.get_resource_as_string('some.host', Resolv::DNS::Resource::IN::A, :address)
+  end
+
+  def test_get_resource_as_string_wjen_resource_is_not_found
+    Resolv::DNS.any_instance.expects(:getresource).with('some.host', Resolv::DNS::Resource::IN::A).raises(Resolv::ResolvError)
+    assert_false @record.get_resource_as_string('some.host', Resolv::DNS::Resource::IN::A, :address)
   end
 
   def test_dns_find_key_not_found
@@ -127,62 +101,67 @@ class DnsRecordTest < Test::Unit::TestCase
   end
 
   def test_a_record_conflicts_no_conflict
-    Resolv::DNS.any_instance.expects(:getaddresses).with('some.host').returns([])
-    assert_equal -1, Proxy::Dns::Record.new.a_record_conflicts('some.host', '192.168.33.33')
-  end
-
-  def test_a_record_conflicts_no_conflict_with_ipv6
-    Resolv::DNS.any_instance.expects(:getaddresses).with('some.host').returns(ips('2001:DB8:DEEF::1'))
+    Resolv::DNS.any_instance.expects(:getresources).with('some.host',  Resolv::DNS::Resource::IN::A).returns([])
     assert_equal -1, Proxy::Dns::Record.new.a_record_conflicts('some.host', '192.168.33.33')
   end
 
   def test_a_record_conflicts_has_conflict
-    Resolv::DNS.any_instance.expects(:getaddresses).with('some.host').returns(ips('192.168.33.33', '2001:DB8:DEEF::1'))
+    Resolv::DNS.any_instance.expects(:getresources).with('some.host',  Resolv::DNS::Resource::IN::A).returns(ips('192.168.33.34', '192.168.33.33'))
     assert_equal 1, Proxy::Dns::Record.new.a_record_conflicts('some.host', '192.168.11.11')
   end
 
   def test_a_record_conflicts_but_nothing_todo
-    Resolv::DNS.any_instance.expects(:getaddresses).with('some.host').returns(ips('192.168.33.33', '2001:DB8:DEEF::1'))
+    Resolv::DNS.any_instance.expects(:getresources).with('some.host',  Resolv::DNS::Resource::IN::A).returns(ips('192.168.33.33'))
     assert_equal 0, Proxy::Dns::Record.new.a_record_conflicts('some.host', '192.168.33.33')
   end
 
   def test_aaaa_record_conflicts_no_conflict
-    Resolv::DNS.any_instance.expects(:getaddresses).with('some.host').returns([])
-    assert_equal -1, Proxy::Dns::Record.new.aaaa_record_conflicts('some.host', '2001:DB8:DEEF::1')
-  end
-
-  def test_aaaa_record_conflicts_no_conflict_with_ipv4
-    Resolv::DNS.any_instance.expects(:getaddresses).with('some.host').returns(ips('192.168.33.33'))
+    Resolv::DNS.any_instance.expects(:getresources).with('some.host',  Resolv::DNS::Resource::IN::AAAA).returns([])
     assert_equal -1, Proxy::Dns::Record.new.aaaa_record_conflicts('some.host', '2001:DB8:DEEF::1')
   end
 
   def test_aaaa_record_conflicts_has_conflict
-    Resolv::DNS.any_instance.expects(:getaddresses).with('some.host').returns(ips('192.168.33.33', '2001:DB8:DEEF::1'))
+    Resolv::DNS.any_instance.expects(:getresources).with('some.host',  Resolv::DNS::Resource::IN::AAAA).returns(ips('2001:DB8:DEEF::1'))
     assert_equal 1, Proxy::Dns::Record.new.aaaa_record_conflicts('some.host', '2001:DB8:ABCD::1')
   end
 
   def test_aaaa_record_conflicts_but_nothing_todo
-    Resolv::DNS.any_instance.expects(:getaddresses).with('some.host').returns(ips('192.168.33.33', '2001:DB8:DEEF::1'))
+    Resolv::DNS.any_instance.expects(:getresources).with('some.host',  Resolv::DNS::Resource::IN::AAAA).returns(ips('2001:DB8:DEEF::1'))
     assert_equal 0, Proxy::Dns::Record.new.aaaa_record_conflicts('some.host', '2001:DB8:DEEF::1')
   end
 
-  def test_ptr_record_conflicts_no_conflict
+  def test_old_ptr_record_conflicts_no_conflict
     Resolv::DNS.any_instance.expects(:getnames).with('192.168.33.33').returns([])
     assert_equal -1, Proxy::Dns::Record.new.ptr_record_conflicts('some.host', '192.168.33.33')
   end
 
-  def test_ptr_record_conflicts_has_conflict
+  def test_old_ptr_record_conflicts_has_conflict
     Resolv::DNS.any_instance.expects(:getnames).with('2001:db8:deef::1').returns(['some.host'])
     assert_equal 1, Proxy::Dns::Record.new.ptr_record_conflicts('another.host', '2001:db8:deef::1')
   end
 
-  def test_ptr_record_conflicts_but_nothing_todo
+  def test_old_ptr_record_conflicts_but_nothing_todo
     Resolv::DNS.any_instance.expects(:getnames).with('192.168.33.33').returns(['some.host'])
     assert_equal 0, Proxy::Dns::Record.new.ptr_record_conflicts('some.host', '192.168.33.33')
   end
 
+  def test_ptr_record_conflicts_no_conflict
+    Resolv::DNS.any_instance.expects(:getresources).with('33.33.168.192.in-addr.arpa',  Resolv::DNS::Resource::IN::PTR).returns([])
+    assert_equal -1, Proxy::Dns::Record.new.ptr_record_conflicts('some.host', '33.33.168.192.in-addr.arpa')
+  end
+
+  def test_ptr_record_conflicts_has_conflict
+    Resolv::DNS.any_instance.expects(:getresources).with('33.33.168.192.in-addr.arpa',  Resolv::DNS::Resource::IN::PTR).returns([Resolv::DNS::Resource::IN::PTR.new('some.host')])
+    assert_equal 1, Proxy::Dns::Record.new.ptr_record_conflicts('another.host', '33.33.168.192.in-addr.arpa')
+  end
+
+  def test_ptr_record_conflicts_but_nothing_todo
+    Resolv::DNS.any_instance.expects(:getresources).with('33.33.168.192.in-addr.arpa',  Resolv::DNS::Resource::IN::PTR).returns([Resolv::DNS::Resource::IN::PTR.new('some.host')])
+    assert_equal 0, Proxy::Dns::Record.new.ptr_record_conflicts('some.host', '33.33.168.192.in-addr.arpa')
+  end
+
   def test_aaaa_record_conflicts_is_case_insensetive
-    Resolv::DNS.any_instance.expects(:getaddresses).with('some.host').returns(ips('192.168.33.33', '2001:DB8:DEEF::1'))
+    Resolv::DNS.any_instance.expects(:getresources).with('some.host',  Resolv::DNS::Resource::IN::AAAA).returns(ips('2001:DB8:DEEF::1'))
     assert_equal 0, Proxy::Dns::Record.new.aaaa_record_conflicts('some.host', '2001:db8:deef::1')
   end
 
@@ -193,6 +172,6 @@ class DnsRecordTest < Test::Unit::TestCase
   end
 
   def ips(*ips)
-    ips.map {|ip| ip =~  Resolv::IPv4::Regex ? Resolv::IPv4.create(ip) : Resolv::IPv6.create(ip) }
+    ips.map {|ip| ip =~  Resolv::IPv4::Regex ? Resolv::DNS::Resource::IN::A.new(ip) : Resolv::DNS::Resource::IN::AAAA.new(ip) }
   end
 end
