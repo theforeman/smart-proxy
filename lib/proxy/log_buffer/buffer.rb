@@ -6,7 +6,7 @@ require 'proxy/log_buffer/ring_buffer'
 # https://github.com/celluloid/celluloid/blob/0-16-stable/lib/celluloid/logging/ring_buffer.rb
 module Proxy::LogBuffer
 
-  LogRecord = Struct.new(:timestamp, :level, :message, :backtrace) do
+  LogRecord = Struct.new(:timestamp, :level, :message, :backtrace, :request_id) do
     def to_h
       h = {}
       self.class.members.each{|m| h[m.to_sym] = self[m]}
@@ -25,6 +25,7 @@ module Proxy::LogBuffer
                     :UNKNOWN
                   end
       h.delete(:backtrace) unless h[:backtrace]
+      h.delete(:request_id) unless h[:request_id]
       h
     end
   end

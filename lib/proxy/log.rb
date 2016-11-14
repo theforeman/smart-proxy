@@ -20,6 +20,30 @@ module Proxy
   end
 
   class LoggerFactory
+    class LogFormatter < ::Logger::Formatter
+      Format = "%s, [%s%s] %5s -- %s: %s\n".freeze
+
+      def call(severity, time, progname, msg)
+        Format % [severity[0..0], format_datetime(time), request_id[0..7], severity, progname, msg2str(msg)]
+      end
+
+      def request_id
+        Thread.current.thread_variable_get(:request_id).to_s
+      end
+    end
+
+    class SyslogFormatter < Syslog::Logger::Formatter
+      Format = "<%s> %s\n".freeze
+
+      def call(severity, time, progname, msg)
+        request_id.empty? ? clean(msg) : Format % [request_id[0..7], clean(msg)]
+      end
+
+      def request_id
+        Thread.current.thread_variable_get(:request_id).to_s
+      end
+    end
+
     def self.logger
       if log_file.casecmp('STDOUT').zero?
         if SETTINGS.daemon
@@ -37,6 +61,7 @@ module Proxy
       else
         logger = default_logger(log_file)
       end
+      logger.formatter = logger.instance_of?(::Syslog::Logger) ? SyslogFormatter.new : LogFormatter.new
       logger.level = ::Logger.const_get(::Proxy::SETTINGS.log_level.upcase)
       logger
     end

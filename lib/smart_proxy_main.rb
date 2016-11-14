@@ -27,6 +27,7 @@ require 'proxy/provider_factory'
 require 'proxy/provider'
 require 'proxy/error'
 require 'proxy/request'
+require 'proxy/request_id_middleware'
 
 require 'bundler_helper'
 Proxy::BundlerHelper.require_groups(:default)
@@ -47,6 +48,7 @@ module Proxy
   ::Sinatra::Base.set :run, false
   ::Sinatra::Base.set :root, APP_ROOT
   ::Sinatra::Base.set :logging, false # we are not going to use Rack::Logger
+  ::Sinatra::Base.use ::Proxy::RequestIdMiddleware
   ::Sinatra::Base.use ::Proxy::LoggerMiddleware # instead, we have our own logging middleware
   ::Sinatra::Base.use ::Rack::CommonLogger, ::Proxy::LogBuffer::Decorator.instance
   ::Sinatra::Base.set :env, :production

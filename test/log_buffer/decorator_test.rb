@@ -59,6 +59,17 @@ class DecoratorTest < Test::Unit::TestCase
     assert_equal [1, 2, 3, 4, 5], @buffer.to_a.collect(&:message)
   end
 
+  def test_should_keep_request_id_in_buffer_when_available
+    request_id = '12345678'
+    Thread.current.thread_variable_set(:request_id, request_id)
+    @decorator.error('error message')
+
+    assert_false @buffer.to_a.empty?
+    assert_equal request_id, @buffer.to_a.first.request_id
+  ensure
+    Thread.current.thread_variable_set(:request_id, nil)
+  end
+
   def test_should_not_roll_log_if_stdout_is_used
     ::Proxy::LoggerFactory.stubs(:logger).returns(::Logger.new("/dev/null"))
     (d = DecoratorForTesting.new(@logger, "STDOUT", nil)).handle_log_rolling
