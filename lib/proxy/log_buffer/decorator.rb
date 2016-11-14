@@ -46,7 +46,7 @@ module Proxy::LogBuffer
           # we accept backtrace, exception and simple string
           backtrace = backtrace.is_a?(Exception) ? backtrace.backtrace : backtrace
           backtrace = backtrace.respond_to?(:join) ? backtrace.join("\n") : backtrace
-          rec = Proxy::LogBuffer::LogRecord.new(nil, severity, message, backtrace)
+          rec = Proxy::LogBuffer::LogRecord.new(nil, severity, message, backtrace, request_id)
           @buffer.push(rec)
         end
       end
@@ -72,6 +72,10 @@ module Proxy::LogBuffer
 
     def fatal(msg_or_progname, exception_or_backtrace = nil, &block)
       add(::Logger::Severity::FATAL, nil, msg_or_progname, exception_or_backtrace, &block)
+    end
+
+    def request_id
+      (r = Thread.current.thread_variable_get(:request_id)).nil? ? r : r.to_s[0..7]
     end
 
     def method_missing(symbol, *args);
