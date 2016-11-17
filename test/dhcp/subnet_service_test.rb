@@ -5,14 +5,14 @@ require 'dhcp_common/subnet_service'
 
 class SubnetServiceTest < Test::Unit::TestCase
   def setup
-    @subnets =  Proxy::MemoryStore.new
+    @subnets = {}
     @leases_ip_store = Proxy::MemoryStore.new
     @leases_mac_store = Proxy::MemoryStore.new
-    @reservations_ip_store =  Proxy::MemoryStore.new
+    @reservations_ip_store = Proxy::MemoryStore.new
     @reservations_mac_store = Proxy::MemoryStore.new
     @reservations_name_store = Proxy::MemoryStore.new
 
-    @service = Proxy::DHCP::SubnetService.new(@subnets, @leases_ip_store, @leases_mac_store, @reservations_ip_store, @reservations_mac_store, @reservations_name_store)
+    @service = Proxy::DHCP::SubnetService.new(@leases_ip_store, @leases_mac_store, @reservations_ip_store, @reservations_mac_store, @reservations_name_store, @subnets)
   end
 
   def test_add_subnet
@@ -47,6 +47,59 @@ class SubnetServiceTest < Test::Unit::TestCase
     @service.add_subnets(*subnets)
 
     assert_equal subnets.first, @service.find_subnet("192.168.0.0")
+  end
+
+  def test_find_subnet_with_cidr_mask
+    subnets = [Proxy::DHCP::Subnet.new("192.168.0.0", "255.255.255.192"),
+               Proxy::DHCP::Subnet.new("192.168.0.64", "255.255.255.192"),
+               Proxy::DHCP::Subnet.new("192.168.0.128", "255.255.255.192"),
+               Proxy::DHCP::Subnet.new("192.168.0.192", "255.255.255.192")]
+    @service.add_subnets(*subnets)
+    assert_equal subnets[2], @service.find_subnet("192.168.0.131")
+  end
+
+  def test_find_subnet_with_cidr_mask_and_match_in_a_group_of_one_network
+    subnets = [Proxy::DHCP::Subnet.new("192.168.0.0", "255.255.255.192"),
+               Proxy::DHCP::Subnet.new("192.168.0.64", "255.255.255.192"),
+               Proxy::DHCP::Subnet.new("192.168.0.192", "255.255.255.192")]
+    @service.add_subnets(*subnets)
+    assert_equal subnets[0], @service.find_subnet("192.168.0.10")
+  end
+
+  def test_find_subnet_with_cidr_mask_if_subnet_is_undefined
+    subnets = [Proxy::DHCP::Subnet.new("192.168.0.0", "255.255.255.192"),
+               Proxy::DHCP::Subnet.new("192.168.0.64", "255.255.255.192"),
+               Proxy::DHCP::Subnet.new("192.168.0.192", "255.255.255.192")]
+    @service.add_subnets(*subnets)
+    assert_nil @service.find_subnet("192.168.0.131")
+  end
+
+  # the address we are looking for is in a /27 subnet
+  def test_find_subnet_with_mixed_cidr_masks_deep
+    subnets = [Proxy::DHCP::Subnet.new("192.0.0.0", "255.128.0.0"),
+               Proxy::DHCP::Subnet.new("192.169.0.0", "255.255.0.0"),
+               Proxy::DHCP::Subnet.new("192.168.0.0", "255.255.255.192"),
+               Proxy::DHCP::Subnet.new("192.168.0.64", "255.255.255.224"),
+               Proxy::DHCP::Subnet.new("192.168.0.96", "255.255.255.224"),
+               Proxy::DHCP::Subnet.new("192.168.0.128", "255.255.255.192"),
+               Proxy::DHCP::Subnet.new("192.168.0.192", "255.255.255.192")]
+    @service.add_subnets(*subnets)
+    assert_not_nil @service.find_subnet("192.168.0.100")
+    assert_equal subnets[4], @service.find_subnet("192.168.0.100")
+  end
+
+  # the address is in a /6 subnet
+  def test_find_subnet_with_mixed_cidr_masks_shallow
+    subnets = [Proxy::DHCP::Subnet.new("188.0.0.0", "252.0.0.0"),
+               Proxy::DHCP::Subnet.new("196.168.0.0", "255.255.255.192"),
+               Proxy::DHCP::Subnet.new("196.168.0.64", "255.255.255.224"),
+               Proxy::DHCP::Subnet.new("196.168.0.96", "255.255.255.224"),
+               Proxy::DHCP::Subnet.new("192.0.0.0", "252.0.0.0"),
+               Proxy::DHCP::Subnet.new("196.168.0.128", "255.255.255.192"),
+               Proxy::DHCP::Subnet.new("196.168.0.192", "255.255.255.192")]
+    @service.add_subnets(*subnets)
+    assert_not_nil @service.find_subnet("192.168.0.100")
+    assert_equal subnets[4], @service.find_subnet("192.168.0.100")
   end
 
   def test_find_subnet_by_host_ip

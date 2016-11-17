@@ -33,9 +33,9 @@ XMLFIXTURE
     @libvirt_network.stubs(:dump_xml).returns(fixture)
     @libvirt_network.stubs(:dhcp_leases).returns(@json_leases)
     @subnet = Proxy::DHCP::Subnet.new("192.168.122.0", "255.255.255.0")
-    @subnet_store = Proxy::MemoryStore.new
-    @service = Proxy::DHCP::SubnetService.new(@subnet_store, Proxy::MemoryStore.new, Proxy::MemoryStore.new,
-                                              Proxy::MemoryStore.new, Proxy::MemoryStore.new, Proxy::MemoryStore.new)
+    @subnet_store = {}
+    @service = Proxy::DHCP::SubnetService.new(Proxy::MemoryStore.new, Proxy::MemoryStore.new,
+                                              Proxy::MemoryStore.new, Proxy::MemoryStore.new, Proxy::MemoryStore.new, @subnet_store)
     @subject = ::Proxy::DHCP::Libvirt::Provider.new('default', @libvirt_network, @service)
   end
 
