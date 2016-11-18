@@ -11,7 +11,7 @@ class StateChangesObserverTest < Test::Unit::TestCase
   def setup
     @config_file = Object.new
     @leases_file = Object.new
-    @service = Proxy::DHCP::SubnetService.new(Proxy::MemoryStore.new, Proxy::MemoryStore.new,
+    @service = Proxy::DHCP::SubnetService.new(Proxy::MemoryStore.new,
                                               Proxy::MemoryStore.new, Proxy::MemoryStore.new,
                                               Proxy::MemoryStore.new, Proxy::MemoryStore.new)
     @observer = ::Proxy::DHCP::ISC::IscStateChangesObserver.new(@config_file, @leases_file, @service)

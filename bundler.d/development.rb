@@ -6,4 +6,5 @@ group :development do
   gem 'single_test'
   gem 'pry'
   gem 'rubocop', '0.38.0' if  RUBY_VERSION > "1.9.2"
+  gem 'benchmark-ips'
 end

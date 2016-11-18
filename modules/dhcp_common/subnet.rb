@@ -9,7 +9,7 @@ require 'tmpdir'
 
 module Proxy::DHCP
   class Subnet
-    attr_reader :network, :netmask, :server
+    attr_reader :network, :ipaddr, :netmask, :server
     attr_accessor :options
 
     include Proxy::DHCP
@@ -19,6 +19,7 @@ module Proxy::DHCP
     def initialize network, netmask, options = {}
       @network = validate_ip network
       @netmask = validate_ip netmask
+      @ipaddr = IPAddr.new(to_s)
       @options = {}
 
       @options[:routers] = options[:routers].each{|ip| validate_ip ip } if options[:routers]
@@ -41,7 +42,7 @@ module Proxy::DHCP
         end
       end
 
-      IPAddr.new(to_s).include?(ipaddr)
+      @ipaddr.include?(ipaddr)
     end
 
     def to_s

@@ -1,11 +1,14 @@
+require 'set'
+
 module Proxy::DHCP
   class SubnetService
     include Proxy::Log
 
-    attr_reader :m, :subnets, :leases_by_ip, :leases_by_mac, :reservations_by_ip, :reservations_by_mac, :reservations_by_name
+    attr_reader :m, :subnets, :subnet_keys, :leases_by_ip, :leases_by_mac, :reservations_by_ip, :reservations_by_mac, :reservations_by_name
 
-    def initialize(subnets, leases_by_ip, leases_by_mac, reservations_by_ip, reservations_by_mac, reservations_by_name)
+    def initialize(leases_by_ip, leases_by_mac, reservations_by_ip, reservations_by_mac, reservations_by_name, subnets = {})
       @subnets = subnets
+      @subnet_keys = SortedSet.new
       @leases_by_ip = leases_by_ip
       @leases_by_mac = leases_by_mac
       @reservations_by_ip = reservations_by_ip
@@ -15,15 +18,18 @@ module Proxy::DHCP
     end
 
     def self.initialized_instance
-      new(::Proxy::MemoryStore.new, ::Proxy::MemoryStore.new, ::Proxy::MemoryStore.new,
+      new(::Proxy::MemoryStore.new, ::Proxy::MemoryStore.new,
           ::Proxy::MemoryStore.new, ::Proxy::MemoryStore.new, ::Proxy::MemoryStore.new)
     end
 
     def add_subnet(subnet)
       m.synchronize do
-        raise Proxy::DHCP::Error, "Unable to add subnet #{subnet}" if find_subnet(subnet.network)
+        key = subnet.ipaddr.to_i
+        raise Proxy::DHCP::Error, "Unable to add subnet #{subnet}" if subnets.key?(key)
         logger.debug("Added a subnet: #{subnet.network}")
-        subnets[subnet.network] = subnet
+        subnets[key] = subnet
+        subnet_keys.add(key)
+        subnet
       end
     end
 
@@ -35,22 +41,47 @@ module Proxy::DHCP
     end
 
     def delete_subnet(subnet_address)
-      m.synchronize { subnets.delete(subnet_address) }
+      m.synchronize do
+        subnets.delete(ipv4_to_i(subnet_address))
+        subnet_keys.delete(ipv4_to_i(subnet_address))
+      end
       logger.debug("Deleted a subnet: #{subnet_address}")
     end
 
     def find_subnet(address)
       m.synchronize do
-        to_ret = subnets[address]
-        return to_ret if to_ret # we were given a subnet address
+        ipv4_as_i = ipv4_to_i(address)
+        return subnets[ipv4_as_i] if subnets.key?(ipv4_as_i)
+        do_find_subnet(subnet_keys.to_a, subnets, ipv4_as_i, address)
+      end
+    end
 
-        # TODO: this can be done much faster
-        subnets.values.each do |subnet|
-          return subnet if subnet.include?(address)
-        end
+    def do_find_subnet(a_slice, all_subnets, address_as_i, address)
+      return nil if a_slice.empty?
+      if a_slice.size == 1
+        return ipv4_to_i(all_subnets[a_slice.first].netmask) & address_as_i == a_slice.first ? all_subnets[a_slice.first] : nil
+      end
+      if a_slice.size == 2
+        return all_subnets[a_slice.first] if ipv4_to_i(all_subnets[a_slice.first].netmask) & address_as_i == a_slice.first
+        return all_subnets[a_slice.last] if ipv4_to_i(all_subnets[a_slice.last].netmask) & address_as_i == a_slice.last
+        return nil
       end
 
-      nil
+      i = a_slice.size/2 - 1
+      distance_left = address_as_i - a_slice[i]
+      distance_right = address_as_i - a_slice[i+1]
+
+      # a shortcut
+      if distance_left > 0 && distance_right < 0
+        return ipv4_to_i(all_subnets[a_slice[i]].netmask) & address_as_i == a_slice[i] ? all_subnets[a_slice[i]] : nil
+      end
+
+      return do_find_subnet(a_slice[0..i], all_subnets, address_as_i, address) if distance_left.abs < distance_right.abs
+      do_find_subnet(a_slice[i+1..-1], all_subnets, address_as_i, address)
+    end
+
+    def ipv4_to_i(ipv4_address)
+      ipv4_address.split('.').inject(0) { |i, octet| (i << 8) | (octet.to_i & 0xff) }
     end
 
     def all_subnets
