@@ -13,7 +13,7 @@ proxy_benchmark do
     [1, 5, 50, 500, 5000].each do |subnet_count|
       hosts = []
       s1 = s2 = 0
-      subnets = (1..subnet_count).map do |i|
+      subnets = (1..subnet_count).map do |_|
         s2 += 1
         if s2 % 256 == 0
           s1 += 1
@@ -22,7 +22,7 @@ proxy_benchmark do
 
         prefix = "#{s1}.#{s2}.0"
         netmask = '255.255.255.0'
-        host_count.times { |i| hosts << "#{prefix}.#{i}" }
+        host_count.times { |c| hosts << "#{prefix}.#{c}" }
         Proxy::DHCP::Subnet.new(prefix + '.0', netmask, {})
       end
 

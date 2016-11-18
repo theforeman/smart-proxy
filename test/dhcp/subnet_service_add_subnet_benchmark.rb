@@ -8,7 +8,7 @@ proxy_benchmark do
   Benchmark.ips do |x|
     x.config(:time => 10, :warmup => 0)
 
-    [1, 5, 50, 500, 1000, 15000].each do |subnet_count|
+    [1, 5, 50, 500, 1000, 15_000].each do |subnet_count|
       s1 = s2 = 0
       subnets = (1..subnet_count).map do |i|
         s2 += 1
