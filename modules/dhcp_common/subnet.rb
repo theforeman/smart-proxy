@@ -10,7 +10,7 @@ require 'tmpdir'
 module Proxy::DHCP
   # Represents a DHCP Subnet
   class Subnet
-    attr_reader :network, :netmask, :server, :timestamp
+    attr_reader :ipaddr, :network, :netmask, :server, :timestamp
     attr_accessor :options
 
     include Proxy::DHCP
@@ -20,6 +20,7 @@ module Proxy::DHCP
     def initialize network, netmask, options = {}
       @network = validate_ip network
       @netmask = validate_ip netmask
+      @ipaddr = IPAddr.new(to_s)
       @options = {}
 
       @options[:routers] = options[:routers].each{|ip| validate_ip ip } if options[:routers]
@@ -44,7 +45,7 @@ module Proxy::DHCP
         end
       end
 
-      IPAddr.new(to_s).include?(ipaddr)
+      @ipaddr.include?(ipaddr)
     end
 
     def to_s
@@ -52,12 +53,16 @@ module Proxy::DHCP
     end
 
     def cidr
-      IPAddr.new(netmask).to_i.to_s(2).count("1")
+      netmask_to_i.to_s(2).count("1")
     end
 
     def range
       r=valid_range
       "#{r.first}-#{r.last}"
+    end
+
+    def netmask_to_i
+      @netmask_to_i ||= Proxy::DHCP.ipv4_to_i(netmask)
     end
 
     def get_index_and_lock filename

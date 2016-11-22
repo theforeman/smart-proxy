@@ -21,4 +21,8 @@ module Proxy::DHCP
   class Collision < RuntimeError; end
   class InvalidRecord < RuntimeError; end
   class AlreadyExists < RuntimeError; end
+
+  def self.ipv4_to_i(ipv4_address)
+    ipv4_address.split('.', 4).inject(0) { |i, octet| (i << 8) | octet.to_i }
+  end
 end
