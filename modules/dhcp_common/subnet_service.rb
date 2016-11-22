@@ -2,9 +2,11 @@ module Proxy::DHCP
   class SubnetService
     include Proxy::Log
 
+    SEARCH_MASKS = (0..31).map { |bit| ~(1 << bit) }
+
     attr_reader :m, :subnets, :leases_by_ip, :leases_by_mac, :reservations_by_ip, :reservations_by_mac, :reservations_by_name
 
-    def initialize(subnets, leases_by_ip, leases_by_mac, reservations_by_ip, reservations_by_mac, reservations_by_name)
+    def initialize(leases_by_ip, leases_by_mac, reservations_by_ip, reservations_by_mac, reservations_by_name, subnets = {})
       @subnets = subnets
       @leases_by_ip = leases_by_ip
       @leases_by_mac = leases_by_mac
@@ -15,15 +17,17 @@ module Proxy::DHCP
     end
 
     def self.initialized_instance
-      new(::Proxy::MemoryStore.new, ::Proxy::MemoryStore.new, ::Proxy::MemoryStore.new,
+      new(::Proxy::MemoryStore.new, ::Proxy::MemoryStore.new,
           ::Proxy::MemoryStore.new, ::Proxy::MemoryStore.new, ::Proxy::MemoryStore.new)
     end
 
     def add_subnet(subnet)
       m.synchronize do
-        raise Proxy::DHCP::Error, "Unable to add subnet #{subnet}" if find_subnet(subnet.network)
+        key = subnet.ipaddr.to_i
+        raise Proxy::DHCP::Error, "Unable to add subnet #{subnet}" if subnets.key?(key)
         logger.debug("Added a subnet: #{subnet.network}")
-        subnets[subnet.network] = subnet
+        subnets[key] = subnet
+        subnet
       end
     end
 
@@ -35,23 +39,31 @@ module Proxy::DHCP
     end
 
     def delete_subnet(subnet_address)
-      m.synchronize { subnets.delete(subnet_address) }
+      m.synchronize { subnets.delete(Proxy::DHCP.ipv4_to_i(subnet_address)) }
       logger.debug("Deleted a subnet: #{subnet_address}")
     end
 
     def find_subnet(address)
       m.synchronize do
-        to_ret = subnets[address]
-        return to_ret if to_ret # we were given a subnet address
+        ipv4_as_i = Proxy::DHCP.ipv4_to_i(address)
+        return subnets[ipv4_as_i] if subnets.key?(ipv4_as_i)
+        do_find_subnet(subnets, ipv4_as_i, address)
+      end
+    end
 
-        # TODO: this can be done much faster
-        subnets.values.each do |subnet|
-          return subnet if subnet.include?(address)
+    def do_find_subnet(all_subnets, address_as_i, address)
+      search_as_i = address_as_i
+      SEARCH_MASKS.each do |mask|
+        # zero consecutive least-significant bits until a matching prefix is found
+        search_as_i &= mask
+        if all_subnets.key?(search_as_i)
+          matching = all_subnets[search_as_i]
+          return matching if matching.netmask_to_i & address_as_i == search_as_i
         end
       end
-
       nil
     end
+    private :do_find_subnet
 
     def all_subnets
       m.synchronize { subnets.values }
