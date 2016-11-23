@@ -127,6 +127,60 @@ class DhcpApiTest < Test::Unit::TestCase
     assert_equal expected, JSON.parse(last_response.body)
   end
 
+  def test_global_search_by_ip
+    @server.expects(:find_subnet).with("192.168.122.0").returns(@subnet)
+    @server.expects(:find_record).with("192.168.122.0", "192.168.122.1").returns(@reservations.first)
+
+    get "/search/192.168.122.1"
+
+    assert last_response.ok?, "Last response was not ok: #{last_response.status} #{last_response.body}"
+    expected = {
+      "hostname" =>"test.example.com",
+      "ip"       =>"192.168.122.1",
+      "mac"      =>"00:11:bb:cc:dd:ee"
+    }
+    assert_equal expected, JSON.parse(last_response.body)
+  end
+
+  def test_global_search_by_mac
+    @server.expects(:find_subnet).with("192.168.122.0").returns(@subnet)
+    @server.expects(:find_record).with("192.168.122.0", "00:11:bb:cc:dd:ee").returns(@reservations.first)
+
+    get "/search/00:11:bb:cc:dd:ee"
+
+    assert last_response.ok?, "Last response was not ok: #{last_response.status} #{last_response.body}"
+    expected = {
+      "hostname" =>"test.example.com",
+      "ip"       =>"192.168.122.1",
+      "mac"      =>"00:11:bb:cc:dd:ee"
+    }
+    assert_equal expected, JSON.parse(last_response.body)
+  end
+
+  def test_global_search_by_hostname
+    @server.expects(:find_subnet).with("192.168.122.0").returns(@subnet)
+    @server.expects(:find_record).with("192.168.122.0", "test.example.com").returns(@reservations.first)
+
+    get "/search/test.example.com"
+
+    assert last_response.ok?, "Last response was not ok: #{last_response.status} #{last_response.body}"
+    expected = {
+      "hostname" =>"test.example.com",
+      "ip"       =>"192.168.122.1",
+      "mac"      =>"00:11:bb:cc:dd:ee"
+    }
+    assert_equal expected, JSON.parse(last_response.body)
+  end
+
+  def test_global_search_nonexistent_record
+    @server.expects(:find_subnet).with("192.168.122.0").returns(@subnet)
+    @server.expects(:find_record).with("192.168.122.0", "something.example.com").returns(nil)
+
+    get "/search/something.example.com"
+
+    assert_equal 404, last_response.status
+  end
+
   def test_get_network_record_for_non_existent_record
     @server.expects(:find_subnet).with("192.168.122.0").returns(@subnet)
     @server.expects(:find_record).with("192.168.122.0", "192.168.122.1").returns(nil)
