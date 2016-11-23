@@ -5,6 +5,8 @@ module Proxy::DHCP::Libvirt
       container.dependency :subnet_service, (lambda do
         ::Proxy::DHCP::SubnetService.new(container.get_dependency(:memory_store),
                                          container.get_dependency(:memory_store), container.get_dependency(:memory_store),
+                                         container.get_dependency(:memory_store), container.get_dependency(:memory_store),
+                                         container.get_dependency(:memory_store), container.get_dependency(:memory_store),
                                          container.get_dependency(:memory_store), container.get_dependency(:memory_store))
       end)
       container.dependency :libvirt_network, (lambda do
