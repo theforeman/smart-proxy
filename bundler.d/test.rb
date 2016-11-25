@@ -5,7 +5,7 @@ group :test do
   gem 'ci_reporter', '>= 1.6.3', "< 2.0.0", :require => false
   gem 'rdoc', '< 4.3.0'
   gem 'test-unit' if RUBY_VERSION > "1.8.7"
-  gem 'addressable', '~> 2.3.8' if RUBY_VERSION == '1.8.7' # 2.4.0 drops support for ruby 1.8.7
+  gem 'addressable', '~> 2.3.8' if RUBY_VERSION < '2.0.0' # 2.4.0 drops support for ruby 1.8.7, 2.5.0 drops support for 1.9.3
 
   if RUBY_VERSION < '1.9.3'
     gem 'rake', '< 11'
