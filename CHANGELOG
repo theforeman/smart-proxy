@@ -1,3 +1,10 @@
+2016-11-25	Dominic Cleal <dominic@cleal.org>
+	* Release 1.13.2
+	* Pin addressable gem on Ruby 1.9.3
+	* Pin gems for 1.8.7-1.9 compatibility
+	* fixes #17387 - SubnetService#find_subnet has constant time lookup
+	* fixes #17262 - verify the JSON request body contains a hash
+
 2016-10-26	Dominic Cleal <dominic@cleal.org>
 	* Release 1.13.1
 
