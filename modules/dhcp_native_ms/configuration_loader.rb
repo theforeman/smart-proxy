@@ -5,7 +5,7 @@ module ::Proxy::DHCP::NativeMS
       container.dependency :subnet_service, (lambda do
         ::Proxy::DHCP::SubnetService.new(container.get_dependency(:memory_store), container.get_dependency(:memory_store),
                                          container.get_dependency(:memory_store), container.get_dependency(:memory_store),
-                                         container.get_dependency(:memory_store), container.get_dependency(:memory_store))
+                                         container.get_dependency(:memory_store))
       end)
       container.dependency :dhcp_provider, (lambda do
         Proxy::DHCP::NativeMS::Provider.new(settings[:server], settings[:subnets], container.get_dependency(:subnet_service))
