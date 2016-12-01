@@ -32,19 +32,20 @@ module ::Proxy::DHCP::ISC
     rescue INotify::QueueOverflowError => e
       logger.warn "Queue overflow occured when monitoring #{leases_filename}, restarting monitoring", e
       observer.leases_recreated
+      sleep 60
       retry
     rescue Exception => e
       logger.error "Error occured when monitoring #{leases_filename}", e
     end
 
     def start
-      observer.monitor_started
+      observer.start
       Thread.new { monitor_leases }
     end
 
     def stop
       @notifier.stop unless @notifier.nil?
-      observer.monitor_stopped
+      observer.stop
     end
   end
 end
