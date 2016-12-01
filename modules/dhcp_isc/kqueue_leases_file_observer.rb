@@ -28,19 +28,19 @@ module ::Proxy::DHCP::ISC
           end
         end
       end
-      
+
       @queue.watch_file(leases_filename, :write, :delete, &watcher_proc)
       @queue.run
     end
 
     def start
-      observer.monitor_started
+      observer.start
       Thread.new { monitor_leases }
     end
 
     def stop
       @queue.stop unless @queue.nil?
-      observer.monitor_stopped
+      observer.stop
     end
   end
 end

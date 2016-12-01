@@ -384,7 +384,7 @@ class BmcApiTest < Test::Unit::TestCase
     Proxy::BMC::IPMI.any_instance.stubs(:bootbios).returns(true)
     put "/#{@host}/chassis/config/bootdevice/bios", "".to_json, "CONTENT_TYPE" => "application/json"
     assert_equal 415, last_response.status
-    assert_equal 'Invalid JSON content in body of request: data must be a hash, not String', last_response.body
+    assert last_response.body.start_with?('Invalid JSON content in body of request')
   end
 
   def test_api_returns_actions_for_power_get
