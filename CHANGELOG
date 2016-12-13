@@ -1,3 +1,55 @@
+2016-12-13	Dominic Cleal <dominic@cleal.org>
+	* Release 1.14.0-RC1
+
+2016-11-22	Dominic Cleal <dominic@cleal.org>
+	* fixes #17387 - SubnetService#find_subnet has constant time lookup
+
+2016-11-16	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #15874 - added logging of 'X_REQUEST_ID' http headers
+
+2016-11-16	Lukas Zapletal <lzap+git@redhat.com>
+	* Fixes #17172 - SSH BMC network details implementation
+	* Fixes #16079 - subnet recursive parsing
+
+2016-11-14	Dmitri Dolguikh <witlessbird@gmail.com>
+	* Fixes #17037 - Resolver::DNS#getresources is used now.
+
+2016-11-10	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #7766: ms dhcp provider uses native dhcps api now.
+
+2016-11-09	Alexander Fisher <alex@linfratech.co.uk>
+	* fixes #17125 - Prompt for Windows service name
+
+2016-11-08	Dominic Cleal <dominic@cleal.org>
+	* fixes #17262 - verify the JSON request body contains a hash
+
+2016-11-08	Pavel Moravec <pmoravec@dhcp-27-35.brq.redhat.com>
+	* Fixes #17069 - foreman-debug counts size instead lines
+
+2016-10-20	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #16964 - Proxy::Dns::Record#dns_find works with ipv6 params
+
+2016-10-12	Tomas Strachota <tstrachota@redhat.com>
+	* Fixes #16860 - use blank 404 page
+
+2016-10-04	Alexander Fisher <alex@linfratech.co.uk>
+	* fixes #13237 - Use RRData option when deleting DNS records
+
+2016-10-03	Lukas Zapletal <lzap+git@redhat.com>
+	* Fixes #10250 - simple SSH BMC provider
+
+2016-10-03	Dominic Cleal <dominic@cleal.org>
+	* fixes #16760 - require 'concurrent' to load concurrent-ruby
+
+2016-10-03	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #16766 - allow non hash-rocket syntax in rubocop
+
+2016-09-27	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #15095 - Support for puppet environment classes api
+
+2016-09-07	Dominic Cleal <dominic@cleal.org>
+	* Bump version to 1.14-develop
+
 2016-09-01	Dmitry Vasilets <pronix.service@gmail.com>
 	* Fixes #16410 - handle several instances of "server" in ipa config
 
