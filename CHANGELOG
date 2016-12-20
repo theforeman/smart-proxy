@@ -1,3 +1,9 @@
+2016-12-20	Dominic Cleal <dominic@cleal.org>
+	* Release 1.13.3
+
+2016-11-28	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #17506 - subnet service is now being correctly initialized.
+
 2016-11-25	Dominic Cleal <dominic@cleal.org>
 	* Release 1.13.2
 	* Pin addressable gem on Ruby 1.9.3
