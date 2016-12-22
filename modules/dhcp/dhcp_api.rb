@@ -67,8 +67,11 @@ class Proxy::DhcpApi < ::Sinatra::Base
     begin
       content_type :json
       records = @server.global_search(params[:record])
-      log_halt 404, "Record #{params[:record]} not found" unless records
-      records.to_json
+      if records
+        records.to_json
+      else
+        {:record => params[:record], :result => "not found"}.to_json
+      end
     rescue => e
       log_halt 400, e
     end
