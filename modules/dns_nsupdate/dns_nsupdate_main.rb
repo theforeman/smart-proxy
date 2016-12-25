@@ -115,11 +115,22 @@ module Proxy::Dns::Nsupdate
     end
 
     def find_nsupdate
-      @nsupdate = which("nsupdate")
+      @nsupdate = generic_which("nsupdate")
       unless File.exist?(@nsupdate.to_s)
         logger.warn "unable to find nsupdate binary, maybe missing bind-utils package?"
         raise "unable to find nsupdate binary"
       end
+    end
+
+    def generic_which(cmd)
+      exts = ENV['PATHEXT'] ? ENV['PATHEXT'].split(';') : ['']
+      ENV['PATH'].split(File::PATH_SEPARATOR).each do |path|
+        exts.each { |ext|
+          exe = File.join(path, "#{cmd}#{ext}")
+          return exe if File.executable?(exe) && !File.directory?(exe)
+        }
+      end
+      return nil
     end
   end
 end
