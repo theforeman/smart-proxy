@@ -20,8 +20,8 @@ module Proxy::DHCP::NativeMS
       mac = record.mac.gsub(/:/,"")
       msg = "Removed DHCP reservation for #{record.name} => #{record.ip} - #{record.mac}"
       cmd = "scope #{subnet.network} delete reservedip #{record.ip} #{mac}"
-
       execute(cmd, msg)
+      nil
     end
 
     def add_record options={}
