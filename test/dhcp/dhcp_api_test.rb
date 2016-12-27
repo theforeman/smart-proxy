@@ -121,8 +121,7 @@ class DhcpApiTest < Test::Unit::TestCase
     expected = {
       "hostname" =>"test.example.com",
       "ip"       =>"192.168.122.1",
-      "mac"      =>"00:11:bb:cc:dd:ee",
-      "subnet"   =>"192.168.122.0/255.255.255.0" # NOTE: 'subnet' attribute isn't being used by foreman, which adds a 'network' attribute instead
+      "mac"      =>"00:11:bb:cc:dd:ee"
     }
     assert_equal expected, JSON.parse(last_response.body)
   end
@@ -134,6 +133,38 @@ class DhcpApiTest < Test::Unit::TestCase
     get "/192.168.122.0/192.168.122.1"
 
     assert_equal 404, last_response.status
+  end
+
+  def test_get_network_record_by_ip
+    @server.expects(:find_subnet).with("192.168.122.0").returns(@subnet)
+    @server.expects(:find_records_by_ip).with("192.168.122.0", "192.168.122.1").returns([@reservations.first])
+
+    get "/192.168.122.0/ip/192.168.122.1"
+
+    assert last_response.ok?, "Last response was not ok: #{last_response.status} #{last_response.body}"
+    expected = [{
+      "hostname" =>"test.example.com",
+      "ip"       =>"192.168.122.1",
+      "mac"      =>"00:11:bb:cc:dd:ee",
+      "subnet"   =>"192.168.122.0/255.255.255.0" # NOTE: 'subnet' attribute isn't being used by foreman, which adds a 'network' attribute instead
+    }]
+    assert_equal expected, JSON.parse(last_response.body)
+  end
+
+  def test_get_network_record_by_mac
+    @server.expects(:find_subnet).with("192.168.122.0").returns(@subnet)
+    @server.expects(:find_record_by_mac).with("192.168.122.0", "00:11:bb:cc:dd:ee").returns(@reservations.first)
+
+    get "/192.168.122.0/mac/00:11:bb:cc:dd:ee"
+
+    assert last_response.ok?, "Last response was not ok: #{last_response.status} #{last_response.body}"
+    expected = {
+      "hostname" =>"test.example.com",
+      "ip"       =>"192.168.122.1",
+      "mac"      =>"00:11:bb:cc:dd:ee",
+      "subnet"   =>"192.168.122.0/255.255.255.0" # NOTE: 'subnet' attribute isn't being used by foreman, which adds a 'network' attribute instead
+    }
+    assert_equal expected, JSON.parse(last_response.body)
   end
 
   # New record with identical duplicate contents should be a successful no-op
@@ -196,6 +227,24 @@ class DhcpApiTest < Test::Unit::TestCase
     @server.expects(:del_record).with(@subnet, @reservations.first)
 
     delete "/192.168.122.0/192.168.122.1"
+
+    assert last_response.ok?, "Last response was not ok: #{last_response.status} #{last_response.body}"
+  end
+
+  def test_delete_records_by_ip
+    @server.expects(:find_subnet).with("192.168.122.0").returns(@subnet)
+    @server.expects(:del_records_by_ip).with(@subnet, "192.168.122.1").returns([@reservations.first, @reservations.last])
+
+    delete "/192.168.122.0/ip/192.168.122.1"
+
+    assert last_response.ok?, "Last response was not ok: #{last_response.status} #{last_response.body}"
+  end
+
+  def test_delete_records_by_mac
+    @server.expects(:find_subnet).with("192.168.122.0").returns(@subnet)
+    @server.expects(:del_record_by_mac).with(@subnet, "00:11:bb:cc:dd:ee").returns(@reservations.first)
+
+    delete "/192.168.122.0/mac/00:11:bb:cc:dd:ee"
 
     assert last_response.ok?, "Last response was not ok: #{last_response.status} #{last_response.body}"
   end

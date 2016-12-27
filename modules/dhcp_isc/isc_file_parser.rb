@@ -23,9 +23,9 @@ module Proxy::DHCP::ISC
       # scan for host statements
       conf.scan(/host\s+(\S+\s*\{[^}]+\})/) do |host|
         if match = host[0].match(/^(\S+)\s*\{([^\}]+)/)
-          hostname = match[1]
+          name = match[1]
           body  = match[2]
-          opts = {:hostname => hostname}
+          opts = {:name => name, :hostname => name}
           body.split(";").each do |data|
             opts.merge!(parse_record_options(data))
           end
@@ -152,6 +152,10 @@ module Proxy::DHCP::ISC
           options[:nextServer] = ns
         when /^supersede server.filename\s+=\s+"(\S+)"/
           options[:filename] = $1
+        when /^option\s+host-name\s+"(\S+)"/
+          options[:hostname] = $1
+        when /^supersede host-name\s+=\s+"(\S+)"/
+          options[:hostname] = $1
         when "dynamic"
           options[:deleteable] = true
         #TODO: check if adding a new reservation with omshell for a free lease still

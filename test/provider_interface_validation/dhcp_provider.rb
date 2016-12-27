@@ -7,7 +7,11 @@ module DhcpProviderInterfaceValidation
     assert dhcp_provider.respond_to?(:all_hosts)
     assert dhcp_provider.respond_to?(:unused_ip)
     assert dhcp_provider.respond_to?(:find_record)
+    assert dhcp_provider.respond_to?(:find_records_by_ip)
+    assert dhcp_provider.respond_to?(:find_record_by_mac)
     assert dhcp_provider.respond_to?(:add_record)
+    assert dhcp_provider.respond_to?(:del_records_by_ip)
+    assert dhcp_provider.respond_to?(:del_record_by_mac)
     assert dhcp_provider.respond_to?(:del_record)
   end
 end

@@ -106,7 +106,31 @@ module Proxy::DHCP::NativeMS
                else
                  dhcpsapi.get_client_by_mac_address(subnet_address, ip_or_mac_address)
                end
+      build_reservation_or_lease(client, subnet_address)
+    rescue DhcpsApi::Error => e
+      return nil if e.error_code == 20_013 # not found
+      raise e
+    end
 
+    def find_records_by_ip(subnet_address, ip_address)
+      client = dhcpsapi.get_client_by_ip_address(ip_address)
+      result = build_reservation_or_lease(client, subnet_address)
+      return [] unless result
+      [result]
+    rescue DhcpsApi::Error => e
+      return [] if e.error_code == 20_013 # not found
+      raise e
+    end
+
+    def find_record_by_mac(subnet_address, mac_address)
+      client = dhcpsapi.get_client_by_mac_address(subnet_address, mac_address)
+      build_reservation_or_lease(client, subnet_address)
+    rescue DhcpsApi::Error => e
+      return nil if e.error_code == 20_013 # not found
+      raise e
+    end
+
+    def build_reservation_or_lease(client, subnet_address)
       reservation_subnet_elements_ips = Set.new(dhcpsapi
                                                     .list_subnet_elements(subnet_address, DhcpsApi::DHCP_SUBNET_ELEMENT_TYPE::DhcpReservedIps)
                                                     .map {|r| r[:element][:reserved_ip_address]})
@@ -117,9 +141,6 @@ module Proxy::DHCP::NativeMS
         standard_option_values = standard_option_values(dhcpsapi.list_subnet_option_values(subnet_address))
         build_lease(client, standard_option_values)
       end
-    rescue DhcpsApi::Error => e
-      return nil if e.error_code == 20_013 # not found
-      raise e
     end
 
     def subnets

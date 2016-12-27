@@ -164,6 +164,40 @@ host mac441ea173366b.example.com {
         supersede host-name = "mac441ea173366b.example.com";
 }
 
+# Reservations for a bonded interface
+host bond.example.com-01 {
+  dynamic;
+  hardware ethernet 44:1e:a1:73:36:10;
+  fixed-address 192.168.122.43;
+        supersede server.filename = "pxelinux.0";
+        supersede server.next-server = c0:a8:00:01;
+        supersede host-name = "bond.example.com";
+}
+
+host bond.example.com-02 {
+  dynamic;
+  hardware ethernet 44:1e:a1:73:36:11;
+  fixed-address 192.168.122.43;
+        supersede server.filename = "pxelinux.0";
+        supersede server.next-server = c0:a8:00:01;
+        supersede host-name = "bond.example.com";
+}
+
+# hostname set without supersede
+host bravo2.example.com {
+  dynamic;
+  hardware ethernet 44:1e:a1:73:36:15;
+  fixed-address 192.168.122.42;
+  option host-name "bravo.example.com";
+}
+
+# No hostname set
+host alpha.example.com {
+  dynamic;
+  hardware ethernet 44:1e:a1:73:36:15;
+  fixed-address 192.168.122.42;
+}
+
 # Prevent deletion of a reserved record via expired lease
 host quux.example.org {
   dynamic;

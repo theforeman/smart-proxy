@@ -1,4 +1,6 @@
 require 'test_helper'
+require 'dhcp_common/server'
+require 'dhcp_common/subnet_service'
 require 'dhcp_libvirt/dhcp_libvirt'
 require 'dhcp_libvirt/dhcp_libvirt_main'
 
@@ -49,8 +51,8 @@ XMLFIXTURE
   def test_should_load_subnet_data
     @subject.load_subnet_data(@subnet)
 
-    assert @service.find_host_by_ip("192.168.122.0", "192.168.122.10")
-    assert @service.find_host_by_ip("192.168.122.0", "192.168.122.11")
+    assert @service.find_hosts_by_ip("192.168.122.0", "192.168.122.10")
+    assert @service.find_hosts_by_ip("192.168.122.0", "192.168.122.11")
     assert @service.find_lease_by_ip("192.168.122.0", "192.168.122.22")
     assert @service.find_lease_by_mac("192.168.122.0", "52:54:00:13:05:12")
     assert_equal 2, @service.all_hosts.size

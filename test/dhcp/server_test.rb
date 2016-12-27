@@ -1,4 +1,6 @@
 require 'test_helper'
+require 'dhcp/dhcp'
+require 'dhcp_common/subnet_service'
 require 'dhcp_common/dhcp_common'
 require 'dhcp_common/server'
 
@@ -11,7 +13,7 @@ class DHCPServerTest < Test::Unit::TestCase
     @subnet = Proxy::DHCP::Subnet.new("192.168.0.0", "255.255.255.0")
     @service.add_subnet(@subnet)
 
-    @record = Proxy::DHCP::Reservation.new(:hostname => 'test', :subnet => @subnet, :ip => "192.168.0.11", :mac => "aa:bb:cc:dd:ee:ff")
+    @record = Proxy::DHCP::Reservation.new(:hostname => 'test', :name => 'test', :subnet => @subnet, :ip => "192.168.0.11", :mac => "aa:bb:cc:dd:ee:ff")
     @service.add_host(@subnet.network, @record)
   end
 
@@ -21,13 +23,23 @@ class DHCPServerTest < Test::Unit::TestCase
 
   def test_should_raise_exception_when_record_exists
     assert_raises Proxy::DHCP::AlreadyExists do
-      @server.add_record('hostname' => 'test', 'network' => @subnet.network, 'ip' => "192.168.0.11", 'mac' => "aa:bb:cc:dd:ee:ff")
+      @server.add_record('hostname' => 'test', 'name' => 'test', 'network' => @subnet.network, 'ip' => "192.168.0.11", 'mac' => "aa:bb:cc:dd:ee:ff")
     end
   end
 
   def test_should_raise_exception_when_address_in_use
     assert_raises Proxy::DHCP::Collision do
-      @server.add_record('hostname' => 'test-1', 'network' => @subnet.network, 'ip' => "192.168.0.11", 'mac' => "aa:bb:cc:dd:ee:ef")
+      @server.add_record('hostname' => 'test-1', 'name' => 'test', 'network' => @subnet.network, 'ip' => "192.168.0.11", 'mac' => "aa:bb:cc:dd:ee:ef")
+    end
+  end
+
+  def test_not_should_raise_exception_when_address_with_related_mac_in_use
+    record = Proxy::DHCP::Reservation.new(:hostname => 'example.com', :name => 'example.com-01', :subnet => @subnet, :ip => "192.168.0.15", :mac => "aa:bb:cc:dd:ee:ee")
+    @service.add_host(@subnet.network, record)
+    assert_nothing_raised do
+      @server.add_record('hostname' => 'example.com', 'name' => 'example.com-02',
+                         'network' => @subnet.network, 'ip' => "192.168.0.15", 'mac' => "aa:bb:cc:dd:ee:de",
+                         'related_macs' => ['aa:bb:cc:dd:ee:ee'])
     end
   end
 
@@ -45,6 +57,14 @@ class DHCPServerTest < Test::Unit::TestCase
 
   def test_should_find_record_based_on_mac
     assert_equal @record, @server.find_record("192.168.0.0", "aa:bb:cc:dd:ee:ff")
+  end
+
+  def test_find_record_by_mac
+    assert_equal @record, @server.find_record_by_mac("192.168.0.0", "aa:bb:cc:dd:ee:ff")
+  end
+
+  def test_find_records_by_ip
+    assert_equal [@record], @server.find_records_by_ip("192.168.0.0", "192.168.0.11")
   end
 
   def test_ip_by_mac_address_and_range
@@ -74,5 +94,15 @@ class DHCPServerTest < Test::Unit::TestCase
 
   def test_should_have_a_name
     assert !@server.name.nil?
+  end
+
+  def test_del_records_by_ip
+    @server.expects(:del_record).with(@subnet, @record).once.returns(true)
+    assert_equal [true], @server.del_records_by_ip(@subnet, '192.168.0.11')
+  end
+
+  def test_del_record_by_mac
+    @server.expects(:del_record).with(@subnet, @record).once.returns(true)
+    assert_equal true, @server.del_record_by_mac(@subnet, 'aa:bb:cc:dd:ee:ff')
   end
 end
