@@ -56,10 +56,32 @@ module Proxy::DHCP
     end
 
     def find_record(subnet_address, an_address)
-      service.find_host_by_ip(subnet_address, an_address) ||
-        service.find_host_by_mac(subnet_address, an_address) ||
-        service.find_lease_by_ip(subnet_address, an_address) ||
-        service.find_lease_by_mac(subnet_address, an_address)
+      records_by_ip = find_records_by_ip(subnet_address, an_address)
+      return records_by_ip.first unless records_by_ip.empty?
+      find_record_by_mac(subnet_address, an_address)
+    end
+
+    def find_record_by_mac(subnet_address, mac_address)
+      service.find_host_by_mac(subnet_address, mac_address) ||
+        service.find_lease_by_mac(subnet_address, mac_address)
+    end
+
+    def find_records_by_ip(subnet_address, ip)
+      hosts = service.find_hosts_by_ip(subnet_address, ip)
+      return hosts if hosts
+      lease = service.find_lease_by_ip(subnet_address, ip)
+      return [lease] if lease
+      []
+    end
+
+    def del_records_by_ip(subnet, ip)
+      records = find_records_by_ip(subnet.network, ip)
+      records.map { |record| del_record(subnet, record) }
+    end
+
+    def del_record_by_mac(subnet, mac_address)
+      record = find_record_by_mac(subnet.network, mac_address)
+      del_record(subnet, record)
     end
 
     def unused_ip(subnet, mac_address, from_address, to_address)
@@ -93,6 +115,8 @@ module Proxy::DHCP
     # Delete keys with string names before adding them back with symbol names,
     # otherwise there will be duplicate information.
     def add_record options = {}
+      related_macs = options.delete("related_macs") || []
+      logger.debug "Ignoring duplicates for macs: #{related_macs.inspect}" unless related_macs.empty?
       options = clean_up_add_record_parameters(options)
 
       validate_ip(options[:ip])
@@ -105,12 +129,16 @@ module Proxy::DHCP
       raise(Proxy::DHCP::Error, "DHCP implementation does not support Vendor Options") if vendor_options_included?(options) && !vendor_options_supported?
 
       # try to figure out if we already have this record
-      record = service.find_host_by_ip(subnet.network, options[:ip]) || service.find_host_by_mac(subnet.network, options[:mac])
-      unless record.nil?
+      similar_records = find_similar_records(subnet, options)
+      similar_records.each do |record|
         if Record.compare_options(record.options, options)
           # we already got this record, no need to do anything
           logger.debug "We already got the same DHCP record - skipping"
           raise Proxy::DHCP::AlreadyExists
+        elsif related_macs.include?(record.mac)
+          logger.debug "Record is an allowed duplicate - skipping"
+          logger.debug "request: #{options.inspect}"
+          logger.debug "local:   #{record.options.inspect}"
         else
           logger.warn "Request to create a conflicting DHCP record"
           logger.debug "request: #{options.inspect}"
@@ -120,6 +148,13 @@ module Proxy::DHCP
       end
 
       Proxy::DHCP::Reservation.new(options)
+    end
+
+    def find_similar_records(subnet, options)
+      records = []
+      records << service.find_hosts_by_ip(subnet.network, options[:ip])
+      records << service.find_host_by_mac(subnet.network, options[:mac])
+      records.flatten.compact.uniq { |record| record.mac }
     end
 
     def clean_up_add_record_parameters(in_options)
@@ -137,7 +172,9 @@ module Proxy::DHCP
       to_return.delete("subnet") # Not a valid key; remove it to prevent conflict with :subnet
       subnet = to_return.delete("network")
 
-      to_return.merge!(:hostname => hostname || name, :subnet => subnet, :ip => ip, :mac => mac)
+      to_return.merge!(:hostname => hostname || name,
+                       :name => name || hostname,
+                       :subnet => subnet, :ip => ip, :mac => mac)
     end
 
     def vendor_options_included? options

@@ -150,14 +150,26 @@ END
     @subnet_service.add_subnet(subnet)
     parsed = @parser.parse_config_and_leases_for_records(File.read("./test/fixtures/dhcp/dhcp.leases"))
 
-    assert_equal 20, parsed.size
+    assert_equal 24, parsed.size
 
     deleted = parsed.select {|record| record.is_a?(::Proxy::DHCP::Reservation) && record.name == "deleted.example.com" }
     assert_equal [::Proxy::DHCP::Reservation, ::Proxy::DHCP::DeletedReservation], deleted.map(&:class)
 
+    bonds = parsed.select {|record| record.is_a?(::Proxy::DHCP::Reservation) && record.name =~ /^bond\.example\.com/ }
+    assert_equal ['bond.example.com', 'bond.example.com'], bonds.map(&:hostname)
+
+    minimal = parsed.find {|record| record.is_a?(::Proxy::DHCP::Reservation) && record.name == "alpha.example.com" }
+    assert_equal 'alpha.example.com', minimal.hostname
+
+    hostname = parsed.find {|record| record.is_a?(::Proxy::DHCP::Reservation) && record.name == "bravo2.example.com" }
+    assert_equal 'bravo.example.com', hostname.hostname
+
     assert_nil parsed.find {|record| record.ip == "192.168.122.0" }
     assert_not_nil parsed.find {|record| record.respond_to?(:name) && record.name == "undeleted.example.com" }
     assert_not_nil parsed.find {|record| record.ip == "192.168.122.35"}
+    assert_not_nil parsed.find {|record| record.name == "bond.example.com-01"}
+    assert_not_nil parsed.find {|record| record.name == "bond.example.com-02"}
+    assert_equal 2, parsed.count {|record| record.ip == "192.168.122.43"}
   end
 
   def test_convert_next_server_ip_from_hex
