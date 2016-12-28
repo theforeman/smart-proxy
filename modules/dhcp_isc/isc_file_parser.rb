@@ -6,6 +6,7 @@ require 'dhcp_common/record/deleted_reservation'
 module Proxy::DHCP::ISC
   class FileParser
     include Common
+    include Proxy::Validations
 
     attr_reader :service
 
@@ -146,7 +147,7 @@ module Proxy::DHCP::ISC
         when /^supersede server.next-server\s+=\s+(\S+)/
           begin
             ns = validate_ip hex2ip($1)
-          rescue
+          rescue Proxy::Validations::Error
             ns = $1.gsub("\"","")
           end
           options[:nextServer] = ns
