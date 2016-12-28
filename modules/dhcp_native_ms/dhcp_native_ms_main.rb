@@ -10,19 +10,33 @@ module Proxy::DHCP::NativeMS
     def initialize(name, subnets, subnet_service)
       super(name, subnets, subnet_service)
     end
+		
 
-    def del_record subnet, record
-      validate_subnet subnet
-      validate_record record
-      # TODO: Refactor this into the base class
-      raise InvalidRecord, "#{record} is static - unable to delete" unless record.deleteable?
-
-      mac = record.mac.gsub(/:/,"")
-      msg = "Removed DHCP reservation for #{record.name} => #{record.ip} - #{record.mac}"
-      cmd = "scope #{subnet.network} delete reservedip #{record.ip} #{mac}"
-
-      execute(cmd, msg)
-    end
+		def del_reservation(record_name, record_ip, record_mac, subnet_network)
+			mac = record_mac.gsub(/:/,"")
+			msg = "Remove DHCP reservation for #{record_name} => #{record_ip} - #{record_mac}"
+			cmd = "scope #{subnet_network} delete reservedip #{record_ip} #{mac}"
+			execute(cmd, msg)
+			nil
+		end
+		
+		def del_lease(record_name, record_ip, record_mac, subnet_network)
+			msg = "Removed DHCP lease for #{record_name} => #{record_ip} - #{record_mac}"
+			cmd  = "scope #{subnet_network} delete lease #{record_ip}"
+			execute(cmd, msg)
+			nil
+		end
+		
+		
+		def del_record subnet, record
+			validate_subnet subnet
+			validate_record record
+			# TODO: Refactor this into the base class
+			raise InvalidRecord, "#{record} is static - unable to delete" unless record.deleteable?
+			del_reservation(record.name, record.ip, record.mac, subnet.network)
+			del_lease(record.name, record.ip, record.mac, subnet.network)
+			nil
+		end
 
     def add_record options={}
       record = super(options)
@@ -192,45 +206,47 @@ module Proxy::DHCP::NativeMS
       super
       service.add_subnets(*find_all_subnets)
     end
-
-    def execute cmd, msg=nil, error_only=false
-      tsecs = 5
-      response = nil
-      interpreter = Proxy::SETTINGS.x86_64 ? 'c:\windows\sysnative\cmd.exe' : 'c:\windows\system32\cmd.exe'
+		
+		def execute cmd, msg=nil, error_only=false
+			tsecs = 5 
+			exit_code = response = nil
+			interpreter = Proxy::SETTINGS.x86_64 ? 'c:\windows\sysnative\cmd.exe' : 'c:\windows\system32\cmd.exe'
       command  = interpreter + ' /c c:\Windows\System32\netsh.exe -c dhcp ' + "server #{name} #{cmd}"
-
-      std_in = std_out = std_err = nil
-      begin
-        timeout(tsecs) do
-          logger.debug "executing: #{command}"
-          std_in, std_out, std_err  = Open3.popen3(command)
-          response  = std_out.readlines
-          response += std_err.readlines
-        end
-      rescue TimeoutError
-        raise Proxy::DHCP::Error.new("Netsh did not respond within #{tsecs} seconds")
-      ensure
-        std_in.close  unless std_in.nil?
-        std_out.close unless std_out.nil?
-        std_err.close unless std_err.nil?
-      end
-      report msg, response, error_only
-      response
-    end
-
-    def report msg, response, error_only
-      if response.grep(/completed successfully/).empty?
+			begin
+				timeout(tsecs) do
+					logger.debug "executing: #{command}"
+					Open3.popen3(command) do |stdin, stdout, stderr, wait_thr|
+						exit_value = wait_thr.value
+						exit_code = exit_value.exitstatus
+						response = stdout.readlines
+						response += stderr.readlines
+					end
+				end
+				rescue TimeoutError
+					raise Proxy::DHCP::Error.new("Netsh did not respond within #{tsecs} seconds")
+			end
+			report msg, response, error_only, exit_code
+			logger.debug "response=#{response}"
+			response
+		end
+			
+		def report msg, response, error_only, exit_code
+			# Since we can't make sure that every netsh command will contain specific string
+			# We'll check the exit code of the command, this can assure us whether it succeeded or not
+      if exit_code.to_i != 0
+				is_known_vendor = true
         if !response.grep(/class name being used is unknown/).empty?
           logger.warn "Vendor class not found"
+					is_known_vendor = false
         else
-          logger.error "Netsh failed:\n" + response.join()
+          logger.error "Netsh failed with exit code #{exit_code}:\n" + response.join()
         end
         msg.sub! /Removed/,    "remove"
         msg.sub! /Added/,      "add"
         msg.sub! /Enumerated/, "enumerate"
         msg.sub! /Queried/,    "query"
         msg  = "Failed to #{msg}"
-        msg += "Vendor class not found" if !response.grep(/class name being used is unknown/).empty?
+		msg += "Vendor class not found" if !is_known_vendor
         msg += ": No entry found" if !response.grep(/not a reserved client/).empty?
         match = response.grep(/used by another client/)
         msg += ": #{match}" unless match.empty?
