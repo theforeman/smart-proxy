@@ -1,4 +1,5 @@
 require 'test_helper'
+require 'dhcp_common/dhcp_common'
 require 'dhcp_common/subnet'
 require 'dhcp_common/subnet_service'
 require 'dhcp_isc/isc_file_parser'
@@ -47,6 +48,7 @@ subnet 192.168.1.0 netmask 255.255.255.128 {
 host test.example.com {
   hardware ethernet 00:11:bb:cc:dd:ee;
   fixed-address 192.168.122.1;
+  supersede server.next-server = ac:17:23:1d;
 }
 END
 
@@ -156,6 +158,15 @@ END
     assert_nil parsed.find {|record| record.ip == "192.168.122.0" }
     assert_not_nil parsed.find {|record| record.respond_to?(:name) && record.name == "undeleted.example.com" }
     assert_not_nil parsed.find {|record| record.ip == "192.168.122.35"}
+  end
+
+  def test_convert_next_server_ip_from_hex
+    subnet = Proxy::DHCP::Subnet.new("192.168.122.0", "255.255.255.0")
+    @subnet_service.add_subnet(subnet)
+    parsed = @parser.parse_config_and_leases_for_records(DHCPD_CONFIG)
+
+    record = parsed.find {|r| r.is_a?(::Proxy::DHCP::Reservation) && r.name == "test.example.com" }
+    assert_equal "172.23.35.29", record.nextServer
   end
 
   def test_get_ip_list_from_config_line
