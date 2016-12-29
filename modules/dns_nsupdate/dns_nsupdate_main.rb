@@ -45,6 +45,17 @@ module Proxy::Dns::Nsupdate
       end
     end
 
+    def create_cname_record(fqdn, target)
+      case cname_record_conflicts(fqdn, target) #return -1, 0, 1
+        when 1
+          raise(Proxy::Dns::Collision, "'#{fqdn}' is already in use by #{target}")
+        when 0
+          return nil
+        else
+          do_create(fqdn, target, "CNAME")
+      end
+    end
+
     def do_create(id, value, type)
       nsupdate_connect
       nsupdate "update add #{id}. #{@ttl} #{type} #{value}"
@@ -67,6 +78,10 @@ module Proxy::Dns::Nsupdate
     def remove_ptr_record(ip)
       get_name!(ip)
       do_remove(ip, "PTR")
+    end
+
+    def remove_cname_record(fqdn_alias)
+      do_remove(fqdn_alias, "CNAME")
     end
 
     def do_remove(id, type)

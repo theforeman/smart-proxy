@@ -1,6 +1,5 @@
 require 'test_helper'
-require 'dns/dns'
-require 'dns_nsupdate/dns_nsupdate_plugin'
+require 'dns_common/dns_common'
 require 'dns_nsupdate/dns_nsupdate_main'
 require 'dns_nsupdate/dns_nsupdate_gss_main'
 
@@ -52,12 +51,6 @@ class DnsNsupdateTest < Test::Unit::TestCase
     end
   end
 
-  def test_remove_cname_record_fails
-    assert_raise Proxy::Dns::Error do
-      Proxy::Dns::Nsupdate::Record.new(nil, 100, nil).remove_cname_record('some.host')
-    end
-  end
-
   def test_create_aaaa_record
     Proxy::Dns::Nsupdate::Record.any_instance.expects(:nsupdate_connect).returns(true)
     Proxy::Dns::Nsupdate::Record.any_instance.expects(:nsupdate).with('update add some.host. 100 AAAA 2001:db8::1').returns(true)
@@ -68,10 +61,26 @@ class DnsNsupdateTest < Test::Unit::TestCase
     assert_nil Proxy::Dns::Nsupdate::Record.new(nil, 100, nil).create_aaaa_record('some.host', '2001:db8::1')
   end
 
+  def test_create_cname_record
+    Proxy::Dns::Nsupdate::Record.any_instance.expects(:nsupdate_connect).returns(true)
+    Proxy::Dns::Nsupdate::Record.any_instance.expects(:nsupdate).with('update add alias.host. 100 CNAME some.host').returns(true)
+    Proxy::Dns::Nsupdate::Record.any_instance.expects(:nsupdate_disconnect).returns(true)
+    Proxy::Dns::Nsupdate::Record.any_instance.expects(:nsupdate_close)
+    Proxy::Dns::Nsupdate::Record.any_instance.expects(:cname_record_conflicts).with('alias.host', 'some.host').returns(-1)
+
+    assert_nil Proxy::Dns::Nsupdate::Record.new(nil, 100, nil).create_cname_record('alias.host', 'some.host')
+  end
+
   def test_overwrite_aaaa_record
     Proxy::Dns::Nsupdate::Record.any_instance.expects(:aaaa_record_conflicts).with('some.host', '2001:db8::1').returns(0)
 
     assert_nil Proxy::Dns::Nsupdate::Record.new(nil, 100, nil).create_aaaa_record('some.host', '2001:db8::1')
+  end
+
+  def test_overwrite_cname_record
+    Proxy::Dns::Nsupdate::Record.any_instance.expects(:cname_record_conflicts).with('alias.host', 'some.host').returns(0)
+
+    assert_nil Proxy::Dns::Nsupdate::Record.new(nil, 100, nil).create_cname_record('alias.host', 'some.host')
   end
 
   def test_create_duplicate_aaaa_record_fails
@@ -79,6 +88,14 @@ class DnsNsupdateTest < Test::Unit::TestCase
 
     assert_raise Proxy::Dns::Collision do
       Proxy::Dns::Nsupdate::Record.new(nil, 100, nil).create_aaaa_record('some.host', '2001:db8::1')
+    end
+  end
+
+  def test_create_duplicate_cname_record_fails
+    Proxy::Dns::Nsupdate::Record.any_instance.expects(:cname_record_conflicts).with('alias.host', 'some.host').returns(1)
+
+    assert_raise Proxy::Dns::Collision do
+      Proxy::Dns::Nsupdate::Record.new(nil, 100, nil).create_cname_record('alias.host', 'some.host')
     end
   end
 
@@ -128,6 +145,16 @@ class DnsNsupdateTest < Test::Unit::TestCase
 
     assert_nil Proxy::Dns::Nsupdate::Record.new('a_server', 999, nil).remove_aaaa_record('some.host')
   end
+
+  def test_remove_cname_record
+    Proxy::Dns::Nsupdate::Record.any_instance.expects(:nsupdate_connect).returns(true)
+    Proxy::Dns::Nsupdate::Record.any_instance.expects(:nsupdate).with('update delete alias.host CNAME').returns(true)
+    Proxy::Dns::Nsupdate::Record.any_instance.expects(:nsupdate_disconnect).returns(true)
+    Proxy::Dns::Nsupdate::Record.any_instance.expects(:nsupdate_close)
+
+    assert_nil Proxy::Dns::Nsupdate::Record.new('a_server', 999, nil).remove_cname_record('alias.host')
+  end
+
 
   def test_remove_aaaa_record_raises_exception_if_host_does_not_exist
     Proxy::Dns::Nsupdate::Record.any_instance.expects(:get_ipv6_address!).with('not_existing.example.com').raises(Proxy::Dns::NotFound)
