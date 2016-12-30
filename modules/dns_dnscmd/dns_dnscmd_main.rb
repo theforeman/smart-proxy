@@ -55,7 +55,7 @@ module Proxy::Dns::Dnscmd
     end
 
     def create_ptr_record(fqdn, ptr)
-      case ptr_record_conflicts(fqdn, ptr_to_ip(ptr)) #returns -1, 0, 1
+      case ptr_record_conflicts(fqdn, ptr) #returns -1, 0, 1
         when 1 then
           raise(Proxy::Dns::Collision, "'#{ptr}' is already in use")
         when 0
