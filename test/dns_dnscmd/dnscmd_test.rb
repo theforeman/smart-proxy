@@ -45,18 +45,18 @@ class DnsCmdTest < Test::Unit::TestCase
   end
 
   def test_create_ptr_record
-    Proxy::Dns::Dnscmd::Record.any_instance.expects(:ptr_record_conflicts).with('host.foo.bar.domain.local', '192.168.33.33').returns(-1)
+    Proxy::Dns::Dnscmd::Record.any_instance.expects(:ptr_record_conflicts).with('host.foo.bar.domain.local', '33.33.168.192.in-addr.arpa').returns(-1)
     Proxy::Dns::Dnscmd::Record.any_instance.expects(:execute).with('/RecordAdd 33.168.192.in-addr.arpa 33.33.168.192.in-addr.arpa. PTR host.foo.bar.domain.local.', anything).returns(true)
     assert_nil @server.create_ptr_record('host.foo.bar.domain.local', '33.33.168.192.in-addr.arpa')
   end
 
   def test_overwrite_ptr_record
-    Proxy::Dns::Dnscmd::Record.any_instance.expects(:ptr_record_conflicts).with('host.foo.bar.domain.local', '192.168.33.33').returns(0)
+    Proxy::Dns::Dnscmd::Record.any_instance.expects(:ptr_record_conflicts).with('host.foo.bar.domain.local', '33.33.168.192.in-addr.arpa').returns(0)
     assert_nil @server.create_ptr_record('host.foo.bar.domain.local', '33.33.168.192.in-addr.arpa')
   end
 
   def test_create_duplicate_ptr_record_fails
-    Proxy::Dns::Dnscmd::Record.any_instance.expects(:ptr_record_conflicts).with('host.foo.bar.domain.local', '192.168.33.33').returns(1)
+    Proxy::Dns::Dnscmd::Record.any_instance.expects(:ptr_record_conflicts).with('host.foo.bar.domain.local', '33.33.168.192.in-addr.arpa').returns(1)
     assert_raise Proxy::Dns::Collision do
       @server.create_ptr_record('host.foo.bar.domain.local', '33.33.168.192.in-addr.arpa')
     end
