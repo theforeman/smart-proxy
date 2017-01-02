@@ -78,6 +78,7 @@ module Proxy
   require 'puppet_proxy_ssh/puppet_proxy_ssh'
   require 'bmc/bmc'
   require 'realm/realm'
+  require 'realm_freeipa/realm_freeipa'
   require 'logs/logs'
 
   def self.version
