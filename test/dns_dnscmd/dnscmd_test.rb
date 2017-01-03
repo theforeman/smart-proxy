@@ -1,5 +1,5 @@
 require 'test_helper'
-require 'dns_dnscmd/dns_dnscmd'
+require 'dns_common/dns_common'
 require 'dns_dnscmd/dns_dnscmd_main'
 
 class DnscmdForTesting < Proxy::Dns::Dnscmd::Record
@@ -21,96 +21,36 @@ class DnsCmdTest < Test::Unit::TestCase
   end
 
   def test_create_a_record_with_longest_zone_match
-    Proxy::Dns::Dnscmd::Record.any_instance.expects(:a_record_conflicts).with('host.foo.bar.domain.local', '192.168.33.33').returns(-1)
     Proxy::Dns::Dnscmd::Record.any_instance.expects(:execute).with('/RecordAdd bar.domain.local host.foo.bar.domain.local. A 192.168.33.33', anything).returns(true)
-    assert_nil @server.create_a_record('host.foo.bar.domain.local', '192.168.33.33')
+    assert_nil @server.do_create('host.foo.bar.domain.local', '192.168.33.33', 'A')
   end
 
   def test_create_aaaa_record_with_longest_zone_match
-    Proxy::Dns::Dnscmd::Record.any_instance.expects(:aaaa_record_conflicts).with('host.foo.bar.domain.local', '2001:db8:deef::1').returns(-1)
     Proxy::Dns::Dnscmd::Record.any_instance.expects(:execute).with('/RecordAdd bar.domain.local host.foo.bar.domain.local. AAAA 2001:db8:deef::1', anything).returns(true)
-    assert_nil @server.create_aaaa_record('host.foo.bar.domain.local', '2001:db8:deef::1')
-  end
-
-  def test_overwrite_address_record_with_longest_zone_match
-    Proxy::Dns::Dnscmd::Record.any_instance.expects(:a_record_conflicts).with('host.foo.bar.domain.local', '192.168.33.33').returns(0)
-    assert_nil @server.create_a_record('host.foo.bar.domain.local', '192.168.33.33')
-  end
-
-  def test_create_duplicate_address_record_fails
-    Proxy::Dns::Dnscmd::Record.any_instance.expects(:a_record_conflicts).with('host.foo.bar.domain.local', '192.168.33.33').returns(1)
-    assert_raise Proxy::Dns::Collision do
-      @server.create_a_record('host.foo.bar.domain.local', '192.168.33.33')
-    end
+    assert_nil @server.do_create('host.foo.bar.domain.local', '2001:db8:deef::1', 'AAAA')
   end
 
   def test_create_ptr_record
-    Proxy::Dns::Dnscmd::Record.any_instance.expects(:ptr_record_conflicts).with('host.foo.bar.domain.local', '33.33.168.192.in-addr.arpa').returns(-1)
     Proxy::Dns::Dnscmd::Record.any_instance.expects(:execute).with('/RecordAdd 33.168.192.in-addr.arpa 33.33.168.192.in-addr.arpa. PTR host.foo.bar.domain.local.', anything).returns(true)
-    assert_nil @server.create_ptr_record('host.foo.bar.domain.local', '33.33.168.192.in-addr.arpa')
-  end
-
-  def test_overwrite_ptr_record
-    Proxy::Dns::Dnscmd::Record.any_instance.expects(:ptr_record_conflicts).with('host.foo.bar.domain.local', '33.33.168.192.in-addr.arpa').returns(0)
-    assert_nil @server.create_ptr_record('host.foo.bar.domain.local', '33.33.168.192.in-addr.arpa')
-  end
-
-  def test_create_duplicate_ptr_record_fails
-    Proxy::Dns::Dnscmd::Record.any_instance.expects(:ptr_record_conflicts).with('host.foo.bar.domain.local', '33.33.168.192.in-addr.arpa').returns(1)
-    assert_raise Proxy::Dns::Collision do
-      @server.create_ptr_record('host.foo.bar.domain.local', '33.33.168.192.in-addr.arpa')
-    end
+    assert_nil @server.do_create('33.33.168.192.in-addr.arpa', 'host.foo.bar.domain.local', 'PTR')
   end
 
   def test_create_cname_record
-    Proxy::Dns::Dnscmd::Record.any_instance.expects(:cname_record_conflicts).with('alias.foo.bar.domain.local', 'host.foo.bar.domain.local').returns(-1)
     Proxy::Dns::Dnscmd::Record.any_instance.expects(:execute).with('/RecordAdd bar.domain.local alias.foo.bar.domain.local. CNAME host.foo.bar.domain.local', anything).returns(true)
-    assert_nil @server.create_cname_record('alias.foo.bar.domain.local', 'host.foo.bar.domain.local')
-  end
-
-  def test_overwrite_cname_record
-    Proxy::Dns::Dnscmd::Record.any_instance.expects(:cname_record_conflicts).with('alias.foo.bar.domain.local', 'host.foo.bar.domain.local').returns(0)
-    assert_nil @server.create_cname_record('alias.foo.bar.domain.local', 'host.foo.bar.domain.local')
-  end
-
-  def test_create_duplicate_cname_record_fails
-    Proxy::Dns::Dnscmd::Record.any_instance.expects(:cname_record_conflicts).with('alias.foo.bar.domain.local', 'host.foo.bar.domain.local').returns(1)
-    assert_raise Proxy::Dns::Collision do
-      @server.create_cname_record('alias.foo.bar.domain.local', 'host.foo.bar.domain.local')
-    end
+    assert_nil @server.do_create('alias.foo.bar.domain.local', 'host.foo.bar.domain.local', 'CNAME')
   end
 
   def test_remove_address_records_with_longest_zone_match
     Proxy::Dns::Dnscmd::Record.any_instance.expects(:enum_records).with('bar.domain.local', 'host.foo.bar.domain.local',  'A').returns(['1.1.1.1','2.2.2.2'])
     Proxy::Dns::Dnscmd::Record.any_instance.expects(:remove_specific_record_from_zone).with('bar.domain.local', 'host.foo.bar.domain.local', '1.1.1.1', 'A').returns(true)
     Proxy::Dns::Dnscmd::Record.any_instance.expects(:remove_specific_record_from_zone).with('bar.domain.local', 'host.foo.bar.domain.local', '2.2.2.2', 'A').returns(true)
-    assert_nil @server.remove_a_record('host.foo.bar.domain.local')
-  end
-
-  def test_remove_a_record
-    Proxy::Dns::Dnscmd::Record.any_instance.expects(:remove_record).with('host.example.com','A').returns(nil)
-    assert_nil @server.remove_a_record('host.example.com')
-  end
-
-  def test_remove_aaaa_record
-    Proxy::Dns::Dnscmd::Record.any_instance.expects(:remove_record).with('host.example.com','AAAA').returns(nil)
-    assert_nil @server.remove_aaaa_record('host.example.com')
-  end
-
-  def test_remove_ptr_record
-    Proxy::Dns::Dnscmd::Record.any_instance.expects(:remove_record).with('33.33.168.192.in-addr.arpa','PTR').returns(nil)
-    assert_nil @server.remove_ptr_record('33.33.168.192.in-addr.arpa')
-  end
-
-  def test_remove_cname_record
-    Proxy::Dns::Dnscmd::Record.any_instance.expects(:remove_record).with('alias.example.com','CNAME').returns(nil)
-    assert_nil @server.remove_cname_record('alias.example.com')
+    assert_nil @server.do_remove('host.foo.bar.domain.local', 'A')
   end
 
   def test_remove_ptr_records
     Proxy::Dns::Dnscmd::Record.any_instance.expects(:enum_records).with('33.168.192.in-addr.arpa', '33.33.168.192.in-addr.arpa',  'PTR').returns(['host.domain.local'])
     Proxy::Dns::Dnscmd::Record.any_instance.expects(:remove_specific_record_from_zone).with('33.168.192.in-addr.arpa', '33.33.168.192.in-addr.arpa', 'host.domain.local', 'PTR').returns(true)
-    assert_nil @server.remove_ptr_record('33.33.168.192.in-addr.arpa')
+    assert_nil @server.do_remove('33.33.168.192.in-addr.arpa', 'PTR')
   end
 
   def test_remove_specific_a_record_from_zone
@@ -126,7 +66,7 @@ class DnsCmdTest < Test::Unit::TestCase
   def test_remove_cname_records
     Proxy::Dns::Dnscmd::Record.any_instance.expects(:enum_records).with('bar.domain.local', 'alias.foo.bar.domain.local',  'CNAME').returns(['host.domain.local'])
     Proxy::Dns::Dnscmd::Record.any_instance.expects(:remove_specific_record_from_zone).with('bar.domain.local', 'alias.foo.bar.domain.local', 'host.domain.local', 'CNAME').returns(true)
-    assert_nil @server.remove_cname_record('alias.foo.bar.domain.local')
+    assert_nil @server.do_remove('alias.foo.bar.domain.local', 'CNAME')
   end
 
   def test_dns_zone_matches_second_best_match_if_zone_name_equals_host_name

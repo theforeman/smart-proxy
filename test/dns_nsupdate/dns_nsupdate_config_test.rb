@@ -1,6 +1,9 @@
 require 'test_helper'
+require 'dns_common/dns_common'
 require 'dns_nsupdate/dns_nsupdate'
+require 'dns_nsupdate/dns_nsupdate_main'
 require 'dns_nsupdate/dns_nsupdate_gss'
+require 'dns_nsupdate/dns_nsupdate_gss_main'
 
 class DnsNsupdateConfigTest < Test::Unit::TestCase
   def test_nsupdate_default_settings

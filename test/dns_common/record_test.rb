@@ -171,6 +171,114 @@ class DnsRecordTest < Test::Unit::TestCase
     assert_equal false, Proxy::Dns::Record.new.to_ipaddress('some.host')
   end
 
+  def test_create_a_record
+    Proxy::Dns::Record.any_instance.expects(:a_record_conflicts).returns(-1)
+    Proxy::Dns::Record.any_instance.expects(:do_create).with('some.host', '192.168.33.22', 'A')
+
+    assert_nil Proxy::Dns::Record.new.create_a_record('some.host', '192.168.33.22')
+  end
+
+  def test_overwrite_a_record
+    Proxy::Dns::Record.any_instance.expects(:a_record_conflicts).returns(0)
+
+    assert_nil Proxy::Dns::Record.new.create_a_record('some.host', '192.168.33.22')
+  end
+
+  def test_create_duplicate_a_record_fails
+    Proxy::Dns::Record.any_instance.expects(:a_record_conflicts).returns(1)
+
+    assert_raise Proxy::Dns::Collision do
+      Proxy::Dns::Record.new.create_a_record('some.host', '2001:db8::1')
+    end
+  end
+
+  def test_create_aaaa_record
+    Proxy::Dns::Record.any_instance.expects(:aaaa_record_conflicts).returns(-1)
+    Proxy::Dns::Record.any_instance.expects(:do_create).with('some.host', '2001:db8::1', 'AAAA')
+
+    assert_nil Proxy::Dns::Record.new.create_aaaa_record('some.host', '2001:db8::1')
+  end
+
+  def test_overwrite_aaaa_record
+    Proxy::Dns::Record.any_instance.expects(:aaaa_record_conflicts).returns(0)
+
+    assert_nil Proxy::Dns::Record.new.create_aaaa_record('some.host', '2001:db8::1')
+  end
+
+  def test_create_duplicate_aaaa_record_fails
+    Proxy::Dns::Record.any_instance.expects(:aaaa_record_conflicts).returns(1)
+
+    assert_raise Proxy::Dns::Collision do
+      Proxy::Dns::Record.new.create_aaaa_record('some.host', '2001:db8::1')
+    end
+  end
+
+  def test_create_cname_record
+    Proxy::Dns::Record.any_instance.expects(:cname_record_conflicts).returns(-1)
+    Proxy::Dns::Record.any_instance.expects(:do_create).with('some.host', 'target.example.com', 'CNAME')
+
+    assert_nil Proxy::Dns::Record.new.create_cname_record('some.host', 'target.example.com')
+  end
+
+  def test_overwrite_cname_record
+    Proxy::Dns::Record.any_instance.expects(:cname_record_conflicts).returns(0)
+
+    assert_nil Proxy::Dns::Record.new.create_cname_record('some.host', 'target.example.com')
+  end
+
+  def test_create_duplicate_cname_record_fails
+    Proxy::Dns::Record.any_instance.expects(:cname_record_conflicts).returns(1)
+
+    assert_raise Proxy::Dns::Collision do
+      Proxy::Dns::Record.new.create_cname_record('some.host', 'target.example.com')
+    end
+  end
+
+  def test_create_ptr_record
+    Proxy::Dns::Record.any_instance.expects(:ptr_record_conflicts).returns(-1)
+    Proxy::Dns::Record.any_instance.expects(:do_create).with('22.33.168.192.in-addr.arpa', 'some.host', 'PTR')
+
+    assert_nil Proxy::Dns::Record.new.create_ptr_record('some.host', '22.33.168.192.in-addr.arpa')
+  end
+
+  def test_overwrite_ptr_record
+    Proxy::Dns::Record.any_instance.expects(:ptr_record_conflicts).returns(0)
+
+    assert_nil Proxy::Dns::Record.new.create_ptr_record('some.host', '22.33.168.192.in-addr.arpa')
+  end
+
+  def test_create_duplicate_ptr_record_fails
+    Proxy::Dns::Record.any_instance.expects(:ptr_record_conflicts).returns(1)
+
+    assert_raise Proxy::Dns::Collision do
+      Proxy::Dns::Record.new.create_ptr_record('some.host', '22.33.168.192.in-addr.arpa')
+    end
+  end
+
+  def test_remove_a_record
+    Proxy::Dns::Record.any_instance.expects(:do_remove).with('some.host', 'A')
+
+    assert_nil Proxy::Dns::Record.new.remove_a_record('some.host')
+  end
+
+  def test_remove_aaaa_record
+    Proxy::Dns::Record.any_instance.expects(:do_remove).with('some.host', 'AAAA')
+
+    assert_nil Proxy::Dns::Record.new.remove_aaaa_record('some.host')
+  end
+
+  def test_remove_cname_record
+    Proxy::Dns::Record.any_instance.expects(:do_remove).with('some.host', 'CNAME')
+
+    assert_nil Proxy::Dns::Record.new.remove_cname_record('some.host')
+  end
+
+  def test_remove_ptr_record
+    Proxy::Dns::Record.any_instance.expects(:do_remove).with('22.33.168.192.in-addr.arpa', 'PTR')
+
+    assert_nil Proxy::Dns::Record.new.remove_ptr_record('22.33.168.192.in-addr.arpa')
+  end
+
   def ips(*ips)
     ips.map {|ip| ip =~  Resolv::IPv4::Regex ? Resolv::DNS::Resource::IN::A.new(ip) : Resolv::DNS::Resource::IN::AAAA.new(ip) }
   end

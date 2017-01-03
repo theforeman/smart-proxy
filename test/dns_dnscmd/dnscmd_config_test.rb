@@ -1,6 +1,8 @@
 require 'test_helper'
+require 'dns_common/dns_common'
 require 'dns_dnscmd/plugin_configuration'
 require 'dns_dnscmd/dns_dnscmd_plugin'
+require 'dns_dnscmd/dns_dnscmd_main'
 
 class DnsCmdConfigTest < Test::Unit::TestCase
   def test_default_configuration
