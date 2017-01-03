@@ -17,6 +17,8 @@ module Proxy::DHCP::ISC
       container.singleton_dependency :subnet_service, (lambda do
         ::Proxy::DHCP::SubnetService.new(container.get_dependency(:memory_store),
                                          container.get_dependency(:memory_store), container.get_dependency(:memory_store),
+                                         container.get_dependency(:memory_store), container.get_dependency(:memory_store),
+                                         container.get_dependency(:memory_store), container.get_dependency(:memory_store),
                                          container.get_dependency(:memory_store), container.get_dependency(:memory_store))
       end)
       container.dependency :parser, lambda {::Proxy::DHCP::ISC::FileParser.new(container.get_dependency(:subnet_service))}

@@ -62,6 +62,21 @@ class Proxy::DhcpApi < ::Sinatra::Base
     end
   end
 
+  # global search fo MAC/IP/hostname across all networks
+  get "/search/:record" do
+    begin
+      content_type :json
+      records = @server.global_search(params[:record])
+      if records
+        records.to_json
+      else
+        {:record => params[:record], :result => "not found"}.to_json
+      end
+    rescue => e
+      log_halt 400, e
+    end
+  end
+
   get "/:network/:record" do
     begin
       content_type :json

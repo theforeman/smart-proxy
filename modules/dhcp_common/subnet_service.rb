@@ -4,20 +4,25 @@ module Proxy::DHCP
 
     SEARCH_MASKS = (0..31).map { |bit| ~(1 << bit) }
 
-    attr_reader :m, :subnets, :leases_by_ip, :leases_by_mac, :reservations_by_ip, :reservations_by_mac, :reservations_by_name
+    attr_reader :m, :subnets, :leases_by_ip, :leases_by_mac, :reservations_by_ip, :reservations_by_mac, :reservations_by_name, :all_reservations_by_mac, :all_reservations_by_ip, :all_leases_by_mac, :all_leases_by_ip
 
-    def initialize(leases_by_ip, leases_by_mac, reservations_by_ip, reservations_by_mac, reservations_by_name, subnets = {})
+    def initialize(leases_by_ip, leases_by_mac, reservations_by_ip, reservations_by_mac, reservations_by_name, all_reservations_by_mac, all_reservations_by_ip, all_leases_by_mac, all_leases_by_ip, subnets = {})
       @subnets = subnets
       @leases_by_ip = leases_by_ip
       @leases_by_mac = leases_by_mac
       @reservations_by_ip = reservations_by_ip
       @reservations_by_mac = reservations_by_mac
       @reservations_by_name = reservations_by_name
+      @all_reservations_by_mac = all_reservations_by_mac
+      @all_reservations_by_ip = all_reservations_by_ip
+      @all_leases_by_mac = all_leases_by_mac
+      @all_leases_by_ip = all_leases_by_ip
       @m = Monitor.new
     end
 
     def self.initialized_instance
-      new(::Proxy::MemoryStore.new, ::Proxy::MemoryStore.new,
+      new(::Proxy::MemoryStore.new, ::Proxy::MemoryStore.new, ::Proxy::MemoryStore.new,
+          ::Proxy::MemoryStore.new, ::Proxy::MemoryStore.new, ::Proxy::MemoryStore.new,
           ::Proxy::MemoryStore.new, ::Proxy::MemoryStore.new, ::Proxy::MemoryStore.new)
     end
 
@@ -73,6 +78,8 @@ module Proxy::DHCP
       m.synchronize do
         leases_by_ip[subnet_address, record.ip] = record
         leases_by_mac[subnet_address, record.mac] = record
+        all_leases_by_ip[record.ip] = record
+        all_leases_by_mac[record.mac] = record
       end
       logger.debug("Added a lease record: #{record.ip}:#{record.mac}")
     end
@@ -82,6 +89,8 @@ module Proxy::DHCP
         reservations_by_ip[subnet_address, record.ip] = record
         reservations_by_mac[subnet_address, record.mac] = record
         reservations_by_name[record.name] = record
+        all_reservations_by_mac[record.mac] = record
+        all_reservations_by_ip[record.ip] = record
       end
       logger.debug("Added a reservation: #{record.ip}:#{record.mac}:#{record.name}")
     end
@@ -90,6 +99,8 @@ module Proxy::DHCP
       m.synchronize do
         leases_by_ip.delete(record.subnet.network, record.ip)
         leases_by_mac.delete(record.subnet.network, record.mac)
+        all_leases_by_ip.delete(record.ip)
+        all_leases_by_mac.delete(record.mac)
       end
       logger.debug("Deleted a lease record: #{record.ip}:#{record.mac}")
     end
@@ -99,6 +110,8 @@ module Proxy::DHCP
         reservations_by_ip.delete(record.subnet.network, record.ip)
         reservations_by_mac.delete(record.subnet.network, record.mac)
         reservations_by_name.delete(record.name)
+        all_reservations_by_mac.delete(record.mac)
+        all_reservations_by_ip.delete(record.ip)
       end
       logger.debug("Deleted a reservation: #{record.ip}:#{record.mac}:#{record.name}")
     end
@@ -123,6 +136,22 @@ module Proxy::DHCP
       m.synchronize { reservations_by_name[hostname] }
     end
 
+    def global_search_reservation_by_mac(mac_address)
+      m.synchronize { all_reservations_by_mac[mac_address] }
+    end
+
+    def global_search_reservation_by_ip(ip_address)
+      m.synchronize { all_reservations_by_ip[ip_address] }
+    end
+
+    def global_search_lease_by_mac(mac_address)
+      m.synchronize { all_leases_by_mac[mac_address] }
+    end
+
+    def global_search_lease_by_ip(ip_address)
+      m.synchronize { all_leases_by_ip[ip_address] }
+    end
+
     def all_hosts(subnet_address = nil)
       if subnet_address
         return m.synchronize { reservations_by_ip[subnet_address] ? reservations_by_ip.values(subnet_address) : [] }
@@ -145,6 +174,10 @@ module Proxy::DHCP
         reservations_by_ip.clear
         reservations_by_mac.clear
         reservations_by_name.clear
+        all_reservations_by_mac.clear
+        all_reservations_by_ip.clear
+        all_leases_by_ip.clear
+        all_leases_by_mac.clear
       end
     end
 

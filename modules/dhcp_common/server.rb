@@ -62,6 +62,14 @@ module Proxy::DHCP
         service.find_lease_by_mac(subnet_address, an_address)
     end
 
+    def global_search(something)
+      service.global_search_reservation_by_mac(something) ||
+        service.global_search_reservation_by_ip(something) ||
+        service.global_search_lease_by_mac(something) ||
+        service.global_search_lease_by_ip(something) ||
+        service.find_host_by_hostname(something)
+    end
+
     def unused_ip(subnet, mac_address, from_address, to_address)
       # first check if we already have a record for this host
       # if we do, we can simply reuse the same ip address.
