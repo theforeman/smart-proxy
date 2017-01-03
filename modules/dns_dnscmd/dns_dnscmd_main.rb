@@ -9,64 +9,13 @@ module Proxy::Dns::Dnscmd
       super(a_server, a_ttl)
     end
 
-    def create_a_record(fqdn, ip)
-      case a_record_conflicts(fqdn, ip) #returns -1, 0, 1
-        when 1 then
-          raise(Proxy::Dns::Collision, "'#{fqdn} 'is already in use")
-        when 0 then
-          return nil
-        else
-          zone = match_zone(fqdn, enum_zones)
-          msg = "Added DNS entry #{fqdn} => #{ip}"
-          cmd = "/RecordAdd #{zone} #{fqdn}. A #{ip}"
-          execute(cmd, msg)
-          nil
-      end
-    end
-
-    def create_aaaa_record(fqdn, ip)
-      case aaaa_record_conflicts(fqdn, ip) #returns -1, 0, 1
-        when 1 then
-          raise(Proxy::Dns::Collision, "'#{fqdn} 'is already in use")
-        when 0 then
-          return nil
-        else
-          zone = match_zone(fqdn, enum_zones)
-          msg = "Added DNS entry #{fqdn} => #{ip}"
-          cmd = "/RecordAdd #{zone} #{fqdn}. AAAA #{ip}"
-          execute(cmd, msg)
-          nil
-      end
-    end
-
-    def create_cname_record(fqdn, target)
-      case cname_record_conflicts(fqdn, target) #returns -1, 0, 1
-        when 1 then
-          raise(Proxy::Dns::Collision, "'#{fqdn} 'is already in use")
-        when 0 then
-          return nil
-        else
-          zone = match_zone(fqdn, enum_zones)
-          msg = "Added CNAME entry #{fqdn} => #{target}"
-          cmd = "/RecordAdd #{zone} #{fqdn}. CNAME #{target}"
-          execute(cmd, msg)
-          nil
-      end
-    end
-
-    def create_ptr_record(fqdn, ptr)
-      case ptr_record_conflicts(fqdn, ptr) #returns -1, 0, 1
-        when 1 then
-          raise(Proxy::Dns::Collision, "'#{ptr}' is already in use")
-        when 0
-          return nil
-        else
-          zone = match_zone(ptr, enum_zones)
-          msg = "Added PTR entry #{ptr} => #{fqdn}"
-          cmd = "/RecordAdd #{zone} #{ptr}. PTR #{fqdn}."
-          execute(cmd, msg)
-          nil
-      end
+    def do_create(name, value, type)
+      zone = match_zone(name, enum_zones)
+      msg = "Added #{type} entry #{name} => #{value}"
+      value = "#{value}." if type == "PTR"
+      cmd = "/RecordAdd #{zone} #{name}. #{type} #{value}"
+      execute(cmd, msg)
+      nil
     end
 
     def remove_specific_record_from_zone(zone_name, node_name, record, type)
@@ -76,28 +25,12 @@ module Proxy::Dns::Dnscmd
       nil
     end
 
-    def remove_record(record, type)
-      zone = match_zone(record, enum_zones)
-      enum_records(zone, record, type).each do |specific_record|
-        remove_specific_record_from_zone(zone, record, specific_record, type)
+    def do_remove(name, type)
+      zone = match_zone(name, enum_zones)
+      enum_records(zone, name, type).each do |specific_record|
+        remove_specific_record_from_zone(zone, name, specific_record, type)
       end
       nil
-    end
-
-    def remove_a_record(fqdn)
-      remove_record(fqdn,'A')
-    end
-
-    def remove_aaaa_record(fqdn)
-      remove_record(fqdn,'AAAA')
-    end
-
-    def remove_cname_record(fqdn)
-      remove_record(fqdn, 'CNAME')
-    end
-
-    def remove_ptr_record(ptr)
-      remove_record(ptr, 'PTR')
     end
 
     def execute cmd, msg=nil, error_only=false

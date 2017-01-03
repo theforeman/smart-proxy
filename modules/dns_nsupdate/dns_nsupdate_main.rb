@@ -12,39 +12,6 @@ module Proxy::Dns::Nsupdate
       super(a_server, a_ttl)
     end
 
-    def create_a_record(fqdn, ip)
-      case a_record_conflicts(fqdn, ip) #returns -1, 0, 1
-      when 1
-        raise(Proxy::Dns::Collision, "'#{fqdn} 'is already in use")
-      when 0 then
-        return nil
-      else
-        do_create(fqdn, ip, "A")
-      end
-    end
-
-    def create_aaaa_record(fqdn, ip)
-      case aaaa_record_conflicts(fqdn, ip) #returns -1, 0, 1
-      when 1
-        raise(Proxy::Dns::Collision, "'#{fqdn} 'is already in use")
-      when 0 then
-        return nil
-      else
-        do_create(fqdn, ip, "AAAA")
-      end
-    end
-
-    def create_ptr_record(fqdn, ptr)
-      case ptr_record_conflicts(fqdn, ptr) #returns -1, 0, 1
-      when 1
-        raise(Proxy::Dns::Collision, "'#{fqdn} 'is already in use")
-      when 0 then
-        return nil
-      else
-        do_create(ptr, fqdn, "PTR")
-      end
-    end
-
     def do_create(id, value, type)
       nsupdate_connect
       nsupdate "update add #{id}. #{@ttl} #{type} #{value}"
@@ -52,21 +19,6 @@ module Proxy::Dns::Nsupdate
       nil
     ensure
       nsupdate_close
-    end
-
-    def remove_a_record(fqdn)
-      get_ipv4_address!(fqdn)
-      do_remove(fqdn, "A")
-    end
-
-    def remove_aaaa_record(fqdn)
-      get_ipv6_address!(fqdn)
-      do_remove(fqdn, "AAAA")
-    end
-
-    def remove_ptr_record(ip)
-      get_name!(ip)
-      do_remove(ip, "PTR")
     end
 
     def do_remove(id, type)

@@ -20,6 +20,74 @@ module Proxy::Dns
       Resolv::DNS.new(:nameserver => @server)
     end
 
+    def create_a_record(fqdn, ip)
+      case a_record_conflicts(fqdn, ip) #returns -1, 0, 1
+        when 1 then
+          raise(Proxy::Dns::Collision, "'#{fqdn} 'is already in use")
+        when 0 then
+          return nil
+        else
+          do_create(fqdn, ip, "A")
+      end
+    end
+
+    def create_aaaa_record(fqdn, ip)
+      case aaaa_record_conflicts(fqdn, ip) #returns -1, 0, 1
+        when 1 then
+          raise(Proxy::Dns::Collision, "'#{fqdn} 'is already in use")
+        when 0 then
+          return nil
+        else
+          do_create(fqdn, ip, "AAAA")
+      end
+    end
+
+    def create_cname_record(fqdn, target)
+      case cname_record_conflicts(fqdn, target) #returns -1, 0, 1
+        when 1 then
+          raise(Proxy::Dns::Collision, "'#{fqdn} 'is already in use")
+        when 0 then
+          return nil
+        else
+          do_create(fqdn, target, "CNAME")
+      end
+    end
+
+    def create_ptr_record(fqdn, ptr)
+      case ptr_record_conflicts(fqdn, ptr) #returns -1, 0, 1
+        when 1 then
+          raise(Proxy::Dns::Collision, "'#{ptr}' is already in use")
+        when 0
+          return nil
+        else
+          do_create(ptr, fqdn, "PTR")
+      end
+    end
+
+    def do_create(name, value, type)
+      raise(Proxy::Dns::Error, "Creation of #{type} not implemented")
+    end
+
+    def remove_a_record(fqdn)
+      do_remove(fqdn, "A")
+    end
+
+    def remove_aaaa_record(fqdn)
+      do_remove(fqdn, "AAAA")
+    end
+
+    def remove_cname_record(fqdn)
+      do_remove(fqdn, "CNAME")
+    end
+
+    def remove_ptr_record(name)
+      do_remove(name, "PTR")
+    end
+
+    def do_remove(name, type)
+      raise(Proxy::Dns::Error, "Deletion of #{type} not implemented")
+    end
+
     def dns_find(key)
       logger.warn(%q{Proxy::Dns::Record#dns_find has been deprecated and will be removed in future versions of Smart-Proxy.
                       Please use ::Proxy::Dns::Record#get_name or ::Proxy::Dns::Record#get_address instead.})
@@ -124,14 +192,6 @@ module Proxy::Dns
 
     def to_ipaddress ip
       IPAddr.new(ip) rescue false
-    end
-
-    def create_cname_record(fqdn, target)
-      raise Proxy::Dns::Error.new("This DNS provider does not support CNAME management")
-    end
-
-    def remove_cname_record(fqdn)
-      raise Proxy::Dns::Error.new("This DNS provider does not support CNAME management")
     end
   end
 end
