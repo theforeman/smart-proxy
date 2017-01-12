@@ -166,9 +166,6 @@ module Proxy::DHCP
               if dupe = service.find_host_by_mac(record.subnet_address, record.mac)
                 service.delete_host(dupe)
               end
-              if dupe = service.find_host_by_ip(record.subnet_address, record.ip)
-                service.delete_host(dupe)
-              end
 
               service.add_host(record.subnet_address, record)
             when Proxy::DHCP::Lease

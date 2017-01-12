@@ -114,7 +114,7 @@ class StateChangesObserverTest < Test::Unit::TestCase
     reservation_details = {:subnet =>  @subnet, :mac => "00:11:22:33:44:55", :ip => "192.168.0.1", :name => "test"}
     @observer.update_subnet_service_with_dhcp_records([::Proxy::DHCP::Reservation.new(reservation_details)])
 
-    assert @service.find_host_by_ip("192.168.0.0", "192.168.0.1")
+    assert @service.find_hosts_by_ip("192.168.0.0", "192.168.0.1")
   end
 
   def test_update_subnet_service_with_dhcp_records_should_delete_hosts_with_duplicate_macs_when_adding_reservations
@@ -123,7 +123,7 @@ class StateChangesObserverTest < Test::Unit::TestCase
 
     @observer.update_subnet_service_with_dhcp_records([::Proxy::DHCP::Reservation.new(reservation_details.merge(:ip => "192.168.0.1"))])
 
-    assert @service.find_host_by_ip("192.168.0.0", "192.168.0.1")
+    assert @service.find_hosts_by_ip("192.168.0.0", "192.168.0.1")
   end
 
   def test_update_subnet_service_with_dhcp_records_should_delete_hosts_with_duplicate_ips_when_adding_reservations

@@ -79,7 +79,8 @@ module Proxy::DHCP
 
     def add_host(subnet_address, record)
       m.synchronize do
-        reservations_by_ip[subnet_address, record.ip] = record
+        records_for_ip = (reservations_by_ip[subnet_address, record.ip] ||= [])
+        records_for_ip << record
         reservations_by_mac[subnet_address, record.mac] = record
         reservations_by_name[record.name] = record
       end
@@ -96,7 +97,8 @@ module Proxy::DHCP
 
     def delete_host(record)
       m.synchronize do
-        reservations_by_ip.delete(record.subnet.network, record.ip)
+        reservations_by_ip[record.subnet.network, record.ip].delete(record)
+        reservations_by_ip.delete(record.subnet.network, record.ip) if reservations_by_ip[record.subnet.network, record.ip].empty?
         reservations_by_mac.delete(record.subnet.network, record.mac)
         reservations_by_name.delete(record.name)
       end
@@ -115,7 +117,7 @@ module Proxy::DHCP
       m.synchronize { leases_by_ip[subnet_address, ip_address] }
     end
 
-    def find_host_by_ip(subnet_address, ip_address)
+    def find_hosts_by_ip(subnet_address, ip_address)
       m.synchronize { reservations_by_ip[subnet_address, ip_address] }
     end
 

@@ -1,4 +1,6 @@
 require 'test_helper'
+require 'dhcp/dhcp'
+require 'dhcp/dhcp_plugin'
 require 'dhcp/sparc_attrs'
 require 'dhcp_common/server'
 require 'dhcp_isc/dhcp_isc_main'
@@ -51,7 +53,8 @@ class ServerIscTest < Test::Unit::TestCase
     @dhcp.expects(:ztp_options_statements).returns([])
     @dhcp.expects(:poap_options_statements).returns([])
 
-    record_to_add = Proxy::DHCP::Reservation.new(:name => 'a-test',
+    record_to_add = Proxy::DHCP::Reservation.new(:name => 'a-test-01',
+                                 :hostname => 'a-test',
                                  :ip => '192.168.42.100',
                                  :subnet => Proxy::DHCP::Subnet.new('192.168.42.0', '255.255.255.0'),
                                  :mac => '01:02:03:04:05:06',
@@ -65,7 +68,7 @@ class ServerIscTest < Test::Unit::TestCase
       "set ip-address = #{record_to_add.ip}",
       "set hardware-address = #{record_to_add.mac}",
       "set hardware-type = 1",
-      "set statements = \"filename = \\\"#{record_to_add.options[:filename]}\\\"; next-server = c0:a8:2a:0a; option host-name = \\\"#{record_to_add.name}\\\";\"",
+      "set statements = \"filename = \\\"#{record_to_add.options[:filename]}\\\"; next-server = c0:a8:2a:0a; option host-name = \\\"#{record_to_add.hostname}\\\";\"",
       "create"
     ]
     assert_equal expected_om_output, omio.input_commands

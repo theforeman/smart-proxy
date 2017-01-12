@@ -89,7 +89,7 @@ class DHCPServerMicrosoftTest < Test::Unit::TestCase
     assert_equal '192.168.42.20', @server.unused_ip(::Proxy::DHCP::Subnet.new(@network, @netmask), '00:01:02:03:04:05', nil, nil)
   end
 
-  def test_should_return_reservation_by_ip_address
+  def test_find_record_should_return_reservation_by_ip_address
     client_ip = '192.168.42.10'
     @dhcpsapi.expects(:list_subnet_elements).with(@network, anything).returns([{:element => {:reserved_ip_address => client_ip}}])
     @dhcpsapi.expects(:get_client_by_ip_address).with(client_ip).returns(
@@ -108,7 +108,7 @@ class DHCPServerMicrosoftTest < Test::Unit::TestCase
                                                 :domain_name => 'test.com'), record
   end
 
-  def test_should_return_lease_by_ip_address
+  def test_find_record_should_return_lease_by_ip_address
     client_ip = '192.168.42.10'
     lease_expires = Time.now + 120
     @dhcpsapi.expects(:list_subnet_elements).with(@network, anything).returns([{:element => {:reserved_ip_address => '192.168.42.11'}}])
@@ -127,6 +127,84 @@ class DHCPServerMicrosoftTest < Test::Unit::TestCase
                                     :domain_name => 'test.com'), record
   end
 
+  def test_find_records_by_ip_should_return_reservations_by_ip_address
+    client_ip = '192.168.42.10'
+    @dhcpsapi.expects(:list_subnet_elements).with(@network, anything).returns([{:element => {:reserved_ip_address => client_ip}}])
+    @dhcpsapi.expects(:get_client_by_ip_address).with(client_ip).returns(
+        :client_ip_address => client_ip, :subnet_mask => @netmask, :client_hardware_address => '00:01:02:03:04:05', :client_name => 'test', :client_lease_expires => nil
+    )
+    @dhcpsapi.expects(:list_reserved_option_values).with(client_ip, @network).returns(@option_values)
+
+    record = @server.find_records_by_ip(@network, client_ip)
+    assert_equal [::Proxy::DHCP::Reservation.new(:subnet => ::Proxy::DHCP::Subnet.new(@network, @netmask),
+                                                :ip => client_ip,
+                                                :mac => '00:01:02:03:04:05',
+                                                :name => 'test',
+                                                :hostname => 'test',
+                                                :deleteable => true,
+                                                :domain_name_servers => ['192.168.42.1'],
+                                                :domain_name => 'test.com')], record
+  end
+
+  def test_find_records_by_ip_should_return_leases_by_ip_address
+    client_ip = '192.168.42.10'
+    lease_expires = Time.now + 120
+    @dhcpsapi.expects(:list_subnet_elements).with(@network, anything).returns([{:element => {:reserved_ip_address => '192.168.42.11'}}])
+    @dhcpsapi.expects(:get_client_by_ip_address).with(client_ip).returns(
+        :client_ip_address => client_ip, :subnet_mask => @netmask, :client_hardware_address => '00:01:02:03:04:05', :client_name => 'test', :client_lease_expires => lease_expires
+    )
+    @dhcpsapi.expects(:list_subnet_option_values).with(@network).returns(@option_values)
+
+    record = @server.find_records_by_ip(@network, client_ip)
+    assert_equal [::Proxy::DHCP::Lease.new(:subnet => ::Proxy::DHCP::Subnet.new(@network, @netmask),
+                                    :ip => client_ip,
+                                    :mac => '00:01:02:03:04:05',
+                                    :name => 'test',
+                                    :ends => lease_expires,
+                                    :domain_name_servers => ['192.168.42.1'],
+                                    :domain_name => 'test.com')], record
+  end
+
+  def test_find_record_by_mac_should_return_reservations_by_mac_address
+    client_mac = '00:01:02:03:04:05'
+    client_ip = '192.168.42.10'
+    @dhcpsapi.expects(:list_subnet_elements).with(@network, anything).returns([{:element => {:reserved_ip_address => client_ip}}])
+    @dhcpsapi.expects(:get_client_by_mac_address).with('192.168.42.0', client_mac).returns(
+        :client_ip_address => client_ip, :subnet_mask => @netmask, :client_hardware_address => client_mac, :client_name => 'test', :client_lease_expires => nil
+    )
+    @dhcpsapi.expects(:list_reserved_option_values).with(client_ip, @network).returns(@option_values)
+
+    record = @server.find_record_by_mac(@network, client_mac)
+    assert_equal ::Proxy::DHCP::Reservation.new(:subnet => ::Proxy::DHCP::Subnet.new(@network, @netmask),
+                                                :ip => client_ip,
+                                                :mac => client_mac,
+                                                :name => 'test',
+                                                :hostname => 'test',
+                                                :deleteable => true,
+                                                :domain_name_servers => ['192.168.42.1'],
+                                                :domain_name => 'test.com'), record
+  end
+
+  def test_find_records_by_mac_should_return_leases_by_mac_address
+    client_mac = '00:01:02:03:04:05'
+    client_ip = '192.168.42.10'
+    lease_expires = Time.now + 120
+    @dhcpsapi.expects(:list_subnet_elements).with(@network, anything).returns([{:element => {:reserved_ip_address => '192.168.42.11'}}])
+    @dhcpsapi.expects(:get_client_by_mac_address).with('192.168.42.0', client_mac).returns(
+        :client_ip_address => client_ip, :subnet_mask => @netmask, :client_hardware_address => client_mac, :client_name => 'test', :client_lease_expires => lease_expires
+    )
+    @dhcpsapi.expects(:list_subnet_option_values).with(@network).returns(@option_values)
+
+    record = @server.find_record_by_mac(@network, client_mac)
+    assert_equal ::Proxy::DHCP::Lease.new(:subnet => ::Proxy::DHCP::Subnet.new(@network, @netmask),
+                                    :ip => client_ip,
+                                    :mac => client_mac,
+                                    :name => 'test',
+                                    :ends => lease_expires,
+                                    :domain_name_servers => ['192.168.42.1'],
+                                    :domain_name => 'test.com'), record
+  end
+
   def test_should_create_reservation
     client_ip = '192.168.42.10'
     client_mac = '00:01:02:03:04:05'
@@ -135,7 +213,7 @@ class DHCPServerMicrosoftTest < Test::Unit::TestCase
     @dhcpsapi.expects(:get_subnet).with(@network).returns(:subnet_address => @network, :subnet_mask => @netmask)
     @server.expects(:create_reservation).with(client_ip, @netmask, client_mac, client_name)
     @server.expects(:build_option_values).with(
-        :ip => client_ip, :mac => client_mac, :hostname => client_name,
+        :ip => client_ip, :mac => client_mac, :hostname => client_name, :name => client_name,
         :subnet =>  @network, :option_one => 'option_one_value', :option_two => 'option_two_value').returns(:option_one => 'option_one_value', :option_two => 'option_two_value')
     @server.expects(:set_option_values).with(client_ip, @network, :option_one => 'option_one_value', :option_two => 'option_two_value')
 

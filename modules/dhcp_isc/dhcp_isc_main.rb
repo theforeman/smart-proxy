@@ -43,9 +43,9 @@ module Proxy::DHCP::ISC
       options = record.options
       # TODO: Extract this block into a generic dhcp options helper
       statements = []
-      statements << "filename = \\\"#{options[:filename]}\\\";"  if options[:filename]
-      statements << bootServer(options[:nextServer])             if options[:nextServer]
-      statements << "option host-name = \\\"#{record.name}\\\";" if record.name
+      statements << "filename = \\\"#{options[:filename]}\\\";" if options[:filename]
+      statements << bootServer(options[:nextServer])            if options[:nextServer]
+      statements << "option host-name = \\\"#{options[:hostname] || record.name}\\\";"
 
       statements += solaris_options_statements(options)
       statements += ztp_options_statements(options)
