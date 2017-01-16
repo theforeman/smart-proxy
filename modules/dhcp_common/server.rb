@@ -76,12 +76,13 @@ module Proxy::DHCP
 
     def del_records_by_ip(subnet, ip)
       records = find_records_by_ip(subnet.network, ip)
-      records.map { |record| del_record(subnet, record) }
+      records.each { |record| del_record(subnet, record) }
+      nil
     end
 
     def del_record_by_mac(subnet, mac_address)
       record = find_record_by_mac(subnet.network, mac_address)
-      del_record(subnet, record)
+      del_record(subnet, record) unless record.nil?
     end
 
     def unused_ip(subnet, mac_address, from_address, to_address)

@@ -233,7 +233,7 @@ class DhcpApiTest < Test::Unit::TestCase
 
   def test_delete_records_by_ip
     @server.expects(:find_subnet).with("192.168.122.0").returns(@subnet)
-    @server.expects(:del_records_by_ip).with(@subnet, "192.168.122.1").returns([@reservations.first, @reservations.last])
+    @server.expects(:del_records_by_ip).with(@subnet, "192.168.122.1")
 
     delete "/192.168.122.0/ip/192.168.122.1"
 
@@ -242,7 +242,7 @@ class DhcpApiTest < Test::Unit::TestCase
 
   def test_delete_records_by_mac
     @server.expects(:find_subnet).with("192.168.122.0").returns(@subnet)
-    @server.expects(:del_record_by_mac).with(@subnet, "00:11:bb:cc:dd:ee").returns(@reservations.first)
+    @server.expects(:del_record_by_mac).with(@subnet, "00:11:bb:cc:dd:ee")
 
     delete "/192.168.122.0/mac/00:11:bb:cc:dd:ee"
 

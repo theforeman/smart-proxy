@@ -154,7 +154,8 @@ class Proxy::DhcpApi < ::Sinatra::Base
       load_subnet
       load_subnet_data
 
-      server.del_records_by_ip(@subnet, params[:ip_address]).to_json
+      server.del_records_by_ip(@subnet, params[:ip_address])
+      nil
     rescue Exception => e
       log_halt 400, e
     end
@@ -166,7 +167,8 @@ class Proxy::DhcpApi < ::Sinatra::Base
       load_subnet
       load_subnet_data
 
-      server.del_record_by_mac(@subnet, params[:mac_address]).to_json
+      server.del_record_by_mac(@subnet, params[:mac_address])
+      nil
     rescue Exception => e
       log_halt 400, e
     end
