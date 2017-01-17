@@ -65,9 +65,12 @@ module Proxy::TFTP
       delete "syslinux", mac
     end
 
-    # Get the value for next_server
+    # Get the value for next_server and suppress flag
     get "/serverName" do
-       {"serverName" => (Proxy::TFTP::Plugin.settings.tftp_servername || "")}.to_json
+      {
+        "serverName" => (Proxy::TFTP::Plugin.settings.tftp_servername || ""),
+        "dont_pass_nextserver" => (Proxy::TFTP::Plugin.settings.dont_pass_nextserver || "")
+      }.to_json
     end
   end
 end
