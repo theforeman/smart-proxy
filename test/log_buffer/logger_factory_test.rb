@@ -26,18 +26,10 @@ class LoggerFactoryTest < Test::Unit::TestCase
 
   def test_should_configure_syslog
     @factory.stubs(:log_file).returns('SYSLOG')
+    @factory.expects(:syslog_available?).returns(true)
     logger = @factory.logger
 
     assert logger.is_a?(::Syslog::Logger)
     assert logger.formatter.is_a?(::Proxy::LoggerFactory::SyslogFormatter)
-  end
-
-  def test_should_fallback_logger_when_syslog_is_not_available
-    @factory.stubs(:log_file).returns('SYSLOG')
-    ::Syslog::Logger.expects(:new).raises(RuntimeError)
-    logger = @factory.logger
-
-    assert logger.is_a?(::Logger)
-    assert logger.formatter.is_a?(::Proxy::LoggerFactory::LogFormatter)
   end
 end
