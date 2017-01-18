@@ -1,6 +1,7 @@
 require 'openssl'
 require 'set'
 
+# rubocop:disable ModuleLength
 module Proxy::PuppetCa
   extend ::Proxy::Log
   extend ::Proxy::Util
@@ -8,7 +9,6 @@ module Proxy::PuppetCa
   class NotPresent < RuntimeError; end
 
   class << self
-
     def sign certname
       puppetca("sign", certname)
     end
@@ -91,8 +91,6 @@ module Proxy::PuppetCa
       all.delete_if {|k,v| v[:state] != "pending"}
     end
 
-    private
-
     # helper to find puppetca and sudo binaries
     # checks if our CA really exists
     def find_puppetca
@@ -157,26 +155,32 @@ module Proxy::PuppetCa
     def ca_inventory
       inventory = Pathname.new(ssldir).join("ca","inventory.txt")
       raise "Unable to find CA inventory file at #{inventory}" unless File.exist?(inventory)
-      hash = {}
-      # 0x005a 2011-04-16T07:12:46GMT 2016-04-14T07:12:46GMT /CN=uuid
-      File.read(inventory).each_line do |cert|
-        if cert =~ /(0(x|X)(\d|[a-f]|[A-F])+)\s+(\d+\S+)\s+(\d+\S+)\s+\/CN=(\S+)/
-          hash[$6] = {:serial => $1.to_i(16), :not_before => $4, :not_after => $5}
-        end
-      end
-      crl = revoked_serials
-      hash.each do |cert,values|
-        values[:state] = "revoked" if crl.include?(values[:serial])
-      end
-      hash
+      crl_path = Pathname.new(ssldir).join("ca","ca_crl.pem")
+      raise "Unable to find CRL" unless File.exist?(crl_path)
+      compute_ca_inventory(File.read(inventory), File.read(crl_path))
     end
 
-    def revoked_serials
-      crl = Pathname.new(ssldir).join("ca","ca_crl.pem")
-      raise "Unable to find CRL" unless File.exist?(crl)
+    def compute_ca_inventory(inventory_contents, crl_cert_contents)
+      inventory = parse_inventory(inventory_contents)
+      crl = revoked_serials(crl_cert_contents)
+      inventory.each do |_, values|
+        values[:state] = "revoked" if crl.include?(values[:serial])
+      end
+      inventory
+    end
 
-      crl = OpenSSL::X509::CRL.new(File.read(crl))
-      Set.new(crl.revoked.collect {|r| r.serial})
+    def parse_inventory(inventory_contents)
+      to_return = {}
+      inventory_contents.each_line do |cert|
+        if cert =~ /(0(x|X)(\d|[a-f]|[A-F])+)\s+(\d+\S+)\s+(\d+\S+)\s+\/CN=(\S+)/ # 0x005a 2011-04-16T07:12:46GMT 2016-04-14T07:12:46GMT /CN=uuid
+          to_return[$6] = {:serial => $1.to_i(16), :not_before => $4, :not_after => $5}
+        end
+      end
+      to_return
+    end
+
+    def revoked_serials(crl_cert_contents)
+      Set.new(OpenSSL::X509::CRL.new(crl_cert_contents).revoked.collect {|r| r.serial.to_i})
     end
 
     def puppetca mode, certname
@@ -199,3 +203,4 @@ module Proxy::PuppetCa
     end
   end
 end
+# rubocop:enable ModuleLength
