@@ -172,7 +172,9 @@ module Proxy::PuppetCa
     def parse_inventory(inventory_contents)
       to_return = {}
       inventory_contents.each_line do |cert|
-        if cert =~ /(0(x|X)(\d|[a-f]|[A-F])+)\s+(\d+\S+)\s+(\d+\S+)\s+\/CN=(\S+)/ # 0x005a 2011-04-16T07:12:46GMT 2016-04-14T07:12:46GMT /CN=uuid
+        # 0x005a 2011-04-16T07:12:46GMT 2016-04-14T07:12:46GMT /CN=uuid
+        # 0x005c 2017-01-07T11:23:20GMT 2022-01-17T11:23:20GMT /CN=name.mcollective/OU=mcollective
+        if cert =~ /(0(x|X)(\d|[a-f]|[A-F])+)\s+(\d+\S+)\s+(\d+\S+)\s+\/CN=([^\s\/]+)/
           to_return[$6] = {:serial => $1.to_i(16), :not_before => $4, :not_after => $5}
         end
       end

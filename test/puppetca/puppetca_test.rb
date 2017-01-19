@@ -67,10 +67,12 @@ class ProxyTest < Test::Unit::TestCase
 0x0002 2015-09-01T15:15:57UTC 2020-08-31T15:15:57UTC /CN=revoked.my.domain
 0x0003 2015-09-02T08:34:59UTC 2020-09-01T08:34:59UTC /CN=active.my.domain
 0x0004 2017-01-11T15:04:35UTC 2022-01-11T15:04:35UTC /CN=revoked.my.domain
+0x0005 2017-01-14T12:01:22UTC 2022-01-14T12:01:22UTC /CN=second-active.my.domain/OU=mydepartment
 EOF
   def test_parse_inventory
     assert_equal({"revoked.my.domain" => {:serial => 4, :not_before => "2017-01-11T15:04:35UTC", :not_after => "2022-01-11T15:04:35UTC"},
-                  "active.my.domain" => {:serial => 3, :not_before => "2015-09-02T08:34:59UTC", :not_after => "2020-09-01T08:34:59UTC"}},
+                  "active.my.domain" => {:serial => 3, :not_before => "2015-09-02T08:34:59UTC", :not_after => "2020-09-01T08:34:59UTC"},
+                  "second-active.my.domain" => {:serial => 5, :not_before => "2017-01-14T12:01:22UTC", :not_after => "2022-01-14T12:01:22UTC"}},
                  ::Proxy::PuppetCa.parse_inventory(INVENTORY_CONTENTS))
   end
 
@@ -100,7 +102,8 @@ EOF
 
   def test_compute_ca_inventory
     assert_equal({"revoked.my.domain"=>{:serial=>4, :not_before=>"2017-01-11T15:04:35UTC", :not_after=>"2022-01-11T15:04:35UTC", :state=>"revoked"},
-                  "active.my.domain"=>{:serial=>3, :not_before=>"2015-09-02T08:34:59UTC", :not_after=>"2020-09-01T08:34:59UTC"}},
+                  "active.my.domain"=>{:serial=>3, :not_before=>"2015-09-02T08:34:59UTC", :not_after=>"2020-09-01T08:34:59UTC"},
+                  "second-active.my.domain" => {:serial => 5, :not_before => "2017-01-14T12:01:22UTC", :not_after => "2022-01-14T12:01:22UTC"}},
                  ::Proxy::PuppetCa.compute_ca_inventory(INVENTORY_CONTENTS, CRL_CONTENTS))
   end
 
