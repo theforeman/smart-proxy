@@ -169,7 +169,7 @@ module Proxy::DHCP
 
               service.add_host(record.subnet_address, record)
             when Proxy::DHCP::Lease
-              if record.options[:state] == "free" || (record.options[:next_state] == "free" && record.options[:ends] && record.options[:ends] < Time.now)
+              if record.state == "free" || (record.options[:next_state] == "free" && record.ends && record.ends < Time.now)
                 record = service.find_lease_by_ip(record.subnet_address, record.ip)
                 service.delete_lease(record) if record
                 next

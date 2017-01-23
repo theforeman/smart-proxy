@@ -60,7 +60,7 @@ XMLFIXTURE
 
   def test_should_add_record
     record_hash = { :name => "test.example.com", :ip => "192.168.122.95", :mac => "00:11:bb:cc:dd:ee", :network => "192.168.122.0/255.255.255.0", :subnet => @subnet }
-    record = Proxy::DHCP::Reservation.new(record_hash)
+    record = Proxy::DHCP::Reservation.new("test.example.com", "192.168.122.95", "00:11:bb:cc:dd:ee", @subnet)
     @service.add_subnet(@subnet)
     @subject.libvirt_network.expects(:add_dhcp_record).with(record)
     ::Proxy::DHCP::Server.any_instance.expects(:add_record).returns(record)
@@ -68,7 +68,7 @@ XMLFIXTURE
   end
 
   def test_should_remove_record
-    record =  Proxy::DHCP::Reservation.new(:name => "test.example.com", :ip => "192.168.122.10", :mac => "00:11:bb:cc:dd:ee", :subnet => @subnet)
+    record =  Proxy::DHCP::Reservation.new("test.example.com", "192.168.122.10", "00:11:bb:cc:dd:ee", @subnet)
     @service.add_subnet(@subnet)
     @service.add_host("192.168.122.0", record)
     @subject.libvirt_network.expects(:del_dhcp_record).with(record)

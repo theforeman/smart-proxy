@@ -2,13 +2,14 @@ require 'dhcp_common/record'
 
 module Proxy::DHCP
   class Lease < Record
-    attr_reader :starts, :ends, :state
+    attr_reader :name, :starts, :ends, :state
 
-    def initialize(args = {})
-      @starts = args[:starts]
-      @ends = args[:ends]
-      @state = args[:state]
-      super(args)
+    def initialize(name, ip_address, mac_address, subnet, starts, ends, state, options = {})
+      @name = name || "*lease*"
+      @starts = starts
+      @ends = ends
+      @state = state
+      super(ip_address, mac_address, subnet, options)
     end
 
     def deletable?
@@ -16,11 +17,11 @@ module Proxy::DHCP
     end
 
     def ==(other)
-      starts == other.starts && ends == other.ends && state == other.state && super(other)
+      super(other) && name == other.name && starts == other.starts && ends == other.ends && state == other.state
     end
 
-    def to_json(*options)
-      Hash[[:ip, :mac, :starts, :ends, :state].map{|s| [s, send(s)]}].to_json(*options)
+    def to_json(*opts)
+      Hash[[:name, :ip, :mac, :subnet, :starts, :ends, :state].map{|s| [s, send(s)]}].merge(options).to_json(*opts)
     end
   end
 end

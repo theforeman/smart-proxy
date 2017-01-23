@@ -10,11 +10,10 @@ module Proxy::DHCP
     include Proxy::Log
     include Proxy::Validations
 
-    def initialize options = {}
-      @subnet  = validate_subnet options[:subnet]
-      @ip      = validate_ip options[:ip]
-      @mac     = validate_mac options[:mac]
-      @deleteable = options.delete(:deleteable) if options[:deleteable]
+    def initialize(ip_address, mac_address, subnet, options = {})
+      @subnet  = validate_subnet subnet #options[:subnet]
+      @ip      = validate_ip ip_address #options[:ip]
+      @mac     = validate_mac mac_address #options[:mac]
       @options = options
     end
 
@@ -34,25 +33,19 @@ module Proxy::DHCP
 
     #TODO move this away from here, as this suppose to be a generic interface
     def deleteable?
-      @deleteable
+      !!@options[:deleteable]
     end
 
     def <=>(other)
       self.ip <=> other.ip
     end
 
+    def eql?(other)
+      self == other
+    end
+
     def ==(other)
-      options == other.options
+      !other.nil? && self.class == other.class && ip == other.ip && mac == other.mac && subnet == other.subnet && deleteable? == other.deleteable? && options == other.options
     end
-
-    # compare between incoming request and our existing record
-    # if our record has all requested attributes then we say they are comparable
-    def self.compare_options(record, request)
-      request.each do |k,v|
-        return false if record[k.to_sym] != v
-      end
-      true
-    end
-
   end
 end
