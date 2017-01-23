@@ -26,19 +26,19 @@ module Proxy::DHCP::ISC
         if match = host[0].match(/^(\S+)\s*\{([^\}]+)/)
           name = match[1]
           body  = match[2]
-          opts = {:name => name, :hostname => name}
+          opts = {:hostname => name}
           body.split(";").each do |data|
             opts.merge!(parse_record_options(data))
           end
         end
         if opts[:deleted]
-          ret_val << Proxy::DHCP::DeletedReservation.new(opts)
+          ret_val << Proxy::DHCP::DeletedReservation.new(name)
           next
         end
         next if opts[:ip].nil? || opts[:ip].empty?
         subnet = service.find_subnet(opts[:ip])
         next unless subnet
-        ret_val << Proxy::DHCP::Reservation.new(opts.merge(:subnet => subnet))
+        ret_val << Proxy::DHCP::Reservation.new(name, opts.delete(:ip), opts.delete(:mac), subnet, opts)
       end
 
       conf.scan(/lease\s+(\S+\s*\{[^}]+\})/) do |lease|
@@ -52,7 +52,7 @@ module Proxy::DHCP::ISC
           next if opts[:mac].nil?
           subnet = service.find_subnet(ip)
           next unless subnet
-          ret_val << Proxy::DHCP::Lease.new(opts.merge(:subnet => subnet, :ip => ip))
+          ret_val << Proxy::DHCP::Lease.new(nil, ip, opts.delete(:mac), subnet, opts.delete(:starts), opts.delete(:ends), opts.delete(:state), opts)
         end
       end
 

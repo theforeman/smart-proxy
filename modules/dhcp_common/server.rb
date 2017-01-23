@@ -118,44 +118,43 @@ module Proxy::DHCP
     def add_record options = {}
       related_macs = options.delete("related_macs") || []
       logger.debug "Ignoring duplicates for macs: #{related_macs.inspect}" unless related_macs.empty?
-      options = clean_up_add_record_parameters(options)
+      name, ip_address, mac_address, subnet_address, options = clean_up_add_record_parameters(options)
 
-      validate_ip(options[:ip])
-      validate_mac(options[:mac])
-      raise(Proxy::DHCP::Error, "Must provide hostname") unless options[:hostname]
-
-      subnet = find_subnet(options[:subnet]) || raise(Proxy::DHCP::Error, "No Subnet detected for: #{options[:subnet]}")
-      options[:subnet] = subnet
-
+      validate_ip(ip_address)
+      validate_mac(mac_address)
+      raise(Proxy::DHCP::Error, "Must provide hostname") unless name
+      
+      subnet = find_subnet(subnet_address) || raise(Proxy::DHCP::Error, "No Subnet detected for: #{subnet_address}")
       raise(Proxy::DHCP::Error, "DHCP implementation does not support Vendor Options") if vendor_options_included?(options) && !vendor_options_supported?
 
+      to_return = Proxy::DHCP::Reservation.new(name, ip_address, mac_address, subnet, options)
+
       # try to figure out if we already have this record
-      similar_records = find_similar_records(subnet, options)
-      similar_records.each do |record|
-        if Record.compare_options(record.options, options)
-          # we already got this record, no need to do anything
-          logger.debug "We already got the same DHCP record - skipping"
-          raise Proxy::DHCP::AlreadyExists
-        elsif related_macs.include?(record.mac)
-          logger.debug "Record is an allowed duplicate - skipping"
-          logger.debug "request: #{options.inspect}"
-          logger.debug "local:   #{record.options.inspect}"
-        else
-          logger.warn "Request to create a conflicting DHCP record"
-          logger.debug "request: #{options.inspect}"
-          logger.debug "local:   #{record.options.inspect}"
-          raise Proxy::DHCP::Collision, "Record #{subnet.network}/#{options[:ip]} already exists"
-        end
+      similar_records = find_similar_records(subnet.network, ip_address, mac_address).reject {|record| related_macs.include?(record.mac)}
+
+      if similar_records.any? {|record| record == to_return}
+        # we already got this record, no need to do anything
+        logger.debug "We already got the same DHCP record - skipping"
+        raise Proxy::DHCP::AlreadyExists
       end
 
-      Proxy::DHCP::Reservation.new(options)
+      unless similar_records.empty?
+        logger.warn "Request to create a conflicting DHCP record"
+        logger.debug "request: #{to_return.inspect}"
+        logger.debug "existing: #{similar_records.inspect}"
+        raise Proxy::DHCP::Collision, "Record #{subnet.network}/#{ip_address} already exists"
+      end
+
+      to_return
     end
 
-    def find_similar_records(subnet, options)
+    def find_similar_records(subnet_address, ip_address, mac_address)
       records = []
-      records << service.find_hosts_by_ip(subnet.network, options[:ip])
-      records << service.find_host_by_mac(subnet.network, options[:mac])
-      records.flatten.compact.uniq { |record| record.mac }
+      records << service.find_hosts_by_ip(subnet_address, ip_address)
+      records << service.find_host_by_mac(subnet_address, mac_address)
+      records << service.find_lease_by_ip(subnet_address, ip_address)
+      records << service.find_lease_by_mac(subnet_address, mac_address)
+      records.flatten.compact.uniq
     end
 
     def clean_up_add_record_parameters(in_options)
@@ -173,9 +172,7 @@ module Proxy::DHCP
       to_return.delete("subnet") # Not a valid key; remove it to prevent conflict with :subnet
       subnet = to_return.delete("network")
 
-      to_return.merge!(:hostname => hostname || name,
-                       :name => name || hostname,
-                       :subnet => subnet, :ip => ip, :mac => mac)
+      [name || hostname, ip, mac, subnet, to_return.merge!(:hostname => hostname || name)]
     end
 
     def vendor_options_included? options

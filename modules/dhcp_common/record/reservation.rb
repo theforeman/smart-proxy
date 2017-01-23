@@ -4,9 +4,9 @@ module Proxy::DHCP
   class Reservation < Record
     attr_reader :name
 
-    def initialize options = {}
-      @name = options[:name] || options[:hostname] || raise("Must define a name: #{options.inspect}")
-      super options
+    def initialize(name, ip_address, mac_address, subnet, options = {})
+      @name = name
+      super(ip_address, mac_address, subnet, options)
     end
 
     def to_s
@@ -18,11 +18,11 @@ module Proxy::DHCP
     end
 
     def ==(other)
-      name == other.name && super(other)
+      super(other) && name == other.name
     end
 
-    def to_json(*options)
-      Hash[[:hostname, :ip, :mac].map{|s| [s, send(s)]}].to_json(*options)
+    def to_json(*ops)
+      Hash[[:name, :ip, :mac, :subnet].map{|s| [s, send(s)]}].merge(options).to_json(*opts)
     end
   end
 end

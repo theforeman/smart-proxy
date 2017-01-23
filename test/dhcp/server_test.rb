@@ -13,7 +13,7 @@ class DHCPServerTest < Test::Unit::TestCase
     @subnet = Proxy::DHCP::Subnet.new("192.168.0.0", "255.255.255.0")
     @service.add_subnet(@subnet)
 
-    @record = Proxy::DHCP::Reservation.new(:hostname => 'test', :name => 'test', :subnet => @subnet, :ip => "192.168.0.11", :mac => "aa:bb:cc:dd:ee:ff")
+    @record = Proxy::DHCP::Reservation.new('test', "192.168.0.11", "aa:bb:cc:dd:ee:ff", @subnet, :hostname => 'test')
     @service.add_host(@subnet.network, @record)
   end
 
@@ -27,14 +27,34 @@ class DHCPServerTest < Test::Unit::TestCase
     end
   end
 
-  def test_should_raise_exception_when_address_in_use
+  def test_should_detect_ip_address_collision_with_a_reservation
     assert_raises Proxy::DHCP::Collision do
       @server.add_record('hostname' => 'test-1', 'name' => 'test', 'network' => @subnet.network, 'ip' => "192.168.0.11", 'mac' => "aa:bb:cc:dd:ee:ef")
     end
   end
 
+  def test_should_detect_mac_address_collision_with_a_reservation
+    assert_raises Proxy::DHCP::Collision do
+      @server.add_record('hostname' => 'test-1', 'name' => 'test', 'network' => @subnet.network, 'ip' => "192.168.0.10", 'mac' => "aa:bb:cc:dd:ee:ff")
+    end
+  end
+
+  def test_should_detect_ip_address_collision_with_a_lease
+    @service.add_host(@subnet.network, ::Proxy::DHCP::Lease.new('test-2', "192.168.0.12", "00:11:22:33:44:55", @subnet, nil, nil, nil))
+    assert_raises Proxy::DHCP::Collision do
+      @server.add_record('hostname' => 'test-1', 'name' => 'test', 'network' => @subnet.network, 'ip' => "192.168.0.12", 'mac' => "aa:bb:cc:dd:ee:ef")
+    end
+  end
+
+  def test_should_detect_mac_address_collision_with_a_lease
+    @service.add_host(@subnet.network, ::Proxy::DHCP::Lease.new('test-2', "192.168.0.13", "00:11:22:33:44:55", @subnet, nil, nil, nil))
+    assert_raises Proxy::DHCP::Collision do
+      @server.add_record('hostname' => 'test-1', 'name' => 'test', 'network' => @subnet.network, 'ip' => "192.168.0.12", 'mac' => "00:11:22:33:44:55")
+    end
+  end
+
   def test_not_should_raise_exception_when_address_with_related_mac_in_use
-    record = Proxy::DHCP::Reservation.new(:hostname => 'example.com', :name => 'example.com-01', :subnet => @subnet, :ip => "192.168.0.15", :mac => "aa:bb:cc:dd:ee:ee")
+    record = Proxy::DHCP::Reservation.new('example.com-01', "192.168.0.15", "aa:bb:cc:dd:ee:ee", @subnet, :hostname => 'example.com')
     @service.add_host(@subnet.network, record)
     assert_nothing_raised do
       @server.add_record('hostname' => 'example.com', 'name' => 'example.com-02',

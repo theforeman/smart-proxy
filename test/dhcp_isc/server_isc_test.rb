@@ -53,13 +53,13 @@ class ServerIscTest < Test::Unit::TestCase
     @dhcp.expects(:ztp_options_statements).returns([])
     @dhcp.expects(:poap_options_statements).returns([])
 
-    record_to_add = Proxy::DHCP::Reservation.new(:name => 'a-test-01',
-                                 :hostname => 'a-test',
-                                 :ip => '192.168.42.100',
-                                 :subnet => Proxy::DHCP::Subnet.new('192.168.42.0', '255.255.255.0'),
-                                 :mac => '01:02:03:04:05:06',
-                                 :filename => 'a_file',
-                                 :nextServer => '192.168.42.10')
+    record_to_add = Proxy::DHCP::Reservation.new('a-test-01',
+                                                 '192.168.42.100',
+                                                 '01:02:03:04:05:06',
+                                                 Proxy::DHCP::Subnet.new('192.168.42.0', '255.255.255.0'),
+                                                 :hostname => 'a-test',
+                                                 :filename => 'a_file',
+                                                 :nextServer => '192.168.42.10')
 
     @dhcp.om_add_record(record_to_add)
 
@@ -81,10 +81,10 @@ class ServerIscTest < Test::Unit::TestCase
     @dhcp.expects(:om_disconnect)
 
     subnet = Proxy::DHCP::Subnet.new('192.168.42.0', '255.255.255.0')
-    record_to_delete = Proxy::DHCP::Reservation.new(:name => 'a-test',
-                                                    :ip => '192.168.42.100',
-                                                    :subnet => subnet,
-                                                    :mac => '01:02:03:04:05:06',
+    record_to_delete = Proxy::DHCP::Reservation.new('a-test',
+                                                    '192.168.42.100',
+                                                    '01:02:03:04:05:06',
+                                                    subnet,
                                                     :deleteable => true)
 
     @dhcp.del_record(subnet, record_to_delete)

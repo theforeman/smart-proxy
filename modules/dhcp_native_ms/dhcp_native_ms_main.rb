@@ -22,16 +22,15 @@ module Proxy::DHCP::NativeMS
     end
 
     def add_record(options)
-      to_add = clean_up_add_record_parameters(options)
+      name, ip_address, mac_address, subnet_address, options = clean_up_add_record_parameters(options)
 
-      validate_ip(to_add[:ip])
-      validate_mac(to_add[:mac])
-      raise(Proxy::DHCP::Error, "Must provide hostname") unless to_add[:hostname]
-      subnet = retrieve_subnet_from_server(to_add[:subnet])
+      validate_ip(ip_address)
+      validate_mac(mac_address)
+      subnet = retrieve_subnet_from_server(subnet_address)
 
-      create_reservation(to_add[:ip], subnet.netmask, to_add[:mac], to_add[:hostname])
-      set_option_values(to_add[:ip], subnet.network, build_option_values(to_add))
-      dhcpsapi.set_reservation_dns_config(to_add[:ip], subnet.network, false, false, false, false, false) if @disable_ddns
+      create_reservation(ip_address, subnet.netmask, mac_address, name)
+      set_option_values(ip_address, subnet.network, build_option_values(options))
+      dhcpsapi.set_reservation_dns_config(ip_address, subnet.network, false, false, false, false, false) if @disable_ddns
     end
 
     def create_reservation(ip_address, subnet_mask, mac_address, hostname)
@@ -53,7 +52,7 @@ module Proxy::DHCP::NativeMS
     end
 
     def build_option_values(options)
-      (options_only = options.clone).delete_if {|k,v| [:ip, :mac, :subnet].include?(k.to_sym) }
+      options_only = options.clone
       options_only[:PXEClient] = '' unless (dhcpsapi.get_option(Standard[:PXEClient][:code]) rescue nil).nil?
       options_only
     end
@@ -161,15 +160,16 @@ module Proxy::DHCP::NativeMS
     end
 
     def build_reservation(client, options)
-      opts = {:subnet => client_subnet(client[:client_ip_address], client[:subnet_mask]),
-              :ip => client[:client_ip_address],
-              :mac => client[:client_hardware_address].downcase, #foreman expects lower-case mac address
-              :name => client[:client_name],
-              :hostname => client[:client_name],
-              :deleteable => true}
-      opts.merge!(options)
-      logger.debug opts.inspect
-      Proxy::DHCP::Reservation.new(opts)
+      to_return = Proxy::DHCP::Reservation.new(
+          client[:client_name],
+          client[:client_ip_address],
+          client[:client_hardware_address].downcase,
+          client_subnet(client[:client_ip_address], client[:subnet_mask]),
+          {:hostname => client[:client_name], :deleteable => true}.merge!(options))
+
+      logger.debug to_return.inspect
+
+      to_return
     rescue Exception
       logger.debug("Skipping a reservation as it failed validation: '%s'" % [opts.inspect])
       nil
@@ -188,14 +188,16 @@ module Proxy::DHCP::NativeMS
     end
 
     def build_lease(client, options)
-      opts = {:subnet => client_subnet(client[:client_ip_address], client[:subnet_mask]),
-              :ip => client[:client_ip_address],
-              :mac => client[:client_hardware_address].downcase, #foreman expects lower-case mac address
-              :name => (client[:client_name] || '*lease*'),
-              :ends => client[:client_lease_expires]}
-      opts.merge!(options)
-      logger.debug opts.inspect
-      Proxy::DHCP::Lease.new(opts)
+      to_return = Proxy::DHCP::Lease.new(client[:client_name],
+                                         client[:client_ip_address],
+                                         client[:client_hardware_address].downcase,
+                                         client_subnet(client[:client_ip_address], client[:subnet_mask]),
+                                         nil,
+                                         client[:client_lease_expires],
+                                         nil,
+                                         options)
+      logger.debug to_return.inspect
+      to_return
     rescue Exception
       logger.debug("Skipping a lease as it failed validation: '%s'" % [opts.inspect])
       nil

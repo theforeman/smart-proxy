@@ -75,7 +75,7 @@ class Proxy::DhcpApi < ::Sinatra::Base
 
       record = server.find_record(@subnet.network, params[:record])
       log_halt 404, "No DHCP record for #{params[:network]}/#{params[:record]} found" unless record
-      record.to_json
+      [:hostname, :ip, :mac].inject({}) {|all, attr| all[attr] = record.send(attr); all}.to_json
     rescue => e
       log_halt 400, e
     end
@@ -91,7 +91,7 @@ class Proxy::DhcpApi < ::Sinatra::Base
 
       records = server.find_records_by_ip(@subnet.network, params[:ip_address])
       log_halt 404, "No DHCP records for IP #{params[:network]}/#{params[:ip_address]} found" unless records
-      records.map(&:options).to_json
+      records.to_json
     rescue => e
       log_halt 400, e
     end
@@ -107,7 +107,7 @@ class Proxy::DhcpApi < ::Sinatra::Base
 
       record = server.find_record_by_mac(@subnet.network, params[:mac_address])
       log_halt 404, "No DHCP record for MAC #{params[:network]}/#{params[:mac_address]} found" unless record
-      record.options.to_json
+      record.to_json
     rescue => e
       log_halt 400, e
     end

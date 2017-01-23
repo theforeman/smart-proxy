@@ -101,8 +101,7 @@ class SubnetServiceTest < Test::Unit::TestCase
   end
 
   def test_add_lease
-    lease = ::Proxy::DHCP::Lease.new(:subnet =>  Proxy::DHCP::Subnet.new("192.168.0.0", "255.255.255.0"),
-                                     :mac => "00:11:22:33:44:55", :ip => "192.168.0.1")
+    lease = ::Proxy::DHCP::Lease.new(nil, "192.168.0.1", "00:11:22:33:44:55", Proxy::DHCP::Subnet.new("192.168.0.0", "255.255.255.0"), nil, nil, nil)
     @service.add_lease("192.168.0.0", lease)
 
     assert_equal lease, @leases_ip_store["192.168.0.0", "192.168.0.1"]
@@ -110,8 +109,7 @@ class SubnetServiceTest < Test::Unit::TestCase
   end
 
   def test_add_reservation
-    reservation = ::Proxy::DHCP::Reservation.new(:subnet =>  Proxy::DHCP::Subnet.new("192.168.0.0", "255.255.255.0"),
-                                     :mac => "00:11:22:33:44:55", :ip => "192.168.0.1", :name => "test")
+    reservation = ::Proxy::DHCP::Reservation.new('test', "192.168.0.1", "00:11:22:33:44:55", Proxy::DHCP::Subnet.new("192.168.0.0", "255.255.255.0"))
     @service.add_host("192.168.0.0", reservation)
 
     assert_equal [reservation], @reservations_ip_store["192.168.0.0", "192.168.0.1"]
@@ -120,8 +118,7 @@ class SubnetServiceTest < Test::Unit::TestCase
   end
 
   def test_delete_lease
-    lease = ::Proxy::DHCP::Lease.new(:subnet =>  Proxy::DHCP::Subnet.new("192.168.0.0", "255.255.255.0"),
-                                     :mac => "00:11:22:33:44:55", :ip => "192.168.0.1")
+    lease = ::Proxy::DHCP::Lease.new(nil, "192.168.0.1", "00:11:22:33:44:55", Proxy::DHCP::Subnet.new("192.168.0.0", "255.255.255.0"), nil, nil, nil)
     @service.add_lease("192.168.0.0", lease)
 
     @service.delete_lease(lease)
@@ -131,8 +128,7 @@ class SubnetServiceTest < Test::Unit::TestCase
   end
 
   def test_delete_host
-    reservation = ::Proxy::DHCP::Reservation.new(:subnet =>  Proxy::DHCP::Subnet.new("192.168.0.0", "255.255.255.0"),
-                                                 :mac => "00:11:22:33:44:55", :ip => "192.168.0.1", :name => "test")
+    reservation = ::Proxy::DHCP::Reservation.new('test', "192.168.0.1", "00:11:22:33:44:55", Proxy::DHCP::Subnet.new("192.168.0.0", "255.255.255.0"))
     @service.add_host("192.168.0.0", reservation)
 
     @service.delete_host(reservation)
@@ -143,10 +139,8 @@ class SubnetServiceTest < Test::Unit::TestCase
   end
 
   def test_all_leases
-    lease1 = ::Proxy::DHCP::Lease.new(:subnet =>  Proxy::DHCP::Subnet.new("192.168.0.0", "255.255.255.0"),
-                                      :mac => "00:11:22:33:44:55", :ip => "192.168.0.1")
-    lease2 = ::Proxy::DHCP::Lease.new(:subnet =>  Proxy::DHCP::Subnet.new("192.168.1.0", "255.255.255.0"),
-                                      :mac => "00:11:22:33:44:55", :ip => "192.168.1.1")
+    lease1 = ::Proxy::DHCP::Lease.new(nil, "192.168.0.1", "00:11:22:33:44:55", Proxy::DHCP::Subnet.new("192.168.0.0", "255.255.255.0"), nil, nil, nil)
+    lease2 = ::Proxy::DHCP::Lease.new(nil, "192.168.1.1", "00:11:22:33:44:55", Proxy::DHCP::Subnet.new("192.168.1.0", "255.255.255.0"), nil, nil, nil)
     @service.add_lease("192.168.0.0", lease1)
     @service.add_lease("192.168.1.0", lease2)
 
@@ -158,10 +152,8 @@ class SubnetServiceTest < Test::Unit::TestCase
   end
 
   def test_all_hosts
-    reservation1 = ::Proxy::DHCP::Reservation.new(:subnet =>  Proxy::DHCP::Subnet.new("192.168.0.0", "255.255.255.0"),
-                                                  :mac => "00:11:22:33:44:55", :ip => "192.168.0.1", :name => "test")
-    reservation2 = ::Proxy::DHCP::Reservation.new(:subnet =>  Proxy::DHCP::Subnet.new("192.168.1.0", "255.255.255.0"),
-                                                  :mac => "00:11:22:33:44:56", :ip => "192.168.1.1", :name => "test1")
+    reservation1 = ::Proxy::DHCP::Reservation.new('test', "192.168.0.1", "00:11:22:33:44:55", Proxy::DHCP::Subnet.new("192.168.0.0", "255.255.255.0"))
+    reservation2 = ::Proxy::DHCP::Reservation.new('test1', "192.168.1.1", "00:11:22:33:44:56", Proxy::DHCP::Subnet.new("192.168.1.0", "255.255.255.0"))
     @service.add_host("192.168.0.0", reservation1)
     @service.add_host("192.168.1.0", reservation2)
 
@@ -173,8 +165,7 @@ class SubnetServiceTest < Test::Unit::TestCase
   end
 
   def test_find_lease_by_ip
-    lease = ::Proxy::DHCP::Lease.new(:subnet =>  Proxy::DHCP::Subnet.new("192.168.0.0", "255.255.255.0"),
-                                     :mac => "00:11:22:33:44:55", :ip => "192.168.0.1")
+    lease = ::Proxy::DHCP::Lease.new(nil, "192.168.0.1", "00:11:22:33:44:55", Proxy::DHCP::Subnet.new("192.168.0.0", "255.255.255.0"), nil, nil, nil)
     @service.add_lease("192.168.0.0", lease)
 
     assert_equal lease, @service.find_lease_by_ip("192.168.0.0", "192.168.0.1")
@@ -185,8 +176,7 @@ class SubnetServiceTest < Test::Unit::TestCase
   end
 
   def test_find_lease_by_mac
-    lease = ::Proxy::DHCP::Lease.new(:subnet =>  Proxy::DHCP::Subnet.new("192.168.0.0", "255.255.255.0"),
-                                     :mac => "00:11:22:33:44:55", :ip => "192.168.0.1")
+    lease = ::Proxy::DHCP::Lease.new(nil, "192.168.0.1", "00:11:22:33:44:55", Proxy::DHCP::Subnet.new("192.168.0.0", "255.255.255.0"), nil, nil, nil)
     @service.add_lease("192.168.0.0", lease)
 
     assert_equal lease, @service.find_lease_by_mac("192.168.0.0", "00:11:22:33:44:55")
@@ -197,8 +187,7 @@ class SubnetServiceTest < Test::Unit::TestCase
   end
 
   def test_find_hosts_by_ip
-    reservation = ::Proxy::DHCP::Reservation.new(:subnet =>  Proxy::DHCP::Subnet.new("192.168.0.0", "255.255.255.0"),
-                                                 :mac => "00:11:22:33:44:55", :ip => "192.168.0.1", :name => "test")
+    reservation = ::Proxy::DHCP::Reservation.new('test', "192.168.0.1", "00:11:22:33:44:55", Proxy::DHCP::Subnet.new("192.168.0.0", "255.255.255.0"))
     @service.add_host("192.168.0.0", reservation)
 
     assert_equal [reservation], @service.find_hosts_by_ip("192.168.0.0", "192.168.0.1")
@@ -209,8 +198,7 @@ class SubnetServiceTest < Test::Unit::TestCase
   end
 
   def test_find_host_by_mac
-    reservation = ::Proxy::DHCP::Reservation.new(:subnet =>  Proxy::DHCP::Subnet.new("192.168.0.0", "255.255.255.0"),
-                                                 :mac => "00:11:22:33:44:55", :ip => "192.168.0.1", :name => "test")
+    reservation = ::Proxy::DHCP::Reservation.new('test', "192.168.0.1", "00:11:22:33:44:55", Proxy::DHCP::Subnet.new("192.168.0.0", "255.255.255.0"))
     @service.add_host("192.168.0.0", reservation)
 
     assert_equal reservation, @service.find_host_by_mac("192.168.0.0", "00:11:22:33:44:55")
@@ -221,8 +209,7 @@ class SubnetServiceTest < Test::Unit::TestCase
   end
 
   def test_find_host_by_name
-    reservation = ::Proxy::DHCP::Reservation.new(:subnet =>  Proxy::DHCP::Subnet.new("192.168.0.0", "255.255.255.0"),
-                                                 :mac => "00:11:22:33:44:55", :ip => "192.168.0.1", :name => "test")
+    reservation = ::Proxy::DHCP::Reservation.new('test', "192.168.0.1", "00:11:22:33:44:55", Proxy::DHCP::Subnet.new("192.168.0.0", "255.255.255.0"))
     @service.add_host("192.168.0.0", reservation)
 
     assert_equal reservation, @service.find_host_by_hostname("test")

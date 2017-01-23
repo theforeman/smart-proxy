@@ -103,75 +103,59 @@ class StateChangesObserverTest < Test::Unit::TestCase
   end
 
   def test_update_subnet_service_with_dhcp_records_should_delete_reservations
-    reservation_details = {:subnet =>  @subnet, :mac => "00:11:22:33:44:55", :ip => "192.168.0.1", :name => "test"}
-    @service.add_host("192.168.0.0", ::Proxy::DHCP::Reservation.new(reservation_details))
-    @observer.update_subnet_service_with_dhcp_records([::Proxy::DHCP::DeletedReservation.new(reservation_details)])
+    @service.add_host("192.168.0.0", ::Proxy::DHCP::Reservation.new("test", "192.168.0.1", "00:11:22:33:44:55", @subnet))
+    @observer.update_subnet_service_with_dhcp_records([::Proxy::DHCP::DeletedReservation.new('test')])
 
     assert_equal 0, @service.all_hosts.size
   end
 
   def test_update_subnet_service_with_dhcp_records_should_add_reservations
-    reservation_details = {:subnet =>  @subnet, :mac => "00:11:22:33:44:55", :ip => "192.168.0.1", :name => "test"}
-    @observer.update_subnet_service_with_dhcp_records([::Proxy::DHCP::Reservation.new(reservation_details)])
-
+    @observer.update_subnet_service_with_dhcp_records([::Proxy::DHCP::Reservation.new("test", "192.168.0.1", "00:11:22:33:44:55", @subnet)])
     assert @service.find_hosts_by_ip("192.168.0.0", "192.168.0.1")
   end
 
   def test_update_subnet_service_with_dhcp_records_should_delete_hosts_with_duplicate_macs_when_adding_reservations
-    reservation_details = {:subnet =>  @subnet, :mac => "00:11:22:33:44:55", :ip => "192.168.0.10", :name => "test"}
-    @service.add_host("192.168.0.0", ::Proxy::DHCP::Reservation.new(reservation_details))
-
-    @observer.update_subnet_service_with_dhcp_records([::Proxy::DHCP::Reservation.new(reservation_details.merge(:ip => "192.168.0.1"))])
+    @service.add_host("192.168.0.0", ::Proxy::DHCP::Reservation.new("test", "192.168.0.10", "00:11:22:33:44:55", @subnet))
+    @observer.update_subnet_service_with_dhcp_records([::Proxy::DHCP::Reservation.new("test", "192.168.0.1", "00:11:22:33:44:55", @subnet)])
 
     assert @service.find_hosts_by_ip("192.168.0.0", "192.168.0.1")
   end
 
   def test_update_subnet_service_with_dhcp_records_should_delete_hosts_with_duplicate_ips_when_adding_reservations
-    reservation_details = {:subnet =>  @subnet, :mac => "00:11:22:33:44:55", :ip => "192.168.0.10", :name => "test"}
-    @service.add_host("192.168.0.0", ::Proxy::DHCP::Reservation.new(reservation_details))
-
-    @observer.update_subnet_service_with_dhcp_records([::Proxy::DHCP::Reservation.new(reservation_details.merge(:mac => "00:11:22:33:44:66"))])
+    @service.add_host("192.168.0.0", ::Proxy::DHCP::Reservation.new("test", "192.168.0.10", "00:11:22:33:44:55", @subnet))
+    @observer.update_subnet_service_with_dhcp_records([::Proxy::DHCP::Reservation.new("test", "192.168.0.10", "00:11:22:33:44:66", @subnet)])
 
     assert @service.find_host_by_mac("192.168.0.0", "00:11:22:33:44:66")
   end
 
   def test_update_subnet_service_with_dhcp_records_should_add_leases
-    lease_details = {:subnet =>  @subnet, :mac => "00:11:22:33:44:55", :ip => "192.168.0.1", :name => "test"}
-    @observer.update_subnet_service_with_dhcp_records([::Proxy::DHCP::Lease.new(lease_details)])
+    @observer.update_subnet_service_with_dhcp_records([::Proxy::DHCP::Lease.new('test', "192.168.0.1", "00:11:22:33:44:55", @subnet, nil, nil, nil)])
 
     assert @service.find_lease_by_ip("192.168.0.0", "192.168.0.1")
   end
 
   def test_update_subnet_service_with_dhcp_records_should_delete_free_leases
-    lease_details = {:subnet =>  @subnet, :mac => "00:11:22:33:44:55", :ip => "192.168.0.1", :name => "test"}
-    @service.add_lease("192.168.0.0", ::Proxy::DHCP::Lease.new(lease_details))
-
-    @observer.update_subnet_service_with_dhcp_records([::Proxy::DHCP::Lease.new(lease_details.merge(:state => 'free'))])
+    @service.add_lease("192.168.0.0", ::Proxy::DHCP::Lease.new('test', "192.168.0.1", "00:11:22:33:44:55", @subnet, nil, nil, nil))
+    @observer.update_subnet_service_with_dhcp_records([::Proxy::DHCP::Lease.new('test', "192.168.0.1", "00:11:22:33:44:55", @subnet, nil, nil, 'free')])
     assert_nil @service.find_lease_by_ip("192.168.0.0", "192.168.0.1")
   end
 
   def test_update_subnet_service_with_dhcp_records_should_delete_expired_leases
-    lease_details = {:subnet =>  @subnet, :mac => "00:11:22:33:44:55", :ip => "192.168.0.1", :name => "test"}
-    @service.add_lease("192.168.0.0", ::Proxy::DHCP::Lease.new(lease_details))
-
-    @observer.update_subnet_service_with_dhcp_records([::Proxy::DHCP::Lease.new(lease_details.merge(:next_state => 'free', :ends => Time.now - 60))])
+    @service.add_lease("192.168.0.0", ::Proxy::DHCP::Lease.new('test', "192.168.0.1", "00:11:22:33:44:55", @subnet, nil, nil, nil))
+    @observer.update_subnet_service_with_dhcp_records([::Proxy::DHCP::Lease.new('test', "192.168.0.1", "00:11:22:33:44:55", @subnet, nil, Time.now - 60, nil, :next_state => 'free')])
     assert_nil @service.find_lease_by_ip("192.168.0.0", "192.168.0.1")
   end
 
   def test_update_subnet_service_with_dhcp_records_should_delete_leases_with_duplicate_macs_when_adding_leases
-    lease_details = {:subnet =>  @subnet, :mac => "00:11:22:33:44:55", :ip => "192.168.0.10", :name => "test"}
-    @service.add_lease("192.168.0.0", ::Proxy::DHCP::Lease.new(lease_details))
-
-    @observer.update_subnet_service_with_dhcp_records([::Proxy::DHCP::Lease.new(lease_details.merge(:ip => "192.168.0.1"))])
+    @service.add_lease("192.168.0.0", ::Proxy::DHCP::Lease.new('test', "192.168.0.10", "00:11:22:33:44:55", @subnet, nil, nil, nil))
+    @observer.update_subnet_service_with_dhcp_records([::Proxy::DHCP::Lease.new('test', "192.168.0.1", "00:11:22:33:44:55", @subnet, nil, nil, nil)])
 
     assert @service.find_lease_by_ip("192.168.0.0", "192.168.0.1")
   end
 
   def test_update_subnet_service_with_dhcp_records_should_delete_leases_with_duplicate_ips_when_adding_leases
-    lease_details = {:subnet =>  @subnet, :mac => "00:11:22:33:44:55", :ip => "192.168.0.10", :name => "test"}
-    @service.add_lease("192.168.0.0", ::Proxy::DHCP::Lease.new(lease_details))
-
-    @observer.update_subnet_service_with_dhcp_records([::Proxy::DHCP::Lease.new(lease_details.merge(:mac => "00:11:22:33:44:66"))])
+    @service.add_lease("192.168.0.0", ::Proxy::DHCP::Lease.new('test', "192.168.0.10", "00:11:22:33:44:55", @subnet, nil, nil, nil))
+    @observer.update_subnet_service_with_dhcp_records([::Proxy::DHCP::Lease.new('test', "192.168.0.1", "00:11:22:33:44:66", @subnet, nil, nil, nil)])
 
     assert @service.find_lease_by_mac("192.168.0.0", "00:11:22:33:44:66")
   end

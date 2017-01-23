@@ -40,27 +40,31 @@ class DhcpApiTest < Test::Unit::TestCase
 
     @subnet = @subnets.first
 
-    @reservations = [Proxy::DHCP::Reservation.new(:hostname => "test.example.com",
-                                                  :ip => "192.168.122.1",
-                                                  :mac => "00:11:bb:cc:dd:ee",
-                                                  :subnet => @subnet),
-                     Proxy::DHCP::Reservation.new(:hostname   => "ten.example.com",
-                                                  :ip         => "192.168.122.10",
-                                                  :mac        => "10:10:10:10:10:10",
-                                                  :subnet => @subnet)]
+    @reservations = [Proxy::DHCP::Reservation.new("test.example.com",
+                                                  "192.168.122.1",
+                                                  "00:11:bb:cc:dd:ee",
+                                                  @subnet,
+                                                  :hostname => "test.example.com"),
+                     Proxy::DHCP::Reservation.new("ten.example.com",
+                                                  "192.168.122.10",
+                                                  "10:10:10:10:10:10",
+                                                  @subnet,
+                                                  :hostname   => "ten.example.com")]
 
-    @leases = [Proxy::DHCP::Lease.new(:ip => "192.168.122.2",
-                                      :mac => "00:aa:bb:cc:dd:ee",
-                                      :starts => date_format("Sat Jul 12 10:08:29 UTC 2014"),
-                                      :ends => nil,
-                                      :state => "active",
-                                      :subnet => @subnet),
-               Proxy::DHCP::Lease.new(:ip => "192.168.122.89",
-                                      :mac => "ec:f4:bb:c6:ca:fe",
-                                      :starts => date_format("2014-10-16 12:59:40 UTC"),
-                                      :ends => date_format("2199-01-01 00:00:01 UTC"),
-                                      :state => "active",
-                                      :subnet => @subnet)]
+    @leases = [Proxy::DHCP::Lease.new(nil,
+                                      "192.168.122.2",
+                                      "00:aa:bb:cc:dd:ee",
+                                      @subnet,
+                                      date_format("Sat Jul 12 10:08:29 UTC 2014"),
+                                      nil,
+                                      "active"),
+               Proxy::DHCP::Lease.new(nil,
+                                      "192.168.122.89",
+                                      "ec:f4:bb:c6:ca:fe",
+                                      @subnet,
+                                      date_format("2014-10-16 12:59:40 UTC"),
+                                      date_format("2199-01-01 00:00:01 UTC"),
+                                      "active")]
   end
 
   # Date formats change between Ruby versions and JSON libraries & versions
@@ -146,6 +150,7 @@ class DhcpApiTest < Test::Unit::TestCase
       "hostname" =>"test.example.com",
       "ip"       =>"192.168.122.1",
       "mac"      =>"00:11:bb:cc:dd:ee",
+      "name"     => 'test.example.com',
       "subnet"   =>"192.168.122.0/255.255.255.0" # NOTE: 'subnet' attribute isn't being used by foreman, which adds a 'network' attribute instead
     }]
     assert_equal expected, JSON.parse(last_response.body)
@@ -162,6 +167,7 @@ class DhcpApiTest < Test::Unit::TestCase
       "hostname" =>"test.example.com",
       "ip"       =>"192.168.122.1",
       "mac"      =>"00:11:bb:cc:dd:ee",
+      "name"     => 'test.example.com',
       "subnet"   =>"192.168.122.0/255.255.255.0" # NOTE: 'subnet' attribute isn't being used by foreman, which adds a 'network' attribute instead
     }
     assert_equal expected, JSON.parse(last_response.body)

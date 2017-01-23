@@ -13,9 +13,8 @@ class LeasesFileTest < Test::Unit::TestCase
 
   def test_hosts_and_leases_should_use_parser
     record_to_return = Proxy::DHCP::Reservation.new(
-        :name => 'a_test', :ip => '192.168.42.1',
-        :mac => '00:01:02:03:04:05',
-        :subnet => ::Proxy::DHCP::Subnet.new('192.168.42.0', '255.255.255.0'))
+        'a_test', '192.168.42.1', '00:01:02:03:04:05',
+        ::Proxy::DHCP::Subnet.new('192.168.42.0', '255.255.255.0'))
     @parser.expects(:parse_config_and_leases_for_records).returns([record_to_return])
 
     assert_equal [record_to_return], @leases.hosts_and_leases
