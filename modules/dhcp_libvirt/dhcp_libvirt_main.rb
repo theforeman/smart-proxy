@@ -92,5 +92,10 @@ module Proxy::DHCP::Libvirt
       logger.error msg = "Error removing DHCP record: #{e}"
       raise Proxy::DHCP::Error, msg
     end
+
+    def find_record(_, record)
+      return unless libvirt_network.leased_ip?(record.ip)
+      super(_, record)
+    end
   end
 end

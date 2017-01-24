@@ -22,5 +22,9 @@ module ::Proxy::DHCP::Libvirt
       xml = "<host mac=\"#{record.mac}\" ip=\"#{record.ip}\" #{nametag}/>"
       network_update ::Libvirt::Network::UPDATE_COMMAND_DELETE, ::Libvirt::Network::NETWORK_SECTION_IP_DHCP_HOST, xml
     end
+
+    def leased_ip?(ip)
+      !dhcp_leases.select { |lease| lease['ip'] == ip }.empty?
+    end
   end
 end
