@@ -8,14 +8,15 @@ module ::Proxy::Settings
       :daemon => false,
       :daemon_pid => "/var/run/foreman-proxy/foreman-proxy.pid",
       :forward_verify => true,
-      :bind_host => "*",
+      :bind_host => ["*"],
       :log_buffer => 2000,
       :log_buffer_errors => 1000,
       :ssl_disabled_ciphers => []
     }
 
     HOW_TO_NORMALIZE = {
-      :foreman_url => lambda { |value| value.end_with?("/") ? value : value + "/" }
+      :foreman_url => lambda { |value| value.end_with?("/") ? value : value + "/" },
+      :bind_host => lambda { |value| value.is_a?(Array) ? value : [value] }
     }
 
     attr_reader :used_defaults

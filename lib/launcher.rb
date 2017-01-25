@@ -18,7 +18,7 @@ module Proxy
       SETTINGS.ssl_private_key && SETTINGS.ssl_certificate && SETTINGS.ssl_ca_file
     end
 
-    def http_app
+    def http_app(http_port)
       return nil unless http_enabled?
       app = Rack::Builder.new do
         ::Proxy::Plugins.instance.select {|p| p[:state] == :running && p[:http_enabled]}.each do |p|
@@ -29,15 +29,15 @@ module Proxy
       {
         :app => app,
         :server => :webrick,
-        :BindAddress => SETTINGS.bind_host,
-        :Port => SETTINGS.http_port,
+        :DoNotListen => true,
+        :Port => http_port, # only being used to correctly log http port being used
         :Logger => ::Proxy::LogBuffer::Decorator.instance,
         :ServerSoftware => '',
         :daemonize => false
       }
     end
 
-    def https_app
+    def https_app(https_port)
       unless https_enabled?
         logger.warn "Missing SSL setup, https is disabled."
         return nil
@@ -59,8 +59,8 @@ module Proxy
       {
         :app => app,
         :server => :webrick,
-        :BindAddress => SETTINGS.bind_host,
-        :Port => SETTINGS.https_port,
+        :DoNotListen => true,
+        :Port => https_port, # only being used to correctly log https port being used
         :Logger => ::Proxy::LogBuffer::Decorator.instance,
         :ServerSoftware => '',
         :SSLEnable => true,
@@ -118,8 +118,9 @@ module Proxy
       retry
     end
 
-    def webrick_server(app)
+    def webrick_server(app, addresses, port)
       server = ::WEBrick::HTTPServer.new(app)
+      addresses.each {|a| server.listen(a, port)}
       server.mount "/", Rack::Handler::WEBrick, app[:app]
       server
     end
@@ -135,11 +136,11 @@ module Proxy
 
       ::Proxy::PluginInitializer.new(::Proxy::Plugins.instance).initialize_plugins
 
-      http_app = http_app()
-      https_app = https_app()
+      http_app = http_app(SETTINGS.http_port)
+      https_app = https_app(SETTINGS.https_port)
 
-      t1 = Thread.new { webrick_server(https_app).start } unless https_app.nil?
-      t2 = Thread.new { webrick_server(http_app).start } unless http_app.nil?
+      t1 = Thread.new { webrick_server(https_app, SETTINGS.bind_host, SETTINGS.https_port).start } unless https_app.nil?
+      t2 = Thread.new { webrick_server(http_app, SETTINGS.bind_host, SETTINGS.http_port).start } unless http_app.nil?
 
       Proxy::SignalHandler.install_traps
 
