@@ -23,4 +23,9 @@ class GlobalSettingsTest < Test::Unit::TestCase
     assert_equal "http://localhost:3000/",
                  ::Proxy::Settings::Global.new(:foreman_url => "http://localhost:3000/").foreman_url
   end
+
+  def test_bind_host_is_normalized
+    assert_equal ['127.0.0.1'], ::Proxy::Settings::Global.new(:bind_host => '127.0.0.1').bind_host
+    assert_equal ['127.0.0.1'], ::Proxy::Settings::Global.new(:bind_host => ['127.0.0.1']).bind_host
+  end
 end
