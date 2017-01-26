@@ -1,3 +1,9 @@
+2017-01-26	Dominic Cleal <dominic@cleal.org>
+	* Release 1.13.4
+
+2017-01-03	Alex Brodov <alex.brodov@primarydata.com>
+	* fixes #17823 -  MS DHCP record deletion is returning the stdout The stdout which is being returned by the server, is causing to parsing issues by Foreman and thus the host is not being deleted at the first attempt while the DHCP record is already gone
+
 2016-12-20	Dominic Cleal <dominic@cleal.org>
 	* Release 1.13.3
 
