@@ -87,7 +87,7 @@ class ServerIscTest < Test::Unit::TestCase
                                                     subnet,
                                                     :deleteable => true)
 
-    @dhcp.del_record(subnet, record_to_delete)
+    @dhcp.del_record(record_to_delete)
 
     expected_om_output = [
       "set hardware-address = #{record_to_delete.mac}",

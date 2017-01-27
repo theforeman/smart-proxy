@@ -12,7 +12,7 @@ module Proxy::DHCP::NativeMS
       @disable_ddns = disable_ddns
     end
 
-    def del_record _, record
+    def del_record(record)
       logger.debug "Deleting '#{record}'"
       if record.is_a?(::Proxy::DHCP::Reservation)
         dhcpsapi.delete_reservation(record.ip, record.subnet_address, record.mac)
@@ -70,11 +70,11 @@ module Proxy::DHCP::NativeMS
       end
     end
 
-    def unused_ip(subnet, mac_address, from_address, to_address)
-      client = dhcpsapi.get_client_by_mac_address(subnet.network, mac_address) rescue nil
+    def unused_ip(subnet_address, mac_address, from_address, to_address)
+      client = dhcpsapi.get_client_by_mac_address(subnet_address, mac_address) rescue nil
       return client[:client_ip_address] unless client.nil?
 
-      return dhcpsapi.get_free_ip_address(subnet.network, from_address, to_address).first
+      return dhcpsapi.get_free_ip_address(subnet_address, from_address, to_address).first
     end
 
     def retrieve_subnet_from_server(subnet_address)
@@ -87,16 +87,6 @@ module Proxy::DHCP::NativeMS
       classes = list_vendor_class_names
       shortened_vendor_name = vendor.gsub(/^sun-/i, '')
       classes.find {|cls| cls.include?(shortened_vendor_name)}
-    end
-
-    def find_subnet(subnet_address)
-      ::Proxy::DHCP::Subnet.new(subnet_address, '255.255.255.0')
-    end
-
-    def load_subnets
-    end
-
-    def load_subnet_data(subnet)
     end
 
     def find_record(subnet_address, ip_or_mac_address)

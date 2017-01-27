@@ -75,12 +75,12 @@ class DHCPServerMicrosoftTest < Test::Unit::TestCase
   def test_should_return_free_ip_address
     @dhcpsapi.expects(:get_client_by_mac_address).raises(RuntimeError)
     @dhcpsapi.expects(:get_free_ip_address).with(@network, nil, nil).returns(['192.168.42.20'])
-    assert_equal '192.168.42.20', @server.unused_ip(::Proxy::DHCP::Subnet.new(@network, @netmask), '00:01:02:03:04:05', nil, nil)
+    assert_equal '192.168.42.20', @server.unused_ip(@network, '00:01:02:03:04:05', nil, nil)
   end
 
   def test_unused_ip_address_for_known_mac_address
     @dhcpsapi.expects(:get_client_by_mac_address).with(@network, '00:01:02:03:04:05').returns(:client_ip_address => '192.168.42.20')
-    assert_equal '192.168.42.20', @server.unused_ip(::Proxy::DHCP::Subnet.new(@network, @netmask), '00:01:02:03:04:05', nil, nil)
+    assert_equal '192.168.42.20', @server.unused_ip(@network, '00:01:02:03:04:05', nil, nil)
   end
 
   def test_find_record_should_return_reservation_by_ip_address
@@ -237,8 +237,8 @@ class DHCPServerMicrosoftTest < Test::Unit::TestCase
     client_mac = '00:01:02:03:04:05'
     @dhcpsapi.expects(:delete_reservation).with(client_ip, @network, client_mac)
 
-    @server.del_record(nil, ::Proxy::DHCP::Reservation.new('test', client_ip, client_mac, ::Proxy::DHCP::Subnet.new(@network, @netmask),
-                                                           :hostname => 'test'))
+    @server.del_record(::Proxy::DHCP::Reservation.new('test', client_ip, client_mac, ::Proxy::DHCP::Subnet.new(@network, @netmask),
+                                                      :hostname => 'test'))
   end
 
   def test_should_delete_lease
@@ -246,8 +246,7 @@ class DHCPServerMicrosoftTest < Test::Unit::TestCase
     client_mac = '00:01:02:03:04:05'
     @dhcpsapi.expects(:delete_client_by_ip_address).with(client_ip)
 
-    @server.del_record(nil, ::Proxy::DHCP::Lease.new('test', client_ip, client_mac, ::Proxy::DHCP::Subnet.new(@network, @netmask),
-                                                     nil, Time.now, nil,
-                                                     :hostname => 'test'))
+    @server.del_record(::Proxy::DHCP::Lease.new('test', client_ip, client_mac, ::Proxy::DHCP::Subnet.new(@network, @netmask),
+                                                nil, Time.now, nil, :hostname => 'test'))
   end
 end

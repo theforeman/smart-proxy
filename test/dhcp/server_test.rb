@@ -117,12 +117,12 @@ class DHCPServerTest < Test::Unit::TestCase
   end
 
   def test_del_records_by_ip
-    @server.expects(:del_record).with(@subnet, @record).once
-    @server.del_records_by_ip(@subnet, '192.168.0.11')
+    @server.expects(:del_record).with(@record).once
+    @server.del_records_by_ip(@subnet.network, '192.168.0.11')
   end
 
   def test_del_record_by_mac
-    @server.expects(:del_record).with(@subnet, @record).once
-    @server.del_record_by_mac(@subnet, 'aa:bb:cc:dd:ee:ff')
+    @server.expects(:del_record).with(@record).once
+    @server.del_record_by_mac(@subnet.network, 'aa:bb:cc:dd:ee:ff')
   end
 end

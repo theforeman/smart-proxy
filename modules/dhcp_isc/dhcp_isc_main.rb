@@ -15,8 +15,7 @@ module Proxy::DHCP::ISC
       @omapi_port = omapi_port
     end
 
-    def del_record subnet, record
-      validate_subnet subnet
+    def del_record(record)
       validate_record record
       raise InvalidRecord, "#{record} is static - unable to delete" unless record.deleteable?
 

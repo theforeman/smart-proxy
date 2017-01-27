@@ -21,7 +21,7 @@ module Proxy::DHCP
       super(other) && name == other.name
     end
 
-    def to_json(*ops)
+    def to_json(*opts)
       Hash[[:name, :ip, :mac, :subnet].map{|s| [s, send(s)]}].merge(options).to_json(*opts)
     end
   end

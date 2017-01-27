@@ -8,26 +8,6 @@ class Proxy::DhcpApi < ::Sinatra::Base
 
   inject_attr :dhcp_provider, :server
 
-  before do
-    begin
-      server.load_subnets
-    rescue => e
-      log_halt 400, e
-    end
-  end
-
-  helpers do
-    def load_subnet
-      @subnet  = server.find_subnet(params[:network])
-      log_halt 404, "Subnet #{params[:network]} not found" unless @subnet
-      @subnet
-    end
-
-    def load_subnet_data
-      server.load_subnet_data(@subnet)
-    end
-  end
-
   get "/?" do
     begin
       content_type :json
@@ -39,11 +19,10 @@ class Proxy::DhcpApi < ::Sinatra::Base
 
   get "/:network" do
     begin
-      load_subnet
-      load_subnet_data
-
       content_type :json
-      {:reservations => server.all_hosts(@subnet.network), :leases => server.all_leases(@subnet.network)}.to_json
+      {:reservations => server.all_hosts(params[:network]), :leases => server.all_leases(params[:network])}.to_json
+    rescue ::Proxy::DHCP::SubnetNotFound
+      log_halt 404, "Subnet #{params[:network]} could not found"
     rescue => e
       log_halt 400, e
     end
@@ -52,11 +31,9 @@ class Proxy::DhcpApi < ::Sinatra::Base
   get "/:network/unused_ip" do
     begin
       content_type :json
-
-      load_subnet
-      load_subnet_data
-
-      {:ip => server.unused_ip(@subnet, params[:mac], params[:from], params[:to])}.to_json
+      {:ip => server.unused_ip(params[:network], params[:mac], params[:from], params[:to])}.to_json
+    rescue ::Proxy::DHCP::SubnetNotFound
+      log_halt 404, "Subnet #{params[:network]} could not found"
     rescue => e
       log_halt 400, e
     end
@@ -70,12 +47,11 @@ class Proxy::DhcpApi < ::Sinatra::Base
       logger.warn('GET dhcp/:network/:record endpoint has been deprecated and will be removed in future versions. '\
                   'Please use GET dhcp/:network/mac/:mac_address or GET dhcp/:network/ip/:ip_address instead.')
 
-      load_subnet
-      load_subnet_data
-
-      record = server.find_record(@subnet.network, params[:record])
+      record = server.find_record(params[:network], params[:record])
       log_halt 404, "No DHCP record for #{params[:network]}/#{params[:record]} found" unless record
-      [:hostname, :ip, :mac].inject({}) {|all, attr| all[attr] = record.send(attr); all}.to_json
+      {:hostname => (record.hostname rescue record.name), :ip => record.ip, :mac => record.mac }.to_json
+    rescue ::Proxy::DHCP::SubnetNotFound
+      log_halt 404, "Subnet #{params[:network]} could not found"
     rescue => e
       log_halt 400, e
     end
@@ -86,12 +62,11 @@ class Proxy::DhcpApi < ::Sinatra::Base
     begin
       content_type :json
 
-      load_subnet
-      load_subnet_data
-
-      records = server.find_records_by_ip(@subnet.network, params[:ip_address])
-      log_halt 404, "No DHCP records for IP #{params[:network]}/#{params[:ip_address]} found" unless records
+      records = server.find_records_by_ip(params[:network], params[:ip_address])
+      log_halt 404, "No DHCP records for IP #{params[:network]}/#{params[:ip_address]} found" if records.empty?
       records.to_json
+    rescue ::Proxy::DHCP::SubnetNotFound
+      log_halt 404, "Subnet #{params[:network]} could not found"
     rescue => e
       log_halt 400, e
     end
@@ -101,13 +76,11 @@ class Proxy::DhcpApi < ::Sinatra::Base
   get "/:network/mac/:mac_address" do
     begin
       content_type :json
-
-      load_subnet
-      load_subnet_data
-
-      record = server.find_record_by_mac(@subnet.network, params[:mac_address])
+      record = server.find_record_by_mac(params[:network], params[:mac_address])
       log_halt 404, "No DHCP record for MAC #{params[:network]}/#{params[:mac_address]} found" unless record
       record.to_json
+    rescue ::Proxy::DHCP::SubnetNotFound
+      log_halt 404, "Subnet #{params[:network]} could not found"
     rescue => e
       log_halt 400, e
     end
@@ -116,9 +89,6 @@ class Proxy::DhcpApi < ::Sinatra::Base
   # create a new record in a network
   post "/:network" do
     begin
-      load_subnet
-      load_subnet_data
-
       content_type :json
       # NOTE: sinatra overwrites params[:network] (required by add_record call) with the :network url parameter
       server.add_record(params)
@@ -126,7 +96,7 @@ class Proxy::DhcpApi < ::Sinatra::Base
       log_halt 409, e
     rescue Proxy::DHCP::AlreadyExists # rubocop:disable Lint/HandleExceptions
       # no need to do anything
-    rescue => e
+    rescue => e # rubocop:enable Lint/HandleExceptions
       log_halt 400, e
     end
   end
@@ -134,15 +104,14 @@ class Proxy::DhcpApi < ::Sinatra::Base
   # deprecated, delete a record from a network
   delete "/:network/:record" do
     begin
-      load_subnet
-      load_subnet_data
-
       logger.warn('DELETE dhcp/:network/:record endpoint has been deprecated and will be removed in future versions. '\
                   'Please use DELETE dhcp/:network/mac/:mac_address or DELETE dhcp/:network/ip/:ip_address instead.')
 
-      record = server.find_record(@subnet.network, params[:record])
+      record = server.find_record(params[:network], params[:record])
       log_halt 404, "No DHCP record for #{params[:network]}/#{params[:record]} found" unless record
-      server.del_record(@subnet, record).to_json
+      server.del_record(record).to_json
+    rescue ::Proxy::DHCP::SubnetNotFound
+      log_halt 404, "Subnet #{params[:network]} could not found"
     rescue Exception => e
       log_halt 400, e
     end
@@ -151,12 +120,11 @@ class Proxy::DhcpApi < ::Sinatra::Base
   # deletes all records for an ip address from a network
   delete "/:network/ip/:ip_address" do
     begin
-      load_subnet
-      load_subnet_data
-
-      server.del_records_by_ip(@subnet, params[:ip_address])
+      server.del_records_by_ip(params[:network], params[:ip_address])
       nil
-    rescue Exception => e
+    rescue ::Proxy::DHCP::SubnetNotFound # rubocop:disable Lint/HandleExceptions
+      # no need to do anything
+    rescue Exception => e # rubocop:enable Lint/HandleExceptions
       log_halt 400, e
     end
   end
@@ -164,12 +132,11 @@ class Proxy::DhcpApi < ::Sinatra::Base
   # delete a record for a mac address from a network
   delete "/:network/mac/:mac_address" do
     begin
-      load_subnet
-      load_subnet_data
-
-      server.del_record_by_mac(@subnet, params[:mac_address])
+      server.del_record_by_mac(params[:network], params[:mac_address])
       nil
-    rescue Exception => e
+    rescue ::Proxy::DHCP::SubnetNotFound # rubocop:disable Lint/HandleExceptions
+      # no need to do anything
+    rescue Exception => e # rubocop:enable Lint/HandleExceptions
       log_halt 400, e
     end
   end
