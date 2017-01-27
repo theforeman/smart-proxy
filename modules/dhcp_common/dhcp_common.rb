@@ -23,6 +23,7 @@ module Proxy::DHCP
   }
 
   class Error < RuntimeError; end
+  class SubnetNotFound < RuntimeError; end
   class Collision < RuntimeError; end
   class InvalidRecord < RuntimeError; end
   class AlreadyExists < RuntimeError; end

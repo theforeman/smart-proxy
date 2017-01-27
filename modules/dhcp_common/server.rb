@@ -27,46 +27,44 @@ module Proxy::DHCP
       service.all_subnets
     end
 
-    # Abstracted Subnet loader method
-    def load_subnets
-      logger.debug "Loading subnets for #{name}"
-    end
-
-    # Abstracted Subnet data loader method
-    def load_subnet_data subnet
-      raise "Invalid Subnet" unless subnet.is_a? Proxy::DHCP::Subnet
-      logger.debug "Loading subnet data for #{subnet}"
-    end
-
     # Abstracted Subnet options loader method
     def load_subnet_options subnet
       logger.debug "Loading Subnet options for #{subnet}"
     end
 
-    def find_subnet subnet_address
+    def find_subnet(subnet_address)
       service.find_subnet(subnet_address)
     end
 
-    def all_leases(subnet)
-      service.all_leases(subnet)
+    def get_subnet(subnet_address)
+      service.find_subnet(subnet_address) || raise(Proxy::DHCP::SubnetNotFound.new("No such subnet: %s" % [subnet_address]))
     end
 
-    def all_hosts(subnet)
-      service.all_hosts(subnet)
+    def all_leases(subnet_address)
+      get_subnet(subnet_address)
+      service.all_leases(subnet_address)
+    end
+
+    def all_hosts(subnet_address)
+      get_subnet(subnet_address)
+      service.all_hosts(subnet_address)
     end
 
     def find_record(subnet_address, an_address)
+      get_subnet(subnet_address)
       records_by_ip = find_records_by_ip(subnet_address, an_address)
       return records_by_ip.first unless records_by_ip.empty?
       find_record_by_mac(subnet_address, an_address)
     end
 
     def find_record_by_mac(subnet_address, mac_address)
+      get_subnet(subnet_address)
       service.find_host_by_mac(subnet_address, mac_address) ||
         service.find_lease_by_mac(subnet_address, mac_address)
     end
 
     def find_records_by_ip(subnet_address, ip)
+      get_subnet(subnet_address)
       hosts = service.find_hosts_by_ip(subnet_address, ip)
       return hosts if hosts
       lease = service.find_lease_by_ip(subnet_address, ip)
@@ -74,18 +72,19 @@ module Proxy::DHCP
       []
     end
 
-    def del_records_by_ip(subnet, ip)
-      records = find_records_by_ip(subnet.network, ip)
-      records.each { |record| del_record(subnet, record) }
+    def del_records_by_ip(subnet_address, ip)
+      records = find_records_by_ip(subnet_address, ip)
+      records.each { |record| del_record(record) }
       nil
     end
 
-    def del_record_by_mac(subnet, mac_address)
-      record = find_record_by_mac(subnet.network, mac_address)
-      del_record(subnet, record) unless record.nil?
+    def del_record_by_mac(subnet_address, mac_address)
+      record = find_record_by_mac(subnet_address, mac_address)
+      del_record(record) unless record.nil?
     end
 
-    def unused_ip(subnet, mac_address, from_address, to_address)
+    def unused_ip(subnet_address, mac_address, from_address, to_address)
+      subnet = get_subnet(subnet_address)
       # first check if we already have a record for this host
       # if we do, we can simply reuse the same ip address.
       if mac_address
@@ -123,7 +122,7 @@ module Proxy::DHCP
       validate_ip(ip_address)
       validate_mac(mac_address)
       raise(Proxy::DHCP::Error, "Must provide hostname") unless name
-      
+
       subnet = find_subnet(subnet_address) || raise(Proxy::DHCP::Error, "No Subnet detected for: #{subnet_address}")
       raise(Proxy::DHCP::Error, "DHCP implementation does not support Vendor Options") if vendor_options_included?(options) && !vendor_options_supported?
 
