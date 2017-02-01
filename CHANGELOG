@@ -1,3 +1,22 @@
+2017-02-01	Dominic Cleal <dominic@cleal.org>
+	* Release 1.14.1
+
+2017-01-30	Alexander Olofsson <alexander.olofsson@liu.se>
+	* Fixes #18149 - Duplicates due to OU in certnames
+
+2017-01-30	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #18115 - Logger is initialized when Syslog isn't available.
+	* Fixes #17554 - inotify events can't overflow the observer anymore
+
+2017-01-30	Dmitri Dolguikh <witlessbird@gmail.com>
+	* Fixes #13318 - Revoked certs always have state 'revoked'
+
+2017-01-30	Timo Goebel <timo.goebel@dm.de>
+	* fixes #17868 - dhcp: convert next-server ip correctly
+
+2017-01-30	Lukas Zapletal <lzap+git@redhat.com>
+	* Fixes #17045 - hostgroup templates URLs proxied correctly
+
 2017-01-13	Dominic Cleal <dominic@cleal.org>
 	* Release 1.14.0
 
