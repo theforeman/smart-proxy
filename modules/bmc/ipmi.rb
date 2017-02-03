@@ -52,6 +52,11 @@ module Proxy
         host.chassis.power.cycle
       end
 
+      # Hard reset the ipmi device
+      def powerreset
+        host.chassis.power.reset
+      end
+
       def bootdevices
         ["pxe", "disk", "bios", "cdrom"]
       end
@@ -146,6 +151,105 @@ module Proxy
       # return the netmask of the bmc device
       def netmask
         host.bmc.lan.netmask
+      end
+
+      # return the SNMP community string of the bmc device
+      def snmp
+        host.bmc.lan.snmp
+      end
+
+      # return the VLAN ID of the bmc device
+      def vlanid
+        host.bmc.lan.vlanid
+      end
+
+      # return IP source of BMC device
+      def ipsrc
+        if host.bmc.lan.dhcp?
+          return "dhcp"
+        else
+          return "static"
+        end
+      end
+
+      # return all LAN details of BMC device
+      def print
+        host.bmc.lan.info
+      end
+
+      # BMC information
+      def info
+        host.bmc.info
+      end
+
+      # BMC GUID information
+      def guid
+        host.bmc.guid
+      end
+
+      # BMC firmware version
+      def version
+        host.bmc.version
+      end
+
+      # BMC reset
+      def reset(type='cold')
+        host.bmc.reset(type)
+      end
+
+      # print all FRU information
+      def frulist
+        host.fru.list
+      end
+
+      # HW manufacturer
+      def manufacturer
+        host.fru.manufacturer
+      end
+
+      # Product name
+      def model
+        host.fru.product_name
+      end
+
+      # Product serial number
+      def serial
+        host.fru.product_serial
+      end
+
+      # Asset tag
+      def asset_tag
+        host.fru.product_asset_tag
+      end
+
+      # Sensor list
+      def sensorlist
+        host.sensors.list
+      end
+
+      # Sensor count
+      def count
+        host.sensors.count
+      end
+
+      # Sensor names
+      def names
+        host.sensors.names
+      end
+
+      # Fan sensors
+      def fanlist
+        host.sensors.fanlist
+      end
+
+      # Temparature sensors
+      def templist
+        host.sensors.templist
+      end
+
+      # Get the readings of a particular sensor
+      def get(sensor)
+        host.sensors.sensor
       end
 
     end
