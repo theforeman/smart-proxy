@@ -1,4 +1,5 @@
 require 'test_helper'
+require 'dns_common/dns_common'
 
 ENV['RACK_ENV'] = 'test'
 
@@ -113,6 +114,11 @@ class DnsApiTest < Test::Unit::TestCase
 
   def test_create_returns_error_on_invalid_ipv6_for_aaaa
     post '/', :fqdn => 'test.com', :value => 'xxxx::1', :type => "AAAA"
+    assert_equal 400, last_response.status
+  end
+
+  def test_create_returns_error_on_invalid_cname
+    post '/', :fqdn => 'test.com', :value => '-test.com', :type => "CNAME"
     assert_equal 400, last_response.status
   end
 
