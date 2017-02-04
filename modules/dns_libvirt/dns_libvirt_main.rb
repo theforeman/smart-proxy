@@ -13,27 +13,27 @@ module Proxy::Dns::Libvirt
       super(@network)
     end
 
-    def create_a_record(fqdn, ip)
-      libvirt_network.add_dns_a_record fqdn, ip
+    def create_a_record(name, content)
+      libvirt_network.add_dns_a_record name, content
     rescue ::Libvirt::Error => e
       logger.error msg = "Error adding DNS A record: #{e}"
       raise Proxy::Dns::Error, msg
     end
     alias :create_aaaa_record :create_a_record
 
-    def create_ptr_record(fqdn, ip)
+    def create_ptr_record(name, content)
       # libvirt does not support PTR
     end
 
-    def remove_a_record(fqdn)
-      libvirt_network.del_dns_a_record fqdn, find_ip_for_host(fqdn)
+    def remove_a_record(name)
+      libvirt_network.del_dns_a_record name, find_ip_for_host(fqdn)
     rescue ::Libvirt::Error => e
       logger.error msg = "Error adding DNS A record: #{e}"
       raise Proxy::Dns::Error, msg
     end
     alias :remove_aaaa_record :remove_a_record
 
-    def remove_ptr_record(ip)
+    def remove_ptr_record(name)
       # libvirt does not support PTR
     end
 

@@ -12,18 +12,18 @@ module Proxy::Dns::Nsupdate
       super(a_server, a_ttl)
     end
 
-    def do_create(id, value, type)
+    def do_create(name, content, type)
       nsupdate_connect
-      nsupdate "update add #{id}. #{@ttl} #{type} #{value}"
+      nsupdate "update add #{name}. #{@ttl} #{type} #{content}"
       nsupdate_disconnect
       nil
     ensure
       nsupdate_close
     end
 
-    def do_remove(id, type)
+    def do_remove(name, type)
       nsupdate_connect
-      nsupdate "update delete #{id} #{type}"
+      nsupdate "update delete #{name} #{type}"
       nsupdate_disconnect
       nil
     ensure

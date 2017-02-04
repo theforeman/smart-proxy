@@ -20,64 +20,64 @@ module Proxy::Dns
       Resolv::DNS.new(:nameserver => @server)
     end
 
-    def create_a_record(fqdn, ip)
-      case a_record_conflicts(fqdn, ip) #returns -1, 0, 1
+    def create_a_record(name, content)
+      case a_record_conflicts(name, content) #returns -1, 0, 1
         when 1 then
-          raise(Proxy::Dns::Collision, "'#{fqdn} 'is already in use")
+          raise(Proxy::Dns::Collision, "'#{name} 'is already in use")
         when 0 then
           return nil
         else
-          do_create(fqdn, ip, "A")
+          do_create(name, content, "A")
       end
     end
 
-    def create_aaaa_record(fqdn, ip)
-      case aaaa_record_conflicts(fqdn, ip) #returns -1, 0, 1
+    def create_aaaa_record(name, content)
+      case aaaa_record_conflicts(name, content) #returns -1, 0, 1
         when 1 then
-          raise(Proxy::Dns::Collision, "'#{fqdn} 'is already in use")
+          raise(Proxy::Dns::Collision, "'#{name} 'is already in use")
         when 0 then
           return nil
         else
-          do_create(fqdn, ip, "AAAA")
+          do_create(name, content, "AAAA")
       end
     end
 
-    def create_cname_record(fqdn, target)
-      case cname_record_conflicts(fqdn, target) #returns -1, 0, 1
+    def create_cname_record(name, target)
+      case cname_record_conflicts(name, target) #returns -1, 0, 1
         when 1 then
-          raise(Proxy::Dns::Collision, "'#{fqdn} 'is already in use")
+          raise(Proxy::Dns::Collision, "'#{name} 'is already in use")
         when 0 then
           return nil
         else
-          do_create(fqdn, target, "CNAME")
+          do_create(name, target, "CNAME")
       end
     end
 
-    def create_ptr_record(fqdn, ptr)
-      case ptr_record_conflicts(fqdn, ptr) #returns -1, 0, 1
+    def create_ptr_record(content, name)
+      case ptr_record_conflicts(content, name) #returns -1, 0, 1
         when 1 then
-          raise(Proxy::Dns::Collision, "'#{ptr}' is already in use")
+          raise(Proxy::Dns::Collision, "'#{name}' is already in use")
         when 0
           return nil
         else
-          do_create(ptr, fqdn, "PTR")
+          do_create(name, content, "PTR")
       end
     end
 
-    def do_create(name, value, type)
+    def do_create(name, content, type)
       raise(Proxy::Dns::Error, "Creation of #{type} not implemented")
     end
 
-    def remove_a_record(fqdn)
-      do_remove(fqdn, "A")
+    def remove_a_record(name)
+      do_remove(name, "A")
     end
 
-    def remove_aaaa_record(fqdn)
-      do_remove(fqdn, "AAAA")
+    def remove_aaaa_record(name)
+      do_remove(name, "AAAA")
     end
 
-    def remove_cname_record(fqdn)
-      do_remove(fqdn, "CNAME")
+    def remove_cname_record(name)
+      do_remove(name, "CNAME")
     end
 
     def remove_ptr_record(name)
@@ -108,20 +108,20 @@ module Proxy::Dns
       get_resource_as_string!(a_ptr, Resolv::DNS::Resource::IN::PTR, :name)
     end
 
-    def get_ipv4_address!(fqdn)
-      get_resource_as_string!(fqdn, Resolv::DNS::Resource::IN::A, :address)
+    def get_ipv4_address!(name)
+      get_resource_as_string!(name, Resolv::DNS::Resource::IN::A, :address)
     end
 
-    def get_ipv4_address(fqdn)
-      get_resource_as_string(fqdn, Resolv::DNS::Resource::IN::A, :address)
+    def get_ipv4_address(name)
+      get_resource_as_string(name, Resolv::DNS::Resource::IN::A, :address)
     end
 
-    def get_ipv6_address!(fqdn)
-      get_resource_as_string!(fqdn, Resolv::DNS::Resource::IN::AAAA, :address)
+    def get_ipv6_address!(name)
+      get_resource_as_string!(name, Resolv::DNS::Resource::IN::AAAA, :address)
     end
 
-    def get_ipv6_address(fqdn)
-      get_resource_as_string(fqdn, Resolv::DNS::Resource::IN::AAAA, :address)
+    def get_ipv6_address(name)
+      get_resource_as_string(name, Resolv::DNS::Resource::IN::AAAA, :address)
     end
 
     def get_resource_as_string(value, resource_type, attr)
@@ -148,9 +148,20 @@ module Proxy::Dns
 
     # conflict methods return values:
     # no conflict: -1; conflict: 1, conflict but record / ip matches: 0
-    def a_record_conflicts(fqdn, ip)
-      if ip_addr = to_ipaddress(ip)
-        addresses = resolver.getresources(fqdn, Resolv::DNS::Resource::IN::A).map {|r| IPAddr.new(r.address.to_s)}
+    def a_record_conflicts(name, content)
+      if ip_addr = to_ipaddress(content)
+        addresses = resolver.getresources(name, Resolv::DNS::Resource::IN::A).map {|r| IPAddr.new(r.address.to_s)}
+        return -1 if addresses.empty?
+        return 0 if addresses.any? {|a| a == ip_addr}
+        1
+      else
+        raise Proxy::Dns::Error.new("Not an IP Address: '#{content}'")
+      end
+    end
+
+    def aaaa_record_conflicts(name, content)
+      if ip_addr = to_ipaddress(content)
+        addresses = resolver.getresources(name, Resolv::DNS::Resource::IN::AAAA).map {|r| IPAddr.new(r.address.to_s)}
         return -1 if addresses.empty?
         return 0 if addresses.any? {|a| a == ip_addr}
         1
@@ -159,34 +170,23 @@ module Proxy::Dns
       end
     end
 
-    def aaaa_record_conflicts(fqdn, ip)
-      if ip_addr = to_ipaddress(ip)
-        addresses = resolver.getresources(fqdn, Resolv::DNS::Resource::IN::AAAA).map {|r| IPAddr.new(r.address.to_s)}
-        return -1 if addresses.empty?
-        return 0 if addresses.any? {|a| a == ip_addr}
-        1
-      else
-        raise Proxy::Dns::Error.new("Not an IP Address: '#{ip}'")
-      end
-    end
-
-    def cname_record_conflicts(fqdn, target)
-      current = resolver.getresources(fqdn, Resolv::DNS::Resource::IN::CNAME)
+    def cname_record_conflicts(name, content)
+      current = resolver.getresources(name, Resolv::DNS::Resource::IN::CNAME)
       return -1 if current.empty?
-      return 0 if current[0].name.to_s == target #There can only be one CNAME
+      return 0 if current[0].name.to_s == content #There can only be one CNAME
       1
     end
 
-    def ptr_record_conflicts(fqdn, ip)
-      names = if ip.match(Resolv::IPv4::Regex) || ip.match(Resolv::IPv6::Regex)
+    def ptr_record_conflicts(content, name)
+      names = if name.match(Resolv::IPv4::Regex) || name.match(Resolv::IPv6::Regex)
                 logger.warn(%q{Proxy::Dns::Record#ptr_record_conflicts with a non-ptr record parameter has been deprecated and will be removed in future versions of Smart-Proxy.
                       Please use ::Proxy::Dns::Record#ptr_record_conflicts('101.212.58.216.in-addr.arpa') format instead.})
-                resolver.getnames(ip).map {|r| r.to_s}
+                resolver.getnames(name).map {|r| r.to_s}
               else
-                resolver.getresources(ip, Resolv::DNS::Resource::IN::PTR).map {|r| r.name.to_s}
+                resolver.getresources(name, Resolv::DNS::Resource::IN::PTR).map {|r| r.name.to_s}
               end
       return -1 if names.empty?
-      return 0 if names.any? {|n| n.casecmp(fqdn) == 0}
+      return 0 if names.any? {|n| n.casecmp(content) == 0}
       1
     end
 
