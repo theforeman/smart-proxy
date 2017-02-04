@@ -27,6 +27,7 @@ module Proxy::Dns
           ip = IPAddr.new(value, Socket::AF_INET6).to_s
           server.create_aaaa_record(fqdn, ip)
         when 'CNAME'
+          validate_dns_name!(value)
           server.create_cname_record(fqdn, value)
         when 'PTR'
           validate_reverse_dns_name!(value)
