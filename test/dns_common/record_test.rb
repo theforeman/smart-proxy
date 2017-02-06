@@ -131,17 +131,18 @@ class DnsRecordTest < Test::Unit::TestCase
   end
 
   def test_old_ptr_record_conflicts_no_conflict
-    Resolv::DNS.any_instance.expects(:getnames).with('192.168.33.33').returns([])
+    Resolv::DNS.any_instance.expects(:getresources).with('33.33.168.192.in-addr.arpa',  Resolv::DNS::Resource::IN::PTR).returns([])
     assert_equal -1, Proxy::Dns::Record.new.ptr_record_conflicts('some.host', '192.168.33.33')
   end
 
   def test_old_ptr_record_conflicts_has_conflict
-    Resolv::DNS.any_instance.expects(:getnames).with('2001:db8:deef::1').returns(['some.host'])
+    Resolv::DNS.any_instance.expects(:getresources).with('1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.f.e.e.d.8.b.d.0.1.0.0.2.ip6.arpa',
+                                                         Resolv::DNS::Resource::IN::PTR).returns([Resolv::DNS::Resource::IN::PTR.new('some.host')])
     assert_equal 1, Proxy::Dns::Record.new.ptr_record_conflicts('another.host', '2001:db8:deef::1')
   end
 
   def test_old_ptr_record_conflicts_but_nothing_todo
-    Resolv::DNS.any_instance.expects(:getnames).with('192.168.33.33').returns(['some.host'])
+    Resolv::DNS.any_instance.expects(:getresources).with('33.33.168.192.in-addr.arpa',  Resolv::DNS::Resource::IN::PTR).returns([Resolv::DNS::Resource::IN::PTR.new('some.host')])
     assert_equal 0, Proxy::Dns::Record.new.ptr_record_conflicts('some.host', '192.168.33.33')
   end
 
