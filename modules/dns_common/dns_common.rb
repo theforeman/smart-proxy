@@ -149,49 +149,50 @@ module Proxy::Dns
     # conflict methods return values:
     # no conflict: -1; conflict: 1, conflict but record / ip matches: 0
     def a_record_conflicts(fqdn, ip)
-      if ip_addr = to_ipaddress(ip)
-        addresses = resolver.getresources(fqdn, Resolv::DNS::Resource::IN::A).map {|r| IPAddr.new(r.address.to_s)}
-        return -1 if addresses.empty?
-        return 0 if addresses.any? {|a| a == ip_addr}
-        1
-      else
-        raise Proxy::Dns::Error.new("Not an IP Address: '#{ip}'")
-      end
+      record_conflicts_ip(fqdn, Resolv::DNS::Resource::IN::A, ip)
     end
 
     def aaaa_record_conflicts(fqdn, ip)
-      if ip_addr = to_ipaddress(ip)
-        addresses = resolver.getresources(fqdn, Resolv::DNS::Resource::IN::AAAA).map {|r| IPAddr.new(r.address.to_s)}
-        return -1 if addresses.empty?
-        return 0 if addresses.any? {|a| a == ip_addr}
-        1
-      else
-        raise Proxy::Dns::Error.new("Not an IP Address: '#{ip}'")
-      end
+      record_conflicts_ip(fqdn, Resolv::DNS::Resource::IN::AAAA, ip)
     end
 
     def cname_record_conflicts(fqdn, target)
-      current = resolver.getresources(fqdn, Resolv::DNS::Resource::IN::CNAME)
-      return -1 if current.empty?
-      return 0 if current[0].name.to_s == target #There can only be one CNAME
-      1
+      record_conflicts_name(fqdn, Resolv::DNS::Resource::IN::CNAME, target)
     end
 
-    def ptr_record_conflicts(fqdn, ip)
-      names = if ip.match(Resolv::IPv4::Regex) || ip.match(Resolv::IPv6::Regex)
-                logger.warn(%q{Proxy::Dns::Record#ptr_record_conflicts with a non-ptr record parameter has been deprecated and will be removed in future versions of Smart-Proxy.
+    def ptr_record_conflicts(content, name)
+      if name.match(Resolv::IPv4::Regex) || name.match(Resolv::IPv6::Regex)
+        logger.warn(%q{Proxy::Dns::Record#ptr_record_conflicts with a non-ptr record parameter has been deprecated and will be removed in future versions of Smart-Proxy.
                       Please use ::Proxy::Dns::Record#ptr_record_conflicts('101.212.58.216.in-addr.arpa') format instead.})
-                resolver.getnames(ip).map {|r| r.to_s}
-              else
-                resolver.getresources(ip, Resolv::DNS::Resource::IN::PTR).map {|r| r.name.to_s}
-              end
-      return -1 if names.empty?
-      return 0 if names.any? {|n| n.casecmp(fqdn) == 0}
-      1
+        name = IPAddr.new(name).reverse
+      end
+      record_conflicts_name(name, Resolv::DNS::Resource::IN::PTR, content)
     end
 
     def to_ipaddress ip
       IPAddr.new(ip) rescue false
+    end
+
+    private
+
+    def record_conflicts_ip(fqdn, type, ip)
+      begin
+        ip_addr = IPAddr.new(ip)
+      rescue
+        raise Proxy::Dns::Error.new("Not an IP Address: '#{ip}'")
+      end
+
+      resources = resolver.getresources(fqdn, type)
+      return -1 if resources.empty?
+      return 0 if resources.any? {|r| IPAddr.new(r.address.to_s) == ip_addr }
+      1
+    end
+
+    def record_conflicts_name(fqdn, type, content)
+      resources = resolver.getresources(fqdn, type)
+      return -1 if resources.empty?
+      return 0 if resources.any? {|r| r.name.to_s.casecmp(content) == 0 }
+      1
     end
   end
 end
