@@ -112,6 +112,12 @@ class DhcpApiTest < Test::Unit::TestCase
     assert_equal 404, last_response.status
   end
 
+  def test_get_unused_when_not_inmplemented
+    @server.expects(:unused_ip).raises(::Proxy::DHCP::NotImplemented)
+    get "/192.168.122.0/unused_ip?mac=01:02:03:04:05:06&from=192.168.122.10&to=192.168.122.20"
+    assert_equal 501, last_response.status
+  end
+
   def test_get_record
     @server.expects(:find_record).with("192.168.122.0", "192.168.122.1").returns(@reservations.first)
 

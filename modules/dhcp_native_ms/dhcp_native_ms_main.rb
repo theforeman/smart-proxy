@@ -74,6 +74,10 @@ module Proxy::DHCP::NativeMS
       client = dhcpsapi.get_client_by_mac_address(subnet_address, mac_address) rescue nil
       return client[:client_ip_address] unless client.nil?
 
+      if dhcpsapi.api_level == DhcpsApi::Server::DHCPS_WIN2008_API || dhcpsapi.api_level == DhcpsApi::Server::DHCPS_NONE
+        raise Proxy::DHCP::NotImplemented.new("DhcpsApi::Server#get_free_ip_address is not available on Windows Server 2008 and earlier versions.")
+      end
+
       return dhcpsapi.get_free_ip_address(subnet_address, from_address, to_address).first
     end
 
