@@ -73,6 +73,7 @@ class DHCPServerMicrosoftTest < Test::Unit::TestCase
   end
 
   def test_should_return_free_ip_address
+    @dhcpsapi.expects(:api_level).twice.returns(DhcpsApi::Server::DHCPS_WIN2012_API)
     @dhcpsapi.expects(:get_client_by_mac_address).raises(RuntimeError)
     @dhcpsapi.expects(:get_free_ip_address).with(@network, nil, nil).returns(['192.168.42.20'])
     assert_equal '192.168.42.20', @server.unused_ip(@network, '00:01:02:03:04:05', nil, nil)

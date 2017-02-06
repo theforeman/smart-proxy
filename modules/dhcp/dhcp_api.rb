@@ -34,6 +34,8 @@ class Proxy::DhcpApi < ::Sinatra::Base
       {:ip => server.unused_ip(params[:network], params[:mac], params[:from], params[:to])}.to_json
     rescue ::Proxy::DHCP::SubnetNotFound
       log_halt 404, "Subnet #{params[:network]} could not found"
+    rescue ::Proxy::DHCP::NotImplemented => e
+      log_halt 501, e
     rescue => e
       log_halt 400, e
     end
