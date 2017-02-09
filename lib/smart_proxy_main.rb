@@ -79,6 +79,7 @@ module Proxy
   require 'bmc/bmc'
   require 'realm/realm'
   require 'realm_freeipa/realm_freeipa'
+  require 'realm_webhook/realm_webhook'
   require 'logs/logs'
 
   def self.version
