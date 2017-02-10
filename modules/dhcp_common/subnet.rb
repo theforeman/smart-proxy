@@ -24,8 +24,8 @@ module Proxy::DHCP
 
       @options[:routers] = options[:routers].each{|ip| validate_ip ip } if options[:routers]
       @options[:domain_name] = options[:domain_name] if options[:domain_name]
-      @options[:domain_name_servers] = options[:domain_name_servers].each{|ip| validate_ip ip } if options[:domain_name_servers]
-      @options[:ntp_servers] = options[:ntp_servers].each{|ip| validate_ip ip } if options[:ntp_servers]
+      @options[:domain_name_servers] = options[:domain_name_servers] if options[:domain_name_servers]
+      @options[:ntp_servers] = options[:ntp_servers] if options[:ntp_servers]
       @options[:interface_mtu] = options[:interface_mtu].to_i if options[:interface_mtu]
       @options[:range] = options[:range] if options[:range] && options[:range][0] && options[:range][1] && valid_range(:from => options[:range][0], :to => options[:range][1])
     end
