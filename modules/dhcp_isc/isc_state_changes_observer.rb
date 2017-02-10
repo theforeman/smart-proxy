@@ -3,7 +3,6 @@ require 'dhcp_common/isc/subnet_service_initialization'
 module Proxy::DHCP
   module ISC
     class IscStateChangesObserver
-      include ::Proxy::DHCP::CommonISC::IscSubnetServiceInitialization
       include ::Proxy::Log
 
       class Events
@@ -66,12 +65,13 @@ module Proxy::DHCP
         end
       end
 
-      attr_reader :service, :leases_file, :config_file, :events, :event_loop_active, :worker
+      attr_reader :service, :service_initializer, :leases_file_path, :config_file_path, :events, :event_loop_active, :worker
 
-      def initialize(config_file, leases_file, subnet_service, events = Events.new)
-        @config_file = config_file
-        @leases_file = leases_file
+      def initialize(config_file_path, leases_file_path, subnet_service, service_initializer, events = Events.new)
+        @config_file_path = config_file_path
+        @leases_file_path = leases_file_path
         @service = subnet_service
+        @service_initializer = service_initializer
         @events = events
         @event_loop_active = false
       end
@@ -126,36 +126,48 @@ module Proxy::DHCP
 
       def do_start
         service.group_changes do
-          load_subnets
-          update_subnet_service_with_dhcp_records(config_file.hosts_and_leases)
-          update_subnet_service_with_dhcp_records(leases_file.hosts_and_leases)
+          load_configuration_file
+          load_leases_file
         end
       end
 
       def do_leases_modified
-        service.group_changes { update_subnet_service_with_dhcp_records(leases_file.hosts_and_leases) }
+        service.group_changes { load_leases_file }
       end
 
       def do_leases_recreated
         service.group_changes do
-          config_file.close rescue nil
-          leases_file.close rescue nil
-
+          close_leases_file
           service.clear
-
-          load_subnets
-          update_subnet_service_with_dhcp_records(config_file.hosts_and_leases)
-          update_subnet_service_with_dhcp_records(leases_file.hosts_and_leases)
+          load_configuration_file
+          load_leases_file
         end
       end
 
       def do_stop
-        config_file.close rescue nil
-        leases_file.close rescue nil
+        close_leases_file
       end
 
-      def load_subnets
-        service.add_subnets(*config_file.subnets)
+      def load_configuration_file
+        service_initializer.load_configuration_file(read_config_file, config_file_path)
+      end
+
+      def load_leases_file
+        service_initializer.load_leases_file(read_leases_file, leases_file_path)
+      end
+
+      def read_leases_file
+        @leases_file ||= File.open(File.expand_path(leases_file_path), "r")
+        @leases_file.read
+      end
+
+      def close_leases_file
+        @leases_file.close unless @leases_file.nil?
+        @leases_file = nil
+      end
+
+      def read_config_file
+        File.read(File.expand_path(config_file_path))
       end
     end
   end

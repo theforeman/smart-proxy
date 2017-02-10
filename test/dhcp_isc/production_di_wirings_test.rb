@@ -2,8 +2,6 @@ require 'test_helper'
 require 'tempfile'
 require 'dhcp_common/subnet_service'
 require 'dhcp_common/isc/omapi_provider'
-require 'dhcp_common/isc/configuration_file'
-require 'dhcp_isc/leases_file'
 require 'dhcp_isc/isc_state_changes_observer'
 require 'dhcp_isc/configuration_loader'
 
@@ -27,26 +25,22 @@ class IscDhcpProductionDiWiringsTest < Test::Unit::TestCase
     assert_equal ::Proxy::DHCP::SubnetService, provider.service.class
   end
 
-  def test_config_file_initialization
-    config_file = @container.get_dependency(:config_file)
-
-    assert_equal @settings[:config], config_file.path
-    assert config_file.parser
-  end
-
-  def test_leases_file_initialization
-    leases_file = @container.get_dependency(:leases_file)
-
-    assert_equal @settings[:leases], leases_file.path
-    assert leases_file.parser
-  end
-
   def test_state_changes_observer_initialization
     state_observer = @container.get_dependency(:state_changes_observer)
-
-    assert state_observer.leases_file
-    assert state_observer.config_file
     assert state_observer.service
+    assert state_observer.service_initializer
+    assert_equal @settings[:leases], state_observer.leases_file_path
+    assert_equal @settings[:config], state_observer.config_file_path
+  end
+
+  def test_service_initializer_initialization
+    initializer = @container.get_dependency(:service_initialization)
+    assert initializer.subnet_service
+    assert initializer.parser
+  end
+
+  def test_parser_initialization
+    assert @container.get_dependency(:parser)
   end
 
   def test_inotify_leases_file_observer_initialization
