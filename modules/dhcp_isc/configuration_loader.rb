@@ -19,11 +19,10 @@ module Proxy::DHCP::ISC
                                          container.get_dependency(:memory_store), container.get_dependency(:memory_store),
                                          container.get_dependency(:memory_store), container.get_dependency(:memory_store))
       end)
-      container.dependency :parser, lambda {::Proxy::DHCP::CommonISC::IscFileParser.new(container.get_dependency(:subnet_service))}
-      container.dependency :config_file, lambda {::Proxy::DHCP::CommonISC::IscConfigurationFile.new(settings[:config], container.get_dependency(:parser))}
-      container.dependency :leases_file, lambda {::Proxy::DHCP::ISC::LeasesFile.new(settings[:leases], container.get_dependency(:parser))}
+      container.dependency :parser, lambda {::Proxy::DHCP::CommonISC::ConfigurationParser.new}
+      container.dependency :service_initialization, lambda {::Proxy::DHCP::CommonISC::IscSubnetServiceInitialization.new(container.get_dependency(:subnet_service), container.get_dependency(:parser))}
       container.dependency :state_changes_observer, (lambda do
-        ::Proxy::DHCP::ISC::IscStateChangesObserver.new(container.get_dependency(:config_file), container.get_dependency(:leases_file), container.get_dependency(:subnet_service))
+        ::Proxy::DHCP::ISC::IscStateChangesObserver.new(settings[:config], settings[:leases], container.get_dependency(:subnet_service), container.get_dependency(:service_initialization))
       end)
 
       if settings[:leases_file_observer] == :inotify_leases_file_observer
@@ -47,10 +46,9 @@ module Proxy::DHCP::ISC
 
     def load_classes
       require 'dhcp_common/subnet_service'
-      require 'dhcp_common/isc/file_parser'
       require 'dhcp_common/isc/omapi_provider'
-      require 'dhcp_common/isc/configuration_file'
-      require 'dhcp_isc/leases_file'
+      require 'dhcp_common/isc/configuration_parser'
+      require 'dhcp_common/isc/subnet_service_initialization'
       require 'dhcp_isc/isc_state_changes_observer'
     end
   end

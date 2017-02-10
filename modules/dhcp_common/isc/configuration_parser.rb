@@ -1,0 +1,364 @@
+require 'rsec'
+
+module Proxy::DHCP::CommonISC
+  class ConfigurationParser
+    include Rsec::Helpers
+    extend Rsec::Helpers
+
+    class Base
+      attr_reader :parent, :dhcp_options, :node_attributes
+
+      def initialize(parent)
+        @parent = parent
+        @dhcp_options = []
+        @node_attributes = {}
+      end
+
+      def dhcp_options
+        @dhcp_options ||= parent.nil? ? dhcp_options : parent.dhcp_options + dhcp_options
+      end
+    end
+
+    class Host < Base
+      attr_reader :name
+
+      def initialize(parent, name)
+        @name = name
+        super(parent)
+      end
+    end
+
+    class Lease < Base
+      attr_reader :ip_address
+
+      def initialize(parent, ip_address)
+        @ip_address = ip_address
+        super(parent)
+      end
+    end
+
+    class Ipv4Subnet < Base
+      attr_reader :subnet_address, :subnet_mask
+      def initialize(parent, subnet_address, subnet_mask)
+        @subnet_address = subnet_address
+        @subnet_mask = subnet_mask
+        super(parent)
+      end
+
+    end
+
+    class Group < Base
+      attr_reader :name
+      def initialize(name, parent)
+        @name = name
+        super(parent)
+      end
+    end
+
+    # rubocop:disable Style/StructInheritance
+    class GroupNode < Struct.new :name, :options_and_settings
+      def visit(all_hosts, all_subnets, parent)
+        group = Group.new(name, parent)
+        options_and_settings.flatten.each {|option_or_setting| option_or_setting.visit(all_hosts, all_subnets, group)}
+      end
+    end
+
+    class IpV4SubnetNode < Struct.new :subnet_address, :subnet_mask, :options_and_settings
+      def visit(all_hosts, all_subnets, parent)
+        subnet = Ipv4Subnet.new(parent, subnet_address, subnet_mask)
+        options_and_settings.flatten.each {|option_or_setting| option_or_setting.visit(all_hosts, all_subnets, subnet)}
+        all_subnets.push(subnet)
+      end
+    end
+
+    class OptionNode < Struct.new :should_supersede, :name, :params
+      def visit(_, _, parent)
+        parent.dhcp_options.push([name, params, should_supersede])
+      end
+    end
+
+    class HostNode < Struct.new :fqdn, :options_and_settings
+      def visit(all_hosts, _, parent)
+        host = Host.new(parent, fqdn)
+        options_and_settings.each {|option_or_setting| option_or_setting.visit([], [], host)}
+        all_hosts.push(host)
+      end
+    end
+
+    class LeaseNode < Struct.new :ip_address, :options_and_settings
+      def visit(all_hosts, _, parent)
+        lease = Lease.new(parent, ip_address)
+        options_and_settings.each {|option_or_setting| option_or_setting.visit([], [], lease)}
+        all_hosts.push(lease)
+      end
+    end
+
+    class RangeNode < Struct.new :ip_addr_one, :ip_addr_two, :dynamic_bootp
+      def visit(_, _, parent)
+        parent.node_attributes[:range] = [ip_addr_one, ip_addr_two.nil? ? ip_addr_one : ip_addr_two] # range can contain one address only
+      end
+    end
+
+    class IgnoredDeclaration < Struct.new :content
+      def visit(all_hosts, all_subnets, parent)
+        # ignore
+      end
+    end
+
+    class IgnoredBlock < Struct.new :declaration, :content
+      def visit(all_hosts, all_subnets, parent)
+        # ignore
+      end
+    end
+
+    class HardwareNode < Struct.new :type, :address
+      def visit(_, _, parent)
+        parent.node_attributes[:hardware_type] = type
+        parent.node_attributes[:hardware_address] = address
+      end
+    end
+
+    class CommentNode < Struct.new :comment
+      def visit(_, _, _); end
+    end
+
+    class KeyValueNode < Struct.new :key, :value
+      def visit(_, _, parent)
+        parent.node_attributes[key] = value
+      end
+    end
+
+    class VendorOptionSpaceNode < Struct.new :value
+      def visit(_, _, parent)
+        # b/c the original implementation cared about SUNW namespace and no other namespaces
+        # there's no other reason to care about this
+        parent.node_attributes[:vendor_option_space] = 'SUNW' if value == 'SUNW'
+      end
+    end
+    # rubocop:enable Style/StructInheritance
+
+    NBSP = /[\ \t]+/.r
+    SPACE = /\s*/.r
+    COMMENT = /#.*/.r.^('\n') {|comment| CommentNode[comment]}
+    EOSTMT = ';'.r 'end of statement'
+    COMMA =  /\s*,\s*/.r 'comma'
+    LITERAL = /".*?"|'.*?'/.r
+    MAC_ADDRESS = /([a-fA-F0-9][a-fA-F0-9]?:){5}[a-fA-F0-9][a-fA-F0-9]?/.r 'mac address'
+    IPV4_ADDRESS = /\d+\.\d+\.\d+\.\d+/.r 'ipv4 address'
+    IPV4_ADDRESS_LIST = IPV4_ADDRESS.join(COMMA).even
+    IPV6_ADDRESS = /[a-fA-F0-9:]+/.r 'ipv6 address'
+    IPV6_ADDRESS_LIST = IPV6_ADDRESS.join(COMMA).even
+    FQDN = /[a-zA-Z0-9\.-]+/.r 'host name'
+    FQDN_LIST = FQDN.join(COMMA).even
+    LFT_BRACKET = '{'.r 'left bracket'
+    RGT_BRACKET = '}'.r  'right bracket'
+    DOUBLE_QUOTE = '"'.r 'comma'
+
+    def ignored_declaration
+      seq_(SPACE.join(/[^\s{};#]+/).odd, EOSTMT | COMMENT) {|content, _| IgnoredDeclaration[content]}
+    end
+
+    def ignored_block
+      seq_(SPACE.join(/[^\s{};#]/).odd, LFT_BRACKET, SPACE.join(ignored_declaration | lazy {ignored_block}).odd, RGT_BRACKET) {|declaration, _, statements, _| IgnoredBlock[declaration, statements]}
+    end
+
+    def deleted
+      Rsec::Fail.reset
+      keyword = word('deleted').fail 'keyword_deleted'
+      seq_(keyword, EOSTMT) {|_, _| KeyValueNode[:deleted, true]}
+    end
+
+    def option_values
+      anything = /[^;,{}\s]+/.r
+      SPACE.join(LITERAL | anything).odd.join(COMMA).even
+    end
+
+    def filename
+      Rsec::Fail.reset
+      keyword = word('filename').fail 'keyword_filename'
+      seq_(keyword, option_values, EOSTMT) {|_, values, _| OptionNode[false, 'filename', values]}
+    end
+
+    def next_server
+      Rsec::Fail.reset
+      keyword = word('next-server').fail 'keyword_next_server'
+      seq_(keyword, option_values, EOSTMT) {|_, values, _| OptionNode[false, 'next-server', values]}
+    end
+
+    def vendor_option_space
+      Rsec::Fail.reset
+      keyword = word('vendor-option-space').fail 'keyword_vendor_option_space'
+      anything = /[^;,{}\s]+/.r
+      seq_(keyword, anything, EOSTMT) {|_, value, _| VendorOptionSpaceNode[value]}
+    end
+
+    def option
+      Rsec::Fail.reset
+      keyword_option = word('option').fail 'keyword_option'
+      keyword_supersede = word('supersede').fail 'keyword_option'
+      option_name = /[\w\.-]+/.r
+      seq_(keyword_option | keyword_supersede, option_name, '='.r._?, option_values, EOSTMT) {|maybe_supersede, name, _, values, _| OptionNode[maybe_supersede == 'supersede', name, values]} |
+          vendor_option_space | filename | next_server
+    end
+
+    # used in host and lease blocks
+    def hardware
+      Rsec::Fail.reset
+      hardware_keyword = word('hardware').fail 'keyword_hardware'
+      ethernet_keyword = word('ethernet').fail 'keyword_ethernet'
+      token_ring_keyword = word('token-ring').fail 'keyword_token_ring'
+      seq_(hardware_keyword, ethernet_keyword | token_ring_keyword, MAC_ADDRESS, EOSTMT) {|_, type, address, _| HardwareNode[type, address]}
+    end
+
+    def fixed_address
+      Rsec::Fail.reset
+      keyword = word('fixed-address').fail 'keyword_fixed_address'
+      seq_(keyword, IPV4_ADDRESS | FQDN, EOSTMT) {|_, address| KeyValueNode[:fixed_address, address]}
+    end
+
+    def dynamic
+      Rsec::Fail.reset
+      keyword_dynamic = word('dynamic').fail 'keyword_dynamic'
+      seq_(keyword_dynamic, EOSTMT) {|_, _| KeyValueNode[:dynamic, true]}
+    end
+
+    def host
+      Rsec::Fail.reset
+      keyword_host = word('host').fail 'keyword_host'
+      seq_(keyword_host, FQDN, LFT_BRACKET,
+           SPACE.join(option | hardware | fixed_address | COMMENT | deleted | dynamic | ignored_declaration | ignored_block).odd,
+           SPACE._?, RGT_BRACKET) {|_, fqdn, _, statements, _| HostNode[fqdn, statements]}
+    end
+
+    def lease_time_stamp
+      Rsec::Fail.reset
+      db_time = /\d\s+[\d\/]+\s+[\d:]+/.r {|t| Time.parse(t + " UTC")} #db-time is UTC
+      local_time = seq_(word('epoch'), prim(:unsigned_int64)) {|_, t| Time.at(t).utc} # since epoch
+      never = word('never')
+
+      starts_keyword = word('starts')
+      ends_keyword = word('ends')
+      tstp_keyword = word('tstp')
+      tsfp_keyword = word('tsfp')
+      atsfp_keyword = word('atsfp')
+      cltt_keyword = word('cltt')
+
+      seq_(starts_keyword | ends_keyword | tstp_keyword | tsfp_keyword | atsfp_keyword | cltt_keyword, db_time | local_time | never, EOSTMT) {|type, value, _| KeyValueNode[type.to_sym, value]}
+    end
+
+    def lease_binding_state
+      Rsec::Fail.reset
+      state_matcher = /\w+/.r
+      binding_state_keyword = word('binding state').fail 'keyword_binding_state'
+      next_binding_state_keyword = word('next binding state').fail 'keyword_next_binding_state'
+
+      seq_(binding_state_keyword | next_binding_state_keyword, state_matcher, EOSTMT) {|state, value| KeyValueNode[state.gsub(' ', '_').to_sym, value]}
+    end
+
+    def lease_uid
+      keyword = word('uid').fail 'keyword_uid'
+      seq_(keyword, LITERAL, EOSTMT) {|_, value, _| KeyValueNode[:uid, value]}
+    end
+
+    def lease_hostname
+      keyword = word('client-hostname').fail 'keyword_client_hostname'
+      seq_(keyword, LITERAL | FQDN, EOSTMT) {|_, fqdn, _| KeyValueNode[:client_hostname, fqdn]}
+    end
+
+    def lease
+      Rsec::Fail.reset
+      keyword = word('lease').fail 'keyword_lease'
+      seq_(keyword, IPV4_ADDRESS, LFT_BRACKET,
+           SPACE.join(option | hardware | lease_time_stamp | lease_binding_state | lease_uid | lease_hostname | COMMENT | ignored_declaration | ignored_block).odd,
+           SPACE._?, RGT_BRACKET) {|_, ip, _, statements, _| LeaseNode[ip, statements]}
+    end
+
+    def range
+      Rsec::Fail.reset
+      range_keyword = word('range').fail 'keyword_range'
+      bootp_keyword = word('dynamic-bootp').fail 'keyword_dynamic-bootp'
+      seq_(range_keyword, bootp_keyword._?, IPV4_ADDRESS, IPV4_ADDRESS._?, EOSTMT) do |_, bootp, ip_addr_one, ip_addr_two, _|
+        RangeNode[ip_addr_one, ip_addr_two.first, !bootp.empty?]
+      end
+    end
+
+    def group
+      Rsec::Fail.reset
+      keyword = word('group').fail 'keyword_group'
+      anything = /[^;,{}\s]+/.r
+      seq_(keyword, SPACE.join(LITERAL | anything).odd._?, LFT_BRACKET,
+           SPACE.join(option | host | lazy {subnet} | lazy {group} | lazy {shared_network} | COMMENT | deleted | ignored_declaration | ignored_block).odd,
+           RGT_BRACKET).cached {|_, name, _, statements, _| GroupNode[name.flatten.first, statements]}
+    end
+
+    def shared_network
+      Rsec::Fail.reset
+      keyword = word('shared-network').fail 'keyword_shared_network'
+      seq_(keyword,
+           SPACE.join(LITERAL | FQDN).odd, LFT_BRACKET,
+           SPACE.join(option | host | lazy {subnet} | lazy {group} | pool | COMMENT | deleted | ignored_declaration | ignored_block).odd,
+           RGT_BRACKET).cached {|_, name, _, statements, _| GroupNode[name.first, statements]}
+    end
+
+    def pool
+      Rsec::Fail.reset
+      keyword = word('pool').fail 'keyword_pool'
+      seq_(keyword, LFT_BRACKET, SPACE.join(range | option | host | COMMENT | ignored_declaration | ignored_block).odd, RGT_BRACKET) {|_, _, statements, _| GroupNode["pool", statements]}
+    end
+
+    def subnet
+      Rsec::Fail.reset
+      subnet_keyword = word('subnet').fail 'keyword_subnet'
+      netmask_keyword = word('netmask').fail 'keyword_netmask'
+
+      seq_(
+          subnet_keyword, IPV4_ADDRESS, netmask_keyword, IPV4_ADDRESS,
+          LFT_BRACKET, SPACE.join(range | option | host | lazy {group} | pool | COMMENT | ignored_declaration | ignored_block).odd,
+          RGT_BRACKET ).cached do |_, subnet_address, _, subnet_mask, _, statements, _|
+        IpV4SubnetNode[subnet_address, subnet_mask, statements]
+      end
+    end
+
+    def include_file
+      Rsec::Fail.reset
+      include_keyword = word('include').fail 'include_keyword'
+      seq_(include_keyword, LITERAL) do |_, filename_in_quotes|
+        ConfigurationParser.new.parse_file(literal_to_filename(filename_in_quotes))
+      end
+    end
+
+    def literal_to_filename(a_literal)
+       a_literal[1..-2]
+    end
+
+    def conf
+      SPACE.join(option | host | lease | group | subnet | shared_network | include_file | COMMENT | ignored_declaration | ignored_block | EOSTMT).odd.eof
+    end
+
+    def start_visiting_parse_tree_nodes(parse_tree)
+      all_hosts = []
+      all_subnets = []
+      root = Group.new("root_group", nil)
+
+      visit_parse_tree_nodes(parse_tree, all_hosts, all_subnets, root)
+
+      [all_subnets, all_hosts, root]
+    end
+
+    def visit_parse_tree_nodes(parse_tree, all_hosts, all_subnets, root)
+      parse_tree.each do |node|
+        node.is_a?(Array) ? visit_parse_tree_nodes(node, all_hosts, all_subnets, root) : node.visit(all_hosts, all_subnets, root)
+      end
+    end
+
+    def parse_file(a_path)
+      File.open(a_path, 'r') {|f| conf.parse!(f.read, a_path)}
+    end
+
+    # returns all_subnets, all_hosts, root_group
+    def subnets_hosts_and_leases(conf_as_string, filename)
+      parsed = conf.parse!(conf_as_string, filename)
+      start_visiting_parse_tree_nodes(parsed)
+    end
+  end
+end
