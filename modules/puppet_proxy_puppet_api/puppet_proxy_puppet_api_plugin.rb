@@ -1,6 +1,6 @@
 module Proxy::PuppetApi
   class Plugin < Proxy::Provider
-    default_settings :puppet_ssl_ca => '/var/lib/puppet/ssl/certs/ca.pem'
+    default_settings :puppet_ssl_ca => '/var/lib/puppet/ssl/certs/ca.pem', :api_timeout => 30
 
     plugin :puppet_proxy_puppet_api, ::Proxy::VERSION
 

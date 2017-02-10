@@ -7,14 +7,14 @@ require 'puppet_proxy_common/puppet_class'
 module PuppetApiv3EnvironmentClassesApiRetrieverTests
   def setup
     @api = Proxy::PuppetApi::EnvironmentClassesApiv3
-    @retriever = Proxy::PuppetApi::V3EnvironmentClassesApiClassesRetriever.new(nil, nil, nil, nil, @api)
+    @retriever = Proxy::PuppetApi::V3EnvironmentClassesApiClassesRetriever.new(nil, nil, nil, nil, nil, @api)
   end
 
   def test_uses_puppet_environment_classes_api
     Proxy::PuppetApi::EnvironmentClassesApiv3.any_instance.expects(:list_classes).
       with('test_environment', nil, EnvironmentClassesApiRetrieverForTesting::MAX_PUPPETAPI_TIMEOUT).
       returns('files' => [])
-    EnvironmentClassesApiRetrieverForTesting.new(nil, nil, nil, nil).get_classes('test_environment')
+    EnvironmentClassesApiRetrieverForTesting.new(nil, nil, nil, nil, nil).get_classes('test_environment')
   end
 
   def test_passes_cached_etag_value_to_puppetapi
@@ -22,7 +22,7 @@ module PuppetApiv3EnvironmentClassesApiRetrieverTests
     Proxy::PuppetApi::EnvironmentClassesApiv3.any_instance.expects(:list_classes).
       with('test_environment', etag_value, EnvironmentClassesApiRetrieverForTesting::MAX_PUPPETAPI_TIMEOUT).
       returns([{'files' => []}, etag_value + 1])
-    retriever = EnvironmentClassesApiRetrieverForTesting.new(nil, nil, nil, nil)
+    retriever = EnvironmentClassesApiRetrieverForTesting.new(nil, nil, nil, nil, nil)
     retriever.etag_cache['test_environment'] = etag_value
     retriever.get_classes('test_environment')
   end
@@ -39,35 +39,35 @@ module PuppetApiv3EnvironmentClassesApiRetrieverTests
   "name": "test_environment"
 }
 EOL
-    retriever = EnvironmentClassesApiRetrieverForTesting.new(nil, nil, nil, nil)
+    retriever = EnvironmentClassesApiRetrieverForTesting.new(nil, nil, nil, nil, nil)
     retriever.classes_cache['test_environment'] = JSON.parse(expected_classes)
     assert_equal JSON.parse(expected_classes), retriever.get_classes('test_environment')
   end
 
   def test_reuses_future_for_concurrent_environment_classes_retrievals
     fake_future = Object.new
-    retriever = EnvironmentClassesApiRetrieverForTesting.new(nil, nil, nil, nil)
+    retriever = EnvironmentClassesApiRetrieverForTesting.new(nil, nil, nil, nil, nil)
     retriever.futures_cache['test_environment'] = fake_future
     assert_equal fake_future, retriever.async_get_classes('test_environment')
   end
 
   def test_clears_futures_cache
     Proxy::PuppetApi::EnvironmentClassesApiv3.any_instance.expects(:list_classes).returns([{'files' => []}, 42])
-    retriever = EnvironmentClassesApiRetrieverForTesting.new(nil, nil, nil, nil)
+    retriever = EnvironmentClassesApiRetrieverForTesting.new(nil, nil, nil, nil, nil)
     retriever.get_classes('test_environment')
     assert_nil retriever.futures_cache['test_environment']
   end
 
   def test_clears_futures_cache_if_puppet_responds_with_not_modified
     Proxy::PuppetApi::EnvironmentClassesApiv3.any_instance.expects(:list_classes).returns([Proxy::PuppetApi::EnvironmentClassesApiv3::NOT_MODIFIED, 42])
-    retriever = EnvironmentClassesApiRetrieverForTesting.new(nil, nil, nil, nil)
+    retriever = EnvironmentClassesApiRetrieverForTesting.new(nil, nil, nil, nil, nil)
     retriever.get_classes('test_environment')
     assert_nil retriever.futures_cache['test_environment']
   end
 
   def test_clears_futures_cache_if_call_to_puppet_raises_an_exception
     Proxy::PuppetApi::EnvironmentClassesApiv3.any_instance.expects(:list_classes).raises(StandardError)
-    retriever = EnvironmentClassesApiRetrieverForTesting.new(nil, nil, nil, nil)
+    retriever = EnvironmentClassesApiRetrieverForTesting.new(nil, nil, nil, nil, nil)
     assert retriever.async_get_classes('test_environment').wait(1).rejected?
     assert_nil retriever.futures_cache['test_environment']
   end
@@ -85,7 +85,7 @@ end
 
 module PuppetApiv3EnvironmentClassesApiParsingTests
   def setup
-    @retriever = Proxy::PuppetApi::V3EnvironmentClassesApiClassesRetriever.new(nil, nil, nil, nil)
+    @retriever = Proxy::PuppetApi::V3EnvironmentClassesApiClassesRetriever.new(nil, nil, nil, nil, nil)
   end
 
   ENVIRONMENT_CLASSES_RESPONSE =<<EOL
