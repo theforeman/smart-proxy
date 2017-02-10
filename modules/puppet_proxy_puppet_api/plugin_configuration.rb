@@ -34,7 +34,8 @@ module ::Proxy::PuppetApi
                                                     settings[:puppet_url],
                                                     settings[:puppet_ssl_ca],
                                                     settings[:puppet_ssl_cert],
-                                                    settings[:puppet_ssl_key])
+                                                    settings[:puppet_ssl_key],
+                                                    settings[:api_timeout])
                                                 end)
         container_instance.dependency :class_cache_initializer,
                                       (lambda do

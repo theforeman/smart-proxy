@@ -3,12 +3,12 @@ require 'concurrent'
 class Proxy::PuppetApi::V3EnvironmentClassesApiClassesRetriever
   include ::Proxy::Log
 
-  MAX_CLIENT_TIMEOUT = 15
+  DEFAULT_CLIENT_TIMEOUT = 15
   MAX_PUPPETAPI_TIMEOUT = 300
 
-  attr_reader :puppet_url, :ssl_ca, :ssl_cert, :ssl_key
+  attr_reader :puppet_url, :ssl_ca, :ssl_cert, :ssl_key, :api_timeout
 
-  def initialize(puppet_url, puppet_ssl_ca, puppet_ssl_cert, puppet_ssl_key, api = nil)
+  def initialize(puppet_url, puppet_ssl_ca, puppet_ssl_cert, puppet_ssl_key, api_timeout, api = nil)
     @etag_cache = {}
     @classes_cache = {}
     @futures_cache = {}
@@ -16,6 +16,7 @@ class Proxy::PuppetApi::V3EnvironmentClassesApiClassesRetriever
     @ssl_cert = puppet_ssl_cert
     @ssl_key = puppet_ssl_key
     @puppet_url = puppet_url
+    @api_timeout = api_timeout
     @m = Monitor.new
     @puppet_api = api || Proxy::PuppetApi::EnvironmentClassesApiv3
   end
@@ -61,7 +62,11 @@ class Proxy::PuppetApi::V3EnvironmentClassesApiClassesRetriever
 
   def get_classes(environment)
     future = async_get_classes(environment)
-    future.value!(MAX_CLIENT_TIMEOUT)
+    cache_used = @m.synchronize { !!@etag_cache[environment] } #etags are only available when classes cache is enabled
+    client_timeout = cache_used ? DEFAULT_CLIENT_TIMEOUT : api_timeout
+    logger.warn("Puppet server classes cache is disabled, classes retrieval can be slow.") unless cache_used
+
+    future.value!(client_timeout)
 
     raise ::Proxy::Puppet::TimeoutError, "Puppet is taking too long to respond, please try again later." if future.pending?
     future.value

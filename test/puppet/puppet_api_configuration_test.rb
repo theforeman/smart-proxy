@@ -19,6 +19,7 @@ class PuppetApiDefaultSettingsTest < Test::Unit::TestCase
   def test_default_settings
     Proxy::PuppetApi::Plugin.load_test_settings({})
     assert_equal '/var/lib/puppet/ssl/certs/ca.pem', Proxy::PuppetApi::Plugin.settings.puppet_ssl_ca
+    assert_equal 30, Proxy::PuppetApi::Plugin.settings.api_timeout
   end
 end
 
@@ -67,6 +68,7 @@ class PuppetApiDIWiringsTest < Test::Unit::TestCase
                                                      :puppet_ssl_ca => "path_to_ca_cert",
                                                      :puppet_ssl_cert => "path_to_ssl_cert",
                                                      :puppet_ssl_key => "path_to_ssl_key",
+                                                     :api_timeout => 100,
                                                      :puppet_version => "4.4")
 
     assert @container.get_dependency(:class_retriever_impl).instance_of?(::Proxy::PuppetApi::V3EnvironmentClassesApiClassesRetriever)
@@ -74,5 +76,6 @@ class PuppetApiDIWiringsTest < Test::Unit::TestCase
     assert_equal "path_to_ca_cert", @container.get_dependency(:class_retriever_impl).ssl_ca
     assert_equal "path_to_ssl_cert", @container.get_dependency(:class_retriever_impl).ssl_cert
     assert_equal "path_to_ssl_key", @container.get_dependency(:class_retriever_impl).ssl_key
+    assert_equal 100, @container.get_dependency(:class_retriever_impl).api_timeout
   end
 end
