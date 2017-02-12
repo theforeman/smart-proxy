@@ -1,0 +1,8 @@
+---
+# Authentication for Kerberos-based Realms
+:realm: EXAMPLE.COM
+:keytab_path: /etc/foreman-proxy/ad.keytab
+:principal: Administrator@EXAMPLE.COM
+:domain_controller: dc.example.com
+:ldap_user: Administrator
+:ldap_password: password
