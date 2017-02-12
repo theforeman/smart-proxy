@@ -2,18 +2,8 @@ require 'test_helper'
 require 'realm_ad/provider'
 
 class RealmADTest < Test::Unit::TestCase
-  class ADConfigParserForTesting
-    attr_reader :realm
-
-    def initialize(realm)
-      @realm = realm
-    end  
-  end
-
   def setup
-    @realm = 'test_realm'
-    @ad_config = ADConfigParserForTesting.new(@realm)
-    @provider = Proxy::ADRealm::Provider.new(@ad_config, 'keytab', 'principal')
+    @provider = Proxy::ADRealm::Provider.new('realm', 'keytab', 'principal', 'domain-controller', 'ldap-user', 'ldap-password')
   end
 
   def test_find
