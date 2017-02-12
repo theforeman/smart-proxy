@@ -7,7 +7,7 @@ module Proxy::ADRealm
     include Proxy::Util
     include Proxy::Kerberos
 
-    def initialize(keytab_path, principal, domain_controller, ldap_user, ldap_password)
+    def initialize(realm, keytab_path, principal, domain_controller, ldap_user, ldap_password)
       @realm = realm
       @keytab_path = keytab_path
       @principal = principal
