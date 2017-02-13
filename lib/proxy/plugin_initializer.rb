@@ -6,7 +6,6 @@ class ::Proxy::PluginGroup
   attr_reader :plugin, :providers, :state, :di_container
 
   def initialize(a_plugin, providers = [], di_container = ::Proxy::DependencyInjection::Container.new)
-    puts "initialize: #{a_plugin}"
     @plugin = a_plugin
     @state = :uninitialized # :uninitialized -> :starting -> :running, or :uninitialized -> :disabled, or :uninitialized -> :starting -> :failed
     @providers = providers
@@ -140,7 +139,6 @@ class ::Proxy::PluginInitializer
   def initialize_plugins
     loaded_plugins = plugins.loaded.select {|plugin| plugin[:class].ancestors.include?(::Proxy::Plugin)}
 
-    puts loaded_plugins
     grouped_with_providers = loaded_plugins.map {|p| ::Proxy::PluginGroup.new(p[:class], [], Proxy::DependencyInjection::Container.new)}
 
     plugins.update(current_state_of_modules(plugins.loaded, grouped_with_providers))
