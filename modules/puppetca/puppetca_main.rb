@@ -10,7 +10,7 @@ module Proxy::PuppetCa
 
   class << self
     def sign certname
-      puppetca("sign", certname)
+      puppetca("sign", certname, [ "--allow-dns-alt-names "])
     end
 
     def clean certname
@@ -185,11 +185,11 @@ module Proxy::PuppetCa
       Set.new(OpenSSL::X509::CRL.new(crl_cert_contents).revoked.collect {|r| r.serial.to_i})
     end
 
-    def puppetca mode, certname
+    def puppetca mode, certname, options=[]
       raise "Invalid mode #{mode}" unless mode =~ /^(clean|sign)$/
       find_puppetca
       certname.downcase!
-      command = "#{@sudo} #{@puppetca} --#{mode} #{certname}"
+      command = "#{@sudo} #{@puppetca} --#{mode} #{certname} " + options.join(" ")
       logger.debug "Executing #{command}"
       response = `#{command} 2>&1`
       if $?.success?
