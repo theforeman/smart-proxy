@@ -76,7 +76,7 @@ module Proxy::ADRealm
     end
 
     def radcli_reset computer_name, newpassword
-    def
+    end
 
     def radcli_delete computer_name
     end
