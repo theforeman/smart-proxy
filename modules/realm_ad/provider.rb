@@ -1,5 +1,6 @@
 require 'net-ldap'
 require 'proxy/kerberos'
+require 'radcli'
 
 module Proxy::ADRealm
   class Provider
@@ -24,7 +25,6 @@ module Proxy::ADRealm
     end
 
     def find hostname
-      
     end
 
     def create realm, hostname, params
@@ -46,34 +46,31 @@ module Proxy::ADRealm
 
     private
 
-    # def ldap_host_exists? hostname
-    #   ldap = Net::LDAP.new
-    #   ldap.host = @domain_controller 
-    #   ldap.port = @ldap_port
-    #   ldap.auth @ldap_user, @ldap_password
-
-    #   filter = Net::LDAP::Filter.eq( "DNSHostname", hostname )
-    #   treebase = domainname_to_basedn @ad_domain
-
-    #   if ldap.bind 
-
-    #     ldap.search( :base => treebase, :filter => filter) do |entry|
-    #       if entry == nil
-    #         logger.debug "Host with DNSName #{hostname} was not found in domain"
-    #         return false
-    #       else 
-    #         logger.debug "Found Host in domain for DNSName #{hostname}"         
-    #         logger.debug "LDAP Returned DN: #{entry.dn}"
-    #         return true
-    #       end
-    #     end
-    #   else
-    #     logger.debug "Authentication failed"
-    #     ldap.get_operation_result
-    #     return false
-    #   end
-    #   return false 
-    # end 
+    def ldap_host_exists? hostname
+      ldap = Net::LDAP.new
+      ldap.host = @domain_controller 
+      ldap.port = @ldap_port
+      ldap.auth @ldap_user, @ldap_password
+      filter = Net::LDAP::Filter.eq( "DNSHostname", hostname )
+      treebase = domainname_to_basedn @realm
+      if ldap.bind 
+        ldap.search( :base => treebase, :filter => filter) do |entry|
+          if entry == nil
+            logger.debug "Host with DNSName #{hostname} was not found in domain"
+            return false
+          else 
+            logger.debug "Found Host in domain for DNSName #{hostname}"         
+            logger.debug "LDAP Returned DN: #{entry.dn}"
+            return true
+          end
+        end
+      else
+        logger.debug "Authentication failed"
+        ldap.get_operation_result
+        return false
+      end
+      return false 
+    end 
 
     def radcli_join computer_name, password
     end
