@@ -26,6 +26,10 @@ module Proxy::ADRealm
       raise Exception.new "Unknown realm #{realm}" unless realm.casecmp(@realm).zero?
     end
 
+    def find hostname
+      nil
+    end
+
     def create realm, hostname, params
       check_realm realm
       begin
