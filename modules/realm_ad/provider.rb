@@ -27,7 +27,7 @@ module Proxy::ADRealm
     end
 
     def find hostname
-      nil
+      ldap_host_exists? hostname
     end
 
     def create realm, hostname, params
@@ -94,5 +94,36 @@ module Proxy::ADRealm
       enroll.set_computer_name(computer_name)
       enroll.delete()
     end  
+
+    def domainname_to_basedn domainname		
+      return "dc="+(domainname.split('.').join(',dc='))		
+    end
+
+    def ldap_host_exists? hostname		
+      ldap = Net::LDAP.new		
+      ldap.host = @domain_controller 		
+      ldap.port = @ldap_port		 
+      ldap.auth @ldap_user, @ldap_password		
+      filter = Net::LDAP::Filter.eq( "DNSHostname", hostname )		
+      treebase = domainname_to_basedn @realm		
+      if ldap.bind 		
+        ldap.search( :base => treebase, :filter => filter) do |entry|		
+          if entry == nil		
+            logger.debug "ldap_host_exists: host with dnsname #{hostname} was not found in domain"		
+            return false		
+          else 		
+            logger.debug "ldap_host_exists: found host in domain for DNSName #{hostname}"         		
+            logger.debug "ldap_host_exists: ldap returned dn: #{entry.dn}"		
+            return true		
+          end		
+        end		
+      else		
+        logger.debug "Authentication failed"		
+        ldap.get_operation_result		
+        return false		
+      end		
+      return false 		
+    end 
+
   end
 end
