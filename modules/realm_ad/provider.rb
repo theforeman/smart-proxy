@@ -28,31 +28,38 @@ module Proxy::ADRealm
     end
 
     def find hostname
-      ldap_host_exists? hostname
+      cn = hostfqdn_hostname hostname
+      if ldap_host_exists? cn
+        hostname
+      else
+        nil        
+      end
     end
 
     def create realm, hostname, params
       check_realm realm
-      begin
-        if params[:rebuild] == "true"
-          otp = generate_random_password()
-          radcli_reset(@adconn, otp)
-          result = {:randompassword => otp}
-        else
-          otp = generate_random_password()
-          radcli_password(@adconn, otp)
-          result = {:randompassword => otp}
-        end
-      rescue AdEnroll::Exception  => e
-        raise
+      logger.debug "params: #{params}"
+
+      host = find(hostname)
+      logger.debug "find: #{host}"
+      if host.nil?
+        logger.debug "host is nil: #{host}"
+        result = do_host_create(hostname)
+      elsif params[:rebuild] == "true"
+        logger.debug "hos option rebuild is true"
+        result = do_host_rebuild(hostname)
+      else
+        logger.debug "option rebuild is not true"
       end
+
+      logger.debug "create end"
     end
  
     def delete realm, hostname
       check_realm realm
       begin
-        radcli_delete(@adconn, hostname)
-      rescue AdEnroll::Exception =>
+        radcli_delete hostname
+      rescue Adcli::AdEnroll::Exception =>
         raise
       end
     end
@@ -62,6 +69,32 @@ module Proxy::ADRealm
     end
 
     private
+
+    def hostfqdn_hostname host_fqdn
+      begin
+        host_fqdn_split = host_fqdn.split('.')
+        host_fqdn_split[0]
+      rescue  
+        logger.debug "hostfqdn_hostname error"
+        raise
+      end
+    end
+   
+    def do_host_create hostname
+      otp = generate_random_password()
+      computername = hostfqdn_hostname hostname
+      radcli_join(computername, hostname, otp)
+      result = {:randompassword => otp}
+      result
+    end
+
+    def do_host_rebuild hostname
+      otp = generate_random_password()
+      computername = hostfqdn_hostname hostname
+      radcli_password(computername, otp)
+      result = {:randompassword => otp}
+      result
+    end
 
     def radcli_connect 
       # Connect to active directory
@@ -73,19 +106,20 @@ module Proxy::ADRealm
       return conn
     end
 
-    def radcli_join computer_name, password
+    def radcli_join computer_name, hostname, password
       # Join computer
       enroll = Adcli::AdEnroll.new(@adconn)
       enroll.set_computer_name(computer_name)
+      enroll.set_host_fqdn(hostname)
       enroll.set_computer_password(password)
       enroll.join()
     end
 
-    def radcli_password computer_name
+    def radcli_password computer_name, password
       # Reset a computer's password
       enroll = Adcli::AdEnroll.new(@adconn)
       enroll.set_computer_name(computer_name)
-      enroll.set_computer_name(computer_name)
+      enroll.set_computer_password(password)
       enroll.password()
     end
 
@@ -101,11 +135,14 @@ module Proxy::ADRealm
     end
 
     def ldap_host_exists? hostname		
-      ldap = Net::LDAP.new		
-      ldap.host = @domain_controller 		
-      ldap.port = @ldap_port		 
-      ldap.auth @ldap_user, @ldap_password		
-      filter = Net::LDAP::Filter.eq( "DNSHostname", hostname )		
+      ldap = Net::LDAP.new :host => @domain_controller,
+        :port => @ldap_port,
+        :auth => {
+           :method => :simple,
+           :username => @ldap_user,
+           :password => @ldap_password
+        }
+      filter = Net::LDAP::Filter.eq( "cn", hostname )		
       treebase = domainname_to_basedn @realm		
       if ldap.bind 		
         ldap.search( :base => treebase, :filter => filter) do |entry|		
@@ -119,8 +156,8 @@ module Proxy::ADRealm
           end		
         end		
       else		
-        logger.debug "Authentication failed"		
-        ldap.get_operation_result		
+        logger.debug "ldap_host_exists: ldap bind failed"		
+        logger.debug ldap.get_operation_result		
         return false		
       end		
       return false 		
