@@ -1,4 +1,5 @@
 require 'proxy/kerberos'
+require 'net-ldap'
 require 'radcli'
 
 module Proxy::ADRealm
