@@ -51,7 +51,7 @@ module Proxy::ADRealm
       check_realm realm
       begin
         radcli_delete(@adconn, hostname)
-      rescue AdEnroll::Exception => else
+      rescue AdEnroll::Exception =>
         raise
       end
     end
