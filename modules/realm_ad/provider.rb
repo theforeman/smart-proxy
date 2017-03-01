@@ -17,10 +17,12 @@ module Proxy::ADRealm
       @ldap_password = ldap_password
       @ldap_port = ldap_port
       @domain = @realm.downcase
+    end
 
-      # Connec to active directory
+    def radcli_connect
+      # Connect to active directory
       init_krb5_ccache @keytab_path, @principal
-      @adconn = radcli_connect
+      @adconn = radcli_connect()
     end
 
     def check_realm realm
@@ -40,6 +42,8 @@ module Proxy::ADRealm
       check_realm realm
       logger.debug "params: #{params}"
 
+      radcli_connect()
+
       host = find(hostname)
       logger.debug "find: #{host}"
       if host.nil?
@@ -57,6 +61,8 @@ module Proxy::ADRealm
  
     def delete realm, hostname
       check_realm realm
+      radcli_connect()
+
       begin
         radcli_delete hostname
       rescue Adcli::AdEnroll::Exception =>
