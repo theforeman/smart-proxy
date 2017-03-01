@@ -19,12 +19,6 @@ module Proxy::ADRealm
       @domain = @realm.downcase
     end
 
-    def radcli_connect
-      # Connect to active directory
-      init_krb5_ccache @keytab_path, @principal
-      @adconn = radcli_connect()
-    end
-
     def check_realm realm
       raise Exception.new "Unknown realm #{realm}" unless realm.casecmp(@realm).zero?
     end
@@ -41,8 +35,7 @@ module Proxy::ADRealm
     def create realm, hostname, params
       check_realm realm
       logger.debug "params: #{params}"
-
-      radcli_connect()
+      kinit_radcli_connect()
 
       host = find(hostname)
       logger.debug "find: #{host}"
@@ -61,7 +54,7 @@ module Proxy::ADRealm
  
     def delete realm, hostname
       check_realm realm
-      radcli_connect()
+      kinit_radcli_connect()
 
       begin
         radcli_delete hostname
@@ -100,6 +93,11 @@ module Proxy::ADRealm
       radcli_password(computername, otp)
       result = {:randompassword => otp}
       result
+    end
+    
+    def kinit_radcli_connect
+      init_krb5_ccache @keytab_path, @principal
+      @adconn = radcli_connect()
     end
 
     def radcli_connect 
