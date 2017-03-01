@@ -121,7 +121,7 @@ class Proxy::PuppetApi::EnvironmentClassesCacheInitializer
                        end
                        .flat_map { |futures| Concurrent::Promise.all?(*futures) }
                        .then { logger.info("Finished puppet class cache initialization") }
-                       .on_error { logger.error("Failed to initialize puppet class cache, will use lazy initialization instead") }
+                       .on_error { logger.warning("Failed to initialize puppet class cache, deferring initialization. Is puppetserver running?") }
                        .execute
   end
 end
