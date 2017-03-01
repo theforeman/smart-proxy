@@ -53,8 +53,8 @@ module Proxy::ADRealm
     end
  
     def delete realm, hostname
-      check_realm realm
       kinit_radcli_connect()
+      check_realm realm
 
       begin
         radcli_delete hostname
