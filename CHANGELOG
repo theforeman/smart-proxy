@@ -1,3 +1,9 @@
+2017-03-02	Dominic Cleal <dominic@cleal.org>
+	* Release 1.14.2
+
+2017-03-01	Dmitri Dolguikh <witlessbird@gmail.com>
+	* Fixes #18290 - increased puppet classes api timeout
+
 2017-02-01	Dominic Cleal <dominic@cleal.org>
 	* Release 1.14.1
 
