@@ -31,7 +31,7 @@ module Proxy::Dns::Nsupdate
     end
 
     def nsupdate_args
-      dns_key.nil? ? '' : "-k #{dns_key} "
+      (dns_key.nil? || dns_key == '') ? '' : "-k #{dns_key} "
     end
 
     def nsupdate_connect

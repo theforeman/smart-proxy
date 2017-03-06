@@ -89,4 +89,8 @@ class DnsNsupdateTest < Test::Unit::TestCase
   def test_uses_dns_key_if_defined
     assert_equal "-k /path/to/key ", Proxy::Dns::Nsupdate::Record.new('a_server', 999, '/path/to/key').nsupdate_args
   end
+
+  def test_omits_dns_key_when_empty
+    assert_equal "", Proxy::Dns::Nsupdate::Record.new('a_server', 999, '').nsupdate_args
+  end
 end
