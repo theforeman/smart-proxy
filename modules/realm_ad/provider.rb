@@ -8,15 +8,13 @@ module Proxy::ADRealm
     include Proxy::Util
     include Proxy::Kerberos
 
-    def initialize(realm, keytab_path, principal, domain_controller, ldap_user, ldap_password, ldap_port)
+    def initialize(realm, keytab_path, principal, domain_controller)
       @realm = realm
       @keytab_path = keytab_path
       @principal = principal
       @domain_controller = domain_controller
-      @ldap_user = ldap_user
-      @ldap_password = ldap_password
-      @ldap_port = ldap_port
-      @domain = @realm.downcase
+      @realm = realm
+      @domain = realm.downcase
     end
 
     def check_realm realm
@@ -24,38 +22,29 @@ module Proxy::ADRealm
     end
 
     def find hostname
-      cn = hostfqdn_hostname hostname
-      if ldap_host_exists? cn
-        hostname
-      else
-        nil        
-      end
+      true
     end
 
     def create realm, hostname, params
       check_realm realm
-      logger.debug "params: #{params}"
-      kinit_radcli_connect()
-
-      host = find(hostname)
-      logger.debug "find: #{host}"
-      if host.nil?
-        logger.debug "host is nil: #{host}"
-        result = do_host_create(hostname)
-      elsif params[:rebuild] == "true"
-        logger.debug "hos option rebuild is true"
-        result = do_host_rebuild(hostname)
-      else
-        logger.debug "option rebuild is not true"
-      end
-
-      logger.debug "create end"
+      kinit_radcli_connect
+      password = generate_password
+      result = { :randompassword => password }
+      begin
+        if params[:rebuild] == "true"
+          do_host_rebuild hostname, password
+        else
+          do_host_create hostname, password
+        end
+      rescue 
+        raise
+      end 
+      JSON.pretty_generate(result)
     end
  
     def delete realm, hostname
       kinit_radcli_connect()
       check_realm realm
-
       begin
         radcli_delete hostname
       rescue Adcli::AdEnroll::Exception =>
@@ -63,7 +52,7 @@ module Proxy::ADRealm
       end
     end
 
-    def generate_random_password
+    def generate_password
       return "_i7@PhgpAnjn"
     end
 
@@ -79,20 +68,14 @@ module Proxy::ADRealm
       end
     end
    
-    def do_host_create hostname
-      otp = generate_random_password()
+    def do_host_create hostname, password
       computername = hostfqdn_hostname hostname
-      radcli_join(computername, hostname, otp)
-      result = {:randompassword => otp}
-      result
+      radcli_join(computername, hostname, password)
     end
 
-    def do_host_rebuild hostname
-      otp = generate_random_password()
+    def do_host_rebuild hostname, password
       computername = hostfqdn_hostname hostname
-      radcli_password(computername, otp)
-      result = {:randompassword => otp}
-      result
+      radcli_password(computername, password)
     end
     
     def kinit_radcli_connect
@@ -133,39 +116,5 @@ module Proxy::ADRealm
       enroll.set_computer_name(computer_name)
       enroll.delete()
     end  
-
-    def domainname_to_basedn domainname		
-      return "dc="+(domainname.split('.').join(',dc='))		
-    end
-
-    def ldap_host_exists? hostname		
-      ldap = Net::LDAP.new :host => @domain_controller,
-        :port => @ldap_port,
-        :auth => {
-           :method => :simple,
-           :username => @ldap_user,
-           :password => @ldap_password
-        }
-      filter = Net::LDAP::Filter.eq( "cn", hostname )		
-      treebase = domainname_to_basedn @realm		
-      if ldap.bind 		
-        ldap.search( :base => treebase, :filter => filter) do |entry|		
-          if entry == nil		
-            logger.debug "ldap_host_exists: host with dnsname #{hostname} was not found in domain"		
-            return false		
-          else 		
-            logger.debug "ldap_host_exists: found host in domain for DNSName #{hostname}"         		
-            logger.debug "ldap_host_exists: ldap returned dn: #{entry.dn}"		
-            return true		
-          end		
-        end		
-      else		
-        logger.debug "ldap_host_exists: ldap bind failed"		
-        logger.debug ldap.get_operation_result		
-        return false		
-      end		
-      return false 		
-    end 
-
   end
 end
