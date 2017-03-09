@@ -37,4 +37,11 @@ class RequestTest < Test::Unit::TestCase
     result = @request.send_request(proxy_req)
     assert_equal("body", result.body)
   end
+
+  def test_put
+    stub_request(:put, @foreman_url+'/path').with(:body => "body").to_return(:status => [200, 'OK'], :body => "body")
+    proxy_req = @request.request_factory.create_put("/path", "body")
+    result = @request.send_request(proxy_req)
+    assert_equal("body", result.body)
+  end
 end

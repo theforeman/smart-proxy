@@ -1,6 +1,7 @@
 require 'proxy/log'
 require 'proxy/settings'
 require 'proxy/signal_handler'
+require 'proxy/startup_info'
 
 module Proxy
   class Launcher
@@ -142,6 +143,7 @@ module Proxy
       t1 = Thread.new { webrick_server(https_app, SETTINGS.bind_host, SETTINGS.https_port).start } unless https_app.nil?
       t2 = Thread.new { webrick_server(http_app, SETTINGS.bind_host, SETTINGS.http_port).start } unless http_app.nil?
 
+      Proxy::StartupInfo.new.put_features
       Proxy::SignalHandler.install_traps
 
       (t1 || t2).join
