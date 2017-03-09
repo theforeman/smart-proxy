@@ -42,8 +42,13 @@ module Proxy::HttpRequest
   end
 
   class ForemanRequest
+    include Proxy::Log
+
     def send_request(request)
       http.request(request)
+    rescue Exception => e
+      logger.error("Error when accessing %s: %s" % [uri.merge(request.path).to_s, e])
+      raise e
     end
 
     def request_factory
