@@ -181,6 +181,15 @@ END
     assert_equal "172.23.35.29", record.nextServer
   end
 
+  def test_convert_next_server_ip_from_hex
+    subnet = Proxy::DHCP::Subnet.new("192.168.122.0", "255.255.255.0")
+    @subnet_service.add_subnet(subnet)
+    parsed = @parser.parse_config_and_leases_for_records(DHCPD_CONFIG)
+
+    record = parsed.find {|r| r.is_a?(::Proxy::DHCP::Reservation) && r.name == "test.example.com" }
+    assert_equal "172.23.35.29", record.nextServer
+  end
+
   def test_get_ip_list_from_config_line
     assert_equal ["192.168.1.1"], @parser.get_ip_list_from_config_line("option foo-bar 192.168.1.1")
     assert_equal ["192.168.1.1", "192.168.20.10"], @parser.get_ip_list_from_config_line("option foo-bar 192.168.1.1,192.168.20.10")
