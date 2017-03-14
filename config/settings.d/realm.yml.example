@@ -3,6 +3,13 @@
 :enabled: false
 
 # Available providers:
-#   realm_freeipa
-#   realm_ad
-:use_provider: realm_freeipa
+#   freeipa
+#:realm_provider: freeipa
+
+# Authentication for Kerberos-based Realms
+:realm_keytab: /etc/foreman-proxy/freeipa.keytab
+:realm_principal: realm-proxy@EXAMPLE.COM
+
+# FreeIPA specific settings
+# Remove from DNS when deleting the FreeIPA entry
+:freeipa_remove_dns: true
