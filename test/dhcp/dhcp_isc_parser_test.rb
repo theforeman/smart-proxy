@@ -2,7 +2,7 @@ require 'test_helper'
 require 'dhcp_common/dhcp_common'
 require 'dhcp_common/subnet'
 require 'dhcp_common/subnet_service'
-require 'dhcp_isc/isc_file_parser'
+require 'dhcp_common/isc/file_parser'
 
 class DhcpIscParserTest < Test::Unit::TestCase
   DHCPD_CONFIG =<<END
@@ -54,44 +54,44 @@ END
 
   def setup
     @subnet_service =  Proxy::DHCP::SubnetService.initialized_instance
-    @parser = ::Proxy::DHCP::ISC::FileParser.new(@subnet_service)
+    @parser = ::Proxy::DHCP::CommonISC::IscFileParser.new(@subnet_service)
   end
 
   def test_subnet_matching_without_parameters_or_declarations
-    assert "subnet 192.168.1.0 netmask 255.255.255.128 {}".match(Proxy::DHCP::ISC::FileParser::SUBNET_BLOCK_REGEX)
+    assert "subnet 192.168.1.0 netmask 255.255.255.128 {}".match(Proxy::DHCP::CommonISC::IscFileParser::SUBNET_BLOCK_REGEX)
   end
 
   def test_subnet_matching_with_ip_parameter
-    assert "subnet 192.168.123.0 netmask 255.255.255.192 {option subnet-mask 255.255.255.192;}".match(Proxy::DHCP::ISC::FileParser::SUBNET_BLOCK_REGEX)
+    assert "subnet 192.168.123.0 netmask 255.255.255.192 {option subnet-mask 255.255.255.192;}".match(Proxy::DHCP::CommonISC::IscFileParser::SUBNET_BLOCK_REGEX)
   end
 
   def test_subnet_matching_with_numerical_parameter
-    assert "subnet 192.168.123.0 netmask 255.255.255.192 {adaptive-lease-time-threshold 50;}".match(Proxy::DHCP::ISC::FileParser::SUBNET_BLOCK_REGEX)
+    assert "subnet 192.168.123.0 netmask 255.255.255.192 {adaptive-lease-time-threshold 50;}".match(Proxy::DHCP::CommonISC::IscFileParser::SUBNET_BLOCK_REGEX)
   end
 
   def test_subnet_matching_with_timestamp_parameter
-    assert "subnet 192.168.123.0 netmask 255.255.255.192 {dynamic-bootp-lease-cutoff 5 2016/11/11 01:01:00;}".match(Proxy::DHCP::ISC::FileParser::SUBNET_BLOCK_REGEX)
+    assert "subnet 192.168.123.0 netmask 255.255.255.192 {dynamic-bootp-lease-cutoff 5 2016/11/11 01:01:00;}".match(Proxy::DHCP::CommonISC::IscFileParser::SUBNET_BLOCK_REGEX)
   end
 
   def test_subnet_matching_with_string_parameter
-    assert "subnet 192.168.123.0 netmask 255.255.255.192 {filename \"filename\";}".match(Proxy::DHCP::ISC::FileParser::SUBNET_BLOCK_REGEX)
+    assert "subnet 192.168.123.0 netmask 255.255.255.192 {filename \"filename\";}".match(Proxy::DHCP::CommonISC::IscFileParser::SUBNET_BLOCK_REGEX)
   end
 
   def test_subnet_matching_with_spaces_in_parameter
-    assert "subnet 192.168.123.0 netmask 255.255.255.192 { option subnet-mask 255.255.255.192 ; }".match(Proxy::DHCP::ISC::FileParser::SUBNET_BLOCK_REGEX)
+    assert "subnet 192.168.123.0 netmask 255.255.255.192 { option subnet-mask 255.255.255.192 ; }".match(Proxy::DHCP::CommonISC::IscFileParser::SUBNET_BLOCK_REGEX)
   end
 
   def test_subnet_matching_with_declaration
-    assert "subnet 192.168.123.0 netmask 255.255.255.192 {pool{range 192.168.42.200 192.168.42.254;}}".match(Proxy::DHCP::ISC::FileParser::SUBNET_BLOCK_REGEX)
+    assert "subnet 192.168.123.0 netmask 255.255.255.192 {pool{range 192.168.42.200 192.168.42.254;}}".match(Proxy::DHCP::CommonISC::IscFileParser::SUBNET_BLOCK_REGEX)
   end
 
   def test_subnet_matching_with_declaration_and_parameter
     assert "subnet 192.168.123.0 netmask 255.255.255.192 {pool{range 192.168.42.200 192.168.42.254;}option subnet-mask 255.255.255.192;}".
-      match(Proxy::DHCP::ISC::FileParser::SUBNET_BLOCK_REGEX)
+      match(Proxy::DHCP::CommonISC::IscFileParser::SUBNET_BLOCK_REGEX)
   end
 
   def test_mathing_with_spaces_in_declarations
-    assert "subnet 192.168.1.0 netmask 255.255.255.128 { pool\n{ range abc ; } }".match(Proxy::DHCP::ISC::FileParser::SUBNET_BLOCK_REGEX)
+    assert "subnet 192.168.1.0 netmask 255.255.255.128 { pool\n{ range abc ; } }".match(Proxy::DHCP::CommonISC::IscFileParser::SUBNET_BLOCK_REGEX)
   end
 
   def test_load_subnets_loads_managed_subnets

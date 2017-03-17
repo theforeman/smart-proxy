@@ -1,10 +1,9 @@
 require 'time'
-require 'dhcp_isc/isc_common'
+require 'dhcp_common/server'
 
-module Proxy::DHCP::ISC
-  class Provider < ::Proxy::DHCP::Server
+module Proxy::DHCP::CommonISC
+  class IscOmapiProvider < ::Proxy::DHCP::Server
     include Proxy::Util
-    include Common
     attr_reader :omapi_port, :key_name, :key_secret
 
     def initialize(server, omapi_port, subnets = nil, key_name = nil, key_secret = nil, service = nil)
@@ -195,6 +194,10 @@ module Proxy::DHCP::ISC
         end
       end
       "next-server = #{ns};"
+    end
+
+    def ip2hex ip
+      ip.split(".").map{|i| "%02x" % i }.join(":")
     end
   end
 end

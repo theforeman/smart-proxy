@@ -2,10 +2,9 @@ require 'test_helper'
 require 'dhcp/dhcp'
 require 'dhcp/dhcp_plugin'
 require 'dhcp/sparc_attrs'
-require 'dhcp_common/server'
-require 'dhcp_isc/dhcp_isc_main'
+require 'dhcp_common/isc/omapi_provider'
 
-class ServerIscTest < Test::Unit::TestCase
+class IscOmapiProviderTest < Test::Unit::TestCase
   class OMIO
     attr_reader :input_commands
 
@@ -21,7 +20,7 @@ class ServerIscTest < Test::Unit::TestCase
   include SparcAttrs
 
   def setup
-    @dhcp = Proxy::DHCP::ISC::Provider.new('192.168.122.1', '999', nil, 'key_name', 'key_secret', nil)
+    @dhcp = Proxy::DHCP::CommonISC::IscOmapiProvider.new('192.168.122.1', '999', nil, 'key_name', 'key_secret', nil)
   end
 
   def test_om
