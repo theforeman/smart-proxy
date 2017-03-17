@@ -1,11 +1,10 @@
-require 'dhcp_isc/isc_common'
+require 'dhcp_common/subnet'
 require 'dhcp_common/record/lease'
 require 'dhcp_common/record/reservation'
 require 'dhcp_common/record/deleted_reservation'
 
-module Proxy::DHCP::ISC
-  class FileParser
-    include Common
+module Proxy::DHCP::CommonISC
+  class IscFileParser
     include Proxy::Validations
 
     attr_reader :service

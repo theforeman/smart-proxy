@@ -1,25 +1,25 @@
 require 'test_helper'
 require 'dhcp_common/subnet'
 require 'dhcp_common/record/reservation'
-require 'dhcp_isc/configuration_file'
+require 'dhcp_common/isc/configuration_file'
 require 'tempfile'
 
 class IscConfigurationFileTest < Test::Unit::TestCase
   def setup
     @parser = Object.new
     @config_file = Tempfile.new('test_config_file')
-    @config = ::Proxy::DHCP::ISC::ConfigurationFile.new(@config_file.path, @parser)
+    @config = ::Proxy::DHCP::CommonISC::IscConfigurationFile.new(@config_file.path, @parser)
   end
 
   def test_read_config_file_respects_includes
-    whole_config = @config.read(StringIO.new("# Test that the ISC DHCP config file parser includes files\ninclude \"test/fixtures/dhcp/dhcp_subnets.conf\";"))
+    whole_config = @config.load(StringIO.new("# Test that the ISC DHCP config file parser includes files\ninclude \"test/fixtures/dhcp/dhcp_subnets.conf\";"))
     assert whole_config.include?("subnet 192.168.122.0 netmask 255.255.255.0")
     assert whole_config.include?("subnet 192.168.124.0 netmask 255.255.255.0")
     assert whole_config.include?("host test.example.com")
   end
 
   def test_read_config_file_should_raise_error_if_included_file_isn_not_readable
-    assert_raises(RuntimeError) { @config.read(StringIO.new("include \"non_existent_config\";")) }
+    assert_raises(RuntimeError) { @config.load(StringIO.new("include \"non_existent_config\";")) }
   end
 
   def test_load_subnets

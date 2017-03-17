@@ -19,8 +19,8 @@ module Proxy::DHCP::ISC
                                          container.get_dependency(:memory_store), container.get_dependency(:memory_store),
                                          container.get_dependency(:memory_store), container.get_dependency(:memory_store))
       end)
-      container.dependency :parser, lambda {::Proxy::DHCP::ISC::FileParser.new(container.get_dependency(:subnet_service))}
-      container.dependency :config_file, lambda {::Proxy::DHCP::ISC::ConfigurationFile.new(settings[:config], container.get_dependency(:parser))}
+      container.dependency :parser, lambda {::Proxy::DHCP::CommonISC::IscFileParser.new(container.get_dependency(:subnet_service))}
+      container.dependency :config_file, lambda {::Proxy::DHCP::CommonISC::IscConfigurationFile.new(settings[:config], container.get_dependency(:parser))}
       container.dependency :leases_file, lambda {::Proxy::DHCP::ISC::LeasesFile.new(settings[:leases], container.get_dependency(:parser))}
       container.dependency :state_changes_observer, (lambda do
         ::Proxy::DHCP::ISC::IscStateChangesObserver.new(container.get_dependency(:config_file), container.get_dependency(:leases_file), container.get_dependency(:subnet_service))
@@ -39,7 +39,7 @@ module Proxy::DHCP::ISC
       end
 
       container.dependency :dhcp_provider, (lambda do
-        Proxy::DHCP::ISC::Provider.new(
+        Proxy::DHCP::CommonISC::IscOmapiProvider.new(
             settings[:server], settings[:omapi_port], settings[:subnets], settings[:key_name], settings[:key_secret],
             container.get_dependency(:subnet_service))
       end)
@@ -47,12 +47,11 @@ module Proxy::DHCP::ISC
 
     def load_classes
       require 'dhcp_common/subnet_service'
-      require 'dhcp_common/server'
-      require 'dhcp_isc/isc_file_parser'
-      require 'dhcp_isc/configuration_file'
+      require 'dhcp_common/isc/file_parser'
+      require 'dhcp_common/isc/omapi_provider'
+      require 'dhcp_common/isc/configuration_file'
       require 'dhcp_isc/leases_file'
       require 'dhcp_isc/isc_state_changes_observer'
-      require 'dhcp_isc/dhcp_isc_main'
     end
   end
 end
