@@ -1,3 +1,75 @@
+2017-03-28	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Bump version to 1.16-develop
+
+2017-03-27	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #18962 - moved isc file parser into dhcp_common
+
+2017-03-01	Dominic Cleal <dominic@cleal.org>
+	* fixes #18745 - add xmlrpc dep to realm_freeipa under Ruby 2.4
+
+2017-03-01	Dmitri Dolguikh <witlessbird@gmail.com>
+	* Fixes #18399 - use warning instead when cache init fails
+
+2017-02-10	Dmitri Dolguikh <witlessbird@gmail.com>
+	* Fixes #18290 - increased puppet classes api timeout
+
+2017-02-10	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #18395 - better error message with ms dhcp on win2008.
+
+2017-02-08	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #17500 - introduced providers for realm module.
+
+2017-02-06	Ewoud Kohl van Wijngaarden <ewoud@kohlvanwijngaarden.nl>
+	* Fixes #18397 - Valid CNAME targets are valid DNS names
+
+2017-01-30	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #18072 - removed load_* methods from core dhcp providers
+
+2017-01-30	Michael Moll <kvedulv@kvedulv.de>
+	* Fixes #9063 - Revert pinning of Rack to < 1.6
+
+2017-01-26	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #18026 - proxy can listen on multiple arbitrary interfaces
+
+2017-01-25	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #18070 - add_record() checks for conflicts with leases now.
+
+2017-01-19	Ewoud Kohl van Wijngaarden <ewoud@kohlvanwijngaarden.nl>
+	* Fixes #17906 - Move {create,remove}_*_record to dns_common
+
+2017-01-19	Alexander Olofsson <alexander.olofsson@liu.se>
+	* Fixes #18149 - Duplicates due to OU in certnames
+
+2017-01-19	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #18115 - Logger is initialized when Syslog isn't available.
+
+2017-01-18	Dmitri Dolguikh <witlessbird@gmail.com>
+	* Fixes #13318 - Revoked certs always have state 'revoked'
+
+2017-01-16	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #18071 - Deleting missing records doesn't generate errors
+
+2017-01-13	Timo Goebel <timo.goebel@dm.de>
+	* fixes #17856 - support multiple dhcp records for same ip
+
+2017-01-03	Timo Goebel <timo.goebel@dm.de>
+	* fixes #17868 - dhcp: convert next-server ip correctly
+
+2017-01-03	Ewoud Kohl van Wijngaarden <ewoud@kohlvanwijngaarden.nl>
+	* Refs #17037 - Fix deprecation warning in dnscmd
+
+2016-12-21	Shlomi Zadok <shlomi@ben-hanna.com>
+	* Fixes #14394 - Undisclose WEBrick server version
+
+2016-12-12	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #17554 - inotify events can't overflow the observer anymore
+
+2016-12-07	Lukas Zapletal <lzap+git@redhat.com>
+	* Fixes #17045 - hostgroup templates URLs proxied correctly
+
+2016-12-06	Dominic Cleal <dominic@cleal.org>
+	* Bump version to 1.15-develop
+
 2016-11-22	Dominic Cleal <dominic@cleal.org>
 	* fixes #17387 - SubnetService#find_subnet has constant time lookup
 
