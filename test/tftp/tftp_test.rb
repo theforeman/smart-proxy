@@ -49,4 +49,23 @@ class TftpTest < Test::Unit::TestCase
   def test_boot_filename_uses_dash_when_prefix_does_not_end_with_slash
     assert_equal "a/b/c-somefile", Proxy::TFTP.boot_filename('a/b/c', '/d/somefile')
   end
+
+  def test_choose_protocol_and_fetch_wget
+    ::Proxy::HttpDownload.any_instance.expects(:start).returns(true).times(3)
+    %w(http://proxy.test https://proxy.test ftp://proxy.test).each do |src|
+      Proxy::TFTP.choose_protocol_and_fetch src, '/destination'
+    end
+  end
+
+  def test_choose_protocol_and_fetch_nfs
+    assert_nothing_raised RuntimeError do
+      Proxy::TFTP.choose_protocol_and_fetch 'nfs://proxy.test', '/destination'
+    end
+  end
+
+  def test_choose_protocol_and_fetch_unknown
+    assert_raises RuntimeError do
+      Proxy::TFTP.choose_protocol_and_fetch 'git://proxy.test', '/destination'
+    end
+  end
 end
