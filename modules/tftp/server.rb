@@ -2,6 +2,8 @@ require 'fileutils'
 require 'pathname'
 
 module Proxy::TFTP
+  extend Proxy::Log
+
   class Server
     include Proxy::Log
     # Creates TFTP pxeconfig file
@@ -135,7 +137,7 @@ module Proxy::TFTP
       ["#{pxeconfig_dir}/01-"+mac.gsub(/:/,"-").downcase+".ipxe"]
     end
   end
- 
+
   def self.fetch_boot_file dst, src
     filename    = boot_filename(dst, src)
     destination = Pathname.new(File.expand_path(filename, Proxy::TFTP::Plugin.settings.tftproot)).cleanpath
@@ -145,8 +147,18 @@ module Proxy::TFTP
     # Ensure that our image directory exists
     # as the dst might contain another sub directory
     FileUtils.mkdir_p destination.parent
+    choose_protocol_and_fetch src, destination
+  end
 
-    ::Proxy::HttpDownload.new(src.to_s, destination.to_s).start
+  def self.choose_protocol_and_fetch(src, destination)
+    case URI(src).scheme
+    when 'http', 'https', 'ftp'
+      ::Proxy::HttpDownload.new(src.to_s, destination.to_s).start
+    when 'nfs'
+      logger.debug "NFS as a protocol for installation medium detected."
+    else
+      raise "Cannot fetch boot file, unknown protocol for medium source path: #{src}"
+    end
   end
 
   def self.boot_filename(dst, src)
