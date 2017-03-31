@@ -18,6 +18,12 @@ class IscConfigurationFileTest < Test::Unit::TestCase
     assert whole_config.include?("host test.example.com")
   end
 
+  def test_read_config_file_ignores_some_includes
+    whole_config = @config.load(StringIO.new("# Test that the ISC DHCP config file parser include ignore\ninclude \"test/fixtures/ignored-by-foreman/dhcp_subnets.conf\";"))
+    refute whole_config.include?("subnet 192.168.122.0 netmask 255.255.255.0")
+    refute whole_config.include?("host test.example.com")
+  end
+
   def test_read_config_file_should_raise_error_if_included_file_isn_not_readable
     assert_raises(RuntimeError) { @config.load(StringIO.new("include \"non_existent_config\";")) }
   end
