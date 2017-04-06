@@ -1,7 +1,6 @@
 require 'openssl'
 require 'set'
 
-# rubocop:disable ModuleLength
 module Proxy::PuppetCa
   extend ::Proxy::Log
   extend ::Proxy::Util
@@ -22,7 +21,7 @@ module Proxy::PuppetCa
       raise "No such file #{autosign_file}" unless File.exist?(autosign_file)
 
       found = false
-      entries = File.open(autosign_file, File::RDONLY).readlines.collect do |l|
+      entries = File.readlines(autosign_file).collect do |l|
         if l.chomp != certname
           l
         else
@@ -31,10 +30,9 @@ module Proxy::PuppetCa
         end
       end.uniq.compact
       if found
-        autosign = File.open(autosign_file, File::TRUNC|File::RDWR)
-        autosign.write entries.join("\n")
-        autosign.write "\n"
-        autosign.close
+        open(autosign_file, File::TRUNC|File::RDWR) do |autosign|
+          autosign.write entries.join
+        end
         logger.debug "Removed #{certname} from autosign"
       else
         logger.debug "Attempt to remove nonexistent client autosign for #{certname}"
@@ -47,11 +45,11 @@ module Proxy::PuppetCa
     def autosign certname
       FileUtils.touch(autosign_file) unless File.exist?(autosign_file)
 
-      autosign = File.open(autosign_file, File::RDWR)
-      # Check that we don't have that host already
-      found = autosign.readlines.find { |line| line.chomp == certname }
-      autosign.puts certname unless found
-      autosign.close
+      open(autosign_file, File::RDWR) do |autosign|
+        # Check that we don't have that host already
+        found = autosign.readlines.find { |line| line.chomp == certname }
+        autosign.puts certname unless found
+      end
       logger.debug "Added #{certname} to autosign"
     end
 
@@ -205,4 +203,3 @@ module Proxy::PuppetCa
     end
   end
 end
-# rubocop:enable ModuleLength

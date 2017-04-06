@@ -38,20 +38,36 @@ class ProxyTest < Test::Unit::TestCase
       file.close
       file.unlink
     end
-    assert_equal content.include?('foobar.example.com'), true
+    assert_true content.include?('foobar.example.com')
   end
 
-  def test_should_remove_autosign_entry
+  def test_should_not_duplicate_autosign_entry
     file = create_temp_autosign_file
-    content = ['foo.example.com']
     begin
-      Proxy::PuppetCa.disable 'foo.example.com'
-      content = file.read.split("\n")
+      before_content = file.read
+      file.seek(0)
+      ## Execute
+      Proxy::PuppetCa.autosign 'foo.example.com'
+      ## Read output
+      after_content = file.read
     ensure
       file.close
       file.unlink
     end
-    assert_equal content.include?('foo.example.com'), false
+    assert_equal before_content, after_content
+  end
+
+  def test_should_remove_autosign_entry
+    file = create_temp_autosign_file
+    begin
+      Proxy::PuppetCa.disable 'foo.example.com'
+      content = file.read
+    ensure
+      file.close
+      file.unlink
+    end
+    assert_false content.split("\n").include?('foo.example.com')
+    assert_true content.end_with?("\n")
   end
 
   def test_which_should_return_a_binary_path
