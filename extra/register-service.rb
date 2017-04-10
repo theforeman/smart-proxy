@@ -25,7 +25,7 @@ default_service_name = 'smart proxy'
 puts "This service must be run under an account that is a member of 'DHCP Administrators' group"
 puts 'The account can be local or a domain account. If it is a domain account then use the domain\account syntax'
 service_name = ask("Enter the name of the service. ")  {|s| s.default = default_service_name}
-user         = ask("Enter the user to run the service as, or press enter to use the following user: ") {|u| u.default = default_user}
+user         = ask("Enter the user to run the service as: ") {|u| u.default = default_user}
 pass1        = ask("Enter the user's password. ") {|p| p.echo = "x"}
 
 description = 'Foreman Smart Proxy'
