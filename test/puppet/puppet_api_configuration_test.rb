@@ -24,7 +24,9 @@ class PuppetApiDefaultSettingsTest < Test::Unit::TestCase
 end
 
 require 'puppet_proxy_common/environments_retriever_base'
+require 'puppet_proxy_puppet_api/v3_api_request'
 require 'puppet_proxy_puppet_api/v3_environments_retriever'
+require 'puppet_proxy_puppet_api/v3_environment_classes_api_classes_retriever'
 require 'puppet_proxy_puppet_api/v3_classes_retriever'
 
 class PuppetApiDIWiringsTest < Test::Unit::TestCase
@@ -77,5 +79,10 @@ class PuppetApiDIWiringsTest < Test::Unit::TestCase
     assert_equal "path_to_ssl_cert", @container.get_dependency(:class_retriever_impl).ssl_cert
     assert_equal "path_to_ssl_key", @container.get_dependency(:class_retriever_impl).ssl_key
     assert_equal 100, @container.get_dependency(:class_retriever_impl).api_timeout
+  end
+
+  def test_environment_classes_retriever_wiring_parameters_with_puppet_410
+    @configuration.load_dependency_injection_wirings(@container, :puppet_version => "4.10")
+    assert @container.get_dependency(:class_retriever_impl).instance_of?(::Proxy::PuppetApi::V3EnvironmentClassesApiClassesRetriever)
   end
 end

@@ -23,7 +23,7 @@ module ::Proxy::PuppetApi
       container_instance.dependency :environment_retriever_impl,
                                     lambda {::Proxy::PuppetApi::V3EnvironmentsRetriever.new(settings[:puppet_url], settings[:puppet_ssl_ca], settings[:puppet_ssl_cert], settings[:puppet_ssl_key])}
 
-      if settings[:puppet_version].to_s < "4.4"
+      if Gem::Version.new(settings[:puppet_version].to_s) < Gem::Version.new("4.4")
         container_instance.dependency :class_retriever_impl,
                                       lambda {::Proxy::PuppetApi::V3ClassesRetriever.new(settings[:puppet_url], settings[:puppet_ssl_ca], settings[:puppet_ssl_cert], settings[:puppet_ssl_key])}
         container_instance.dependency :class_cache_initializer, lambda {Proxy::PuppetApi::NoopClassesCacheInitializer.new}
