@@ -1,3 +1,5 @@
+require 'puppet_proxy_common/api_request'
+
 module Proxy::PuppetApi
   class EnvironmentsApiv3 < ::Proxy::Puppet::ApiRequest
     def find_environments
