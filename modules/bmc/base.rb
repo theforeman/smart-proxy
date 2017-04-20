@@ -108,6 +108,101 @@ module Proxy
         raise NotImplementedError.new
       end
 
+      # return the SNMP community string of the bmc device
+      def snmp
+        raise NotImplementedError.new
+      end
+
+      # return the VLAN ID of the bmc device
+      def vlanid
+        raise NotImplementedError.new
+      end
+
+      # return IP source of BMC device
+      def ipsrc
+        raise NotImplementedError.new
+      end
+
+      # return all LAN details of BMC device
+      def lanprint
+        raise NotImplementedError.new
+      end
+
+      # BMC information
+      def info
+        raise NotImplementedError.new
+      end
+
+      # BMC GUID information
+      def guid
+        raise NotImplementedError.new
+      end
+
+      # BMC firmware version
+      def version
+        raise NotImplementedError.new
+      end
+
+      # BMC reset
+      def reset
+        raise NotImplementedError.new
+      end
+
+      # print all FRU information
+      def frulist
+        raise NotImplementedError.new
+      end
+
+      # HW manufacturer
+      def manufacturer
+        raise NotImplementedError.new
+      end
+
+      # Product name
+      def model
+        raise NotImplementedError.new
+      end
+
+      # Product serial number
+      def serial
+        raise NotImplementedError.new
+      end
+
+      # Asset tag
+      def asset_tag
+        raise NotImplementedError.new
+      end
+
+      # Sensor list
+      def sensorlist
+        raise NotImplementedError.new
+      end
+
+      # Sensor count
+      def sensorcount
+        raise NotImplementedError.new
+      end
+
+      # Sensor names
+      def sensornames
+        raise NotImplementedError.new
+      end
+
+      # Fan sensors
+      def fanlist
+        raise NotImplementedError.new
+      end
+
+      # Temparature sensors
+      def templist
+        raise NotImplementedError.new
+      end
+
+      # Get the readings of a particular sensor
+      def sensorget(sensor)
+        raise NotImplementedError.new
+      end
+
       protected
       attr_reader :host
     end

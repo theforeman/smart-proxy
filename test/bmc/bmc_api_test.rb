@@ -311,6 +311,40 @@ class BmcApiTest < Test::Unit::TestCase
     assert_equal("e0:f8:47:04:bc:26", data["result"].to_s)
   end
 
+  def test_api_can_get_snmp
+    Proxy::BMC::IPMI.any_instance.stubs(:snmp).returns("public")
+    get "/#{host}/lan/snmp", args
+    assert last_response.ok?, "Last response was not ok"
+    data = JSON.parse(last_response.body)
+    assert_equal("public", data["result"].to_s)
+  end
+
+  def test_api_can_get_vlanid
+    Proxy::BMC::IPMI.any_instance.stubs(:vlanid).returns(nil)
+    get "/#{host}/lan/vlanid", args
+    assert last_response.ok?, "Last response was not ok"
+    data = JSON.parse(last_response.body)
+    assert_equal("", data["result"].to_s)
+  end
+
+  def test_api_can_get_ipsrc
+    Proxy::BMC::IPMI.any_instance.stubs(:ipsrc).returns("static")
+    get "/#{host}/lan/ipsrc", args
+    assert last_response.ok?, "Last response was not ok"
+    data = JSON.parse(last_response.body)
+    assert_equal("static", data["result"].to_s)
+  end
+
+  def test_api_can_get_print
+    expects_s = '{"anything":"goes_in_this_hash"}'
+    expects_json = JSON.parse(expects_s)
+    Proxy::BMC::IPMI.any_instance.stubs(:lanprint).returns(expects_json)
+    get "/#{host}/lan/print", args
+    assert last_response.ok?, "Last response was not ok"
+    data = JSON.parse(last_response.body)
+    assert_equal(expects_json, data["result"])
+  end
+
   def test_api_can_identify
     Proxy::BMC::IPMI.any_instance.stubs(:identifyon).returns(true)
     put "/#{host}/chassis/identify/on", args
@@ -349,6 +383,148 @@ class BmcApiTest < Test::Unit::TestCase
     assert last_response.ok?, "Last response was not ok"
     data = JSON.parse(last_response.body)
     assert_match(/true|false/, data["result"].to_s)
+  end
+
+  def test_api_can_get_fru_actions
+    actions = {"list" => :frulist,
+               "serial" => :serial,
+               "manufacturer" => :manufacturer,
+               "model" => :model,
+               "asset_tag" => :asset_tag}
+    actions.each do |key, symbol|
+      Proxy::BMC::IPMI.any_instance.expects(symbol).returns("anything")
+      get "/#{host}/fru/#{key}", args
+      assert last_response.ok?, "Last response was not ok"
+      data = JSON.parse(last_response.body)
+      assert_equal(key, data["action"].to_s)
+      assert_equal("anything", data["result"].to_s)
+    end
+  end
+
+  def test_api_returns_error_for_get_fru_action_bogus
+    get "/#{@host}/fru/bogus", args
+    assert last_response.ok?, "Last response was not ok"
+    data = JSON.parse(last_response.body)
+    assert_equal("The action: bogus is not a valid action", data["error"].to_s)
+  end
+
+  def test_api_can_get_bmc_actions
+    actions = {"info" => :info,
+               "guid" => :guid,
+               "version" => :version}
+    actions.each do |key, symbol|
+      Proxy::BMC::IPMI.any_instance.expects(symbol).returns("anything")
+      get "/#{host}/bmc/#{key}", args
+      assert last_response.ok?, "Last response was not ok"
+      data = JSON.parse(last_response.body)
+      assert_equal(key, data["action"].to_s)
+      assert_equal("anything", data["result"].to_s)
+    end
+  end
+
+  def test_api_returns_error_for_get_bmc_action_bogus
+    get "/#{@host}/bmc/bogus", args
+    assert last_response.ok?, "Last response was not ok"
+    data = JSON.parse(last_response.body)
+    assert_equal("The action: bogus is not a valid action", data["error"].to_s)
+  end
+
+  def test_api_can_set_bmc_action_reset_type_cold
+    Proxy::BMC::IPMI.any_instance.expects(:reset).returns(true)
+    put "/#{@host}/bmc/reset", :type => "cold"
+    assert last_response.ok?, "Last response was not ok"
+    data = JSON.parse(last_response.body)
+    assert_match(/true|false/, data["result"].to_s)
+  end
+
+  def test_api_can_set_bmc_action_reset_type_warm
+    Proxy::BMC::IPMI.any_instance.expects(:reset).returns(true)
+    put "/#{@host}/bmc/reset", :type => "warm"
+    assert last_response.ok?, "Last response was not ok"
+    data = JSON.parse(last_response.body)
+    assert_match(/true|false/, data["result"].to_s)
+  end
+
+  def test_api_returns_error_for_set_bmc_action_bogus
+    put "/#{@host}/bmc/bogus", args
+    assert last_response.ok?, "Last response was not ok"
+    data = JSON.parse(last_response.body)
+    assert_equal("The action: bogus is not a valid action", data["error"].to_s)
+  end
+
+  def test_api_returns_error_for_set_bmc_action_reset_type_bogus
+    Proxy::BMC::IPMI.any_instance.stubs(:reset).returns(false)
+    put "/#{@host}/bmc/reset", :type => "bogus"
+    assert last_response.ok?, "Last response was not ok"
+    data = JSON.parse(last_response.body)
+    assert_equal("The type: bogus is not a valid type", data["error"].to_s)
+  end
+
+  def test_api_throws_501_error_when_set_bmc_action_reset_not_implemented
+    Proxy::BMC::IPMI.any_instance.expects(:reset).raises(NotImplementedError)
+    put "/#{@host}/bmc/reset", :type => "warm"
+    assert_equal "NotImplementedError", last_response.body
+    assert_equal 501, last_response.status
+  end
+
+  def test_api_throws_400_error_when_set_bmc_action_reset_execption
+    Proxy::BMC::IPMI.any_instance.expects(:reset).raises(StandardError)
+    put "/#{@host}/bmc/reset", :type => "warm"
+    assert_equal "StandardError", last_response.body
+    assert_equal 400, last_response.status
+  end
+
+  def test_api_can_get_sensors_actions
+    actions = {"list" => :sensorlist,
+               "count" => :sensorcount,
+               "names" => :sensornames,
+               "fanlist" => :fanlist,
+               "templist" => :templist}
+    actions.each do |key, symbol|
+      Proxy::BMC::IPMI.any_instance.expects(symbol).returns(key)
+      get "/#{host}/sensors/#{key}", args
+      assert last_response.ok?, "Last response was not ok"
+      data = JSON.parse(last_response.body)
+      assert_equal(key, data["action"].to_s)
+      assert_equal(key, data["result"].to_s)
+    end
+  end
+
+  def test_api_can_get_sensors_action_get_sensor_any
+    Proxy::BMC::IPMI.any_instance.expects(:sensorget).with("any").returns("anything")
+    get "/#{host}/sensors/get/any"
+    assert last_response.ok?, "Last response was not ok"
+    data = JSON.parse(last_response.body)
+    assert_equal("get", data["action"].to_s)
+    assert_equal("anything", data["result"].to_s)
+  end
+
+  def test_api_returns_error_for_get_sensors_action_bogus
+    get "/#{host}/sensors/bogus"
+    assert last_response.ok?, "Last response was not ok"
+    data = JSON.parse(last_response.body)
+    assert_equal("The action: bogus is not a valid action", data["error"].to_s)
+  end
+
+  def test_api_returns_options_for_get_sensors_action_get
+    get "/#{host}/sensors/get", args
+    assert last_response.ok?, "Last response was not ok"
+    data = JSON.parse(last_response.body)
+    assert_operator(data["options"].length, :>, 0)
+  end
+
+  def test_api_throws_501_error_when_get_sensors_action_list_not_implemented
+    Proxy::BMC::IPMI.any_instance.expects(:sensorlist).raises(NotImplementedError)
+    get "/#{@host}/sensors/list", args
+    assert_equal "NotImplementedError", last_response.body
+    assert_equal 501, last_response.status
+  end
+
+  def test_api_throws_400_error_when_get_sensors_action_list_execption
+    Proxy::BMC::IPMI.any_instance.expects(:sensorlist).raises(StandardError)
+    get "/#{@host}/sensors/list", args
+    assert_equal "StandardError", last_response.body
+    assert_equal 400, last_response.status
   end
 
   def test_api_can_pass_options_in_body
@@ -431,6 +607,34 @@ class BmcApiTest < Test::Unit::TestCase
 
   def test_api_returns_actions_for_boot_devices_put
     put "/#{host}/chassis/config/bootdevice", args
+    assert last_response.ok?, "Last response was not ok"
+    data = JSON.parse(last_response.body)
+    assert_operator(data["actions"].length, :>, 0)
+  end
+
+  def test_api_returns_actions_for_fru_get
+    get "/#{host}/fru", args
+    assert last_response.ok?, "Last response was not ok"
+    data = JSON.parse(last_response.body)
+    assert_operator(data["actions"].length, :>, 0)
+  end
+
+  def test_api_returns_actions_for_bmc_get
+    get "/#{host}/bmc", args
+    assert last_response.ok?, "Last response was not ok"
+    data = JSON.parse(last_response.body)
+    assert_operator(data["actions"].length, :>, 0)
+  end
+
+  def test_api_returns_actions_for_bmc_put
+    put "/#{host}/bmc", args
+    assert last_response.ok?, "Last response was not ok"
+    data = JSON.parse(last_response.body)
+    assert_operator(data["actions"].length, :>, 0)
+  end
+
+  def test_api_returns_actions_for_sensors_get
+    get "/#{host}/sensors", args
     assert last_response.ok?, "Last response was not ok"
     data = JSON.parse(last_response.body)
     assert_operator(data["actions"].length, :>, 0)
