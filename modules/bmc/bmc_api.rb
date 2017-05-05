@@ -35,7 +35,7 @@ module Proxy::BMC
 
     # returns host operations
     get "/:host" do
-      { :actions => %w[chassis lan test] }.to_json
+      { :actions => %w[chassis lan test fru bmc sensors] }.to_json
     end
 
     # runs a test against the bmc device and returns true if the connection was successful
@@ -83,7 +83,7 @@ module Proxy::BMC
 
     get "/:host/lan/?:action?" do
       if params[:action].nil?
-        return { :actions => ["ip", "netmask", "mac", "gateway"] }.to_json
+        return { :actions => ["ip", "netmask", "mac", "gateway", "snmp", "vlanid", "ipsrc", "print"] }.to_json
       end
       bmc_setup
       begin
@@ -96,6 +96,14 @@ module Proxy::BMC
             { :action => params[:action], :result => @bmc.mac }.to_json
           when "gateway"
             { :action => params[:action], :result => @bmc.gateway }.to_json
+          when "snmp"
+            { :action => params[:action], :result => @bmc.snmp }.to_json
+          when "vlanid"
+            { :action => params[:action], :result => @bmc.vlanid }.to_json
+          when "ipsrc"
+            { :action => params[:action], :result => @bmc.ipsrc }.to_json
+          when "print"
+            { :action => params[:action], :result => @bmc.print }.to_json
           else
             { :error => "The action: #{params[:action]} is not a valid action" }.to_json
         end
@@ -154,7 +162,7 @@ module Proxy::BMC
     put "/:host/chassis/power/?:action?" do
       # return hint on valid options
       if params[:action].nil?
-        return { :actions => ["on", "off", "cycle", "soft"] }.to_json
+        return { :actions => ["on", "off", "cycle", "soft", "reset"] }.to_json
       end
       bmc_setup
       begin
@@ -167,6 +175,8 @@ module Proxy::BMC
             { :action => params[:action], :result => @bmc.powercycle }.to_json
           when "soft"
             { :action => params[:action], :result => @bmc.poweroff(true) }.to_json
+          when "reset"
+            { :action => params[:action], :result => @bmc.powerreset }.to_json
           else
             { :error => "The action: #{params[:action]} is not a valid action" }.to_json
         end
@@ -187,7 +197,7 @@ module Proxy::BMC
 
           when "bootdevice"
             if params[:action].nil?
-              return { :actions => @bmc.bootdevices, :options => ["reboot", "persistent"] }.to_json
+              return { :actions => @bmc.bootdevices, :options => ["reboot=true|false", "persistent=true|false"] }.to_json
             end
             case params[:action]
               when /pxe/
@@ -232,6 +242,115 @@ module Proxy::BMC
             { :action => params[:action], :result => @bmc.identifyoff }.to_json
           else
             { :error => "The action: #{params[:function]} is not a valid function" }.to_json
+        end
+      rescue NotImplementedError => e
+        log_halt 501, e
+      rescue => e
+        log_halt 400, e
+      end
+    end
+
+    get "/:host/fru/?:action?" do
+      if params[:action].nil?
+        return { :actions => %w[list serial manufacturer model asset_tag] }.to_json
+      end
+      bmc_setup
+      begin
+        case params[:action]
+          when "list"
+            { :action => params[:action], :result => @bmc.frulist }.to_json
+          when "serial"
+            { :action => params[:action], :result => @bmc.serial }.to_json
+          when "manufacturer"
+            { :action => params[:action], :result => @bmc.manufacturer }.to_json
+          when "model"
+            { :action => params[:action], :result => @bmc.model }.to_json
+          when "asset_tag"
+            { :action => params[:action], :result => @bmc.asset_tag}.to_json
+          else
+            { :error => "The action: #{params[:action]} is not a valid action" }.to_json
+        end
+      rescue NotImplementedError => e
+        log_halt 501, e
+      rescue => e
+        log_halt 400, e
+      end
+    end
+
+    get "/:host/bmc/?:action?" do
+      if params[:action].nil?
+        return { :actions => %w[info guid version] }.to_json
+      end
+      bmc_setup
+      begin
+        case params[:action]
+          when "info"
+            { :action => params[:action], :result => @bmc.info }.to_json
+          when "guid"
+            { :action => params[:action], :result => @bmc.guid }.to_json
+          when "version"
+            { :action => params[:action], :result => @bmc.version }.to_json
+          else
+            { :error => "The action: #{params[:action]} is not a valid action" }.to_json
+        end
+      rescue NotImplementedError => e
+        log_halt 501, e
+      rescue => e
+        log_halt 400, e
+      end
+    end
+
+    put "/:host/bmc/?:action?" do
+      if params[:action].nil?
+        return { :actions => %w[reset] }.to_json
+      end
+      bmc_setup
+      begin
+        case params[:action]
+          when "reset"
+            if params[:type].nil?
+              return { :options => "type=cold|warm" }.to_json
+            end
+            case params[:type]
+              when /cold|warm/
+                { :action => params[:action], :result => @bmc.reset(params[:type])}.to_json
+              else
+                { :error => "The type: #{params[:type]} is not a valid type" }.to_json
+            end
+          else
+            { :error => "The action: #{params[:action]} is not a valid action" }.to_json
+        end
+      rescue NotImplementedError => e
+        log_halt 501, e
+      rescue => e
+        log_halt 400, e
+      end
+    end
+
+    get "/:host/sensors/?:action?/?:sensor?" do
+      if params[:action].nil?
+        return { :actions => %w[list count names fanlist templist get] }.to_json
+      end
+      bmc_setup
+      begin
+        case params[:action]
+          when "list"
+            { :action => params[:action], :result => @bmc.sensorlist }.to_json
+          when "count"
+            { :action => params[:action], :result => @bmc.count }.to_json
+          when "names"
+            { :action => params[:action], :result => @bmc.names }.to_json
+          when "fanlist"
+            { :action => params[:action], :result => @bmc.fanlist }.to_json
+          when "templist"
+            { :action => params[:action], :result => @bmc.templist }.to_json
+          when "get"
+            if params[:sensor].nil?
+              return { :options => "sensor=<name>" }.to_json
+            end
+            { :action => params[:action], :result => @bmc.get(params[:sensor]) }.to_json
+          else
+            { :error => "The action: #{params[:action]} is not a valid action" }.to_json
         end
       rescue NotImplementedError => e
         log_halt 501, e
