@@ -42,7 +42,7 @@ require 'sinatra/default_not_found_page'
 require 'webrick-patch'
 
 module Proxy
-  SETTINGS = Settings.load_global_settings
+  SETTINGS = Settings.initialize_global_settings
   VERSION = File.read(File.join(File.dirname(__FILE__), '../VERSION')).chomp
 
   ::Sinatra::Base.set :run, false
