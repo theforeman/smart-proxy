@@ -1,6 +1,8 @@
 require 'proxy/log'
+require 'proxy/sd_notify'
 require 'proxy/settings'
 require 'proxy/signal_handler'
+require 'thread'
 
 module Proxy
   class Launcher
@@ -138,6 +140,7 @@ module Proxy
 
       http_app = http_app(SETTINGS.http_port)
       https_app = https_app(SETTINGS.https_port)
+      install_webrick_callback!(http_app, https_app)
 
       t1 = Thread.new { webrick_server(https_app, SETTINGS.bind_host, SETTINGS.https_port).start } unless https_app.nil?
       t2 = Thread.new { webrick_server(http_app, SETTINGS.bind_host, SETTINGS.http_port).start } unless http_app.nil?
@@ -155,6 +158,29 @@ module Proxy
       logger.error("Error during startup, terminating. #{e}", e.backtrace)
       puts "Errors detected on startup, see log for details. Exiting: #{e}"
       exit(1)
+    end
+
+    def install_webrick_callback!(*apps)
+      apps.compact!
+
+      # track how many webrick apps are still starting up
+      @pending_webrick = apps.size
+      @pending_webrick_lock = Mutex.new
+
+      apps.each do |app|
+        # add a callback to each server, decrementing the pending counter
+        app[:StartCallback] = lambda do
+          @pending_webrick_lock.synchronize do
+            @pending_webrick -= 1
+            launched(apps) if @pending_webrick.zero?
+          end
+        end
+      end
+    end
+
+    def launched(apps)
+      logger.info("Smart proxy has launched on #{apps.size} socket(s), waiting for requests")
+      Proxy::SdNotify.new.tap { |sd| sd.ready if sd.active? }
     end
   end
 end

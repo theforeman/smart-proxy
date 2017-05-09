@@ -28,4 +28,16 @@ class GlobalSettingsTest < Test::Unit::TestCase
     assert_equal ['127.0.0.1'], ::Proxy::Settings::Global.new(:bind_host => '127.0.0.1').bind_host
     assert_equal ['127.0.0.1'], ::Proxy::Settings::Global.new(:bind_host => ['127.0.0.1']).bind_host
   end
+
+  def test_apply_argv_daemonize
+    settings = ::Proxy::Settings::Global.new(daemon: false)
+    settings.apply_argv(['--daemonize'])
+    assert_equal true, settings.daemon
+  end
+
+  def test_apply_argv_no_daemonize
+    settings = ::Proxy::Settings::Global.new(daemon: true)
+    settings.apply_argv(['--no-daemonize'])
+    assert_equal false, settings.daemon
+  end
 end

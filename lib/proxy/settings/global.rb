@@ -42,5 +42,10 @@ module ::Proxy::Settings
       return value unless how_to.has_key?(key)
       how_to[key].call(value)
     end
+
+    def apply_argv(args)
+      self.daemon = true if args.include?('--daemonize')
+      self.daemon = false if args.include?('--no-daemonize')
+    end
   end
 end
