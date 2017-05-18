@@ -1,9 +1,10 @@
 class Proxy::PuppetSsh::Runner < Proxy::Puppet::Runner
-  attr_reader :command, :user, :keyfile_path, :use_sudo, :wait_for_command_to_finish
+  attr_reader :command, :user, :port, :keyfile_path, :use_sudo, :wait_for_command_to_finish
 
-  def initialize(puppetssh_command, puppetssh_user, ssh_keyfile, use_sudo, wait_for_command_to_finish)
+  def initialize(puppetssh_command, puppetssh_user, puppetssh_port, ssh_keyfile, use_sudo, wait_for_command_to_finish)
     @command = puppetssh_command
     @user = puppetssh_user
+    @port = puppetssh_port
     @keyfile_path = ssh_keyfile.to_s
     @use_sudo = use_sudo
     @wait_for_command_to_finish = wait_for_command_to_finish
@@ -29,6 +30,7 @@ class Proxy::PuppetSsh::Runner < Proxy::Puppet::Runner
     cmd.push(ssh_path)
 
     cmd.push("-l", user) if user
+    cmd.push("-p", port.to_s) if port
 
     if keyfile_path
       if File.exist?(keyfile_path)

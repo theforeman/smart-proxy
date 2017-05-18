@@ -7,7 +7,7 @@ module ::Proxy::PuppetSsh
 
     def load_dependency_injection_wirings(container_instance, settings)
       container_instance.dependency :puppet_runner_impl, (lambda do
-        ::Proxy::PuppetSsh::Runner.new(settings[:command], settings[:user], settings[:keyfile], settings[:use_sudo], settings[:wait])
+        ::Proxy::PuppetSsh::Runner.new(settings[:command], settings[:user], settings[:port], settings[:keyfile], settings[:use_sudo], settings[:wait])
       end)
     end
   end
