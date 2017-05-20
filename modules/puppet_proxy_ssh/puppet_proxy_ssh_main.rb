@@ -28,6 +28,7 @@ class Proxy::PuppetSsh::Runner < Proxy::Puppet::Runner
     end
     cmd.push(ssh_path)
 
+    cmd.push('-o', 'StrictHostKeyChecking=no')
     cmd.push("-l", user) if user
 
     if keyfile_path
