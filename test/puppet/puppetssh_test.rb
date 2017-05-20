@@ -17,11 +17,11 @@ class PuppetSshTest < Test::Unit::TestCase
 
     puppetssh.
       expects(:shell_command).
-      with(["/usr/bin/ssh", "host1", command], false).
+      with(["/usr/bin/ssh", "-o", "StrictHostKeyChecking=no", "host1", command], false).
       returns(true)
     puppetssh.
       expects(:shell_command).
-      with(["/usr/bin/ssh", "host2", command], false).
+      with(["/usr/bin/ssh", "-o", "StrictHostKeyChecking=no", "host2", command], false).
       returns(true)
     assert puppetssh.run(["host1", "host2"])
   end
@@ -31,8 +31,8 @@ class PuppetSshTest < Test::Unit::TestCase
     puppetssh.stubs(:which).with("sudo", anything).returns("/usr/bin/sudo")
     puppetssh.stubs(:which).with("ssh", anything).returns("/usr/bin/ssh")
 
-    puppetssh.expects(:shell_command).with(["/usr/bin/sudo", "/usr/bin/ssh", "host1", "/bin/true"], false).returns(true)
-    puppetssh.expects(:shell_command).with(["/usr/bin/sudo", "/usr/bin/ssh", "host2", "/bin/true"], false).returns(true)
+    puppetssh.expects(:shell_command).with(["/usr/bin/sudo", "/usr/bin/ssh", "-o", "StrictHostKeyChecking=no", "host1", "/bin/true"], false).returns(true)
+    puppetssh.expects(:shell_command).with(["/usr/bin/sudo", "/usr/bin/ssh", "-o", "StrictHostKeyChecking=no", "host2", "/bin/true"], false).returns(true)
     assert puppetssh.run(["host1", "host2"])
   end
 
@@ -42,19 +42,19 @@ class PuppetSshTest < Test::Unit::TestCase
     puppetssh.stubs(:which).with("sudo", anything).returns("/usr/bin/sudo")
     puppetssh.stubs(:which).with("ssh", anything).returns("/usr/bin/ssh")
 
-    puppetssh.expects(:shell_command).with(["/usr/bin/ssh", "-i", "/root/.ssh/id_rsa", "host1", "/bin/true"], false).returns(true)
-    puppetssh.expects(:shell_command).with(["/usr/bin/ssh", "-i", "/root/.ssh/id_rsa", "host2", "/bin/true"], false).returns(true)
+    puppetssh.expects(:shell_command).with(["/usr/bin/ssh", "-o", "StrictHostKeyChecking=no", "-i", "/root/.ssh/id_rsa", "host1", "/bin/true"], false).returns(true)
+    puppetssh.expects(:shell_command).with(["/usr/bin/ssh", "-o", "StrictHostKeyChecking=no", "-i", "/root/.ssh/id_rsa", "host2", "/bin/true"], false).returns(true)
     assert puppetssh.run(["host1", "host2"])
   end
 
-  def test_command_line_with_ssh_keyfile_that_doesnt_exists
+  def test_command_line_with_ssh_keyfile_that_doesnt_exist
     puppetssh = Proxy::PuppetSsh::Runner.new("/bin/true", nil, '/root/.ssh/id_rsa', false, false)
     File.stubs(:exists?).returns(false)
     puppetssh.stubs(:which).with("sudo", anything).returns("/usr/bin/sudo")
     puppetssh.stubs(:which).with("ssh", anything).returns("/usr/bin/ssh")
 
-    puppetssh.expects(:shell_command).with(["/usr/bin/ssh", "host1", "/bin/true"], false).returns(true)
-    puppetssh.expects(:shell_command).with(["/usr/bin/ssh", "host2", "/bin/true"], false).returns(true)
+    puppetssh.expects(:shell_command).with(["/usr/bin/ssh", "-o", "StrictHostKeyChecking=no", "host1", "/bin/true"], false).returns(true)
+    puppetssh.expects(:shell_command).with(["/usr/bin/ssh", "-o", "StrictHostKeyChecking=no", "host2", "/bin/true"], false).returns(true)
     assert puppetssh.run(["host1", "host2"])
   end
 
@@ -63,8 +63,8 @@ class PuppetSshTest < Test::Unit::TestCase
     puppetssh.stubs(:which).with("sudo", anything).returns("/usr/bin/sudo")
     puppetssh.stubs(:which).with("ssh", anything).returns("/usr/bin/ssh")
 
-    puppetssh.expects(:shell_command).with(["/usr/bin/ssh", "-l", "root", "host1", "/bin/true"], false).returns(true)
-    puppetssh.expects(:shell_command).with(["/usr/bin/ssh", "-l", "root", "host2", "/bin/true"], false).returns(true)
+    puppetssh.expects(:shell_command).with(["/usr/bin/ssh", "-o", "StrictHostKeyChecking=no", "-l", "root", "host1", "/bin/true"], false).returns(true)
+    puppetssh.expects(:shell_command).with(["/usr/bin/ssh", "-o", "StrictHostKeyChecking=no", "-l", "root", "host2", "/bin/true"], false).returns(true)
     assert puppetssh.run(["host1", "host2"])
   end
 
@@ -73,8 +73,8 @@ class PuppetSshTest < Test::Unit::TestCase
     puppetssh.stubs(:which).with("sudo", anything).returns("/usr/bin/sudo")
     puppetssh.stubs(:which).with("ssh", anything).returns("/usr/bin/ssh")
 
-    puppetssh.expects(:shell_command).with(["/usr/bin/ssh", "host1", "/bin/true"], false).returns(true)
-    puppetssh.expects(:shell_command).with(["/usr/bin/ssh", "host2", "/bin/true"], false).returns(true)
+    puppetssh.expects(:shell_command).with(["/usr/bin/ssh", "-o", "StrictHostKeyChecking=no", "host1", "/bin/true"], false).returns(true)
+    puppetssh.expects(:shell_command).with(["/usr/bin/ssh", "-o", "StrictHostKeyChecking=no", "host2", "/bin/true"], false).returns(true)
     assert puppetssh.run(["host1", "host2"])
   end
 
@@ -83,8 +83,8 @@ class PuppetSshTest < Test::Unit::TestCase
     puppetssh.stubs(:which).with("sudo", anything).returns("/usr/bin/sudo")
     puppetssh.stubs(:which).with("ssh", anything).returns("/usr/bin/ssh")
 
-    puppetssh.expects(:shell_command).with(["/usr/bin/ssh", "host1", "/bin/true"], true).returns(true)
-    puppetssh.expects(:shell_command).with(["/usr/bin/ssh", "host2", "/bin/true"], true).returns(true)
+    puppetssh.expects(:shell_command).with(["/usr/bin/ssh", "-o", "StrictHostKeyChecking=no", "host1", "/bin/true"], true).returns(true)
+    puppetssh.expects(:shell_command).with(["/usr/bin/ssh", "-o", "StrictHostKeyChecking=no", "host2", "/bin/true"], true).returns(true)
     assert puppetssh.run(["host1", "host2"])
   end
 
