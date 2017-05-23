@@ -252,35 +252,40 @@ class DhcpApiTest < Test::Unit::TestCase
 
   def test_delete_record
     @server.expects(:find_record).with("192.168.122.0", "192.168.122.1").returns(@reservations.first)
-    @server.expects(:del_record).with(@reservations.first)
+    @server.expects(:del_record).with(@reservations.first).returns(nil)
 
     delete "/192.168.122.0/192.168.122.1"
 
-    assert last_response.ok?, "Last response was not ok: #{last_response.status} #{last_response.body}"
+    assert_equal 200, last_response.status
+    assert_empty last_response.body
   end
 
   def test_delete_records_by_ip
     @server.expects(:del_records_by_ip).with("192.168.122.0", "192.168.122.1")
     delete "/192.168.122.0/ip/192.168.122.1"
-    assert last_response.ok?, "Last response was not ok: #{last_response.status} #{last_response.body}"
+    assert_equal 200, last_response.status
+    assert_empty last_response.body
   end
 
   def test_delete_records_by_ip_for_nonexistent_subnet
     @server.expects(:del_records_by_ip).with("192.168.122.0", "192.168.122.1").raises(::Proxy::DHCP::SubnetNotFound)
     delete "/192.168.122.0/ip/192.168.122.1"
-    assert last_response.ok?, "Last response was not ok: #{last_response.status} #{last_response.body}"
+    assert_equal 200, last_response.status
+    assert_empty last_response.body
   end
 
   def test_delete_records_by_mac
     @server.expects(:del_record_by_mac).with("192.168.122.0", "00:11:bb:cc:dd:ee")
     delete "/192.168.122.0/mac/00:11:bb:cc:dd:ee"
-    assert last_response.ok?, "Last response was not ok: #{last_response.status} #{last_response.body}"
+    assert_equal 200, last_response.status
+    assert_empty last_response.body
   end
 
   def test_delete_records_by_mac_for_nonexistent_subnet
     @server.expects(:del_record_by_mac).with("192.168.122.0", "00:11:bb:cc:dd:ee").raises(::Proxy::DHCP::SubnetNotFound)
     delete "/192.168.122.0/mac/00:11:bb:cc:dd:ee"
-    assert last_response.ok?, "Last response was not ok: #{last_response.status} #{last_response.body}"
+    assert_equal 200, last_response.status
+    assert_empty last_response.body
   end
 
   def test_delete_non_existent_record
