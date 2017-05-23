@@ -3,7 +3,7 @@ module Proxy::PuppetCa
     http_rackup_path File.expand_path("http_config.ru", File.expand_path("../", __FILE__))
     https_rackup_path File.expand_path("http_config.ru", File.expand_path("../", __FILE__))
 
-    default_settings :ssldir => '/var/lib/puppet/ssl', :puppetdir => '/etc/puppet'
+    default_settings :ssldir => '/var/lib/puppet/ssl', :autosignfile => '/etc/puppet/autosign.conf'
 
     plugin :puppetca, ::Proxy::VERSION
   end

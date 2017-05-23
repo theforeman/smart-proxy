@@ -129,12 +129,8 @@ module Proxy::PuppetCa
       Proxy::PuppetCa::Plugin.settings.ssldir
     end
 
-    def puppetdir
-      Proxy::PuppetCa::Plugin.settings.puppetdir
-    end
-
     def autosign_file
-      "#{puppetdir}/autosign.conf"
+      Proxy::PuppetCa::Plugin.settings.autosignfile
     end
 
     # parse the puppetca --list output
