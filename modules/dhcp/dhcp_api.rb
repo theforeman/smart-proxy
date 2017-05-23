@@ -111,7 +111,8 @@ class Proxy::DhcpApi < ::Sinatra::Base
 
       record = server.find_record(params[:network], params[:record])
       log_halt 404, "No DHCP record for #{params[:network]}/#{params[:record]} found" unless record
-      server.del_record(record).to_json
+      server.del_record(record)
+      nil
     rescue ::Proxy::DHCP::SubnetNotFound
       log_halt 404, "Subnet #{params[:network]} could not found"
     rescue Exception => e
