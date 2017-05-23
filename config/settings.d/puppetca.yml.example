@@ -3,6 +3,6 @@
 :enabled: false
 
 #:ssldir: /var/lib/puppet/ssl
-#:puppetdir: /etc/puppet
+#:autosignfile: /etc/puppet/autosign.conf
 #:puppetca_use_sudo: true
 #:sudo_command: /usr/bin/sudo
