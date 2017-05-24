@@ -27,10 +27,12 @@ module Proxy::DHCP::CommonISC
 
         if /^include\s+"(.*)"\s*;.*/ =~ line
           conf = $1
-          raise "Unable to find the included DHCP configuration file: #{conf}" unless File.exist?(conf)
-          # concat modifies the receiver rather than creating a new array
-          # and does not create a multidimensional array
-          to_return.concat([File.open(conf, 'r') {|f| load(f)}])
+          if conf !~ /\/ignored-by-foreman\//
+            raise "Unable to find the included DHCP configuration file: #{conf}" unless File.exist?(conf)
+            # concat modifies the receiver rather than creating a new array
+            # and does not create a multidimensional array
+            to_return.concat([File.open(conf, 'r') {|f| load(f)}])
+          end
         else
           to_return << line
         end
