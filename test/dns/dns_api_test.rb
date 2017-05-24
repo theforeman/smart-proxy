@@ -14,8 +14,8 @@ class DnsApiTestProvider
   def create_ptr_record(fqdn, ip)
     @fqdn = fqdn; @ip = ip; @type = 'PTR'
   end
-  def create_cname_record(fqdn, target)
-    @fqdn = fqdn; @target = target; @type = 'CNAME'
+  def create_cname_record(fqdn, host_alias)
+    @fqdn = fqdn; @host_alias = host_alias; @type = 'CNAME'
   end
   def remove_a_record(fqdn)
     @fqdn = fqdn; @type = 'A'
@@ -26,8 +26,8 @@ class DnsApiTestProvider
   def remove_ptr_record(ip)
     @ip = ip; @type = 'PTR'
   end
-  def remove_cname_record(fqdn)
-    @fqdn = fqdn; @type = 'CNAME'
+  def remove_cname_record(host_alias)
+    @host_alias = host_alias; @type = 'CNAME'
   end
 end
 
@@ -155,10 +155,10 @@ class DnsApiTest < Test::Unit::TestCase
   end
 
   def test_create_cname_record
-    post '/', :fqdn => 'test.com', :value => 'test1.com', :type => 'CNAME'
+    post '/', :fqdn => 'test.com', :value => 'alias.com', :type => 'CNAME'
     assert_equal 200, last_response.status
     assert_equal 'test.com', @server.fqdn
-    assert_equal 'test1.com', @server.target
+    assert_equal 'alias.com', @server.host_alias
     assert_equal 'CNAME', @server.type
   end
 
@@ -198,9 +198,9 @@ class DnsApiTest < Test::Unit::TestCase
   end
 
   def test_delete_explicit_cname_record
-    delete "/test.com/CNAME"
+    delete "/alias.com/CNAME"
     assert_equal 200, last_response.status
-    assert_equal 'test.com', @server.fqdn
+    assert_equal 'alias.com', @server.host_alias
     assert_equal 'CNAME', @server.type
   end
 

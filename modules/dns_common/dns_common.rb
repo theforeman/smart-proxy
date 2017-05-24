@@ -42,14 +42,14 @@ module Proxy::Dns
       end
     end
 
-    def create_cname_record(fqdn, target)
-      case cname_record_conflicts(fqdn, target) #returns -1, 0, 1
+    def create_cname_record(fqdn, host_alias)
+      case cname_record_conflicts(fqdn, host_alias) #returns -1, 0, 1
         when 1 then
-          raise(Proxy::Dns::Collision, "'#{fqdn} 'is already in use")
+          raise(Proxy::Dns::Collision, "'#{host_alias} 'is already in use")
         when 0 then
           return nil
         else
-          do_create(fqdn, target, "CNAME")
+          do_create(host_alias, fqdn, "CNAME")
       end
     end
 
@@ -76,8 +76,8 @@ module Proxy::Dns
       do_remove(fqdn, "AAAA")
     end
 
-    def remove_cname_record(fqdn)
-      do_remove(fqdn, "CNAME")
+    def remove_cname_record(host_alias)
+      do_remove(host_alias, "CNAME")
     end
 
     def remove_ptr_record(name)
@@ -170,10 +170,10 @@ module Proxy::Dns
       end
     end
 
-    def cname_record_conflicts(fqdn, target)
-      current = resolver.getresources(fqdn, Resolv::DNS::Resource::IN::CNAME)
+    def cname_record_conflicts(fqdn, host_alias)
+      current = resolver.getresources(host_alias, Resolv::DNS::Resource::IN::CNAME)
       return -1 if current.empty?
-      return 0 if current[0].name.to_s == target #There can only be one CNAME
+      return 0 if current[0].name.to_s == fqdn #There can only be one CNAME
       1
     end
 
