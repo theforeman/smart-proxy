@@ -39,16 +39,16 @@ class DHCPServerTest < Test::Unit::TestCase
     end
   end
 
-  def test_should_detect_ip_address_collision_with_a_lease
-    @service.add_host(@subnet.network, ::Proxy::DHCP::Lease.new('test-2', "192.168.0.12", "00:11:22:33:44:55", @subnet, nil, nil, nil))
-    assert_raises Proxy::DHCP::Collision do
+  def test_should_ignore_ip_address_collision_with_a_lease
+    @service.add_lease(@subnet.network, ::Proxy::DHCP::Lease.new('test-2', "192.168.0.12", "00:11:22:33:44:55", @subnet, nil, nil, nil))
+    assert_nothing_raised do
       @server.add_record('hostname' => 'test-1', 'name' => 'test', 'network' => @subnet.network, 'ip' => "192.168.0.12", 'mac' => "aa:bb:cc:dd:ee:ef")
     end
   end
 
-  def test_should_detect_mac_address_collision_with_a_lease
-    @service.add_host(@subnet.network, ::Proxy::DHCP::Lease.new('test-2', "192.168.0.13", "00:11:22:33:44:55", @subnet, nil, nil, nil))
-    assert_raises Proxy::DHCP::Collision do
+  def test_should_ignore_mac_address_collision_with_a_lease
+    @service.add_lease(@subnet.network, ::Proxy::DHCP::Lease.new('test-2', "192.168.0.13", "00:11:22:33:44:55", @subnet, nil, nil, nil))
+    assert_nothing_raised Proxy::DHCP::Collision do
       @server.add_record('hostname' => 'test-1', 'name' => 'test', 'network' => @subnet.network, 'ip' => "192.168.0.12", 'mac' => "00:11:22:33:44:55")
     end
   end

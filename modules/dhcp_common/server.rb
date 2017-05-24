@@ -110,6 +110,8 @@ module Proxy::DHCP
       self
     end
 
+    # TODO: this is dhcpd-centric and should be moved out into CommonISC module
+
     # add_record options can take a params hash from the API layer, which behaves
     # like a HashWithIndifferentAccess to symbol and string keys.
     # Delete keys with string names before adding them back with symbol names,
@@ -147,12 +149,12 @@ module Proxy::DHCP
       to_return
     end
 
+    # We ignore leases in this lookup, as isc dhcpd will allow creation of
+    # reservations with the same ip and mac addresses as leases (including active ones)
     def find_similar_records(subnet_address, ip_address, mac_address)
       records = []
       records << service.find_hosts_by_ip(subnet_address, ip_address)
       records << service.find_host_by_mac(subnet_address, mac_address)
-      records << service.find_lease_by_ip(subnet_address, ip_address)
-      records << service.find_lease_by_mac(subnet_address, mac_address)
       records.flatten.compact.uniq
     end
 
