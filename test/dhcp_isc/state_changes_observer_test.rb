@@ -82,7 +82,7 @@ class StateChangesObserverTest < Test::Unit::TestCase
   end
 
   class ObserverForTesting < ::Proxy::DHCP::ISC::IscStateChangesObserver
-    attr_accessor :event_loop_active
+    attr_accessor :event_loop_active, :config_file, :leases_file
 
     def pause
       @event_loop_active = false
@@ -91,73 +91,13 @@ class StateChangesObserverTest < Test::Unit::TestCase
 
   def setup
     @events = EventsForTesting.new
-    @config_file = Object.new
-    @leases_file = Object.new
     @service = Proxy::DHCP::SubnetService.new(Proxy::MemoryStore.new,
                                               Proxy::MemoryStore.new, Proxy::MemoryStore.new,
                                               Proxy::MemoryStore.new, Proxy::MemoryStore.new)
-    @observer = ObserverForTesting.new(@config_file, @leases_file, @service, @events)
+    @observer = ObserverForTesting.new("config/file", "leases/file", @service, @events)
 
     @subnet = Proxy::DHCP::Subnet.new("192.168.0.0", "255.255.255.0")
     @service.add_subnet(@subnet)
-  end
-
-  def test_update_subnet_service_with_dhcp_records_should_delete_reservations
-    @service.add_host("192.168.0.0", ::Proxy::DHCP::Reservation.new("test", "192.168.0.1", "00:11:22:33:44:55", @subnet))
-    @observer.update_subnet_service_with_dhcp_records([::Proxy::DHCP::DeletedReservation.new('test')])
-
-    assert_equal 0, @service.all_hosts.size
-  end
-
-  def test_update_subnet_service_with_dhcp_records_should_add_reservations
-    @observer.update_subnet_service_with_dhcp_records([::Proxy::DHCP::Reservation.new("test", "192.168.0.1", "00:11:22:33:44:55", @subnet)])
-    assert @service.find_hosts_by_ip("192.168.0.0", "192.168.0.1")
-  end
-
-  def test_update_subnet_service_with_dhcp_records_should_delete_hosts_with_duplicate_macs_when_adding_reservations
-    @service.add_host("192.168.0.0", ::Proxy::DHCP::Reservation.new("test", "192.168.0.10", "00:11:22:33:44:55", @subnet))
-    @observer.update_subnet_service_with_dhcp_records([::Proxy::DHCP::Reservation.new("test", "192.168.0.1", "00:11:22:33:44:55", @subnet)])
-
-    assert @service.find_hosts_by_ip("192.168.0.0", "192.168.0.1")
-  end
-
-  def test_update_subnet_service_with_dhcp_records_should_delete_hosts_with_duplicate_ips_when_adding_reservations
-    @service.add_host("192.168.0.0", ::Proxy::DHCP::Reservation.new("test", "192.168.0.10", "00:11:22:33:44:55", @subnet))
-    @observer.update_subnet_service_with_dhcp_records([::Proxy::DHCP::Reservation.new("test", "192.168.0.10", "00:11:22:33:44:66", @subnet)])
-
-    assert @service.find_host_by_mac("192.168.0.0", "00:11:22:33:44:66")
-  end
-
-  def test_update_subnet_service_with_dhcp_records_should_add_leases
-    @observer.update_subnet_service_with_dhcp_records([::Proxy::DHCP::Lease.new('test', "192.168.0.1", "00:11:22:33:44:55", @subnet, nil, nil, nil)])
-
-    assert @service.find_lease_by_ip("192.168.0.0", "192.168.0.1")
-  end
-
-  def test_update_subnet_service_with_dhcp_records_should_delete_free_leases
-    @service.add_lease("192.168.0.0", ::Proxy::DHCP::Lease.new('test', "192.168.0.1", "00:11:22:33:44:55", @subnet, nil, nil, nil))
-    @observer.update_subnet_service_with_dhcp_records([::Proxy::DHCP::Lease.new('test', "192.168.0.1", "00:11:22:33:44:55", @subnet, nil, nil, 'free')])
-    assert_nil @service.find_lease_by_ip("192.168.0.0", "192.168.0.1")
-  end
-
-  def test_update_subnet_service_with_dhcp_records_should_delete_expired_leases
-    @service.add_lease("192.168.0.0", ::Proxy::DHCP::Lease.new('test', "192.168.0.1", "00:11:22:33:44:55", @subnet, nil, nil, nil))
-    @observer.update_subnet_service_with_dhcp_records([::Proxy::DHCP::Lease.new('test', "192.168.0.1", "00:11:22:33:44:55", @subnet, nil, Time.now - 60, nil, :next_state => 'free')])
-    assert_nil @service.find_lease_by_ip("192.168.0.0", "192.168.0.1")
-  end
-
-  def test_update_subnet_service_with_dhcp_records_should_delete_leases_with_duplicate_macs_when_adding_leases
-    @service.add_lease("192.168.0.0", ::Proxy::DHCP::Lease.new('test', "192.168.0.10", "00:11:22:33:44:55", @subnet, nil, nil, nil))
-    @observer.update_subnet_service_with_dhcp_records([::Proxy::DHCP::Lease.new('test', "192.168.0.1", "00:11:22:33:44:55", @subnet, nil, nil, nil)])
-
-    assert @service.find_lease_by_ip("192.168.0.0", "192.168.0.1")
-  end
-
-  def test_update_subnet_service_with_dhcp_records_should_delete_leases_with_duplicate_ips_when_adding_leases
-    @service.add_lease("192.168.0.0", ::Proxy::DHCP::Lease.new('test', "192.168.0.10", "00:11:22:33:44:55", @subnet, nil, nil, nil))
-    @observer.update_subnet_service_with_dhcp_records([::Proxy::DHCP::Lease.new('test', "192.168.0.1", "00:11:22:33:44:66", @subnet, nil, nil, nil)])
-
-    assert @service.find_lease_by_mac("192.168.0.0", "00:11:22:33:44:66")
   end
 
   def test_start
@@ -190,41 +130,28 @@ class StateChangesObserverTest < Test::Unit::TestCase
   end
 
   def test_monitor_started
-    @observer.expects(:load_subnets)
-    @observer.expects(:update_subnet_service_with_dhcp_records)
-    @config_file.expects(:hosts_and_leases).returns([])
-    @observer.expects(:update_subnet_service_with_dhcp_records)
-    @leases_file.expects(:hosts_and_leases).returns([])
-
+    @observer.expects(:load_configuration_file)
+    @observer.expects(:load_leases_file)
     @observer.do_start
   end
 
   def test_leases_recreated
-    @config_file.expects(:close)
-    @leases_file.expects(:close)
-
+    @observer.expects(:close_leases_file)
     @service.expects(:clear)
-
-    @observer.expects(:load_subnets)
-    @observer.expects(:update_subnet_service_with_dhcp_records)
-    @config_file.expects(:hosts_and_leases).returns([])
-    @observer.expects(:update_subnet_service_with_dhcp_records)
-    @leases_file.expects(:hosts_and_leases).returns([])
+    @observer.expects(:load_configuration_file)
+    @observer.expects(:load_leases_file)
 
     @observer.do_leases_recreated
   end
 
   def test_leases_modified
-    @observer.expects(:update_subnet_service_with_dhcp_records)
-    @leases_file.expects(:hosts_and_leases).returns([])
+    @observer.expects(:load_leases_file)
 
     @observer.do_leases_modified
   end
 
   def test_monitor_stopped
-    @config_file.expects(:close)
-    @leases_file.expects(:close)
-
+    @observer.expects(:close_leases_file)
     @observer.do_stop
   end
 end

@@ -186,8 +186,8 @@ host bond.example.com-02 {
 # hostname set without supersede
 host bravo2.example.com {
   dynamic;
-  hardware ethernet 44:1e:a1:73:36:15;
-  fixed-address 192.168.122.42;
+  hardware ethernet 44:1e:a1:73:36:16;
+  fixed-address 192.168.122.45;
   option host-name "bravo.example.com";
 }
 

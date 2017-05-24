@@ -25,15 +25,6 @@ class Proxy::DHCPSubnetTest < Test::Unit::TestCase
     end
   end
 
-  def test_should_not_save_invalid_domain_name_servers_addresses
-    assert_raise Proxy::Validations::Error do
-      Proxy::DHCP::Subnet.new(@network, @netmask, :domain_name_servers => ["192.168.1.."])
-    end
-    assert_raise Proxy::Validations::Error do
-      Proxy::DHCP::Subnet.new(@network, @netmask, :domain_name_servers => ["192.168.1.1", "192.1068.13"])
-    end
-  end
-
   def test_should_not_save_invalid_range
     assert_raise Proxy::Validations::Error do
       Proxy::DHCP::Subnet.new(@network, @netmask, :range => ["192.168.0..", "192.168.0.50"])
