@@ -5,6 +5,7 @@ module Proxy::DHCP
     attr_reader :name
 
     def initialize(name, ip_address, mac_address, subnet, options = {})
+      @type = "reservation"
       @name = name
       super(ip_address, mac_address, subnet, options)
     end
@@ -22,7 +23,7 @@ module Proxy::DHCP
     end
 
     def to_json(*opts)
-      Hash[[:name, :ip, :mac, :subnet].map{|s| [s, send(s)]}].merge(options).to_json(*opts)
+      Hash[[:name, :ip, :mac, :subnet, :type].map{|s| [s, send(s)]}].merge(options).to_json(*opts)
     end
   end
 end
