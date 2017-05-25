@@ -144,18 +144,39 @@ class DhcpApiTest < Test::Unit::TestCase
     assert_equal 404, last_response.status
   end
 
-  def test_get_record_by_ip
+  def test_get_reservation_record_by_ip
     @server.expects(:find_records_by_ip).with("192.168.122.0", "192.168.122.1").returns([@reservations.first])
 
     get "/192.168.122.0/ip/192.168.122.1"
 
     assert last_response.ok?, "Last response was not ok: #{last_response.status} #{last_response.body}"
     expected = [{
-      "hostname" =>"test.example.com",
-      "ip"       =>"192.168.122.1",
-      "mac"      =>"00:11:bb:cc:dd:ee",
+      "type"     => "reservation",
+      "hostname" => "test.example.com",
+      "ip"       => "192.168.122.1",
+      "mac"      => "00:11:bb:cc:dd:ee",
       "name"     => 'test.example.com',
-      "subnet"   =>"192.168.122.0/255.255.255.0" # NOTE: 'subnet' attribute isn't being used by foreman, which adds a 'network' attribute instead
+      "subnet"   => "192.168.122.0/255.255.255.0"
+    }]
+    assert_equal expected, JSON.parse(last_response.body)
+  end
+
+  def test_get_lease_record_by_ip
+    @server.expects(:find_records_by_ip).with("192.168.122.0", "192.168.122.1").returns([@leases.first])
+
+    get "/192.168.122.0/ip/192.168.122.1"
+
+    assert last_response.ok?, "Last response was not ok: #{last_response.status} #{last_response.body}"
+
+    expected = [{
+      "ends" => nil,
+      "ip" => "192.168.122.2",
+      "mac" => "00:aa:bb:cc:dd:ee",
+      "name" => "lease-00aabbccddee",
+      "starts" => "2014-07-12 10:08:29 UTC",
+      "state" => "active",
+      "subnet" => "192.168.122.0/255.255.255.0",
+      "type" => "lease"
     }]
     assert_equal expected, JSON.parse(last_response.body)
   end
@@ -179,6 +200,7 @@ class DhcpApiTest < Test::Unit::TestCase
 
     assert last_response.ok?, "Last response was not ok: #{last_response.status} #{last_response.body}"
     expected = {
+      "type"     => "reservation",
       "hostname" =>"test.example.com",
       "ip"       =>"192.168.122.1",
       "mac"      =>"00:11:bb:cc:dd:ee",
