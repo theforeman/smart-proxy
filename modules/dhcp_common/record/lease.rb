@@ -5,6 +5,7 @@ module Proxy::DHCP
     attr_reader :name, :starts, :ends, :state
 
     def initialize(name, ip_address, mac_address, subnet, starts, ends, state, options = {})
+      @type = "lease"
       @name = name || "lease-#{mac_address.tr(':-','')}"
       @starts = starts
       @ends = ends
@@ -21,7 +22,7 @@ module Proxy::DHCP
     end
 
     def to_json(*opts)
-      Hash[[:name, :ip, :mac, :subnet, :starts, :ends, :state].map{|s| [s, send(s)]}].merge(options).to_json(*opts)
+      Hash[[:name, :ip, :mac, :subnet, :starts, :ends, :state, :type].map{|s| [s, send(s)]}].merge(options).to_json(*opts)
     end
   end
 end
