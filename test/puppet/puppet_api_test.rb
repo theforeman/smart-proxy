@@ -100,6 +100,12 @@ class PuppetApiTest < Test::Unit::TestCase
     app
   end
 
+  def test_gets_puppet_index
+    get "/"
+    assert last_response.ok?, "Last response was not ok: #{last_response.body}"
+    assert_equal '4.6.1', JSON.parse(last_response.body)['version']
+  end
+
   def test_gets_puppet_environments
     get "/environments"
     assert last_response.ok?, "Last response was not ok: #{last_response.body}"

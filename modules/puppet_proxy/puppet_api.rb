@@ -9,6 +9,11 @@ class Proxy::Puppet::Api < ::Sinatra::Base
   inject_attr :environment_retriever_impl, :environment_retriever
   inject_attr :puppet_runner_impl, :puppet_runner
 
+  get "/" do
+    content_type :json
+    {:version => Proxy::Puppet::Plugin.settings.puppet_version}.to_json
+  end
+
   post "/run" do
     begin
       log_halt 400, "Failed puppet run: No nodes defined" unless params[:nodes]
