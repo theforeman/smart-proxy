@@ -1,4 +1,5 @@
 require 'bmc/ipmi'
+require 'bmc/ipmiscanner'
 
 module Proxy::BMC
   class Api < ::Sinatra::Base
@@ -31,6 +32,40 @@ module Proxy::BMC
     # returns a helpful message that the user should supply a hostname
     get "/host" do
       { :message => "You need to supply the hostname or ip of the actual bmc device"}.to_json
+    end
+
+    # Scan IP range for BMC hosts
+    # Returns a list of available scanning options
+    get "/scan" do
+      { :available_resources => %w[range cidr] }.to_json
+    end
+
+    # Returns a helpful message that the user should supply a beginning IP and ending IP
+    get "/scan/range" do
+      { :message => "You need to supply a range with /bmc/scan/range/:address_first/:address_last"}.to_json
+    end
+
+    # Returns a helpful message that the user should supply a CIDR
+    get "/scan/cidr" do
+      { :message => "You need to supply a CIDR with /bmc/scan/cidr/:address/:netmask (e.g. \"192.168.1.1/24\" or \"192.168.1.1/255.255.255.0\")"}.to_json
+    end
+
+    get "/scan/range/:address_first/?:address_last?" do
+      bmc_setup
+      if !@scanner.valid?
+        { :error => @scanner.error_string}.to_json
+      else
+        { :result => @scanner.scan_to_list}.to_json
+      end
+    end
+
+    get "/scan/cidr/:address/?:netmask?" do
+      bmc_setup
+      if !@scanner.valid?
+        { :error => @scanner.error_string}.to_json
+      else
+        { :result => @scanner.scan_to_list}.to_json
+      end
     end
 
     # returns host operations
@@ -396,6 +431,21 @@ module Proxy::BMC
 
       case provider_type
         when 'freeipmi', 'ipmitool'
+          # /scan/cidr/:address/:netmask
+          if params.key? "address"
+            args = { :address => params[:address],
+                     :netmask => params[:netmask] }
+            @scanner = Proxy::BMC::IPMIScanner.new(args)
+            return
+          # /scan/range/:address_first/:address_last
+          elsif params.key? "address_first"
+            args = { :address_first => params[:address_first],
+                     :address_last  => params[:address_last] }
+            @scanner = Proxy::BMC::IPMIScanner.new(args)
+            return
+          end
+
+          # /:host
           log_halt 401, "unauthorized" unless auth.provided?
           log_halt 401, "bad_authentication_request, credentials are not in auth.basic format" unless auth.basic?
           username, password = auth.credentials
