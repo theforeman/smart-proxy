@@ -1,0 +1,37 @@
+---
+# Host parameters, mandatory
+:host: localhost
+:port: 9090
+:path: /hooks
+
+# Will both default to true
+:use_ssl: false
+:verify_ssl: false
+
+# Additional headers
+:headers:
+  HTTP_X_ACME_SENDER: foreman
+  Content-Type: application/vnd.acme.hostevent+json
+
+# If signing is enabled an header within every request
+# will contain a HMAC hashed version of the request body to enable
+# the Webhook server to verify the origin using the shared secret.
+# See https://developer.github.com/webhooks/securing/
+# Algorithms: md2, md4, md5, SHA, sha1, sha224, sha256, sha384, sha512
+# See https://ruby-doc.org/stdlib-2.0.0/libdoc/openssl/rdoc/OpenSSL/Digest.html
+:signing:
+  :enabled: true
+  :algorithm: sha512
+  :secret: secret_shared_with_webhook_server
+  :header_name: HTTP_X_ACME_SIGNATURE
+
+# The keys to use in the JSON body are defined here.
+# :operation is either "create" or "delete"
+# :hostname is the name of the host of interest
+# :params will contain a hash of other parameters
+# This example configuration results in something like:
+# {"action":"create","hostname":"host.foo","parameters":{...}}
+:json_keys:
+  :operation: action
+  :hostname: hostname
+  :params: parameters
