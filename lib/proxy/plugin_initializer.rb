@@ -151,6 +151,13 @@ class ::Proxy::PluginInitializer
     #resolve provider names to classes
     grouped_with_providers.each {|group| group.resolve_providers(plugins.loaded)}
 
+    # validate prerequisite versions and availability
+    all_enabled = all_enabled_plugins_and_providers(grouped_with_providers)
+    grouped_with_providers.each do |group|
+      next if group.inactive?
+      group.validate_dependencies_or_fail(all_enabled)
+    end
+
     # load provider plugin settings
     grouped_with_providers.each {|group| group.load_provider_settings }
 
@@ -159,7 +166,7 @@ class ::Proxy::PluginInitializer
     # configure each plugin & providers
     grouped_with_providers.each {|group| group.configure }
 
-    # check prerequisites
+    # validate prerequisites again, as some may have been disabled during loading
     all_enabled = all_enabled_plugins_and_providers(grouped_with_providers)
     grouped_with_providers.each do |group|
       next if group.inactive?
