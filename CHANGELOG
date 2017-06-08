@@ -1,3 +1,14 @@
+2017-06-08	Lukas Zapletal <lzap+git@redhat.com>
+	* Fixes #19666 - add DHCP record type field
+	* Fixes #19597 - fallback DHCP hostname pattern
+
+2017-06-08	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #19649 - dhcpd provider ignores conflicts with leases.
+	* Fixes #19599: del dhcp record returns empty body on success.
+
+2017-05-08	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Release 1.15.0
+
 2017-05-08	Paul Kelly <paul.ian.kelly@gmail.com>
 	* fixes #18177 - file descriptor leak in puppet autosign handling
 
