@@ -28,6 +28,8 @@ module Proxy::DHCP
       @options[:ntp_servers] = options[:ntp_servers] if options[:ntp_servers]
       @options[:interface_mtu] = options[:interface_mtu].to_i if options[:interface_mtu]
       @options[:range] = options[:range] if options[:range] && options[:range][0] && options[:range][1] && valid_range(:from => options[:range][0], :to => options[:range][1])
+
+      @m = Monitor.new
     end
 
     def include? ip
@@ -62,28 +64,12 @@ module Proxy::DHCP
       @netmask_to_i ||= Proxy::DHCP.ipv4_to_i(netmask)
     end
 
-    def get_index_and_lock filename
-      # Store for use in the unlock method
-      @filename = "#{Dir::tmpdir}/#{filename}"
-      @lockfile = "#{@filename}.lock"
-
-      # Loop if the file is locked
-      Timeout::timeout(30) { sleep 0.1 while File.exist? @lockfile }
-
-      # Touch the lock the file
-      File.open(@lockfile, "w") {}
-
-      @file = File.new(@filename,'r+') rescue File.new(@filename,'w+')
-
-      # this returns the index in the file
-      return @file.readlines.first.to_i rescue 0
+    def get_index(filename)
+      File.readlines(filename).first.to_i rescue 0
     end
 
-    def write_index_and_unlock index
-      @file.reopen(@filename,'w')
-      @file.write index
-      @file.close
-      File.delete @lockfile
+    def write_index(filename, index)
+      File.write(filename, index)
     end
 
     #
@@ -99,29 +85,31 @@ module Proxy::DHCP
         logger.warn "No free IPs at #{self}"
         return nil
       else
-        @index = 0
-        begin
-          # Read and lock the storage file
-          stored_index = get_index_and_lock("foreman-proxy_#{network}_#{cidr}.tmp")
+        @m.synchronize do
+          @index = 0
+          begin
+            # Read and lock the storage file
+            stored_index = get_index(index_filename)
 
-          free_ips.rotate(stored_index).each do |ip|
-            logger.debug "Searching for free IP - pinging #{ip}"
-            if tcp_pingable?(ip) || icmp_pingable?(ip)
-              logger.debug "Found a pingable IP(#{ip}) address which does not have a Proxy::DHCP record"
-            else
-              logger.debug "Found free IP #{ip} out of a total of #{free_ips.size} free IPs"
-              @index = free_ips.index(ip)+1
-              return ip
+            free_ips.rotate(stored_index).each do |ip|
+              logger.debug "Searching for free IP - pinging #{ip}"
+              if tcp_pingable?(ip) || icmp_pingable?(ip)
+                logger.debug "Found a pingable IP(#{ip}) address which does not have a Proxy::DHCP record"
+              else
+                logger.debug "Found free IP #{ip} out of a total of #{free_ips.size} free IPs"
+                @index = free_ips.index(ip)+1
+                return ip
+              end
             end
+            logger.warn "No free IPs at #{self}"
+          rescue Exception => e
+            logger.debug e.message
+          ensure
+            # ensure we unlock the storage file
+            write_index index_filename, @index
           end
-          logger.warn "No free IPs at #{self}"
-        rescue Exception => e
-          logger.debug e.message
-        ensure
-          # ensure we unlock the storage file
-          write_index_and_unlock @index
+          nil
         end
-        nil
       end
     end
 
@@ -208,6 +196,10 @@ module Proxy::DHCP
       # We failed to check this address so we should not use it
       logger.warn "Unable to icmp ping #{ip} because #{err.inspect}. Skipping this address..."
       true
+    end
+
+    def index_filename
+      "#{Dir::tmpdir}/foreman-proxy_#{network}_#{cidr}.tmp"
     end
   end
 end
