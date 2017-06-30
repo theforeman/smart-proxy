@@ -9,11 +9,11 @@ module Proxy::Dns::Dnscmd
       super(a_server, a_ttl)
     end
 
-    def do_create(name, value, type)
+    def do_create(name, content, type)
       zone = match_zone(name, enum_zones)
-      msg = "Added #{type} entry #{name} => #{value}"
-      value = "#{value}." if type == "PTR"
-      cmd = "/RecordAdd #{zone} #{name}. #{type} #{value}"
+      msg = "Added #{type} entry #{name} => #{content}"
+      content = "#{content}." if type == "PTR"
+      cmd = "/RecordAdd #{zone} #{name}. #{type} #{content}"
       execute(cmd, msg)
       nil
     end
