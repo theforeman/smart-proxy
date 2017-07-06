@@ -1,3 +1,9 @@
+2017-06-09	Dominic Cleal <dominic@cleal.org>
+	* fixes #19485 - pin sinatra to 1.x on Ruby 2.0-2.1
+
+2017-06-08	Daniel Lobato Garcia <me@daniellobato.me>
+	* Release 1.15.1
+
 2017-06-08	Lukas Zapletal <lzap+git@redhat.com>
 	* Fixes #19666 - add DHCP record type field
 	* Fixes #19597 - fallback DHCP hostname pattern
