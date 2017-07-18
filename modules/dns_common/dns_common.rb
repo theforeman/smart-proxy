@@ -1,5 +1,6 @@
 require 'resolv'
 require 'ipaddr'
+require 'dns_common/dns_resources'
 
 module Proxy::Dns
   class Error < RuntimeError; end
@@ -68,6 +69,18 @@ module Proxy::Dns
       end
     end
 
+    def create_sshfp_record(fqdn, value)
+      algorithm, type, fingerprint = value.split()
+      case sshfp_record_conflicts(fqdn, algorithm.to_i, type.to_i, fingerprint) #returns -1, 0, 1
+        when 1 then
+          raise(Proxy::Dns::Collision, "'SSHFP record for #{fqdn}' is already in use")
+        when 0
+          return nil
+        else
+          do_create(fqdn, "#{algorithm} #{type} #{fingerprint}", "SSHFP")
+      end
+    end
+
     def do_create(name, value, type)
       raise(Proxy::Dns::Error, "Creation of #{type} not implemented")
     end
@@ -90,6 +103,10 @@ module Proxy::Dns
 
     def remove_ptr_record(name)
       do_remove(name, "PTR")
+    end
+
+    def remove_sshfp_records(fqdn)
+      do_remove(fqdn, "SSHFP")
     end
 
     def do_remove(name, type)
@@ -176,6 +193,14 @@ module Proxy::Dns
       end
       record_conflicts_name(name, Resolv::DNS::Resource::IN::PTR, content)
     end
+
+    def sshfp_record_conflicts(fqdn, algorithm, type, fingerprint)
+      current = resolver.getresources(fqdn, DnsResources::SSHFP)
+      return -1 if current.empty?
+      return 0 if current.any? {|sshfp| sshfp.type == type && sshfp.algorithm == algorithm && sshfp.fingerprint == fingerprint}
+      1
+    end
+
 
     def to_ipaddress ip
       IPAddr.new(ip) rescue false

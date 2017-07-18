@@ -29,6 +29,9 @@ module Proxy::Dns
         when 'CNAME'
           validate_dns_name!(value, type)
           server.create_cname_record(fqdn, value)
+        when 'SSHFP'
+          validate_sshfp_data!(value)
+          server.create_sshfp_record(fqdn, value)
         when 'PTR'
           validate_reverse_dns_name!(value)
           server.create_ptr_record(fqdn, value)
@@ -63,6 +66,8 @@ module Proxy::Dns
           server.remove_aaaa_record(name)
         when 'CNAME'
           server.remove_cname_record(name)
+        when 'SSHFP'
+          server.remove_sshfp_records(name)
         when 'PTR'
           validate_reverse_dns_name!(name)
           server.remove_ptr_record(name)
@@ -107,6 +112,10 @@ module Proxy::Dns
     def validate_reverse_dns_name!(name)
       validate_dns_name!(name, 'PTR')
       raise Proxy::Dns::Error.new("Invalid reverse DNS #{name}") unless name =~ /\.(in-addr|ip6)\.arpa$/
+    end
+
+    def validate_sshfp_data!(data)
+      raise Proxy::Dns::Error.new("Invalid SSHFP data #{data}") unless data =~/^[0-9]\s+[0-9]\s+[0-9a-f]+$/i
     end
   end
 end

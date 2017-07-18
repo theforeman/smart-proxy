@@ -4,7 +4,7 @@ require 'dns_common/dns_common'
 ENV['RACK_ENV'] = 'test'
 
 class DnsApiTestProvider
-  attr_reader :fqdn, :ip, :type, :target
+  attr_reader :fqdn, :ip, :type, :target, :value
   def create_a_record(fqdn, ip)
     @fqdn = fqdn; @ip = ip; @type = 'A'
   end
@@ -20,6 +20,9 @@ class DnsApiTestProvider
   def create_cname_record(fqdn, target)
     @fqdn = fqdn; @target = target; @type = 'CNAME'
   end
+  def create_sshfp_record(fqdn, value)
+    @fqdn = fqdn; @value = value; @type = 'SSHFP'
+  end
   def remove_a_record(fqdn)
     @fqdn = fqdn; @type = 'A'
   end
@@ -32,9 +35,15 @@ class DnsApiTestProvider
   def remove_cname_record(fqdn)
     @fqdn = fqdn; @type = 'CNAME'
   end
+
   def remove_srv_record(fqdn)
     @fqdn = fqdn; @type = 'SRV'
   end
+
+  def remove_sshfp_records(fqdn)
+    @fqdn = fqdn; @type = 'SSHFP'
+  end
+
 end
 
 module Proxy::Dns
@@ -136,6 +145,11 @@ class DnsApiTest < Test::Unit::TestCase
     assert_equal 400, last_response.status
   end
 
+  def test_create_returns_error_on_invalid_sshfp
+    post '/', :fqdn => 'test.com', :value => '1 1 notnumbers', :type => "SSHFP"
+    assert_equal 400, last_response.status
+  end
+
   def test_create_ptr_v4_record
     post '/', :fqdn => 'test.com', :value => '33.33.168.192.in-addr.arpa', :type => 'PTR'
     assert_equal 200, last_response.status
@@ -174,6 +188,14 @@ class DnsApiTest < Test::Unit::TestCase
     assert_equal 'test.com', @server.fqdn
     assert_equal 'test1.com', @server.target
     assert_equal 'CNAME', @server.type
+  end
+
+  def test_create_sshfp_record
+    post '/', :fqdn => 'test.com', :value => '3 1 517893c2a6751a5313b66a656ceca3b3952e', :type => 'SSHFP'
+    assert_equal 200, last_response.status
+    assert_equal 'test.com', @server.fqdn
+    assert_equal '3 1 517893c2a6751a5313b66a656ceca3b3952e', @server.value
+    assert_equal 'SSHFP', @server.type
   end
 
   def test_delete_a_record
@@ -223,6 +245,13 @@ class DnsApiTest < Test::Unit::TestCase
     assert_equal 200, last_response.status
     assert_equal 'test.com', @server.fqdn
     assert_equal 'SRV', @server.type
+  end
+
+  def test_delete_explicit_sshfp_record
+    delete "/test.com/SSHFP"
+    assert_equal 200, last_response.status
+    assert_equal 'test.com', @server.fqdn
+    assert_equal 'SSHFP', @server.type
   end
 
   def test_delete_returns_error_if_value_is_missing

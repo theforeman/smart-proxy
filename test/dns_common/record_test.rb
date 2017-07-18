@@ -1,5 +1,6 @@
 require 'test_helper'
 require 'dns_common/dns_common'
+require 'dns_common/dns_resources'
 
 class DnsRecordTest < Test::Unit::TestCase
   def setup
@@ -166,6 +167,23 @@ class DnsRecordTest < Test::Unit::TestCase
     assert_equal 0, Proxy::Dns::Record.new.aaaa_record_conflicts('some.host', '2001:db8:deef::1')
   end
 
+  def test_sshfp_record_conflicts_no_conflict
+    Resolv::DNS.any_instance.expects(:getresources).with('some.host',  DnsResources::SSHFP).returns([])
+    assert_equal -1, Proxy::Dns::Record.new.sshfp_record_conflicts('some.host', 3, 1, "517893c2a6751a5313b66a656ceca3b3952e")
+  end
+
+  def test_sshfp_record_conflicts_has_conflict
+    Resolv::DNS.any_instance.expects(:getresources).with('some.host',  DnsResources::SSHFP).returns(
+      [DnsResources::SSHFP.new(3, 1, "anotherfingerprint")])
+    assert_equal 1, Proxy::Dns::Record.new.sshfp_record_conflicts('some.host', 3, 1, "517893c2a6751a5313b66a656ceca3b3952e")
+  end
+
+  def test_sshfp_record_conflicts_but_nothing_todo
+    Resolv::DNS.any_instance.expects(:getresources).with('some.host',  DnsResources::SSHFP).returns(
+      [DnsResources::SSHFP.new(3, 1, "517893c2a6751a5313b66a656ceca3b3952e")])
+    assert_equal 0, Proxy::Dns::Record.new.sshfp_record_conflicts('some.host', 3, 1, "517893c2a6751a5313b66a656ceca3b3952e")
+  end
+
   def test_validate_ip
     assert_equal '192.168.33.33', Proxy::Dns::Record.new.to_ipaddress('192.168.33.33').to_s
     assert_equal '2001:db8:deef::1', Proxy::Dns::Record.new.to_ipaddress('2001:db8:deef::1').to_s
@@ -262,6 +280,27 @@ class DnsRecordTest < Test::Unit::TestCase
     end
   end
 
+  def test_create_sshfp_record
+    Proxy::Dns::Record.any_instance.expects(:sshfp_record_conflicts).returns(-1)
+    Proxy::Dns::Record.any_instance.expects(:do_create).with('some.host', '3 1 517893c2a6751a5313b66a656ceca3b3952e', 'SSHFP')
+
+    assert_nil Proxy::Dns::Record.new.create_sshfp_record('some.host', '3 1 517893c2a6751a5313b66a656ceca3b3952e')
+  end
+
+  def test_overwrite_sshfp_record
+    Proxy::Dns::Record.any_instance.expects(:sshfp_record_conflicts).returns(0)
+
+    assert_nil Proxy::Dns::Record.new.create_sshfp_record('some.host', '3 1 517893c2a6751a5313b66a656ceca3b3952e')
+  end
+
+  def test_create_duplicate_sshfp_record_fails
+    Proxy::Dns::Record.any_instance.expects(:sshfp_record_conflicts).returns(1)
+
+    assert_raise Proxy::Dns::Collision do
+      Proxy::Dns::Record.new.create_sshfp_record('some.host', '3 1 517893c2a6751a5313b66a656ceca3b3952e')
+    end
+  end
+
   def test_remove_a_record
     Proxy::Dns::Record.any_instance.expects(:do_remove).with('some.host', 'A')
 
@@ -284,6 +323,12 @@ class DnsRecordTest < Test::Unit::TestCase
     Proxy::Dns::Record.any_instance.expects(:do_remove).with('22.33.168.192.in-addr.arpa', 'PTR')
 
     assert_nil Proxy::Dns::Record.new.remove_ptr_record('22.33.168.192.in-addr.arpa')
+  end
+
+  def test_remove_sshfp_records
+    Proxy::Dns::Record.any_instance.expects(:do_remove).with('some.host', 'SSHFP')
+
+    assert_nil Proxy::Dns::Record.new.remove_sshfp_records('some.host')
   end
 
   def ips(*ips)
