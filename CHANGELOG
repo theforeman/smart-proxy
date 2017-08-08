@@ -1,3 +1,6 @@
+2017-07-06	Daniel Lobato Garcia <me@daniellobato.me>
+	* Release 1.15.2
+
 2017-06-09	Dominic Cleal <dominic@cleal.org>
 	* fixes #19485 - pin sinatra to 1.x on Ruby 2.0-2.1
 
