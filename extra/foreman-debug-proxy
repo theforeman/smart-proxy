@@ -6,7 +6,7 @@
 #
 
 # proxy-related configs and logs
-add_files /etc/foreman{-proxy,-proxy/settings.d}/*
+add_files /etc/foreman{-proxy,-proxy/settings.d}/*.{yml,yaml,conf}
 add_files /etc/{sysconfig,default}/foreman-proxy
 add_files /var/log/foreman-proxy/cron*.log*
 add_files /var/log/foreman-proxy/migrate_settings*.log*
