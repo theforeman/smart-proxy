@@ -16,15 +16,16 @@ module Proxy::Templates
       opts.delete("hostgroup")
       opts.delete("splat")
       opts.delete("captures")
+      # in hostgroup provisioning there are spaces
+      kind = kind.split('/').map{|x| CGI.escape(x)}.join('/')
+      logger.debug "Template: request for #{kind} using #{opts.inspect} at #{uri.host}"
       proxy_headers = extract_request_headers(env).merge("X-Forwarded-For" => "#{env['REMOTE_ADDR']}, #{proxy_ip}")
       proxy_req = request_factory.create_get("/unattended/#{kind}", opts, proxy_headers)
       logger.debug "Retrieving a template from %s%s" % [uri, proxy_req.path]
       logger.debug "HTTP headers: #{proxy_headers.inspect}"
       res = send_request(proxy_req)
-
       # You get a 201 from the 'built' URL
       raise "Error retrieving #{kind} for #{opts.inspect} from #{uri.host}: #{res.class}" unless ["200", "201"].include?(res.code)
-      logger.debug "Template: request for #{kind} using #{opts.inspect} at #{uri.host}"
       res.body
     end
 
