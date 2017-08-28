@@ -1,3 +1,62 @@
+2017-08-17	Tomer Brisker <tbrisker@gmail.com>
+	* Fixes #20542 - correct link to cipher suite names
+
+2017-08-09	Daniel Lobato Garcia <me@daniellobato.me>
+	* Fixes #20539 - foreman-debug shouldn't save private key
+
+2017-07-18	Eric D. Helms <ericdhelms@gmail.com>
+	* Fixes #17747: Add Puppet 4 paths to debug
+
+2017-07-18	Ewoud Kohl van Wijngaarden <ewoud@kohlvanwijngaarden.nl>
+	* Fixes #20236 - Unify DNS record conflict detection
+
+2017-06-30	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #20173,#6819 - removed race condition in Subnet#unused_ip
+
+2017-06-08	Dmitri Dolguikh <witlessbird@gmail.com>
+	* Fixes #19709 - check version before loading dependencies
+
+2017-05-30	Michael Moll <kvedulv@kvedulv.de>
+	* Fixes #6945 - use autosign path for puppetca
+
+2017-05-30	Lukas Zapletal <lzap+git@redhat.com>
+	* Fixes #19666 - add DHCP record type field
+
+2017-05-25	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #19649 - dhcpd provider ignores conflicts with leases.
+
+2017-05-24	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #19441 - recursive descent parser for dhcpd config files.
+	* Fixes #19599: del dhcp record returns empty body on success.
+
+2017-05-23	Michael Moll <kvedulv@kvedulv.de>
+	* Fixes #6022 - disable StrictHostKeyChecking
+
+2017-05-22	Lukas Zapletal <lzap+git@redhat.com>
+	* Fixes #19597 - fallback DHCP hostname pattern
+
+2017-05-19	Dominic Cleal <dominic@cleal.org>
+	* fixes #7832 - add SSL verification tests for production Rack apps
+
+2017-05-09	Dominic Cleal <dominic@cleal.org>
+	* fixes #19480 - add systemd notify support
+	* fixes #19485 - pin sinatra to 1.x on Ruby 2.0-2.1
+
+2017-05-05	Deltik <deltik@gmx.com>
+	* Fixes #2595 - Add more Rubyipmi methods to BMC API
+
+2017-05-03	Paul Kelly <paul.ian.kelly@gmail.com>
+	* fixes #18177 - file descriptor leak in puppet autosign handling
+
+2017-04-10	tek0011 <thecptsparrow@gmail.com>
+	* Fixes #19234: Update register-service.rb
+
+2017-04-10	Dominic Cleal <dominic@cleal.org>
+	* fixes #19225 - compare minor Puppet versions numerically
+
+2017-04-07	Ondrej Prazak <oprazak@redhat.com>
+	* Fixes #992 - Make NFS a recognized protocol
+
 2017-03-28	Dmitri Dolguikh <dmitri@appliedlogic.ca>
 	* Bump version to 1.16-develop
 
