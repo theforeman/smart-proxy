@@ -46,4 +46,11 @@ class TemplateApiTest < Test::Unit::TestCase
     assert last_response.ok?, "Last response was ok"
     assert_match("An API template", last_response.body)
   end
+
+  def test_api_can_ask_for_a_hostgroup_template_2
+    stub_request(:get, "#{@foreman_url}/unattended/kind+space/temp+space/hg+space").with(query: {"url" => @template_url}).to_return(:body => 'An API template')
+    get "/kind%20space/temp%20space/hg%20space", {}
+    assert last_response.ok?, "Last response was ok"
+    assert_match("An API template", last_response.body)
+  end
 end
