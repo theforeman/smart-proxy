@@ -434,6 +434,25 @@ OFMULTILNE_LEASE
     ]]], Proxy::DHCP::CommonISC::ConfigurationParser.new.conf.parse!(MULTILINE_LEASE)
   end
 
+  def test_server_duid_parser
+    assert_equal [Proxy::DHCP::CommonISC::ConfigurationParser::KeyValueNode[:server_duid, '"\000\001\000\001!:}\221RT\000^\244\022"']],
+                 Proxy::DHCP::CommonISC::ConfigurationParser.new.conf.parse!('server-duid "\000\001\000\001!:}\221RT\000^\244\022";')
+    assert_equal [Proxy::DHCP::CommonISC::ConfigurationParser::KeyValueNode[:server_duid, '00:01:00:01:1e:68:b3:db:0a:00:27:00:00:02']],
+                 Proxy::DHCP::CommonISC::ConfigurationParser.new.conf.parse!('server-duid 00:01:00:01:1e:68:b3:db:0a:00:27:00:00:02;')
+    assert_equal [Proxy::DHCP::CommonISC::ConfigurationParser::KeyValueNode[:server_duid, ['llt']]],
+                 Proxy::DHCP::CommonISC::ConfigurationParser.new.conf.parse!('server-duid llt;')
+    assert_equal [Proxy::DHCP::CommonISC::ConfigurationParser::KeyValueNode[:server_duid, ['llt', 'ethernet', '213982198', '00:16:6F:49:7D:9B']]],
+                 Proxy::DHCP::CommonISC::ConfigurationParser.new.conf.parse!('server-duid llt ethernet 213982198 00:16:6F:49:7D:9B;')
+    assert_equal [Proxy::DHCP::CommonISC::ConfigurationParser::KeyValueNode[:server_duid, ['ll']]],
+                 Proxy::DHCP::CommonISC::ConfigurationParser.new.conf.parse!('server-duid ll;')
+    assert_equal [Proxy::DHCP::CommonISC::ConfigurationParser::KeyValueNode[:server_duid, ['ll', 'fddi', '00:16:6F:49:7D:9B']]],
+                 Proxy::DHCP::CommonISC::ConfigurationParser.new.conf.parse!('server-duid ll fddi 00:16:6F:49:7D:9B;')
+    assert_equal [Proxy::DHCP::CommonISC::ConfigurationParser::KeyValueNode[:server_duid, ['en', 2495, '"enterprise-specific-identifier-1234"']]],
+                 Proxy::DHCP::CommonISC::ConfigurationParser.new.conf.parse!('server-duid en 2495 "enterprise-specific-identifier-1234";')
+    assert_equal [Proxy::DHCP::CommonISC::ConfigurationParser::KeyValueNode[:server_duid, 1234]],
+                 Proxy::DHCP::CommonISC::ConfigurationParser.new.conf.parse!('server-duid 1234;')
+  end
+
   def test_ignored_declaration_parser
     Proxy::DHCP::CommonISC::ConfigurationParser.new.conf.parse!('aaa true;')
   end
