@@ -172,6 +172,7 @@ module Proxy
         EOSTMT = ';'.r 'end of statement'
         COMMA =  /\s*,\s*/.r 'comma'
         LITERAL = /".*?"|'.*?'/.r
+        HEX = /([a-fA-F0-9][a-fA-F0-9]?:)+[a-fA-F0-9][a-fA-F0-9]?/.r
         MAC_ADDRESS = /([a-fA-F0-9][a-fA-F0-9]?:){5}[a-fA-F0-9][a-fA-F0-9]?/.r 'mac address'
         IPV4_ADDRESS = /\d+\.\d+\.\d+\.\d+/.r 'ipv4 address'
         IPV4_ADDRESS_LIST = IPV4_ADDRESS.join(COMMA).even
@@ -181,7 +182,7 @@ module Proxy
         FQDN_LIST = FQDN.join(COMMA).even
         LFT_BRACKET = '{'.r 'left bracket'
         RGT_BRACKET = '}'.r  'right bracket'
-        DOUBLE_QUOTE = '"'.r 'comma'
+        DOUBLE_QUOTE = '"'.r 'double quote'
 
         def ignored_declaration
           seq_(SPACE.join(/[^\s{};#]+/).odd, EOSTMT | COMMENT) {|content, _| IgnoredDeclaration[content]}
@@ -200,6 +201,16 @@ module Proxy
         def option_values
           anything = /[^;,{}\s]+/.r
           SPACE.join(LITERAL | anything).odd.join(COMMA).even
+        end
+
+        def server_duid
+          Rsec::Fail.reset
+          keyword = word('server-duid').fail 'keyword_server_duid'
+          anything = /[^;,{}\s]+/.r
+          llt = seq_(word('llt') | word('LLT'), SPACE.join(anything).odd._?)
+          ll = seq_(word('ll') | word('LL'), SPACE.join(anything).odd._?)
+          en = seq_(word('en') | word('EN'), prim(:int32), LITERAL)
+          seq_(keyword,  LITERAL | HEX | en | llt | ll | prim(:int32), EOSTMT) {|_, duid, _| KeyValueNode[:server_duid, duid.respond_to?(:flatten) ? duid.flatten : duid]}
         end
 
         def filename
@@ -361,7 +372,7 @@ module Proxy
         end
 
         def conf
-          SPACE.join(option | host | lease | group | subnet | shared_network | include_file | COMMENT | ignored_declaration | ignored_block | EOSTMT).odd.eof
+          SPACE.join(option | host | lease | group | subnet | shared_network | include_file | COMMENT | server_duid | ignored_declaration | ignored_block | EOSTMT).odd.eof
         end
 
         def start_visiting_parse_tree_nodes(parse_tree)
