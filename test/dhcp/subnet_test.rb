@@ -59,37 +59,15 @@ class Proxy::DHCPSubnetTest < Test::Unit::TestCase
   end
 
   def test_should_provide_range_excluding_network_address
-   assert @subnet.valid_range.include?("192.168.0.0") == false
+    assert_equal "192.168.0.1", @subnet.subnet_range_addresses[0]
   end
 
   def test_should_provide_range_excluding_broadcast_address
-   assert @subnet.valid_range.include?("192.168.0.255") == false
+   assert_equal "192.168.0.254", @subnet.subnet_range_addresses[1]
   end
 
   def test_range
     assert_equal @subnet.range, "192.168.0.1-192.168.0.254"
-  end
-
-  def test_unused_ip
-    @subnet.stubs(:icmp_pingable?)
-    @subnet.stubs(:tcp_pingable?)
-    r = Proxy::DHCP::Reservation.new('test', "192.168.0.1", "aa:bb:cc:dd:ee:ff", @subnet, :hostname =>'test')
-
-    assert_equal "192.168.0.2", @subnet.unused_ip([r])
-    assert File.exist?('test/tmp/foreman-proxy_192.168.0.0_24.tmp')
-    assert_equal '1', File.read('test/tmp/foreman-proxy_192.168.0.0_24.tmp')
-  ensure
-    File.delete('test/tmp/foreman-proxy_192.168.0.0_24.tmp')
-  end
-
-  def test_unused_ip_should_return_ip_from_within_the_range
-    @subnet.stubs(:icmp_pingable?)
-    @subnet.stubs(:tcp_pingable?)
-    r = Proxy::DHCP::Reservation.new('test', "192.168.0.11", "aa:bb:cc:dd:ee:ff", @subnet, :hostname => 'test')
-
-    assert_equal '192.168.0.20', @subnet.unused_ip([r], :from => '192.168.0.20', :to => '192.168.0.30')
-  ensure
-    File.delete('test/tmp/foreman-proxy_192.168.0.0_24.tmp')
   end
 
   def test_options_should_be_a_hash

@@ -32,4 +32,12 @@ module Proxy::DHCP
   def self.ipv4_to_i(ipv4_address)
     ipv4_address.split('.', 4).inject(0) { |i, octet| (i << 8) | octet.to_i }
   end
+
+  def self.i_to_ipv4(ipv4_as_i)
+    octets = [3, 2, 1, 0].inject([]) do |all, i|
+      all.push((ipv4_as_i >> i*8) & 0xff)
+      all
+    end
+    octets.join(".")
+  end
 end

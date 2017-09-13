@@ -2,10 +2,10 @@ module Proxy::DHCP::Libvirt
   class Provider < ::Proxy::DHCP::Server
     attr_reader :libvirt_network, :network
 
-    def initialize(network, libvirt_network_impl, subnet_service)
+    def initialize(network, libvirt_network_impl, subnet_service, free_ips_service)
       @network = network
       @libvirt_network = libvirt_network_impl
-      super(@network, nil, subnet_service)
+      super(@network, nil, subnet_service, free_ips_service)
     end
 
     def add_record(options={})

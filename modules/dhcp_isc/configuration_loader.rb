@@ -25,6 +25,8 @@ module Proxy::DHCP::ISC
         ::Proxy::DHCP::ISC::IscStateChangesObserver.new(settings[:config], settings[:leases], container.get_dependency(:subnet_service), container.get_dependency(:service_initialization))
       end)
 
+      container.singleton_dependency :free_ips, lambda {::Proxy::DHCP::FreeIps.new(settings[:blacklist_duration_minutes]) }
+
       if settings[:leases_file_observer] == :inotify_leases_file_observer
         require 'dhcp_isc/inotify_leases_file_observer'
         container.singleton_dependency :leases_observer, (lambda do
@@ -40,12 +42,13 @@ module Proxy::DHCP::ISC
       container.dependency :dhcp_provider, (lambda do
         Proxy::DHCP::CommonISC::IscOmapiProvider.new(
             settings[:server], settings[:omapi_port], settings[:subnets], settings[:key_name], settings[:key_secret],
-            container.get_dependency(:subnet_service))
+            container.get_dependency(:subnet_service), container.get_dependency(:free_ips))
       end)
     end
 
     def load_classes
       require 'dhcp_common/subnet_service'
+      require 'dhcp_common/free_ips'
       require 'dhcp_common/isc/omapi_provider'
       require 'dhcp_common/isc/configuration_parser'
       require 'dhcp_common/isc/subnet_service_initialization'

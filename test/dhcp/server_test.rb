@@ -89,15 +89,15 @@ class DHCPServerTest < Test::Unit::TestCase
 
   def test_ip_by_mac_address_and_range
     assert_equal @record.ip,
-                 @server.ip_by_mac_address_and_range(@subnet, "aa:bb:cc:dd:ee:ff", "192.168.0.1", "192.168.0.15")
+                 @server.find_ip_by_mac_address_and_range(@subnet, "aa:bb:cc:dd:ee:ff", "192.168.0.1", "192.168.0.15")
   end
 
   def test_ip_by_mac_address_and_range_should_return_nil_when_no_record_exists
-    assert_nil @server.ip_by_mac_address_and_range(@subnet, "aa:aa:aa:aa:aa:aa", "192.168.0.1", "192.168.0.15")
+    assert_nil @server.find_ip_by_mac_address_and_range(@subnet, "aa:aa:aa:aa:aa:aa", "192.168.0.1", "192.168.0.15")
   end
 
   def test_ip_by_mac_address_and_range_should_return_nil_when_range_ip_is_outside_range
-    assert_nil @server.ip_by_mac_address_and_range(@subnet, "aa:bb:cc:dd:ee:ff", "192.168.0.100", "192.168.0.120")
+    assert_nil @server.find_ip_by_mac_address_and_range(@subnet, "aa:bb:cc:dd:ee:ff", "192.168.0.100", "192.168.0.120")
   end
 
   def test_managed_subnet

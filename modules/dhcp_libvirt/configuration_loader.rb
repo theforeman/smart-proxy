@@ -13,8 +13,11 @@ module Proxy::DHCP::Libvirt
       container.dependency :initialized_subnet_service, (lambda do
         ::Proxy::DHCP::Libvirt::SubnetServiceInitializer.new(container.get_dependency(:libvirt_network)).initialized_subnet_service(container.get_dependency(:subnet_service))
       end)
+      container.singleton_dependency :free_ips, lambda {::Proxy::DHCP::FreeIps.new }
       container.dependency :dhcp_provider, (lambda do
-        Proxy::DHCP::Libvirt::Provider.new(settings[:network], container.get_dependency(:libvirt_network), container.get_dependency(:initialized_subnet_service))
+        Proxy::DHCP::Libvirt::Provider.new(settings[:network], container.get_dependency(:libvirt_network),
+                                           container.get_dependency(:initialized_subnet_service),
+                                           container.get_dependency(:free_ips))
       end)
     end
 
@@ -22,6 +25,7 @@ module Proxy::DHCP::Libvirt
       require 'dhcp_libvirt/libvirt_dhcp_network'
       require 'dhcp_common/subnet_service'
       require 'dhcp_common/server'
+      require 'dhcp_common/free_ips'
       require 'dhcp_libvirt/subnet_service_initializer'
       require 'dhcp_libvirt/dhcp_libvirt_main'
     end

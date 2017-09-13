@@ -3,7 +3,3 @@ group :puppet_proxy_legacy do
   gem 'puppet', '< 5.0.0'
   gem 'ruby-augeas', :require => 'augeas'
 end
-
-group :puppet_proxy_puppet_api do
-  gem 'concurrent-ruby', '~> 1.0', require: 'concurrent'
-end

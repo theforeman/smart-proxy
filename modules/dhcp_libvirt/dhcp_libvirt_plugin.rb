@@ -7,5 +7,7 @@ module ::Proxy::DHCP::Libvirt
 
     load_classes ::Proxy::DHCP::Libvirt::PluginConfiguration
     load_dependency_injection_wirings ::Proxy::DHCP::Libvirt::PluginConfiguration
+
+    start_services :free_ips
   end
 end
