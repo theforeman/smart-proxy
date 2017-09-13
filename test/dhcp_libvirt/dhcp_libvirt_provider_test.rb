@@ -11,7 +11,7 @@ class DhcpLibvirtProviderTest < Test::Unit::TestCase
     @subnet_store = {}
     @service = Proxy::DHCP::SubnetService.new(Proxy::MemoryStore.new, Proxy::MemoryStore.new,
                                               Proxy::MemoryStore.new, Proxy::MemoryStore.new, Proxy::MemoryStore.new, @subnet_store)
-    @subject = ::Proxy::DHCP::Libvirt::Provider.new('default', @libvirt_network, @service)
+    @subject = ::Proxy::DHCP::Libvirt::Provider.new('default', @libvirt_network, @service, nil)
   end
 
   def test_should_add_record

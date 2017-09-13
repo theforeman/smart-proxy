@@ -6,16 +6,17 @@ require 'dhcp_common/record/deleted_reservation'
 
 module Proxy::DHCP
   class Server
-    attr_reader :name, :service, :managed_subnets
+    attr_reader :name, :service, :managed_subnets, :free_ips
     alias_method :to_s, :name
 
     include Proxy::DHCP
     include Proxy::Log
     include Proxy::Validations
 
-    def initialize(name, managed_subnets, subnet_service)
+    def initialize(name, managed_subnets, subnet_service, free_ips_service = nil)
       @name = name
       @service = subnet_service
+      @free_ips = free_ips_service
       @managed_subnets = if managed_subnets.nil?
                            Set.new
                          else
@@ -87,23 +88,28 @@ module Proxy::DHCP
       subnet = get_subnet(subnet_address)
       # first check if we already have a record for this host
       # if we do, we can simply reuse the same ip address.
+
+      validated_from_address, validated_to_address = subnet.subnet_range_addresses(from_address, to_address)
+
       if mac_address
-        r = ip_by_mac_address_and_range(subnet, mac_address, from_address, to_address)
+        r = find_ip_by_mac_address_and_range(subnet, mac_address, validated_from_address, validated_to_address)
         return r if r
       end
 
-      subnet.unused_ip(all_hosts(subnet.network) + all_leases(subnet.network),
-                       :from => from_address, :to => to_address)
+      free_ips.find_free_ip(validated_to_address, validated_to_address, subnet.netmask,
+                            all_hosts(subnet_address) + all_leases(subnet_address))
     end
 
-    def ip_by_mac_address_and_range(subnet, mac_address, from_address, to_address)
+    def find_ip_by_mac_address_and_range(subnet, mac_address, from_address, to_address)
       r = service.find_host_by_mac(subnet.network, mac_address) ||
           service.find_lease_by_mac(subnet.network, mac_address)
 
-      if r && subnet.valid_range(:from => from_address, :to => to_address).include?(r.ip)
+      if r && (IPAddr.new(from_address)..IPAddr.new(to_address)).cover?(IPAddr.new(r.ip))
         logger.debug "Found an existing DHCP record #{r}, reusing..."
         return r.ip
       end
+
+      nil
     end
 
     def inspect

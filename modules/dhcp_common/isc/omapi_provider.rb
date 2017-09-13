@@ -6,8 +6,8 @@ module Proxy::DHCP::CommonISC
     include Proxy::Util
     attr_reader :omapi_port, :key_name, :key_secret
 
-    def initialize(server, omapi_port, subnets = nil, key_name = nil, key_secret = nil, service = nil)
-      super(server, subnets, service)
+    def initialize(server, omapi_port, subnets = nil, key_name = nil, key_secret = nil, service = nil, free_ips_service = nil)
+      super(server, subnets, service, free_ips_service)
       # TODO: verify key name and secret
       @key_name = key_name
       @key_secret = key_secret

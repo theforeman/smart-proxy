@@ -1,5 +1,6 @@
 require 'test_helper'
 require 'dhcp_common/subnet_service'
+require 'dhcp_common/free_ips'
 require 'dhcp_libvirt/libvirt_dhcp_network'
 require 'dhcp_libvirt/dhcp_libvirt_main'
 require 'dhcp_libvirt/configuration_loader'
@@ -17,6 +18,10 @@ class DhcpLibvirtProductionDIWiringsTest < Test::Unit::TestCase
     assert_equal @settings[:network], network.network
   end
 
+  def test_free_ips_initialization
+    assert_not_nil @container.get_dependency(:free_ips)
+  end
+
   def test_initialized_subnet_service_initialization
     expected_subnet_service = Object.new
     Proxy::DHCP::Libvirt::SubnetServiceInitializer.any_instance.expects(:initialized_subnet_service).
@@ -31,5 +36,6 @@ class DhcpLibvirtProductionDIWiringsTest < Test::Unit::TestCase
     provider = @container.get_dependency(:dhcp_provider)
     assert_equal @settings[:network], provider.network
     assert_equal expected_subnet_service, provider.service
+    assert_not_nil provider.free_ips
   end
 end
