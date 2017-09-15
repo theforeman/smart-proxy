@@ -1,8 +1,24 @@
-2017-08-08	Eric D. Helms <ericdhelms@gmail.com>
-	* Fixes #17747: Add Puppet 4 paths to debug
+2017-09-13	Michael Moll <kvedulv@kvedulv.de>
+	* Refs #20843 - Put public_suffix only in test
+
+2017-09-13	Daniel Lobato Garcia <me@daniellobato.me>
+	* Fixes #20539 - foreman-debug shouldn't save private key
+
+2017-09-13	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #20173,#6819 - removed race condition in Subnet#unused_ip
+
+2017-09-08	Ewoud Kohl van Wijngaarden <ewoud@kohlvanwijngaarden.nl>
+	* Fixes #20843 - Pin public_suffix on RUBY_VERSION 2.0
+
+2017-08-31	Lukáš Zapletal <lzap@redhat.com>
+	* Fixes #20700 - templates are passed with spaces in kind
 
 2017-08-08	Daniel Lobato Garcia <me@daniellobato.me>
+	* Release 1.15.3 - fix
 	* Release 1.15.3
+
+2017-08-08	Eric D. Helms <ericdhelms@gmail.com>
+	* Fixes #17747: Add Puppet 4 paths to debug
 
 2017-07-06	Daniel Lobato Garcia <me@daniellobato.me>
 	* Release 1.15.2
