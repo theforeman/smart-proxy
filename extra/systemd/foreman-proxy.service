@@ -7,6 +7,7 @@ After=basic.target network.target
 Type=notify
 User=foreman-proxy
 ExecStart=/usr/share/foreman-proxy/bin/smart-proxy --no-daemonize
+ExecReload=/bin/kill -USR1 $MAINPID
 
 [Install]
 WantedBy=multi-user.target
