@@ -78,6 +78,36 @@ module Proxy::DHCP::NativeMS
         raise Proxy::DHCP::NotImplemented.new("DhcpsApi::Server#get_free_ip_address is not available on Windows Server 2008 and earlier versions.")
       end
 
+      dhcp_range = dhcpsapi.list_subnet_elements(subnet_address, DhcpsApi::DHCP_SUBNET_ELEMENT_TYPE::DhcpIpRanges) rescue nil
+      if dhcp_range.nil?
+        logger.warn "The specified subnet #{subnet_address} does not exist on the DHCP server"
+        return nil
+      end
+      dhcp_start_addr = dhcp_range.map {|r| r[:element][:start_address]}.first
+      dhcp_end_addr = dhcp_range.map {|r| r[:element][:end_address]}.first
+      if dhcp_start_addr.nil? || dhcp_end_addr.nil?
+        logger.warn "Unable to find IP range on the DHCP server for subnet #{subnet_address}"
+        return nil
+      end
+
+      if from_address.nil? || to_address.nil?
+        from_address = dhcp_start_addr
+        to_address = dhcp_end_addr
+      else
+        foreman_start_addr_ip = IPAddr.new(from_address)
+        foreman_end_addr_ip = IPAddr.new(to_address)
+        dhcp_start_addr_ip = IPAddr.new(dhcp_start_addr)
+        dhcp_end_addr_ip = IPAddr.new(dhcp_end_addr)
+        if not (dhcp_start_addr_ip..dhcp_end_addr_ip).cover? foreman_start_addr_ip
+          logger.warn "Start of IP range #{from_address} is out of DHCP range (#{dhcp_start_addr}-#{dhcp_end_addr})"
+          return nil
+        end
+        if not (dhcp_start_addr_ip..dhcp_end_addr_ip).cover? foreman_end_addr_ip
+          logger.warn "End of IP range #{to_address} is out of DHCP range (#{dhcp_start_addr}-#{dhcp_end_addr})"
+          return nil
+        end
+      end
+
       return dhcpsapi.get_free_ip_address(subnet_address, from_address, to_address).first
     end
 

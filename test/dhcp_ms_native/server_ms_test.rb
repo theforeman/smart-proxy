@@ -75,8 +75,39 @@ class DHCPServerMicrosoftTest < Test::Unit::TestCase
   def test_should_return_free_ip_address
     @dhcpsapi.expects(:api_level).twice.returns(DhcpsApi::Server::DHCPS_WIN2012_API)
     @dhcpsapi.expects(:get_client_by_mac_address).raises(RuntimeError)
-    @dhcpsapi.expects(:get_free_ip_address).with(@network, nil, nil).returns(['192.168.42.20'])
+    @dhcpsapi.expects(:list_subnet_elements).with(@network, anything).returns([{:element => {:start_address => '192.168.42.1', :end_address => '192.168.42.100'}}])
+    @dhcpsapi.expects(:get_free_ip_address).with(@network, '192.168.42.1', '192.168.42.100').returns(['192.168.42.20'])
     assert_equal '192.168.42.20', @server.unused_ip(@network, '00:01:02:03:04:05', nil, nil)
+  end
+
+  def test_should_return_free_ip_address_in_range
+    @dhcpsapi.expects(:api_level).twice.returns(DhcpsApi::Server::DHCPS_WIN2012_API)
+    @dhcpsapi.expects(:list_subnet_elements).with(@network, anything).returns([{:element => {:start_address => '192.168.42.1', :end_address => '192.168.42.100'}}])
+    @dhcpsapi.expects(:get_free_ip_address).with(@network, '192.168.42.10', '192.168.42.50').returns(['192.168.42.20'])
+    assert_equal '192.168.42.20', @server.unused_ip(@network, '00:01:02:03:04:05', '192.168.42.10', '192.168.42.50')
+  end
+
+  def test_should_not_return_free_ip_address_wrong_end
+    @dhcpsapi.expects(:api_level).twice.returns(DhcpsApi::Server::DHCPS_WIN2012_API)
+    @dhcpsapi.expects(:list_subnet_elements).with(@network, anything).returns([{:element => {:start_address => '192.168.42.100', :end_address => '192.168.42.200'}}])
+    assert_equal nil, @server.unused_ip(@network, '00:01:02:03:04:05', '192.168.42.100', '192.168.42.250')
+  end
+
+  def test_should_not_return_free_ip_address_wrong_start
+    @dhcpsapi.expects(:api_level).twice.returns(DhcpsApi::Server::DHCPS_WIN2012_API)
+    @dhcpsapi.expects(:list_subnet_elements).with(@network, anything).returns([{:element => {:start_address => '192.168.42.100', :end_address => '192.168.42.200'}}])
+    assert_equal nil, @server.unused_ip(@network, '00:01:02:03:04:05', '192.168.42.10', '192.168.42.200')
+  end
+
+  def test_should_not_return_free_ip_address_wrong_subnet
+    @dhcpsapi.expects(:api_level).twice.returns(DhcpsApi::Server::DHCPS_WIN2012_API)
+    assert_equal nil, @server.unused_ip(@network, '00:01:02:03:04:05', nil, nil)
+  end
+
+  def test_should_not_return_free_ip_address_wrong_dhcp_range
+    @dhcpsapi.expects(:api_level).twice.returns(DhcpsApi::Server::DHCPS_WIN2012_API)
+    @dhcpsapi.expects(:list_subnet_elements).with(@network, anything).returns([{:element => {:start_address => '192.168.42.100'}}])
+    assert_equal nil, @server.unused_ip(@network, '00:01:02:03:04:05', nil, nil)
   end
 
   def test_unused_ip_address_for_known_mac_address
