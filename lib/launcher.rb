@@ -72,6 +72,19 @@ module Proxy
       ssl_options |= OpenSSL::SSL::OP_NO_SSLv3 if defined?(OpenSSL::SSL::OP_NO_SSLv3)
       ssl_options |= OpenSSL::SSL::OP_NO_TLSv1 if defined?(OpenSSL::SSL::OP_NO_TLSv1)
 
+      if Proxy::SETTINGS.tls_disabled_versions
+        Proxy::SETTINGS.tls_disabled_versions.each do |version|
+          constant = OpenSSL::SSL.const_get("OP_NO_TLSv#{version.gsub(/\./, '_')}") rescue nil
+
+          if constant
+            logger.info "TLSv#{version} will be disabled."
+            ssl_options |= constant
+          else
+            logger.warn "TLSv#{version} was not found."
+          end
+        end
+      end
+
       {
         :app => app,
         :server => :webrick,
