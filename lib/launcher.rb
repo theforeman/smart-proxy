@@ -72,6 +72,13 @@ module Proxy
       ssl_options |= OpenSSL::SSL::OP_NO_SSLv3 if defined?(OpenSSL::SSL::OP_NO_SSLv3)
       ssl_options |= OpenSSL::SSL::OP_NO_TLSv1 if defined?(OpenSSL::SSL::OP_NO_TLSv1)
 
+      if Proxy::SETTINGS.ssl_versions &&
+          defined?(OpenSSL::SSL::OP_NO_TLSv1_1) &&
+            !Proxy::SETTINGS.ssl_versions.include?('TLSv1.1')
+          ssl_options |= OpenSSL::SSL::OP_NO_TLSv1_1
+        end
+      end
+
       {
         :app => app,
         :server => :webrick,
