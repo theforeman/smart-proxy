@@ -198,6 +198,12 @@ host alpha.example.com {
   fixed-address 192.168.122.42;
 }
 
+# Not a dynamic host
+host static.example.com {
+  hardware ethernet 44:1e:a1:11:36:15;
+  fixed-address 192.168.122.80;
+}
+
 # Prevent deletion of a reserved record via expired lease
 host quux.example.org {
   dynamic;

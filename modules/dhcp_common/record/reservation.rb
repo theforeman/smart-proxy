@@ -7,7 +7,7 @@ module Proxy::DHCP
     def initialize(name, ip_address, mac_address, subnet, options = {})
       @type = "reservation"
       @name = name
-      super(ip_address, mac_address, subnet, options)
+      super(ip_address, mac_address, subnet, {:deleteable => true}.merge(options))
     end
 
     def to_s

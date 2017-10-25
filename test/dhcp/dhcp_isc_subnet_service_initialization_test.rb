@@ -115,7 +115,7 @@ END
     @initialization.load_leases_file(File.read("./test/fixtures/dhcp/dhcp.leases"))
     parsed = @subnet_service.all_hosts + @subnet_service.all_leases
 
-    assert_equal 11, parsed.size
+    assert_equal 12, parsed.size
     assert_equal 'bravo.example.com', @subnet_service.find_host_by_hostname("bravo2.example.com").hostname
   end
 
@@ -158,6 +158,20 @@ END
     @subnet_service.add_subnet(subnet)
     @initialization.load_leases_file(File.read("./test/fixtures/dhcp/dhcp.leases"))
     assert_equal 'bravo.example.com', @subnet_service.find_host_by_hostname("bravo2.example.com").hostname
+  end
+
+  def test_dynamic_host_should_be_deleteable
+    subnet = Proxy::DHCP::Subnet.new("192.168.122.0", "255.255.255.0")
+    @subnet_service.add_subnet(subnet)
+    @initialization.load_leases_file(File.read("./test/fixtures/dhcp/dhcp.leases"))
+    assert_equal true, @subnet_service.find_host_by_hostname("bravo2.example.com").deleteable?
+  end
+
+  def test_static_host_should_not_be_deleteable
+    subnet = Proxy::DHCP::Subnet.new("192.168.122.0", "255.255.255.0")
+    @subnet_service.add_subnet(subnet)
+    @initialization.load_leases_file(File.read("./test/fixtures/dhcp/dhcp.leases"))
+    assert_equal false, @subnet_service.find_host_by_hostname("static.example.com").deleteable?
   end
 
   def test_parsing_and_loading_leases

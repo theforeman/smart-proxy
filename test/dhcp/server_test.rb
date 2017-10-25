@@ -13,7 +13,7 @@ class DHCPServerTest < Test::Unit::TestCase
     @subnet = Proxy::DHCP::Subnet.new("192.168.0.0", "255.255.255.0")
     @service.add_subnet(@subnet)
 
-    @record = Proxy::DHCP::Reservation.new('test', "192.168.0.11", "aa:bb:cc:dd:ee:ff", @subnet, :hostname => 'test')
+    @record = Proxy::DHCP::Reservation.new('test', "192.168.0.11", "aa:bb:cc:dd:ee:ff", @subnet, :hostname => 'test', :deleteable => true)
     @service.add_host(@subnet.network, @record)
   end
 

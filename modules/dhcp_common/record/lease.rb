@@ -13,7 +13,7 @@ module Proxy::DHCP
       super(ip_address, mac_address, subnet, options)
     end
 
-    def deletable?
+    def deleteable?
       false
     end
 
