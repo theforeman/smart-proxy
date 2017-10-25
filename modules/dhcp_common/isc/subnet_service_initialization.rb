@@ -93,7 +93,12 @@ module Proxy::DHCP::CommonISC
         all
       end
 
-      options_and_attributes = parsed_host.dhcp_options.inject({:hostname => name}.merge(attributes_only)) do |all, current|
+      default_attributes = {
+        :hostname => name,
+        :deleteable => false
+      }
+
+      options_and_attributes = parsed_host.dhcp_options.inject(default_attributes.merge(attributes_only)) do |all, current|
         key, values = process_dhcpd_option(current[0], current[1])
         all[key] = values
         all

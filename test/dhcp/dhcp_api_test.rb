@@ -151,12 +151,13 @@ class DhcpApiTest < Test::Unit::TestCase
 
     assert last_response.ok?, "Last response was not ok: #{last_response.status} #{last_response.body}"
     expected = [{
-      "type"     => "reservation",
-      "hostname" => "test.example.com",
-      "ip"       => "192.168.122.1",
-      "mac"      => "00:11:bb:cc:dd:ee",
-      "name"     => 'test.example.com',
-      "subnet"   => "192.168.122.0/255.255.255.0"
+      "deleteable" => true,
+      "type"       => "reservation",
+      "hostname"   => "test.example.com",
+      "ip"         => "192.168.122.1",
+      "mac"        => "00:11:bb:cc:dd:ee",
+      "name"       => 'test.example.com',
+      "subnet"     => "192.168.122.0/255.255.255.0"
     }]
     assert_equal expected, JSON.parse(last_response.body)
   end
@@ -200,12 +201,13 @@ class DhcpApiTest < Test::Unit::TestCase
 
     assert last_response.ok?, "Last response was not ok: #{last_response.status} #{last_response.body}"
     expected = {
-      "type"     => "reservation",
-      "hostname" =>"test.example.com",
-      "ip"       =>"192.168.122.1",
-      "mac"      =>"00:11:bb:cc:dd:ee",
-      "name"     => 'test.example.com',
-      "subnet"   =>"192.168.122.0/255.255.255.0" # NOTE: 'subnet' attribute isn't being used by foreman, which adds a 'network' attribute instead
+      "deleteable" => true,
+      "type"       => "reservation",
+      "hostname"   =>"test.example.com",
+      "ip"         =>"192.168.122.1",
+      "mac"        =>"00:11:bb:cc:dd:ee",
+      "name"       => 'test.example.com',
+      "subnet"     =>"192.168.122.0/255.255.255.0" # NOTE: 'subnet' attribute isn't being used by foreman, which adds a 'network' attribute instead
     }
     assert_equal expected, JSON.parse(last_response.body)
   end
