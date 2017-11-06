@@ -7,6 +7,9 @@ group :test do
   gem 'test-unit' if RUBY_VERSION > "1.8.7"
   gem 'addressable', '~> 2.3.8' if RUBY_VERSION == '1.8.7' # 2.4.0 drops support for ruby 1.8.7
   gem 'public_suffix', '< 3' if RUBY_VERSION < '2.1'
+  gem 'benchmark-ips'
+  gem 'ruby-prof'
+  gem 'rubocop', '0.38.0' if RUBY_VERSION > "1.9.2"
 
   if RUBY_VERSION < '1.9.3'
     gem 'rake', '< 11'
