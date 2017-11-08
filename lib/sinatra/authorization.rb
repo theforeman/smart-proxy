@@ -4,6 +4,7 @@ module Sinatra
       helpers ::Proxy::Helpers
 
       before do
+        break if @authenticated
         # When :trusted_hosts is given, we check the client against the list
         # HTTPS: test the certificate CN
         # HTTP: test the reverse DNS entry of the remote IP
@@ -18,7 +19,9 @@ module Sinatra
           end
           fqdn = fqdn.downcase
 
-          unless Proxy::SETTINGS.trusted_hosts.include?(fqdn)
+          if Proxy::SETTINGS.trusted_hosts.include?(fqdn)
+            @authenticated = true
+          else
             log_halt 403, "Untrusted client #{fqdn} attempted to access #{request.path_info}. Check :trusted_hosts: in settings.yml"
           end
 
@@ -31,9 +34,12 @@ module Sinatra
       helpers ::Proxy::Log
 
       before do
+        break if @authenticated
         if ['yes', 'on', '1'].include? request.env['HTTPS'].to_s
           if request.env['SSL_CLIENT_CERT'].to_s.empty?
             log_halt 403, "No client SSL certificate supplied"
+          else
+            @authenticated = true
           end
         else
           logger.debug('require_ssl_client_verification: skipping, non-HTTPS request')
