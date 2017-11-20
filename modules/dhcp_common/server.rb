@@ -96,8 +96,7 @@ module Proxy::DHCP
         return r if r
       end
 
-      free_ips.find_free_ip(validated_to_address, validated_to_address, subnet.netmask,
-                            all_hosts(subnet_address) + all_leases(subnet_address))
+      free_ips.find_free_ip(validated_from_address, validated_to_address, all_hosts(subnet_address) + all_leases(subnet_address))
     end
 
     def find_ip_by_mac_address_and_range(subnet, mac_address, from_address, to_address)
