@@ -2,7 +2,13 @@ source 'https://rubygems.org'
 
 gemspec
 
-gem 'sinatra', '< 2' if RUBY_VERSION < '2.2'
+if RUBY_VERSION < '2.2'
+  gem 'sinatra', '< 2'
+  gem 'rack', '>= 1.1', '< 2.0.0'
+else
+  gem 'sinatra'
+  gem 'rack', '>= 1.1'
+end
 gem 'concurrent-ruby', '~> 1.0', require: 'concurrent'
 
 Dir["#{File.dirname(__FILE__)}/bundler.d/*.rb"].each do |bundle|

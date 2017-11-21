@@ -1,6 +1,5 @@
 group :test do
   gem 'mocha', '> 0.13.0', :require => false
-  gem 'rack-test'
   gem 'single_test'
   gem 'ci_reporter', '>= 1.6.3', "< 2.0.0", :require => false
   gem 'rdoc'
@@ -18,5 +17,11 @@ group :test do
     gem 'rake'
     gem 'rubocop-checkstyle_formatter', '~> 0.2'
     gem 'webmock'
+  end
+
+  if RUBY_VERSION < '2.2.2'
+    gem 'rack-test', '~> 0.7.0'
+  else
+    gem 'rack-test'
   end
 end
