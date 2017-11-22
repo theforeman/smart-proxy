@@ -8,7 +8,8 @@ class DHCPServerTest < Test::Unit::TestCase
 
   def setup
     @service = Proxy::DHCP::SubnetService.initialized_instance
-    @server = Proxy::DHCP::Server.new("testcase", nil, @service)
+    @free_ips = Object.new
+    @server = Proxy::DHCP::Server.new("testcase", nil, @service, @free_ips)
 
     @subnet = Proxy::DHCP::Subnet.new("192.168.0.0", "255.255.255.0")
     @service.add_subnet(@subnet)
@@ -124,5 +125,17 @@ class DHCPServerTest < Test::Unit::TestCase
   def test_del_record_by_mac
     @server.expects(:del_record).with(@record).once
     @server.del_record_by_mac(@subnet.network, 'aa:bb:cc:dd:ee:ff')
+  end
+
+  def test_unused_ip
+    @free_ips.expects(:find_free_ip)
+             .with("192.168.0.1", "192.168.0.10", @service.all_hosts("192.168.0.0"))
+             .returns(nil)
+    @server.unused_ip("192.168.0.0", nil, "192.168.0.1", "192.168.0.10")
+  end
+
+  def test_unused_ip_with_mac_address_specified
+    assert_equal "192.168.0.11",
+                 @server.unused_ip("192.168.0.0", "aa:bb:cc:dd:ee:ff", "192.168.0.1", "192.168.0.20")
   end
 end
