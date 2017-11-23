@@ -2,6 +2,9 @@ require 'proxy/default_di_wirings'
 require 'proxy/default_plugin_validators'
 
 class ::Proxy::PluginGroup
+  HTTP_ENABLED = [true, 'http']
+  HTTPS_ENABLED = [true, 'https']
+
   include ::Proxy::Log
   attr_reader :plugin, :providers, :state, :di_container
 
@@ -57,15 +60,15 @@ class ::Proxy::PluginGroup
   end
 
   def load_plugin_settings
-    settings = plugin.module_loader_class.new(plugin, di_container).load_settings
+    settings = plugin.module_loader_class.new(plugin, di_container).load_plugin_settings
     update_group_initial_state(settings[:enabled])
   rescue Exception => e
     fail_group(e)
   end
 
   def update_group_initial_state(enabled_setting)
-    @http_enabled = [true, 'http'].include?(enabled_setting) ? true : false
-    @https_enabled = [true, 'https'].include?(enabled_setting) ? true : false
+    @http_enabled = HTTP_ENABLED.include?(enabled_setting)
+    @https_enabled = HTTPS_ENABLED.include?(enabled_setting)
     @state = (http_enabled? || https_enabled?) ? :starting : :disabled
   end
 
@@ -78,7 +81,7 @@ class ::Proxy::PluginGroup
   def load_provider_settings
     return if inactive?
     providers.each do |p|
-      p.module_loader_class.new(p, di_container).load_settings(plugin.settings.marshal_dump)
+      p.module_loader_class.new(p, di_container).load_provider_settings(plugin.settings.marshal_dump)
     end
   rescue Exception => e
     fail_group(e)
@@ -238,7 +241,15 @@ module ::Proxy::DefaultRuntimeConfigurationLoader
 end
 
 module ::Proxy::DefaultSettingsLoader
-  def load_settings(main_plugin_settings = {})
+  def load_plugin_settings
+    load_settings({}) {|s| log_used_settings(s)}
+  end
+
+  def load_provider_settings(main_plugin_settings)
+    load_settings(main_plugin_settings) {|s| log_provider_settings(s)}
+  end
+
+  def load_settings(main_plugin_settings)
     config_file_settings = load_configuration_file(plugin.settings_file)
 
     merged_with_defaults = plugin.default_settings.merge(config_file_settings)
@@ -254,7 +265,7 @@ module ::Proxy::DefaultSettingsLoader
 
     plugin.settings = ::Proxy::Settings::Plugin.new({}, settings)
 
-    log_used_settings(settings)
+    yield settings
 
     validate_settings(plugin, settings)
 
@@ -286,6 +297,13 @@ module ::Proxy::DefaultSettingsLoader
   end
 
   def log_used_settings(settings)
+    log_provider_settings(settings)
+    logger.debug("'%s' ports: 'http': %s, 'https': %s" % [plugin.plugin_name,
+                                                          ::Proxy::PluginGroup::HTTP_ENABLED.include?(settings[:enabled]),
+                                                          ::Proxy::PluginGroup::HTTPS_ENABLED.include?(settings[:enabled])])
+  end
+
+  def log_provider_settings(settings)
     default_settings = plugin.plugin_default_settings
     sorted_keys = settings.keys.map(&:to_s).sort.map(&:to_sym) # ruby 1.8.7 doesn't support sorting of symbols
     to_log = sorted_keys.map {|k| "'%s': %s%s" % [k, settings[k], (default_settings.include?(k) && default_settings[k] == settings[k]) ? " (default)" : ""] }.join(", ")
