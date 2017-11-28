@@ -1,6 +1,7 @@
 require 'checks'
 require 'open3'
 require 'dhcp_common/server'
+require 'ipaddr'
 
 module Proxy::DHCP::NativeMS
   class Provider < ::Proxy::DHCP::Server
@@ -108,7 +109,30 @@ module Proxy::DHCP::NativeMS
         end
       end
 
-      return dhcpsapi.get_free_ip_address(subnet_address, from_address, to_address).first
+      logger.debug "Searching for free IP in subnet #{subnet_address}"
+      find_ip = 1
+      while find_ip == 1
+        ip_array = dhcpsapi.get_free_ip_address(subnet_address, from_address, to_address)
+        ip = ip_array.first unless ip_array.nil?
+        if ip.nil? || ip.empty?
+          logger.warn "No free IP returned by DHCP for subnet #{subnet_address}"
+          return nil
+        end
+        if icmp_pingable?(ip)
+          logger.debug "Found a pingable IP address which does not have a DHCP record: #{ip}"
+        else
+          logger.debug "Found free IP #{ip}"
+          return ip
+        end
+        if ip == to_address
+          find_ip = 0
+          break
+        end
+        found_ip = IPAddr.new(ip)
+        from_address = IPAddr.new(found_ip.to_i + 1, found_ip.family).to_s
+      end
+      logger.warn "All IPs returned by the DHCP are already in use"
+      return nil
     end
 
     def retrieve_subnet_from_server(subnet_address)

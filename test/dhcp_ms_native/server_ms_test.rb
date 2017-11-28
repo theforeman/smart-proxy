@@ -110,6 +110,20 @@ class DHCPServerMicrosoftTest < Test::Unit::TestCase
     assert_equal nil, @server.unused_ip(@network, '00:01:02:03:04:05', nil, nil)
   end
 
+  def test_should_return_no_free_ip_address
+    @dhcpsapi.expects(:api_level).twice.returns(DhcpsApi::Server::DHCPS_WIN2012_API)
+    @dhcpsapi.expects(:list_subnet_elements).with(@network, anything).returns([{:element => {:start_address => '192.168.42.100', :end_address => '192.168.42.200'}}])
+    @dhcpsapi.expects(:get_free_ip_address).returns(nil)
+    assert_equal nil, @server.unused_ip(@network, nil, nil, nil)
+  end
+
+  def test_should_not_return_pingable_ip_address
+    @dhcpsapi.expects(:api_level).twice.returns(DhcpsApi::Server::DHCPS_WIN2012_API)
+    @dhcpsapi.expects(:list_subnet_elements).with('127.0.0.0', anything).returns([{:element => {:start_address => '127.0.0.1', :end_address => '127.0.0.10'}}])
+    @dhcpsapi.expects(:get_free_ip_address).returns(['127.0.0.1'])
+    assert_equal nil, @server.unused_ip('127.0.0.0', nil, '127.0.0.1', '127.0.0.1')
+  end
+
   def test_unused_ip_address_for_known_mac_address
     @dhcpsapi.expects(:get_client_by_mac_address).with(@network, '00:01:02:03:04:05').returns(:client_ip_address => '192.168.42.20')
     assert_equal '192.168.42.20', @server.unused_ip(@network, '00:01:02:03:04:05', nil, nil)
