@@ -126,6 +126,7 @@ module Proxy::DHCP
     def add_record options = {}
       related_macs = options.delete("related_macs") || []
       logger.debug "Ignoring duplicates for macs: #{related_macs.inspect}" unless related_macs.empty?
+
       name, ip_address, mac_address, subnet_address, options = clean_up_add_record_parameters(options)
 
       validate_ip(ip_address)
@@ -166,21 +167,24 @@ module Proxy::DHCP
     end
 
     def clean_up_add_record_parameters(in_options)
-      to_return = in_options.dup
+      options = in_options.dup
 
-      to_return.delete("captures")
-      to_return.delete("splat")
+      options.delete("captures")
+      options.delete("splat")
 
-      ip = to_return.delete("ip")
-      mac = to_return.delete("mac")
+      ip = options.delete("ip")
+      mac = options.delete("mac")
 
-      name = to_return.delete("name")
-      hostname = to_return.delete("hostname")
+      name = options.delete("name")
+      hostname = options.delete("hostname")
 
-      to_return.delete("subnet") # Not a valid key; remove it to prevent conflict with :subnet
-      subnet = to_return.delete("network")
+      options.delete("subnet") # Not a valid key; remove it to prevent conflict with :subnet
+      subnet = options.delete("network")
 
-      [name || hostname, ip, mac, subnet, to_return.merge!(:hostname => hostname || name)]
+      # convert string keys to symbols
+      options = options.inject({}){|all, current| all[current[0].to_sym] = current[1]; all}
+
+      [name || hostname, ip, mac, subnet, options.merge!(:hostname => hostname || name)]
     end
 
     def vendor_options_included? options

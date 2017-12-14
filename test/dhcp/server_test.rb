@@ -138,4 +138,45 @@ class DHCPServerTest < Test::Unit::TestCase
     assert_equal "192.168.0.11",
                  @server.unused_ip("192.168.0.0", "aa:bb:cc:dd:ee:ff", "192.168.0.1", "192.168.0.20")
   end
+
+  def test_clean_up_add_record_parameters
+    expected_ip = "192.168.33.100"
+    expected_mac = "01:02:03:04:05:06"
+    expected_subnet = "192.168.33.0"
+
+    _, ip, mac, subnet, _ = @server.clean_up_add_record_parameters("ip" => expected_ip, "mac" => expected_mac,
+                                                                   "network" => expected_subnet)
+
+    assert_equal expected_ip, ip
+    assert_equal expected_mac, mac
+    assert_equal expected_subnet, subnet
+  end
+
+  def test_clean_up_add_record_parameters_ignores_subnet_key
+    _, _, _, subnet, _ = @server.clean_up_add_record_parameters("subnet" => "192.168.33.0")
+    assert_nil subnet
+  end
+
+  def test_clean_up_add_record_parameters_uses_hostname_key_to_create_hostname_option
+    expected_hostname = "thisishostname"
+    expected_name = "thisisname"
+    name, _, _, _, actual_options = @server.clean_up_add_record_parameters("hostname" => expected_hostname,
+                                                                           "name" => expected_name)
+
+    assert_equal expected_name, name
+    assert_equal({:hostname => expected_hostname}, actual_options)
+  end
+
+  def test_clean_up_add_record_parameters_uses_name_key_to_create_hostname_option
+    expected_hostname = "testing"
+    name, _, _, _, actual_options = @server.clean_up_add_record_parameters("name" => expected_hostname)
+
+    assert_equal expected_hostname, name
+    assert_equal({:hostname => expected_hostname}, actual_options)
+  end
+
+  def test_clean_up_add_record_parameters_converts_string_keys_to_symbols
+    _, _, _, _, actual_options = @server.clean_up_add_record_parameters("a" => 1, "b" => 2)
+    assert_equal({:a => 1, :b => 2, :hostname => nil}, actual_options)
+  end
 end
