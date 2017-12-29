@@ -2,7 +2,6 @@ group :test do
   gem 'mocha', '> 0.13.0', :require => false
   gem 'single_test'
   gem 'ci_reporter', '>= 1.6.3', "< 2.0.0", :require => false
-  gem 'rdoc'
   gem 'test-unit' if RUBY_VERSION > "1.8.7"
   gem 'addressable', '~> 2.3.8' if RUBY_VERSION == '1.8.7' # 2.4.0 drops support for ruby 1.8.7
   gem 'public_suffix', '< 3' if RUBY_VERSION < '2.1'
@@ -20,5 +19,11 @@ group :test do
     gem 'rack-test', '~> 0.7.0'
   else
     gem 'rack-test'
+  end
+
+  if RUBY_VERSION < '2.2'
+    gem 'rdoc', '< 6'
+  else
+    gem 'rdoc'
   end
 end
