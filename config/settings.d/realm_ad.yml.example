@@ -1,0 +1,24 @@
+---
+# Authentication for Kerberos-based Realms
+:realm: EXAMPLE.COM
+
+# Kerberos pricipal used to authenticate against Active Directory
+:principal: realm-proxy@EXAMPLE.COM
+
+# Path to the keytab used to authenticate against Active Directory
+:keytab_path:  /etc/foreman-proxy/realm_ad.keytab
+
+# FQDN of the Domain Controller
+:domain_controller: dc.example.com
+
+# Optional: OU where the machine account shall be placed
+#:ou: OU=Linux,OU=Servers,DC=example,DC=com
+
+# Optional: Prefix for the computername
+#:computername_prefix: ''
+
+# Optional: Generate the computername by calculating the SHA256 hexdigest of the hostname
+#:computername_hash: false
+
+# Optional:  use the fqdn of the host to generate the computername
+#:computername_use_fqdn: false
