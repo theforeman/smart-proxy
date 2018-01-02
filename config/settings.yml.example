@@ -8,10 +8,15 @@
 #:ssl_private_key: ssl/private_keys/fqdn.key
 
 # Use this option only if you need to disable certain cipher suites.
-# Note: we use the OpenSSL suite name, such as "RC4-MD5". 
-# The complete list of cipher suite names can be found at: 
+# Note: we use the OpenSSL suite name, such as "RC4-MD5".
+# The complete list of cipher suite names can be found at:
 # https://www.openssl.org/docs/manmaster/man1/ciphers.html#CIPHER-SUITE-NAMES
 #:ssl_disabled_ciphers: [CIPHER-SUITE-1, CIPHER-SUITE-2]
+
+# Use this option only if you need to strictly specify TLS
+# versions to be used. SSLv3 is disabled and cannot be configured.
+# TLSv1.1 and TLSv1.2 are available are the default configurations.
+#:ssl_versions: ['TLSv1.2']
 
 # Hosts which the proxy accepts connections from
 # commenting the following lines would mean every verified SSL connection allowed

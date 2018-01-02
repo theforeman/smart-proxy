@@ -11,7 +11,8 @@ module ::Proxy::Settings
       :bind_host => ["*"],
       :log_buffer => 2000,
       :log_buffer_errors => 1000,
-      :ssl_disabled_ciphers => []
+      :ssl_disabled_ciphers => [],
+      :ssl_versions => ['TLSv1.1', 'TLSv1.2']
     }
 
     HOW_TO_NORMALIZE = {
