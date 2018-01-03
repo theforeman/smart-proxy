@@ -13,10 +13,10 @@
 # https://www.openssl.org/docs/manmaster/man1/ciphers.html#CIPHER-SUITE-NAMES
 #:ssl_disabled_ciphers: [CIPHER-SUITE-1, CIPHER-SUITE-2]
 
-# Use this option only if you need to strictly specify TLS
-# versions to be used. SSLv3 is disabled and cannot be configured.
-# TLSv1.1 and TLSv1.2 are available are the default configurations.
-#:ssl_versions: ['TLSv1.2']
+# Use this option only if you need to strictly specify TLS versions to be
+# disabled. SSLv3 and TLS v1.0 are always disabled and cannot be configured.
+# Specify versions like: '1.1', or '1.2'
+#:tls_disabled_versions: []
 
 # Hosts which the proxy accepts connections from
 # commenting the following lines would mean every verified SSL connection allowed

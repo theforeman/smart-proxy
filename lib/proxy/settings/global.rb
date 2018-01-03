@@ -12,7 +12,7 @@ module ::Proxy::Settings
       :log_buffer => 2000,
       :log_buffer_errors => 1000,
       :ssl_disabled_ciphers => [],
-      :ssl_versions => ['TLSv1.1', 'TLSv1.2']
+      :tls_disabled_versions => []
     }
 
     HOW_TO_NORMALIZE = {
