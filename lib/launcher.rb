@@ -80,7 +80,7 @@ module Proxy
             logger.info "TLSv#{version} will be disabled."
             ssl_options |= constant
           else
-            logger.warn "TLSv#{version} cannot be disabled, it was not found."
+            logger.warn "TLSv#{version} was not found."
           end
         end
       end
