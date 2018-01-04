@@ -1,3 +1,52 @@
+2018-01-03	Eric D. Helms <ericdhelms@gmail.com>
+	* Fixes #21350 - Allow restricting to TLSv1.2
+
+2018-01-02	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #21729 - removed gem specs for older rubies
+
+2018-01-01	Michael Moll <kvedulv@kvedulv.de>
+	* Fixes #22098 - pin rdoc gem for Ruby <2.2
+
+2017-12-18	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #21975 - filename dhcp option is accepted now
+
+2017-12-17	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #15535 - http ports used by plugins are being logged now.
+
+2017-12-04	Anthony Chevalet <anthony.chevalet@gmail.com>
+	* Fixes #21236 - No ping check causes duplicated IP with MS DHCP
+
+2017-11-22	Dmitri Dolguikh <witlessbird@gmail.com>
+	* Fixes #21710 - correct arguments to find_free_ip are used. (#551)
+
+2017-11-22	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #21728 - pinned rack and rack-test for rubies < 2.2
+
+2017-11-16	Anthony Chevalet <anthony.chevalet@kudelskisecurity.com>
+	* Fixes #21249 - Check MS DHCP range versus start/end address
+
+2017-11-06	Timo Goebel <mail@timogoebel.name>
+	* fixes #21463 - new reservations are deletable
+	* fixes #21581 - tests run without bundler development group
+
+2017-11-03	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #20474 - return different ips on sequential unused_ip calls
+
+2017-09-25	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #20826: added parsing of server-duids
+
+2017-09-08	Michael Moll <kvedulv@kvedulv.de>
+	* Refs #20843 - Put public_suffix only in test
+
+2017-09-05	Ewoud Kohl van Wijngaarden <ewoud@kohlvanwijngaarden.nl>
+	* Fixes #20843 - Pin public_suffix on RUBY_VERSION 2.0
+
+2017-08-31	Lukáš Zapletal <lzap@redhat.com>
+	* Fixes #20700 - templates are passed with spaces in kind
+
+2017-08-28	Daniel Lobato Garcia <me@daniellobato.me>
+	* Bump version to 1.17-develop
+
 2017-08-17	Tomer Brisker <tbrisker@gmail.com>
 	* Fixes #20542 - correct link to cipher suite names
 
