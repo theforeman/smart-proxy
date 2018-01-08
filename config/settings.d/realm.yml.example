@@ -4,4 +4,5 @@
 
 # Available providers:
 #   realm_freeipa
+#   realm_ad
 :use_provider: realm_freeipa
