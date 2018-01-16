@@ -5,3 +5,15 @@
 #:tftproot: /var/lib/tftpboot
 # Defines the TFTP Servername to use, overrides the name in the subnet declaration
 #:tftp_servername: tftp.domain.com
+
+# Defines the default read timeout in seconds needed to download tftp artifacts
+# like initrd and vmlinuz. Default value 60 seconds
+#:tftp_read_timeout: 60
+
+# Defines the default connection timeout in seconds needed to download tftp artifacts
+# like initrd and vmlinuz. Default value 10 seconds
+#:tftp_connect_timeout: 10
+
+# Defines the default dns timeout in seconds needed to download tftp artifacts
+# like initrd and vmlinuz. Default value 10 seconds
+#:tftp_dns_timeout: 10

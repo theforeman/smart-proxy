@@ -57,6 +57,39 @@ class TftpTest < Test::Unit::TestCase
     end
   end
 
+  def test_choose_protocol_and_fetch_wget_with_timeouts
+    src = "https://proxy.test"
+    dst = "/destination"
+    tftp_read_timeout = "1000"
+    tftp_connect_timeout = "40"
+    tftp_dns_timeout = "14300"
+    Proxy::TFTP::Plugin.load_test_settings(
+        :tftp_read_timeout => tftp_read_timeout,
+        :tftp_connect_timeout => tftp_connect_timeout,
+        :tftp_dns_timeout => tftp_dns_timeout
+    )
+
+    ::Proxy::HttpDownload.expects(:new).returns(stub(:start)).
+      with(src, dst, tftp_read_timeout, tftp_connect_timeout, tftp_dns_timeout)
+
+    Proxy::TFTP.choose_protocol_and_fetch src, dst
+  end
+
+  def test_choose_protocol_and_fetch_wget_with_read_timeout
+    src = "https://proxy.test"
+    dst = "/destination"
+    tftp_read_timeout = "1000"
+    tftp_connect_timeout = Proxy::TFTP::Plugin.settings.tftp_connect_timeout
+    tftp_dns_timeout = Proxy::TFTP::Plugin.settings.tftp_dns_timeout
+
+    Proxy::TFTP::Plugin.load_test_settings(:tftp_read_timeout => tftp_read_timeout)
+
+    ::Proxy::HttpDownload.expects(:new).returns(stub(:start)).
+      with(src, dst, tftp_read_timeout, tftp_connect_timeout, tftp_dns_timeout)
+
+    Proxy::TFTP.choose_protocol_and_fetch src, dst
+  end
+
   def test_choose_protocol_and_fetch_nfs
     assert_nothing_raised RuntimeError do
       Proxy::TFTP.choose_protocol_and_fetch 'nfs://proxy.test', '/destination'

@@ -153,7 +153,11 @@ module Proxy::TFTP
   def self.choose_protocol_and_fetch(src, destination)
     case URI(src).scheme
     when 'http', 'https', 'ftp'
-      ::Proxy::HttpDownload.new(src.to_s, destination.to_s).start
+      ::Proxy::HttpDownload.new(src.to_s,
+                                destination.to_s,
+                                Proxy::TFTP::Plugin.settings.tftp_read_timeout,
+                                Proxy::TFTP::Plugin.settings.tftp_connect_timeout,
+                                Proxy::TFTP::Plugin.settings.tftp_dns_timeout).start
     when 'nfs'
       logger.debug "NFS as a protocol for installation medium detected."
     else
