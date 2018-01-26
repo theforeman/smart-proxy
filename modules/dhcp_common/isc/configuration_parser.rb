@@ -185,7 +185,7 @@ module Proxy
         DOUBLE_QUOTE = '"'.r 'double quote'
 
         def ignored_declaration
-          seq_(SPACE.join(/[^\s{};#]+/).odd, EOSTMT | COMMENT) {|content, _| IgnoredDeclaration[content]}
+          seq_(SPACE.join(LITERAL | /[^\s{};#]+/.r).odd, EOSTMT | COMMENT) {|content, _| IgnoredDeclaration[content]}
         end
 
         def ignored_block
