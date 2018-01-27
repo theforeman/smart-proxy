@@ -49,7 +49,7 @@ class FreeIPATest < Test::Unit::TestCase
   def test_delete
     ok_result = {:a => 'a'}
     @provider.expects(:ipa_call).with('host_del', ['a_host'], 'updatedns' => true).returns(ok_result)
-    assert_equal JSON.pretty_generate(ok_result), @provider.delete(@realm, 'a_host')
+    assert_equal ok_result.to_json, @provider.delete(@realm, 'a_host')
   end
 
   def test_delete_with_unrecognized_realm_raises_exception
@@ -123,7 +123,7 @@ class FreeIPATest < Test::Unit::TestCase
                    1 => unicode_string,
                    :key => unicode_string }, new_hash)
 
-    deserialized_hash = JSON.load(JSON.pretty_generate(new_hash))
+    deserialized_hash = JSON.load(new_hash.to_json)
     assert_equal({ unicode_string => { unicode_string => [ unicode_string, 'test'],
                                        'hello' => 'world' },
                    '1' => unicode_string,
