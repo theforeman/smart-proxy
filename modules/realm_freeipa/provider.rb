@@ -76,10 +76,10 @@ module Proxy::FreeIPARealm
         result = do_host_modify(hostname, setattr)
       end
 
-      JSON.pretty_generate(result["result"])
+      result['result'].to_json
     rescue => e
       if e.message =~ /no modifications/
-        JSON.pretty_generate("message" => "nothing to do")
+        JSON.pretty_generate({"message" => "nothing to do"})
       else
         raise
       end
@@ -118,7 +118,8 @@ module Proxy::FreeIPARealm
           raise
         end
       end
-      JSON.pretty_generate(result)
+
+      result.to_json
     end
 
     def self.ensure_utf(object)
