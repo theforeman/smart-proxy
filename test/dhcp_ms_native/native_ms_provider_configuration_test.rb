@@ -19,5 +19,6 @@ class NativeMsProviderConfigurationTest < Test::Unit::TestCase
 
     assert_equal Set.new(['192.168.42.0']), @container.get_dependency(:dhcp_provider).managed_subnets
     assert @container.get_dependency(:dhcp_provider).disable_ddns
+    assert @container.get_dependency(:dhcp_provider).free_ips
   end
 end

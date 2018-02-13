@@ -13,7 +13,8 @@ class DHCPServerMicrosoftTest < Test::Unit::TestCase
     @dhcpsapi = Object.new
     @network = '192.168.42.0'
     @netmask = '255.255.255.0'
-    @server = Proxy::DHCP::NativeMS::Provider.new(@dhcpsapi, ["#{@network}/#{@netmask}"], false)
+    @free_ips = Object.new
+    @server = Proxy::DHCP::NativeMS::Provider.new(@dhcpsapi, ["#{@network}/#{@netmask}"], false, @free_ips)
     @option_values = [{:option_id => 6, :value => [{:option_type => 4, :element => '192.168.42.1'}]},
                       {:option_id => 15, :value => [{:option_type => 5, :element => 'test.com'}]}]
   end
@@ -73,55 +74,47 @@ class DHCPServerMicrosoftTest < Test::Unit::TestCase
   end
 
   def test_should_return_free_ip_address
-    @dhcpsapi.expects(:api_level).twice.returns(DhcpsApi::Server::DHCPS_WIN2012_API)
     @dhcpsapi.expects(:get_client_by_mac_address).raises(RuntimeError)
     @dhcpsapi.expects(:list_subnet_elements).with(@network, anything).returns([{:element => {:start_address => '192.168.42.1', :end_address => '192.168.42.100'}}])
-    @dhcpsapi.expects(:get_free_ip_address).with(@network, '192.168.42.1', '192.168.42.100').returns(['192.168.42.20'])
+    @server.expects(:all_hosts).with(@network).returns([host = Object.new])
+    @server.expects(:all_leases).with(@network).returns([lease = Object.new])
+    @free_ips.expects(:find_free_ip).with('192.168.42.1', '192.168.42.100', [host, lease]).returns('192.168.42.20')
     assert_equal '192.168.42.20', @server.unused_ip(@network, '00:01:02:03:04:05', nil, nil)
   end
 
   def test_should_return_free_ip_address_in_range
-    @dhcpsapi.expects(:api_level).twice.returns(DhcpsApi::Server::DHCPS_WIN2012_API)
     @dhcpsapi.expects(:list_subnet_elements).with(@network, anything).returns([{:element => {:start_address => '192.168.42.1', :end_address => '192.168.42.100'}}])
-    @dhcpsapi.expects(:get_free_ip_address).with(@network, '192.168.42.10', '192.168.42.50').returns(['192.168.42.20'])
+    @server.expects(:all_hosts).with(@network).returns([])
+    @server.expects(:all_leases).with(@network).returns([])
+    @free_ips.expects(:find_free_ip).with('192.168.42.10', '192.168.42.50', []).returns('192.168.42.20')
     assert_equal '192.168.42.20', @server.unused_ip(@network, '00:01:02:03:04:05', '192.168.42.10', '192.168.42.50')
   end
 
   def test_should_not_return_free_ip_address_wrong_end
-    @dhcpsapi.expects(:api_level).twice.returns(DhcpsApi::Server::DHCPS_WIN2012_API)
     @dhcpsapi.expects(:list_subnet_elements).with(@network, anything).returns([{:element => {:start_address => '192.168.42.100', :end_address => '192.168.42.200'}}])
     assert_equal nil, @server.unused_ip(@network, '00:01:02:03:04:05', '192.168.42.100', '192.168.42.250')
   end
 
   def test_should_not_return_free_ip_address_wrong_start
-    @dhcpsapi.expects(:api_level).twice.returns(DhcpsApi::Server::DHCPS_WIN2012_API)
     @dhcpsapi.expects(:list_subnet_elements).with(@network, anything).returns([{:element => {:start_address => '192.168.42.100', :end_address => '192.168.42.200'}}])
     assert_equal nil, @server.unused_ip(@network, '00:01:02:03:04:05', '192.168.42.10', '192.168.42.200')
   end
 
   def test_should_not_return_free_ip_address_wrong_subnet
-    @dhcpsapi.expects(:api_level).twice.returns(DhcpsApi::Server::DHCPS_WIN2012_API)
     assert_equal nil, @server.unused_ip(@network, '00:01:02:03:04:05', nil, nil)
   end
 
   def test_should_not_return_free_ip_address_wrong_dhcp_range
-    @dhcpsapi.expects(:api_level).twice.returns(DhcpsApi::Server::DHCPS_WIN2012_API)
     @dhcpsapi.expects(:list_subnet_elements).with(@network, anything).returns([{:element => {:start_address => '192.168.42.100'}}])
     assert_equal nil, @server.unused_ip(@network, '00:01:02:03:04:05', nil, nil)
   end
 
   def test_should_return_no_free_ip_address
-    @dhcpsapi.expects(:api_level).twice.returns(DhcpsApi::Server::DHCPS_WIN2012_API)
     @dhcpsapi.expects(:list_subnet_elements).with(@network, anything).returns([{:element => {:start_address => '192.168.42.100', :end_address => '192.168.42.200'}}])
-    @dhcpsapi.expects(:get_free_ip_address).returns(nil)
+    @server.expects(:all_hosts).with(@network).returns([])
+    @server.expects(:all_leases).with(@network).returns([])
+    @free_ips.expects(:find_free_ip).returns(nil)
     assert_equal nil, @server.unused_ip(@network, nil, nil, nil)
-  end
-
-  def test_should_not_return_pingable_ip_address
-    @dhcpsapi.expects(:api_level).twice.returns(DhcpsApi::Server::DHCPS_WIN2012_API)
-    @dhcpsapi.expects(:list_subnet_elements).with('127.0.0.0', anything).returns([{:element => {:start_address => '127.0.0.1', :end_address => '127.0.0.10'}}])
-    @dhcpsapi.expects(:get_free_ip_address).returns(['127.0.0.1'])
-    assert_equal nil, @server.unused_ip('127.0.0.0', nil, '127.0.0.1', '127.0.0.1')
   end
 
   def test_unused_ip_address_for_known_mac_address
