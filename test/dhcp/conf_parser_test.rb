@@ -468,4 +468,14 @@ OFMULTILNE_LEASE
     assert_equal ['test.example.com'],
                  included.select {|node| node.class == Proxy::DHCP::CommonISC::ConfigurationParser::HostNode}.map(&:fqdn)
   end
+
+  def test_include_in_shared_network
+    included =
+      Proxy::DHCP::CommonISC::ConfigurationParser.new.conf.parse!('shared-network "testing" {include "test/fixtures/dhcp/dhcp_subnets.conf";}')
+    assert_equal 1, included.size
+    assert_equal ['192.168.122.0', '192.168.123.0', '192.168.124.0', '192.168.1.0'],
+                 included.first.options_and_settings.flatten.select {|node| node.class == Proxy::DHCP::CommonISC::ConfigurationParser::IpV4SubnetNode}.map(&:subnet_address)
+    assert_equal ['test.example.com'],
+                 included.first.options_and_settings.flatten.select {|node| node.class == Proxy::DHCP::CommonISC::ConfigurationParser::HostNode}.map(&:fqdn)
+  end
 end
