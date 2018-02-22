@@ -336,7 +336,7 @@ module Proxy
           keyword = word('shared-network').fail 'keyword_shared_network'
           seq_(keyword,
                SPACE.join(LITERAL | FQDN).odd, LFT_BRACKET,
-               SPACE.join(option | host | lazy {subnet} | lazy {group} | pool | COMMENT | deleted | ignored_declaration | ignored_block).odd,
+               SPACE.join(include_file | option | host | lazy {subnet} | lazy {group} | pool | COMMENT | deleted | ignored_declaration | ignored_block).odd,
                RGT_BRACKET).cached {|_, name, _, statements, _| GroupNode[name.first, statements]}
         end
 
