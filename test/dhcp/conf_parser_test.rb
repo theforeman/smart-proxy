@@ -361,7 +361,7 @@ EOMULTILINE_HOST
                  Proxy::DHCP::CommonISC::ConfigurationParser.new.lease_time_stamp.parse!('starts epoch 1493734390;')
     assert_equal Proxy::DHCP::CommonISC::ConfigurationParser::KeyValueNode[:ends, Time.parse('2 2017/05/01 14:20:25 UTC')],
                  Proxy::DHCP::CommonISC::ConfigurationParser.new.lease_time_stamp.parse!('ends 2 2017/05/01 14:20:25;')
-    assert_equal Proxy::DHCP::CommonISC::ConfigurationParser::KeyValueNode[:ends, 'never'],
+    assert_equal Proxy::DHCP::CommonISC::ConfigurationParser::KeyValueNode[:ends, Proxy::DHCP::CommonISC::ConfigurationParser::FAR_FUTURE],
                  Proxy::DHCP::CommonISC::ConfigurationParser.new.lease_time_stamp.parse!('ends never;')
     assert_equal Proxy::DHCP::CommonISC::ConfigurationParser::KeyValueNode[:tstp, Time.parse('2 2017/05/01 14:20:25 UTC')],
                  Proxy::DHCP::CommonISC::ConfigurationParser.new.lease_time_stamp.parse!('tstp 2 2017/05/01 14:20:25;')
