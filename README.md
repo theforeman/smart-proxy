@@ -1,5 +1,4 @@
 [![Build Status](http://ci.theforeman.org/buildStatus/icon?job=test_proxy_develop)](http://ci.theforeman.org/job/test_proxy_develop/)
-[![Code Climate](https://codeclimate.com/github/theforeman/smart-proxy/badges/gpa.svg)](https://codeclimate.com/github/theforeman/smart-proxy)
 [![Issue Stats](http://issuestats.com/github/theforeman/smart-proxy/badge/pr)](http://issuestats.com/github/theforeman/smart-proxy)
 [![Support IRC channel](https://kiwiirc.com/buttons/irc.freenode.net/theforeman.png)](https://kiwiirc.com/client/irc.freenode.net/?#theforeman)
 
