@@ -1,3 +1,13 @@
+2018-02-28	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #22704 - handle dhcpd's "never" expiring leases
+	* Fixes #22651 - extend dhcpd config parser support for "include"'s
+
+2018-01-17	Michael Moll <kvedulv@kvedulv.de>
+	* Fixes #22304 - Allow Puppet 5.x in bundle
+
+2018-01-04	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Release 1.17.0-RC1
+
 2018-01-03	Eric D. Helms <ericdhelms@gmail.com>
 	* Fixes #21350 - Allow restricting to TLSv1.2
 
