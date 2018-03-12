@@ -25,11 +25,8 @@ class Proxy::PuppetApi::V3ClassesRetriever
     raise Proxy::Puppet::EnvironmentNotFound.new(e.response_body) if e.status_code.to_s == '400' && e.response_body.include?("Could not find environment")
     raise e
   end
-end
 
-# A dummy noop service
-class Proxy::PuppetApi::NoopClassesCacheInitializer
-  def start_service
-    # nothing to do, we don't cache classes in this implementation
+  def class_count(environment)
+    0 #Not implemented
   end
 end

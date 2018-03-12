@@ -27,6 +27,15 @@ class Proxy::Puppet::Api < ::Sinatra::Base
     end
   end
 
+  get "/environment_details" do
+    begin
+      content_type :json
+      class_retriever.environment_details().to_json
+    rescue Proxy::Puppet::NotReady => e
+      log_halt 503, e.message
+    end
+  end
+
   get "/environments/:environment" do
     content_type :json
     begin
@@ -45,10 +54,17 @@ class Proxy::Puppet::Api < ::Sinatra::Base
       class_retriever.classes_in_environment(params[:environment]).map{|k| {k.to_s => { :name => k.name, :module => k.module, :params => k.params} } }.to_json
     rescue Proxy::Puppet::EnvironmentNotFound
       log_halt 404, "Could not find environment '#{params[:environment]}'"
-    rescue Proxy::Puppet::TimeoutError => e
+    end
+  end
+
+  get "/environments/:environment/classes_counter" do
+    content_type :json
+    begin
+      class_retriever.count_classes_in_environment(params[:environment]).to_json
+    rescue Proxy::Puppet::EnvironmentNotFound
+      log_halt 404, "Could not find environment '#{params[:environment]}'"
+    rescue Proxy::Puppet::NotReady => e
       log_halt 503, e.message
-    rescue Exception => e
-      log_halt 406, "Failed to show puppet classes: #{e}"
     end
   end
 

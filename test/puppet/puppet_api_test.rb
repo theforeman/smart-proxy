@@ -4,6 +4,10 @@ require 'puppet_proxy_common/puppet_class'
 require 'puppet_proxy_common/environment'
 require 'puppet_proxy_common/environments_retriever_base'
 require 'puppet_proxy_common/errors'
+require 'puppet_proxy/configuration_loader'
+require 'puppet_proxy/puppet_plugin'
+require 'puppet_proxy/dependency_injection'
+require 'puppet_proxy/puppet_api'
 
 class ApiTestEnvironmentsRetriever < ::Proxy::Puppet::EnvironmentsRetrieverBase
   attr_reader :first, :second
@@ -23,6 +27,7 @@ end
 
 class ApiTestClassesRetriever
   attr_reader :class_one, :class_two, :classes_and_errors_response
+  attr_accessor :initial_cache_update_in_progress
 
   def initialize
     @class_one = ::Proxy::Puppet::PuppetClass.new("dns::install")
@@ -54,6 +59,21 @@ class ApiTestClassesRetriever
         raise Proxy::Puppet::EnvironmentNotFound
     end
   end
+
+  def environment_details
+    raise Proxy::Puppet::NotReady if initial_cache_update_in_progress
+    {'first' => {:class_count => 2}}
+  end
+
+  def count_classes_in_environment(an_environment)
+    raise Proxy::Puppet::NotReady if initial_cache_update_in_progress
+    case an_environment
+      when 'first'
+        2
+      else
+        raise Proxy::Puppet::EnvironmentNotFound
+    end
+  end
 end
 
 class ApiTestPuppetRunner
@@ -64,29 +84,15 @@ class ApiTestPuppetRunner
   end
 end
 
-module Proxy::Puppet
-  module DependencyInjection
-    include Proxy::DependencyInjection::Accessors
-    def container_instance
-      Proxy::DependencyInjection::Container.new do |c|
-        c.dependency :class_retriever_impl, ApiTestClassesRetriever
-        c.dependency :environment_retriever_impl, ApiTestEnvironmentsRetriever
-      end
-    end
-  end
-end
-
-require 'puppet_proxy/puppet_api'
-
 ENV['RACK_ENV'] = 'test'
 
 class PuppetApiTest < Test::Unit::TestCase
-
   include Rack::Test::Methods
 
   def setup
     @class_retriever = ApiTestClassesRetriever.new
     @environment_retriever = ApiTestEnvironmentsRetriever.new
+    @test_runner = ApiTestPuppetRunner.new
 
     @class_one = @class_retriever.class_one
     @class_two = @class_retriever.class_two
@@ -95,8 +101,9 @@ class PuppetApiTest < Test::Unit::TestCase
 
   def app
     app = Proxy::Puppet::Api.new
-    @test_runner = ApiTestPuppetRunner.new
     app.helpers.puppet_runner = @test_runner
+    app.helpers.environment_retriever = @environment_retriever
+    app.helpers.class_retriever = @class_retriever
     app
   end
 
@@ -144,6 +151,39 @@ class PuppetApiTest < Test::Unit::TestCase
   def test_get_classes_and_errors_from_non_existing_environment
     get "/environments/second/classes_and_errors"
     assert_equal 404, last_response.status
+  end
+
+  def test_get_environment_details
+    get "/environment_details"
+    assert last_response.ok?, "Last response was not ok: #{last_response.body}"
+    data = JSON.parse(last_response.body)
+
+    assert_equal({'first' => {'class_count' => 2}}, data)
+  end
+
+  def test_get_total_classes_counter_when_initial_cache_update_in_progress
+    @class_retriever.initial_cache_update_in_progress = true
+    get "/environment_details"
+    assert_equal 503, last_response.status
+  end
+
+  def test_get_environment_classes_counter
+    get "/environments/first/classes_counter"
+    assert last_response.ok?, "Last response was not ok: #{last_response.body}"
+    data = JSON.parse(last_response.body)
+
+    assert_equal 2, data
+  end
+
+  def test_get_environment_classes_counter_from_non_existing_environment
+    get "/environments/second/classes_counter"
+    assert_equal 404, last_response.status
+  end
+
+  def test_get_environment_classes_counter_when_initial_cache_update_in_progress
+    @class_retriever.initial_cache_update_in_progress = true
+    get "/environments/first/classes_counter"
+    assert_equal 503, last_response.status
   end
 
   def test_puppet_run

@@ -26,6 +26,7 @@ end
 require 'puppet_proxy_common/environments_retriever_base'
 require 'puppet_proxy_puppet_api/v3_api_request'
 require 'puppet_proxy_puppet_api/v3_environments_retriever'
+require 'puppet_proxy_puppet_api/lru_cache'
 require 'puppet_proxy_puppet_api/v3_environment_classes_api_classes_retriever'
 require 'puppet_proxy_puppet_api/v3_classes_retriever'
 
@@ -71,14 +72,25 @@ class PuppetApiDIWiringsTest < Test::Unit::TestCase
                                                      :puppet_ssl_cert => "path_to_ssl_cert",
                                                      :puppet_ssl_key => "path_to_ssl_key",
                                                      :api_timeout => 100,
+                                                     :classes_counter_update_frequency => 200,
+                                                     :classes_counter_timeout_interval => 300,
+                                                     :max_number_of_cached_environments => 99,
                                                      :puppet_version => "4.4")
 
+
+    assert_equal "http://puppet.url", @container.get_dependency(:environment_classes_api_v3).url
+    assert_equal "path_to_ca_cert", @container.get_dependency(:environment_classes_api_v3).ssl_ca
+    assert_equal "path_to_ssl_cert", @container.get_dependency(:environment_classes_api_v3).ssl_cert
+    assert_equal "path_to_ssl_key", @container.get_dependency(:environment_classes_api_v3).ssl_key
     assert @container.get_dependency(:class_retriever_impl).instance_of?(::Proxy::PuppetApi::V3EnvironmentClassesApiClassesRetriever)
-    assert_equal "http://puppet.url", @container.get_dependency(:class_retriever_impl).puppet_url
-    assert_equal "path_to_ca_cert", @container.get_dependency(:class_retriever_impl).ssl_ca
-    assert_equal "path_to_ssl_cert", @container.get_dependency(:class_retriever_impl).ssl_cert
-    assert_equal "path_to_ssl_key", @container.get_dependency(:class_retriever_impl).ssl_key
     assert_equal 100, @container.get_dependency(:class_retriever_impl).api_timeout
+    assert @container.get_dependency(:class_retriever_impl).puppet_api
+    assert @container.get_dependency(:class_retriever_impl).environment_classes_counter
+    assert @container.get_dependency(:environment_classes_counter).instance_of?(::Proxy::PuppetApi::EnvironmentClassesCounter)
+    assert @container.get_dependency(:environment_classes_counter).environment_classes
+    assert @container.get_dependency(:environment_classes_counter).environments_retriever
+    assert_equal 200, @container.get_dependency(:environment_classes_counter).update_frequency
+    assert_equal 300, @container.get_dependency(:environment_classes_counter).timeout_interval
   end
 
   def test_environment_classes_retriever_wiring_parameters_with_puppet_410

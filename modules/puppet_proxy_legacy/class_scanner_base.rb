@@ -25,5 +25,9 @@ module Proxy::PuppetLegacy
     def classes_in_environment(an_environment)
       classes(environments_retriever.get(an_environment).paths)
     end
+
+    def class_count(environment)
+      0 # Not implemented
+    end
   end
 end
