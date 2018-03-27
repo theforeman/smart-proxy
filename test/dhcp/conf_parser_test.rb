@@ -435,6 +435,8 @@ OFMULTILNE_LEASE
   end
 
   def test_server_duid_parser
+    assert_equal [Proxy::DHCP::CommonISC::ConfigurationParser::KeyValueNode[:server_duid, '"\000\001\000\001\"L{\010RT\000A\377\305"']],
+                 Proxy::DHCP::CommonISC::ConfigurationParser.new.conf.parse!('server-duid "\000\001\000\001\"L{\010RT\000A\377\305";')
     assert_equal [Proxy::DHCP::CommonISC::ConfigurationParser::KeyValueNode[:server_duid, '"\000\001\000\001!:}\221RT\000^\244\022"']],
                  Proxy::DHCP::CommonISC::ConfigurationParser.new.conf.parse!('server-duid "\000\001\000\001!:}\221RT\000^\244\022";')
     assert_equal [Proxy::DHCP::CommonISC::ConfigurationParser::KeyValueNode[:server_duid, "\"\\000\\001\\000\\001!\\374\\304\\243\\000PV\\244\\350{\""]],
