@@ -209,10 +209,11 @@ module Proxy
           Rsec::Fail.reset
           keyword = word('server-duid').fail 'keyword_server_duid'
           anything = /[^;,{}\s]+/.r
+          literal = /"([^"]|\")*"/.r
           llt = seq_(word('llt') | word('LLT'), SPACE.join(anything).odd._?)
           ll = seq_(word('ll') | word('LL'), SPACE.join(anything).odd._?)
           en = seq_(word('en') | word('EN'), prim(:int32), LITERAL)
-          seq_(keyword,  LITERAL | HEX | en | llt | ll | prim(:int32), EOSTMT) {|_, duid, _| KeyValueNode[:server_duid, duid.respond_to?(:flatten) ? duid.flatten : duid]}
+          seq_(keyword,  literal | HEX | en | llt | ll | prim(:int32), EOSTMT) {|_, duid, _| KeyValueNode[:server_duid, duid.respond_to?(:flatten) ? duid.flatten : duid]}
         end
 
         def filename
