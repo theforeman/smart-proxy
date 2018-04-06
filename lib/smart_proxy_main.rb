@@ -36,7 +36,6 @@ require 'json'
 require 'rack'
 require 'rack-patch' if Rack.release < "1.3"
 require 'sinatra'
-require 'sinatra-patch'
 require 'sinatra/authorization'
 require 'sinatra/default_not_found_page'
 require 'webrick-patch'
