@@ -1,17 +1,13 @@
-[![Build Status](http://ci.theforeman.org/buildStatus/icon?job=test_proxy_develop)](http://ci.theforeman.org/job/test_proxy_develop/)
-[![Issue Stats](http://issuestats.com/github/theforeman/smart-proxy/badge/pr)](http://issuestats.com/github/theforeman/smart-proxy)
+[![Build Status](https://ci.theforeman.org/buildStatus/icon?job=test_proxy_develop)](https://ci.theforeman.org/job/test_proxy_develop/)
 [![Support IRC channel](https://kiwiirc.com/buttons/irc.freenode.net/theforeman.png)](https://kiwiirc.com/client/irc.freenode.net/?#theforeman)
 
-[Smart Proxy](http://projects.theforeman.org/projects/smart-proxy/wiki) is a free open source project that provides restful API to subsystems such as DNS, DHCP, etc, for higher level orchestration tools such as [Foreman](https://github.com/theforeman/foreman). 
+[Smart Proxy](https://projects.theforeman.org/projects/smart-proxy/wiki) is a free open source project that provides restful API to subsystems such as DNS, DHCP, etc, for higher level orchestration tools such as [Foreman](https://github.com/theforeman/foreman).
 
-* Issues: [Redmine](http://projects.theforeman.org/projects/smart-proxy/issues)
-* Wiki: [Foreman wiki](http://projects.theforeman.org/projects/smart-proxy/wiki)
-* Community and support: We use [Freenode](irc.freenode.net) IRC channels
+* Issues: [Redmine](https://projects.theforeman.org/projects/smart-proxy/issues)
+* Wiki: [Foreman wiki](https://projects.theforeman.org/projects/smart-proxy/wiki)
+* Community and support: We have a [forum](https://community.theforeman.org) and use [Freenode](irc.freenode.net) IRC channels
     * #theforeman for general support
     * #theforeman-dev for development chat
-* Mailing lists:
-    * [foreman-users](https://groups.google.com/forum/?fromgroups#!forum/foreman-users)
-    * [foreman-dev](https://groups.google.com/forum/?fromgroups#!forum/foreman-dev)
 
 # Supported Modules
 Currently Supported modules:
@@ -24,17 +20,17 @@ Currently Supported modules:
  * TFTP - any UNIX based tftp server
 
 # Installation
-Read the [Smart Proxy Installation section](http://theforeman.org/manuals/latest/index.html#4.3.1SmartProxyInstallation) of the manual.
+Read the [Smart Proxy Installation section](https://theforeman.org/manuals/latest/index.html#4.3.1SmartProxyInstallation) of the manual.
 
 # Configuration
-Read the [Smart Proxy Settings section](http://theforeman.org/manuals/latest/index.html#4.3.2SmartProxySettings) of the manual.
+Read the [Smart Proxy Settings section](https://theforeman.org/manuals/latest/index.html#4.3.2SmartProxySettings) of the manual.
 
 # For Developers
-* [API Reference](http://projects.theforeman.org/projects/smart-proxy/wiki/API)
-* Smart Proxy Plugin development [how-to] (http://projects.theforeman.org/projects/foreman/wiki/How_to_Create_a_Smart-Proxy_Plugin)
+* [API Reference](https://projects.theforeman.org/projects/smart-proxy/wiki/API)
+* Smart Proxy Plugin development [how-to] (https://projects.theforeman.org/projects/foreman/wiki/How_to_Create_a_Smart-Proxy_Plugin)
 
 # Special thanks
-The original author of this project is [Ohad Levy](http://github.com/ohadlevy). You can find a more thorough list of people who have contributed to this project at some point in [Contributors](Contributors).
+The original author of this project is [Ohad Levy](https://github.com/ohadlevy). You can find a more thorough list of people who have contributed to this project at some point in [Contributors](Contributors).
 
 # License
 See [LICENSE](LICENSE) file.
