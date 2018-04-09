@@ -3,71 +3,67 @@ require 'tempfile'
 require 'fileutils'
 
 require 'puppetca/puppetca'
-require 'puppetca/puppetca_main'
+require 'puppetca/puppetca_certmanager'
 
 class ProxyTest < Test::Unit::TestCase
-  ## Helper for autosign files.
-  def create_temp_autosign_file
-    file = Tempfile.new('autosign_test')
-    begin
-      ## Setup
-      FileUtils.cp './test/fixtures/autosign.conf', file.path
-      Proxy::PuppetCa.stubs(:autosign_file).returns(file.path)
-    rescue
-      file.close
-      file.unlink
-      file = nil
-    end
-    file
+  CSR_EXAMPLE = <<EOF
+-----BEGIN CERTIFICATE REQUEST-----
+MIIEdTCCAl0CAQAwGzEZMBcGA1UEAwwQdGVzdC5leGFtcGxlLmNvbTCCAiIwDQYJ
+KoZIhvcNAQEBBQADggIPADCCAgoCggIBAK+eSI5LYrBUROs02A9DYPqEpnN1YokD
+MSb47NQW0A4+o7B7h/B3HFN2Moo/US/zNLDvHGuVDZIaIpudtNBTBSX0MQPtF8tQ
+Lm7WA6wGwqpX3eR3OLXdWR/T4wIvFQ1gvCS/snuW8YennSeAl1Yijtr2EHiPFJ/i
+Dy67vGhvXrqVDl/svIf13uw9zcxZ34VfE8zYg5WZ/thlhjbue/KKJdn+riNIYNK4
+gwEjFNER9U38UPZUXMNJCEAXEJ7GKXQUKMXXtybp5jihPxTjbxFKilaIEJNM35ej
+9Ra0OREGc0Cc0beaW9+n9ZFBxsfM/NV0nzOos4tmSEyAq54Nbd80ropYivrmSRQf
+/yDPijvmC4frL1nhSJaf17rmfw27urbPcObbpuQFXCIlNFJd/CwpPds6ikZ9otDx
+yTzPveLbQUCh3CzReODC7jopi7vchPH3cZVvuaE90REKL++3xHqOzRpq5tZ1xc2j
+3agiQmTthnzABx6cj/q2ab4YAwpaSIAZFoHtzD8tsyD1WTGkL9jzBkCULd7ZcQdR
+AL0PwGLYI2hbCsQV6i9noVZZ19+hHEjjk06lG5SKK+H8eTIybWr9IPU/yZowNPtd
+et6samT8ltBLAxqTFffrdsTUTQAoN+ykgsML/N3LUuPACg1G6ge0MQVVvBIfCNiP
+SjfPJmthHHc1AgMBAAGgFTATBgkqhkiG9w0BCQcxBhMEMTIzNDANBgkqhkiG9w0B
+AQsFAAOCAgEAfTtWZAP8z9pxR6esLkoCfhhXaYzjnzJ5/4r+x/VPpJQEzI37CScG
+Dma+UzVkIddCVc5oFtzLtVZtGTaygW2QyR7wu+an0qQBs+MVzkjPPnMLerDUR89c
+Nk5DlDMaKFYV3JJpg2G2YdmOR0SEF0640Aw0/Ftx41iTSLSFopDMcTPRbZ9zm2AN
+uer2TMIWpio6k6OyEJHkyifQOG1kgI+amVgk21kVRm5qUZV01QduLSxuN8KQKDYT
+dmE31BpSQdVYzvrRPV558+NiWSrRheQtLfCl4BUZsZjfgh7OXSiy/yCZ6Co7FeDX
+WbVtlIeaFukt5fPD4VKBQVIP296ZiB4BFIDLUcq87DaWbjbO1owS/B89MbAM6Fjy
+FHCE3x0nUev3LYrKrJGouHYXiyUNGQk1ilI60y1xc3+B3ErjzpszJB1uBRk1fsem
+Np60VUVqNPD7GzxlE/acgEa2Xij1vl+g4yIjWGVv5Fokb4fO6K+n8iSEYKG4+nMr
++vjP7bTcW4GymYPH38TtQfzhXvFMODL8ehiy2xjndEfLMitrbP1vjiLrCZD6gIk3
+alxj7nHJMXF83Rqg/7OhERMVmUGE+tDiRD95bMK/eYq4sj49zke6puf5r0MeW6Fv
+jfuZ0r0kJmJF/r2FZEKuScl0uS4/RWUvgUdUFwpZ3i8KzJWJ6NDm7eY=
+-----END CERTIFICATE REQUEST-----
+EOF
+
+  def setup
+    @foreman_url = 'https://foreman.example.com'
+    Proxy::SETTINGS.stubs(:foreman_url).returns(@foreman_url)
+    @cert_manager = Proxy::PuppetCa::Certmanager.new
   end
 
-  def test_should_list_autosign_entries
-    Proxy::PuppetCa.stubs(:autosign_file).returns('./test/fixtures/autosign.conf')
-    assert_equal Proxy::PuppetCa.autosign_list, ['foo.example.com', '*.bar.example.com']
+  def test_extracts_token_form_csr
+    req = Proxy::PuppetCa::CSR.new CSR_EXAMPLE
+    assert_equal req.challenge_password, '1234'
   end
 
-  def test_should_add_autosign_entry
-    file = create_temp_autosign_file
-    content = []
-    begin
-      ## Execute
-      Proxy::PuppetCa.autosign 'foobar.example.com'
-      ## Read output
-      content = file.read.split("\n")
-    ensure
-      file.close
-      file.unlink
-    end
-    assert_true content.include?('foobar.example.com')
+  def test_acceptsall_on_signall
+    @cert_manager.stubs(:sign_all).returns(true)
+    assert_true @cert_manager.autosign CSR_EXAMPLE
   end
 
-  def test_should_not_duplicate_autosign_entry
-    file = create_temp_autosign_file
-    begin
-      before_content = file.read
-      file.seek(0)
-      ## Execute
-      Proxy::PuppetCa.autosign 'foo.example.com'
-      ## Read output
-      after_content = file.read
-    ensure
-      file.close
-      file.unlink
-    end
-    assert_equal before_content, after_content
+  def test_makes_a_correct_foreman_call
+    stub_request(:delete, @foreman_url+'/api/puppetca_token/test').to_return(:status => [204, 'NO CONTENT'])
+    assert_true @cert_manager.foreman_csr_validation 'test'
   end
 
-  def test_should_remove_autosign_entry
-    file = create_temp_autosign_file
-    begin
-      Proxy::PuppetCa.disable 'foo.example.com'
-      content = file.read
-    ensure
-      file.close
-      file.unlink
-    end
-    assert_false content.split("\n").include?('foo.example.com')
-    assert_true content.end_with?("\n")
+  def test_handles_foreman_deny_correct
+    stub_request(:delete, @foreman_url+'/api/puppetca_token/1234').to_return(:status => [404, 'NOT FOUND'])
+    assert_false @cert_manager.autosign CSR_EXAMPLE
+  end
+
+  def test_handles_foreman_accept_correct
+    stub_request(:delete, @foreman_url+'/api/puppetca_token/1234').to_return(:status => [204, 'NO CONTENT'])
+    assert_true @cert_manager.autosign CSR_EXAMPLE
   end
 
   def test_which_should_return_a_binary_path
@@ -76,7 +72,7 @@ class ProxyTest < Test::Unit::TestCase
       FileTest.stubs(:file?).with("#{p}/ls").returns(r)
       FileTest.stubs(:executable?).with("#{p}/ls").returns(r)
     end
-    assert_equal '/bin/ls', Proxy::PuppetCa.which('ls')
+    assert_equal '/bin/ls', @cert_manager.which('ls')
   end
 
   INVENTORY_CONTENTS =<<EOF
@@ -89,7 +85,7 @@ EOF
     assert_equal({"revoked.my.domain" => {:serial => 4, :not_before => "2017-01-11T15:04:35UTC", :not_after => "2022-01-11T15:04:35UTC"},
                   "active.my.domain" => {:serial => 3, :not_before => "2015-09-02T08:34:59UTC", :not_after => "2020-09-01T08:34:59UTC"},
                   "second-active.my.domain" => {:serial => 5, :not_before => "2017-01-14T12:01:22UTC", :not_after => "2022-01-14T12:01:22UTC"}},
-                 ::Proxy::PuppetCa.parse_inventory(INVENTORY_CONTENTS))
+                 @cert_manager.parse_inventory(INVENTORY_CONTENTS))
   end
 
   CRL_CONTENTS =<<EOF
@@ -113,29 +109,24 @@ Ldr9eKhzX/iwBRnlcwxVCLSUEP+46oGi8hawrhEUnPxPtftMjPVFTQ==
 -----END X509 CRL-----
 EOF
   def test_revoked_serials
-   assert_equal Set.new([2, 4]), ::Proxy::PuppetCa.revoked_serials(CRL_CONTENTS)
+   assert_equal Set.new([2, 4]), @cert_manager.revoked_serials(CRL_CONTENTS)
   end
 
   def test_compute_ca_inventory
     assert_equal({"revoked.my.domain"=>{:serial=>4, :not_before=>"2017-01-11T15:04:35UTC", :not_after=>"2022-01-11T15:04:35UTC", :state=>"revoked"},
                   "active.my.domain"=>{:serial=>3, :not_before=>"2015-09-02T08:34:59UTC", :not_after=>"2020-09-01T08:34:59UTC"},
                   "second-active.my.domain" => {:serial => 5, :not_before => "2017-01-14T12:01:22UTC", :not_after => "2022-01-14T12:01:22UTC"}},
-                 ::Proxy::PuppetCa.compute_ca_inventory(INVENTORY_CONTENTS, CRL_CONTENTS))
+                 @cert_manager.compute_ca_inventory(INVENTORY_CONTENTS, CRL_CONTENTS))
   end
 
   def test_should_clean_host
     #TODO
-    assert_respond_to Proxy::PuppetCa, :clean
-  end
-
-  def test_should_disable_host
-    #TODO
-    assert_respond_to Proxy::PuppetCa, :disable
+    assert_respond_to @cert_manager, :clean
   end
 
   def test_should_sign_host
     #TODO
-    assert_respond_to Proxy::PuppetCa, :sign
+    assert_respond_to @cert_manager, :sign
   end
 
 end

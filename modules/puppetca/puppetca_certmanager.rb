@@ -1,13 +1,16 @@
 require 'openssl'
 require 'set'
+require 'puppetca/puppetca_csr'
+require 'proxy/request'
 
-module Proxy::PuppetCa
-  extend ::Proxy::Log
-  extend ::Proxy::Util
+module ::Proxy::PuppetCa
 
   class NotPresent < RuntimeError; end
 
-  class << self
+  class Certmanager
+    include ::Proxy::Log
+    include ::Proxy::Util
+
     def sign certname
       puppetca("sign", certname)
     end
@@ -16,51 +19,52 @@ module Proxy::PuppetCa
       puppetca("clean", certname)
     end
 
-    #remove certname from autosign if exists
-    def disable certname
-      raise "No such file #{autosign_file}" unless File.exist?(autosign_file)
-
-      found = false
-      entries = File.readlines(autosign_file).collect do |l|
-        if l.chomp != certname
-          l
-        else
-          found = true
-          nil
-        end
-      end.uniq.compact
-      if found
-        open(autosign_file, File::TRUNC|File::RDWR) do |autosign|
-          autosign.write entries.join
-        end
-        logger.debug "Removed #{certname} from autosign"
-      else
-        logger.debug "Attempt to remove nonexistent client autosign for #{certname}"
-        raise NotPresent, "Attempt to remove nonexistent client autosign for #{certname}"
+    # decide if csr should be autosigned
+    # parameter is csr to use
+    def autosign csr
+      if csr.nil?
+        logger.warn "Request did not include a CSR."
+        return false
       end
+      if sign_all
+        logger.warn "Signing CSR without token verification."
+        return true
+      end
+      begin
+        req = Proxy::PuppetCa::CSR.new csr
+        token = req.challenge_password
+      rescue
+        logger.warn "Invalid CSR"
+        return false
+      end
+      if token.nil?
+        logger.warn "CSR did not include a token."
+        return false
+      end
+      foreman_csr_validation token
     end
 
-    # add certname to puppet autosign file
-    # parameter is certname to use
-    def autosign certname
-      FileUtils.touch(autosign_file) unless File.exist?(autosign_file)
-
-      open(autosign_file, File::RDWR) do |autosign|
-        # Check that we don't have that host already
-        found = autosign.readlines.find { |line| line.chomp == certname }
-        autosign.puts certname unless found
-      end
-      logger.debug "Added #{certname} to autosign"
+    def sign_all
+      Proxy::PuppetCa::Plugin.settings.sign_all
     end
 
-    # list of hosts which are now allowed to be installed via autosign
-    def autosign_list
-      return [] unless File.exist?(autosign_file)
-      File.read(autosign_file).split("\n").reject do |v|
-        v =~ /^\s*#.*|^$/ ## Remove comments and empty lines
-      end.map do |v|
-        v.chomp ## Strip trailing spaces
+    # Verify token by trying to delete it from foreman
+    def foreman_csr_validation token
+      logger.debug "Calling foreman with token '#{token}'."
+      fr = Proxy::HttpRequest::ForemanRequest.new
+      req = fr.request_factory.create_delete("api/puppetca_token", :id => token)
+      begin
+        response = fr.send_request(req)
+        if response.code.start_with? "2"
+          logger.debug "Autosigning CSR with token " + token
+          return true
+        end
+      rescue => e
+        logger.error "Error while calling foreman: " + e.to_s
+        return false
       end
+      logger.debug "Denied autosign request for token " + token
+      return false
     end
 
     # list of all certificates and their state/fingerprint
@@ -127,10 +131,6 @@ module Proxy::PuppetCa
 
     def ssldir
       Proxy::PuppetCa::Plugin.settings.ssldir
-    end
-
-    def autosign_file
-      Proxy::PuppetCa::Plugin.settings.autosignfile
     end
 
     # parse the puppetca --list output

@@ -20,6 +20,12 @@ module Proxy::HttpRequest
       req
     end
 
+    def create_delete(path, query={}, headers={})
+      req = Net::HTTP::Delete.new(uri(path).path + "/" + query[:id])
+      req = add_headers(req, headers)
+      req
+    end
+
     def uri(path)
       URI.join(@base_uri.to_s, path)
     end

@@ -1,7 +1,8 @@
-require 'puppetca/puppetca_main'
-
 module Proxy::PuppetCa
   class Api < ::Sinatra::Base
+    extend Proxy::PuppetCa::DependencyInjection
+    inject_attr :cert_manager, :cert_manager
+
     helpers ::Proxy::Helpers
     authorize_with_trusted_hosts
     authorize_with_ssl_client
@@ -9,40 +10,18 @@ module Proxy::PuppetCa
     get "/?" do
       content_type :json
       begin
-        Proxy::PuppetCa.list.to_json
+        cert_manager.list.to_json
       rescue => e
         log_halt 406, "Failed to list certificates: #{e}"
       end
     end
 
-    get "/autosign" do
-      content_type :json
+    post "/autosign" do
+      request.body.rewind
       begin
-        Proxy::PuppetCa.autosign_list.to_json
+        cert_manager.autosign(request.body.read) ? 200 : 404
       rescue => e
-        log_halt 406, "Failed to list autosign entries: #{e}"
-      end
-    end
-
-    post "/autosign/:certname" do
-      content_type :json
-      certname = params[:certname]
-      begin
-        Proxy::PuppetCa.autosign(certname)
-      rescue => e
-        log_halt 406, "Failed to enable autosign for #{certname}: #{e}"
-      end
-    end
-
-    delete "/autosign/:certname" do
-      content_type :json
-      certname = params[:certname]
-      begin
-        Proxy::PuppetCa.disable(certname)
-      rescue Proxy::PuppetCa::NotPresent => e
-        log_halt 404, e.to_s
-      rescue => e
-        log_halt 406, "Failed to remove autosign for #{certname}: #{e}"
+        log_halt 406, "Failed to check autosigning for CSR: #{e}"
       end
     end
 
@@ -50,7 +29,7 @@ module Proxy::PuppetCa
       content_type :json
       certname = params[:certname]
       begin
-        Proxy::PuppetCa.sign(certname)
+        cert_manager.sign(certname)
       rescue => e
         log_halt 406, "Failed to sign certificate(s) for #{certname}: #{e}"
       end
@@ -60,7 +39,7 @@ module Proxy::PuppetCa
       begin
         content_type :json
         certname = params[:certname]
-        Proxy::PuppetCa.clean(certname)
+        cert_manager.clean(certname)
       rescue Proxy::PuppetCa::NotPresent => e
         log_halt 404, e.to_s
       rescue => e
