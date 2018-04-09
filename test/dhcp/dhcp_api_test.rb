@@ -212,6 +212,24 @@ class DhcpApiTest < Test::Unit::TestCase
     assert_equal expected, JSON.parse(last_response.body)
   end
 
+  def test_get_record_by_mac_uppercase
+    @server.expects(:find_record_by_mac).with("192.168.122.0", "00:11:bb:cc:dd:ee").returns(@reservations.first)
+
+    get "/192.168.122.0/mac/00:11:BB:CC:DD:EE"
+
+    assert last_response.ok?, "Last response was not ok: #{last_response.status} #{last_response.body}"
+    expected = {
+      "deleteable" => true,
+      "type"       => "reservation",
+      "hostname"   =>"test.example.com",
+      "ip"         =>"192.168.122.1",
+      "mac"        =>"00:11:bb:cc:dd:ee",
+      "name"       => 'test.example.com',
+      "subnet"     =>"192.168.122.0/255.255.255.0" # NOTE: 'subnet' attribute isn't being used by foreman, which adds a 'network' attribute instead
+    }
+    assert_equal expected, JSON.parse(last_response.body)
+  end
+
   def test_get_record_by_mac_for_nonexistent_mac
     @server.expects(:find_record_by_mac).with("192.168.122.0", "00:11:bb:cc:dd:ee").returns(nil)
     get "/192.168.122.0/mac/00:11:bb:cc:dd:ee"
@@ -301,6 +319,13 @@ class DhcpApiTest < Test::Unit::TestCase
   def test_delete_records_by_mac
     @server.expects(:del_record_by_mac).with("192.168.122.0", "00:11:bb:cc:dd:ee")
     delete "/192.168.122.0/mac/00:11:bb:cc:dd:ee"
+    assert_equal 200, last_response.status
+    assert_empty last_response.body
+  end
+
+  def test_delete_records_by_mac_uppercase
+    @server.expects(:del_record_by_mac).with("192.168.122.0", "00:11:bb:cc:dd:ee")
+    delete "/192.168.122.0/mac/00:11:BB:CC:DD:EE"
     assert_equal 200, last_response.status
     assert_empty last_response.body
   end

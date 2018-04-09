@@ -76,13 +76,15 @@ class Proxy::DhcpApi < ::Sinatra::Base
 
   # returns a record for a mac address
   get "/:network/mac/:mac_address" do
+    param_network = params[:network]
+    param_mac = params[:mac_address].downcase unless params[:mac_address].nil?
     begin
       content_type :json
-      record = server.find_record_by_mac(params[:network], params[:mac_address])
-      log_halt 404, "No DHCP record for MAC #{params[:network]}/#{params[:mac_address]} found" unless record
+      record = server.find_record_by_mac(param_network, param_mac)
+      log_halt 404, "No DHCP record for MAC #{param_network}/#{param_mac} found" unless record
       record.to_json
     rescue ::Proxy::DHCP::SubnetNotFound
-      log_halt 404, "Subnet #{params[:network]} could not found"
+      log_halt 404, "Subnet #{param_network} could not found"
     rescue => e
       log_halt 400, e
     end
@@ -135,7 +137,7 @@ class Proxy::DhcpApi < ::Sinatra::Base
   # delete a record for a mac address from a network
   delete "/:network/mac/:mac_address" do
     begin
-      server.del_record_by_mac(params[:network], params[:mac_address])
+      server.del_record_by_mac(params[:network], params[:mac_address].nil? ? nil : params[:mac_address].downcase)
       nil
     rescue ::Proxy::DHCP::SubnetNotFound # rubocop:disable Lint/HandleExceptions
       # no need to do anything
