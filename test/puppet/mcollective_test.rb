@@ -20,7 +20,7 @@ class MCollectiveTest < Test::Unit::TestCase
     @mcollective = Proxy::PuppetMCollective::Runner.new("peadmin")
     @mcollective.stubs(:which).with("sudo", anything).returns("/usr/bin/sudo")
     @mcollective.stubs(:which).with("mco", anything).returns("/usr/bin/mco")
-    @mcollective.expects(:shell_command).with(["/usr/bin/sudo", "-u", "peadmin", "/usr/bin/mco", "puppet", "runonce", "-I", "host1", "host2"]).returns(true)
+    @mcollective.expects(:shell_command).with(["/usr/bin/sudo", "-Hu", "peadmin", "/usr/bin/mco", "puppet", "runonce", "-I", "host1", "host2"]).returns(true)
     assert @mcollective.run(["host1", "host2"])
   end
 
