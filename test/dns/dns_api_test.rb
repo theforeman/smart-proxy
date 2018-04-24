@@ -8,6 +8,9 @@ class DnsApiTestProvider
   def create_a_record(fqdn, ip)
     @fqdn = fqdn; @ip = ip; @type = 'A'
   end
+  def create_srv_record(fqdn, value)
+    @fqdn = fqdn; @ip = value; @type = 'SRV'
+  end
   def create_aaaa_record(fqdn, ip)
     @fqdn = fqdn; @ip = ip; @type = 'AAAA'
   end
@@ -52,6 +55,29 @@ class DnsApiTest < Test::Unit::TestCase
     @app = Proxy::Dns::Api.new
     @server = @app.helpers.server
     @app
+  end
+
+  def test_create_srv_record
+    post '/', :fqdn => '_sip._tcp.example.com.', :value => '0 5 5060 sipserver.example.com.', :type => 'SRV'
+    assert_equal 200, last_response.status
+    assert_equal '_sip._tcp.example.com.', @server.fqdn
+    assert_equal '0 5 5060 sipserver.example.com.', @server.ip
+    assert_equal 'SRV', @server.type
+  end
+
+  def test_create_srv_record_returns_error_if_value_is_wrong
+    post '/', :fqdn => '_sip._tcp.example.com.', :value => '0 5 5060 sipserver.example.com. 1 2 3', :type => 'SRV'
+    assert_equal 400, last_response.status
+  end
+
+  def test_create_srv_record_returns_error_if_value_is_wrong2
+    post '/', :fqdn => '_sip._tcp.example.com.', :value => 'a 5 5060 sipserver.example.com.', :type => 'SRV'
+    assert_equal 400, last_response.status
+  end
+
+  def test_create_srv_record_returns_error_if_value_is_wrong3
+    post '/', :fqdn => '_sip._tcp.example.com.', :value => '0 5 sipserver.example.com.', :type => 'SRV'
+    assert_equal 400, last_response.status
   end
 
   def test_create_a_record

@@ -17,7 +17,11 @@ module Proxy::Dns
       log_halt(400, "'create' requires fqdn, value, and type parameters") if fqdn.nil? || value.nil? || type.nil?
 
       begin
-        validate_dns_name!(fqdn)
+        if type == 'SRV'
+          validate_srv_name!(fqdn)
+        else
+          validate_dns_name!(fqdn)
+        end
 
         case type
         when 'A'
@@ -32,6 +36,9 @@ module Proxy::Dns
         when 'PTR'
           validate_reverse_dns_name!(value)
           server.create_ptr_record(fqdn, value)
+        when 'SRV'
+          validate_srv_value!(value)
+          server.create_srv_record(fqdn, value)
         else
           log_halt(400, "unrecognized 'type' parameter: #{type}")
         end
@@ -51,7 +58,11 @@ module Proxy::Dns
       end
 
       begin
-        validate_dns_name!(name)
+        if type == 'SRV'
+          validate_srv_name!(name)
+        else
+          validate_dns_name!(name)
+        end
 
         case type
         when 'A'
@@ -63,6 +74,8 @@ module Proxy::Dns
         when 'PTR'
           validate_reverse_dns_name!(name)
           server.remove_ptr_record(name)
+        when 'SRV'
+          server.remove_srv_record(name)
         else
           log_halt(400, "unrecognized 'type' parameter: #{type}")
         end
@@ -71,6 +84,21 @@ module Proxy::Dns
       rescue => e
         log_halt 400, e
       end
+    end
+
+    def validate_srv_value!(value)
+      priority,weight,port,target,nillval = value.split(' ')
+      validate_dns_name!(target)
+      raise Proxy::Dns::Error.new("Invalid DNS SRV value #{value}") unless priority.scan(/\D/).empty? and
+        weight.scan(/\D/).empty? and
+        port.scan(/\D/).empty? and
+        (0..65535) === priority.to_i and
+        (0..65535) === weight.to_i and
+        (1..65535) === port.to_i and nillval.nil?
+    end
+
+    def validate_srv_name!(name)
+      raise Proxy::Dns::Error.new("Invalid DNS srv name #{name}") unless name =~ /^([a-zA-Z0-9_]([-a-zA-Z0-9_]+)?\.?)+$/
     end
 
     def validate_dns_name!(name)
