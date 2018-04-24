@@ -20,6 +20,10 @@ module Proxy::Dns
       Resolv::DNS.new(:nameserver => @server)
     end
 
+    def create_srv_record(service, value)
+      do_create(service, value, 'SRV')
+    end
+
     def create_a_record(fqdn, ip)
       case a_record_conflicts(fqdn, ip) #returns -1, 0, 1
         when 1 then
@@ -70,6 +74,10 @@ module Proxy::Dns
 
     def remove_a_record(fqdn)
       do_remove(fqdn, "A")
+    end
+
+    def remove_srv_record(fqdn)
+      do_remove(fqdn, 'SRV')
     end
 
     def remove_aaaa_record(fqdn)
