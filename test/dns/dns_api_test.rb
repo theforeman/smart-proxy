@@ -8,6 +8,9 @@ class DnsApiTestProvider
   def create_a_record(fqdn, ip)
     @fqdn = fqdn; @ip = ip; @type = 'A'
   end
+  def create_srv_record(fqdn, value)
+    @fqdn = fqdn; @ip = value; @type = 'SRV'
+  end
   def create_aaaa_record(fqdn, ip)
     @fqdn = fqdn; @ip = ip; @type = 'AAAA'
   end
@@ -28,6 +31,9 @@ class DnsApiTestProvider
   end
   def remove_cname_record(fqdn)
     @fqdn = fqdn; @type = 'CNAME'
+  end
+  def remove_srv_record(fqdn)
+    @fqdn = fqdn; @type = 'SRV'
   end
 end
 
@@ -52,6 +58,14 @@ class DnsApiTest < Test::Unit::TestCase
     @app = Proxy::Dns::Api.new
     @server = @app.helpers.server
     @app
+  end
+
+  def test_create_srv_record
+    post '/', :fqdn => '_sip._tcp.example.com.', :value => '0 5 5060 sipserver.example.com.', :type => 'SRV'
+    assert_equal 200, last_response.status
+    assert_equal '_sip._tcp.example.com.', @server.fqdn
+    assert_equal '0 5 5060 sipserver.example.com.', @server.ip
+    assert_equal 'SRV', @server.type
   end
 
   def test_create_a_record
@@ -204,6 +218,13 @@ class DnsApiTest < Test::Unit::TestCase
     assert_equal 'CNAME', @server.type
   end
 
+  def test_delete_srv_record
+    delete "/test.com/SRV"
+    assert_equal 200, last_response.status
+    assert_equal 'test.com', @server.fqdn
+    assert_equal 'SRV', @server.type
+  end
+
   def test_delete_returns_error_if_value_is_missing
     delete '/'
     assert_equal 404, last_response.status
@@ -222,5 +243,72 @@ class DnsApiTest < Test::Unit::TestCase
   def test_delete_returns_error_on_invalid_type
     delete "/test.com/INVALID"
     assert_equal 400, last_response.status
+  end
+
+  def test_validate_srv_value_fails_if_more_than_four_parts
+    app = Proxy::Dns::Api.new!
+    assert_raise Proxy::Dns::Error do
+      app.validate_srv_value!('0 5 5060 sipserver.example.com. 1 2 3')
+    end
+  end
+
+  def test_validate_srv_value_fails_if_priority_weight_port_not_integer
+    app = Proxy::Dns::Api.new!
+    assert_raise Proxy::Dns::Error do
+      app.validate_srv_value!('a 5 5060 sipserver.example.com.')
+    end
+    assert_raise Proxy::Dns::Error do
+      app.validate_srv_value!('0 % 5060 sipserver.example.com.')
+    end
+    assert_raise Proxy::Dns::Error do
+      app.validate_srv_value!('0 5 X sipserver.example.com.')
+    end
+  end
+
+  def test_validate_srv_value_fails_if_priority_weight_port_exceed_range
+    app = Proxy::Dns::Api.new!
+    assert_raise Proxy::Dns::Error do
+      app.validate_srv_value!('70000 5 5060 sipserver.example.com.')
+    end
+    assert_raise Proxy::Dns::Error do
+      app.validate_srv_value!('0 70000 5060 sipserver.example.com.')
+    end
+    assert_raise Proxy::Dns::Error do
+      app.validate_srv_value!('0 5 70000 sipserver.example.com.')
+    end
+  end
+
+  def test_validate_srv_value_fails_if_fewer_than_four_parts
+    app = Proxy::Dns::Api.new!
+    assert_raise Proxy::Dns::Error do
+      app.validate_srv_value!('0 5 sipserver.example.com.')
+    end
+  end
+
+  def test_validate_srv_name_allows_correct_input
+    app = Proxy::Dns::Api.new!
+    assert_nothing_raised do
+      app.validate_srv_name!('_sip._tcp.example.com')
+    end
+    assert_nothing_raised do
+      app.validate_srv_name!('sipserver.example.com.')
+    end
+  end
+
+  def test_validate_srv_name_fails_if_srv_name_blank
+    app = Proxy::Dns::Api.new!
+    assert_raise Proxy::Dns::Error do
+      app.validate_srv_name!(' ')
+    end
+    assert_raise Proxy::Dns::Error do
+      app.validate_srv_name!('')
+    end
+  end
+
+  def test_validate_srv_name_fails_if_srv_name_contains_inappropriate_chars
+    app = Proxy::Dns::Api.new!
+    assert_raise Proxy::Dns::Error do
+      app.validate_srv_name!('google com')
+    end
   end
 end

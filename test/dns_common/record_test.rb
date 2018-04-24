@@ -172,6 +172,12 @@ class DnsRecordTest < Test::Unit::TestCase
     assert_equal false, Proxy::Dns::Record.new.to_ipaddress('some.host')
   end
 
+  def test_create_srv_record
+    Proxy::Dns::Record.any_instance.expects(:do_create).with('_sip._tcp.example.com.','10 60 5060 bigbox.example.com.', 'SRV')
+
+    assert_nil Proxy::Dns::Record.new.create_srv_record('_sip._tcp.example.com.', '10 60 5060 bigbox.example.com.')
+  end
+
   def test_create_a_record
     Proxy::Dns::Record.any_instance.expects(:a_record_conflicts).returns(-1)
     Proxy::Dns::Record.any_instance.expects(:do_create).with('some.host', '192.168.33.22', 'A')
