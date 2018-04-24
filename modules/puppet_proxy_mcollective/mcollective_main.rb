@@ -21,7 +21,7 @@ class Proxy::PuppetMCollective::Runner < Proxy::Puppet::Runner
     # Defaults:foreman-proxy !requiretty
     # foreman-proxy ALL=(peadmin) NOPASSWD: /opt/puppet/bin/mco *',
     if user
-      cmd.push("-u", user)
+      cmd.push("-Hu", user)
     end
 
     mco_path = which("mco", ["/opt/puppet/bin", "/opt/puppetlabs/bin"])
