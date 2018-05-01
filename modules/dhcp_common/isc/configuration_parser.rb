@@ -168,12 +168,44 @@ module Proxy
         end
         # rubocop:enable Style/StructInheritance
 
+        class Literal < Rsec::Binary
+          def _parse ctx
+            buffer = StringIO.new
+            bs = false
+            end_of_string = false
+            double_quote_counter = 0
+
+            return Rsec::INVALID if ctx.peek(1) != '"'
+            until end_of_string
+              return Rsec::INVALID if ctx.eos?
+              c = ctx.get_byte
+              if bs
+                buffer << sprintf("\\%c", c)
+                bs = false
+              elsif c == '\\'
+                bs = true
+              elsif c == '"'
+                double_quote_counter += 1
+                end_of_string = (double_quote_counter == 2)
+                buffer << c
+              else
+                buffer << c
+              end
+            end
+
+            buffer.string
+          end
+        end
+
+        def literal &p
+          Literal.new.map p
+        end
+
         NBSP = /[\ \t]+/.r
         SPACE = /\s*/.r
         COMMENT = /#.*/.r.^('\n') {|comment| CommentNode[comment]}
         EOSTMT = ';'.r 'end of statement'
         COMMA =  /\s*,\s*/.r 'comma'
-        LITERAL = /".*?"|'.*?'/.r
         HEX = /([a-fA-F0-9][a-fA-F0-9]?:)+[a-fA-F0-9][a-fA-F0-9]?/.r
         MAC_ADDRESS = /([a-fA-F0-9][a-fA-F0-9]?:){5}[a-fA-F0-9][a-fA-F0-9]?/.r 'mac address'
         IPV4_ADDRESS = /\d+\.\d+\.\d+\.\d+/.r 'ipv4 address'
@@ -202,17 +234,16 @@ module Proxy
 
         def option_values
           anything = /[^;,{}\s]+/.r
-          SPACE.join(LITERAL | anything).odd.join(COMMA).even
+          SPACE.join(literal | anything).odd.join(COMMA).even
         end
 
         def server_duid
           Rsec::Fail.reset
           keyword = word('server-duid').fail 'keyword_server_duid'
           anything = /[^;,{}\s]+/.r
-          literal = /"([^"]|\")*"/.r
           llt = seq_(word('llt') | word('LLT'), SPACE.join(anything).odd._?)
           ll = seq_(word('ll') | word('LL'), SPACE.join(anything).odd._?)
-          en = seq_(word('en') | word('EN'), prim(:int32), LITERAL)
+          en = seq_(word('en') | word('EN'), prim(:int32), literal)
           seq_(keyword,  literal | HEX | en | llt | ll | prim(:int32), EOSTMT) {|_, duid, _| KeyValueNode[:server_duid, duid.respond_to?(:flatten) ? duid.flatten : duid]}
         end
 
@@ -300,12 +331,12 @@ module Proxy
 
         def lease_uid
           keyword = word('uid').fail 'keyword_uid'
-          seq_(keyword, LITERAL, EOSTMT) {|_, value, _| KeyValueNode[:uid, value]}
+          seq_(keyword, literal, EOSTMT) {|_, value, _| KeyValueNode[:uid, value]}
         end
 
         def lease_hostname
           keyword = word('client-hostname').fail 'keyword_client_hostname'
-          seq_(keyword, LITERAL | FQDN, EOSTMT) {|_, fqdn, _| KeyValueNode[:client_hostname, fqdn]}
+          seq_(keyword, literal | FQDN, EOSTMT) {|_, fqdn, _| KeyValueNode[:client_hostname, fqdn]}
         end
 
         def lease
@@ -329,7 +360,7 @@ module Proxy
           Rsec::Fail.reset
           keyword = word('group').fail 'keyword_group'
           anything = /[^;,{}\s]+/.r
-          seq_(keyword, SPACE.join(LITERAL | anything).odd._?, LFT_BRACKET,
+          seq_(keyword, SPACE.join(literal | anything).odd._?, LFT_BRACKET,
                SPACE.join(option | host | lazy {subnet} | lazy {group} | lazy {shared_network} | COMMENT | deleted | ignored_declaration | ignored_block).odd,
                RGT_BRACKET).cached {|_, name, _, statements, _| GroupNode[name.flatten.first, statements]}
         end
@@ -338,7 +369,7 @@ module Proxy
           Rsec::Fail.reset
           keyword = word('shared-network').fail 'keyword_shared_network'
           seq_(keyword,
-               SPACE.join(LITERAL | FQDN).odd, LFT_BRACKET,
+               SPACE.join(literal | FQDN).odd, LFT_BRACKET,
                SPACE.join(include_file | option | host | lazy {subnet} | lazy {group} | pool | COMMENT | deleted | ignored_declaration | ignored_block).odd,
                RGT_BRACKET).cached {|_, name, _, statements, _| GroupNode[name.first, statements]}
         end
@@ -365,7 +396,7 @@ module Proxy
         def include_file
           Rsec::Fail.reset
           include_keyword = word('include').fail 'include_keyword'
-          seq_(include_keyword, LITERAL) do |_, filename_in_quotes|
+          seq_(include_keyword, literal) do |_, filename_in_quotes|
             ConfigurationParser.new.parse_file(literal_to_filename(filename_in_quotes))
           end
         end
@@ -396,7 +427,7 @@ module Proxy
         end
 
         def parse_file(a_path)
-          File.open(a_path, 'r') {|f| conf.parse!(f.read, a_path)}
+          File.open(a_path, 'r:ASCII-8BIT') {|f| conf.parse!(f.read, a_path)}
         end
 
         # returns all_subnets, all_hosts, root_group
