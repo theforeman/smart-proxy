@@ -387,6 +387,8 @@ EOMULTILINE_HOST
                  Proxy::DHCP::CommonISC::ConfigurationParser.new.lease_uid.parse!('uid "\000DELLX\000\020W\200L\310\300O022";')
     assert_equal Proxy::DHCP::CommonISC::ConfigurationParser::KeyValueNode[:uid, '"\000DELLX\000\020W\200L\310\300O022"'],
                  Proxy::DHCP::CommonISC::ConfigurationParser.new.lease_uid.parse!('uid "\000DELLX\000\020W\200L\310\300O022" ; ')
+    assert_equal Proxy::DHCP::CommonISC::ConfigurationParser::KeyValueNode[:uid, '"\000\001\000\001\"L{\010RT\000A\377\305"'],
+                 Proxy::DHCP::CommonISC::ConfigurationParser.new.lease_uid.parse!('uid "\000\001\000\001\"L{\010RT\000A\377\305" ; ')
   end
 
   def test_lease_client_name
