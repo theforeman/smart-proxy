@@ -1,4 +1,11 @@
+2018-05-17	swadeley <swadeley@redhat.com>
+	* Fixes #23399 - Fix puppet kick instructions
+
+2018-05-17	Lukas Zapletal <lzap+git@redhat.com>
+	* Fixes #23166 - MAC DHCP CRUD not case sensitive
+
 2018-04-05	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Release 1.17.0
 	* Fixes #23031 - parse server duid's with nested double quotes
 
 2018-03-07	Dmitri Dolguikh <dmitri@appliedlogic.ca>
