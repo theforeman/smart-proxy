@@ -43,7 +43,7 @@ class SdNotifyTest < Test::Unit::TestCase
   end
 
   def with_test_socket(&block)
-    socket_path = File.expand_path('../tmp/test_systemd.socket', __FILE__)
+    socket_path = File.expand_path('../tmp/systemd.socket', __FILE__)
     File.delete(socket_path) if File.exist?(socket_path)
 
     socket = Socket.new(Socket::AF_UNIX, Socket::SOCK_DGRAM, 0)
