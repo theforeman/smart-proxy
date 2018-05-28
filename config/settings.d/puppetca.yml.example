@@ -2,7 +2,9 @@
 # Can be true, false, or http/https to enable just one of the protocols
 :enabled: false
 
+# valid providers:
+#   - puppetca_hostname_whitelisting (verify CSRs based on a hostname whitelist)
+#:use_provider: puppetca_hostname_whitelisting
 #:ssldir: /var/lib/puppet/ssl
-#:autosignfile: /etc/puppet/autosign.conf
 #:puppetca_use_sudo: true
 #:sudo_command: /usr/bin/sudo

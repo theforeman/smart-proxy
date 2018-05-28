@@ -1,7 +1,9 @@
-require 'puppetca/puppetca_main'
-
 module Proxy::PuppetCa
   class Api < ::Sinatra::Base
+    extend Proxy::PuppetCa::DependencyInjection
+    inject_attr :puppet_cert, :puppet_cert
+    inject_attr :autosigner, :autosigner
+
     helpers ::Proxy::Helpers
     authorize_with_trusted_hosts
     authorize_with_ssl_client
@@ -9,7 +11,7 @@ module Proxy::PuppetCa
     get "/?" do
       content_type :json
       begin
-        Proxy::PuppetCa.list.to_json
+        puppet_cert.list.to_json
       rescue => e
         log_halt 406, "Failed to list certificates: #{e}"
       end
@@ -18,7 +20,7 @@ module Proxy::PuppetCa
     get "/autosign" do
       content_type :json
       begin
-        Proxy::PuppetCa.autosign_list.to_json
+        autosigner.autosign_list.to_json
       rescue => e
         log_halt 406, "Failed to list autosign entries: #{e}"
       end
@@ -28,7 +30,7 @@ module Proxy::PuppetCa
       content_type :json
       certname = params[:certname]
       begin
-        Proxy::PuppetCa.autosign(certname)
+        autosigner.autosign(certname)
       rescue => e
         log_halt 406, "Failed to enable autosign for #{certname}: #{e}"
       end
@@ -38,7 +40,7 @@ module Proxy::PuppetCa
       content_type :json
       certname = params[:certname]
       begin
-        Proxy::PuppetCa.disable(certname)
+        autosigner.disable(certname)
       rescue Proxy::PuppetCa::NotPresent => e
         log_halt 404, e.to_s
       rescue => e
@@ -50,7 +52,7 @@ module Proxy::PuppetCa
       content_type :json
       certname = params[:certname]
       begin
-        Proxy::PuppetCa.sign(certname)
+        puppet_cert.sign(certname)
       rescue => e
         log_halt 406, "Failed to sign certificate(s) for #{certname}: #{e}"
       end
@@ -60,7 +62,7 @@ module Proxy::PuppetCa
       begin
         content_type :json
         certname = params[:certname]
-        Proxy::PuppetCa.clean(certname)
+        puppet_cert.clean(certname)
       rescue Proxy::PuppetCa::NotPresent => e
         log_halt 404, e.to_s
       rescue => e

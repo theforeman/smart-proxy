@@ -67,6 +67,7 @@ module Proxy
   require 'dhcp_native_ms/dhcp_native_ms'
   require 'dhcp_libvirt/dhcp_libvirt'
   require 'puppetca/puppetca'
+  require 'puppetca_hostname_whitelisting/puppetca_hostname_whitelisting'
   require 'puppet_proxy/puppet'
   require 'puppet_proxy_customrun/puppet_proxy_customrun'
   require 'puppet_proxy_legacy/puppet_proxy_legacy'

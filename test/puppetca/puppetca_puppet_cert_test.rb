@@ -3,71 +3,11 @@ require 'tempfile'
 require 'fileutils'
 
 require 'puppetca/puppetca'
-require 'puppetca/puppetca_main'
+require 'puppetca/puppetca_puppet_cert'
 
-class ProxyTest < Test::Unit::TestCase
-  ## Helper for autosign files.
-  def create_temp_autosign_file
-    file = Tempfile.new('autosign_test')
-    begin
-      ## Setup
-      FileUtils.cp './test/fixtures/autosign.conf', file.path
-      Proxy::PuppetCa.stubs(:autosign_file).returns(file.path)
-    rescue
-      file.close
-      file.unlink
-      file = nil
-    end
-    file
-  end
-
-  def test_should_list_autosign_entries
-    Proxy::PuppetCa.stubs(:autosign_file).returns('./test/fixtures/autosign.conf')
-    assert_equal Proxy::PuppetCa.autosign_list, ['foo.example.com', '*.bar.example.com']
-  end
-
-  def test_should_add_autosign_entry
-    file = create_temp_autosign_file
-    content = []
-    begin
-      ## Execute
-      Proxy::PuppetCa.autosign 'foobar.example.com'
-      ## Read output
-      content = file.read.split("\n")
-    ensure
-      file.close
-      file.unlink
-    end
-    assert_true content.include?('foobar.example.com')
-  end
-
-  def test_should_not_duplicate_autosign_entry
-    file = create_temp_autosign_file
-    begin
-      before_content = file.read
-      file.seek(0)
-      ## Execute
-      Proxy::PuppetCa.autosign 'foo.example.com'
-      ## Read output
-      after_content = file.read
-    ensure
-      file.close
-      file.unlink
-    end
-    assert_equal before_content, after_content
-  end
-
-  def test_should_remove_autosign_entry
-    file = create_temp_autosign_file
-    begin
-      Proxy::PuppetCa.disable 'foo.example.com'
-      content = file.read
-    ensure
-      file.close
-      file.unlink
-    end
-    assert_false content.split("\n").include?('foo.example.com')
-    assert_true content.end_with?("\n")
+class PuppetCaCertmanagerTest < Test::Unit::TestCase
+  def setup
+    @puppet_cert = Proxy::PuppetCa::PuppetCert.new
   end
 
   def test_which_should_return_a_binary_path
@@ -76,7 +16,7 @@ class ProxyTest < Test::Unit::TestCase
       FileTest.stubs(:file?).with("#{p}/ls").returns(r)
       FileTest.stubs(:executable?).with("#{p}/ls").returns(r)
     end
-    assert_equal '/bin/ls', Proxy::PuppetCa.which('ls')
+    assert_equal '/bin/ls', @puppet_cert.which('ls')
   end
 
   INVENTORY_CONTENTS =<<EOF
@@ -89,7 +29,7 @@ EOF
     assert_equal({"revoked.my.domain" => {:serial => 4, :not_before => "2017-01-11T15:04:35UTC", :not_after => "2022-01-11T15:04:35UTC"},
                   "active.my.domain" => {:serial => 3, :not_before => "2015-09-02T08:34:59UTC", :not_after => "2020-09-01T08:34:59UTC"},
                   "second-active.my.domain" => {:serial => 5, :not_before => "2017-01-14T12:01:22UTC", :not_after => "2022-01-14T12:01:22UTC"}},
-                 ::Proxy::PuppetCa.parse_inventory(INVENTORY_CONTENTS))
+                 @puppet_cert.parse_inventory(INVENTORY_CONTENTS))
   end
 
   CRL_CONTENTS =<<EOF
@@ -113,29 +53,24 @@ Ldr9eKhzX/iwBRnlcwxVCLSUEP+46oGi8hawrhEUnPxPtftMjPVFTQ==
 -----END X509 CRL-----
 EOF
   def test_revoked_serials
-   assert_equal Set.new([2, 4]), ::Proxy::PuppetCa.revoked_serials(CRL_CONTENTS)
+   assert_equal Set.new([2, 4]), @puppet_cert.revoked_serials(CRL_CONTENTS)
   end
 
   def test_compute_ca_inventory
     assert_equal({"revoked.my.domain"=>{:serial=>4, :not_before=>"2017-01-11T15:04:35UTC", :not_after=>"2022-01-11T15:04:35UTC", :state=>"revoked"},
                   "active.my.domain"=>{:serial=>3, :not_before=>"2015-09-02T08:34:59UTC", :not_after=>"2020-09-01T08:34:59UTC"},
                   "second-active.my.domain" => {:serial => 5, :not_before => "2017-01-14T12:01:22UTC", :not_after => "2022-01-14T12:01:22UTC"}},
-                 ::Proxy::PuppetCa.compute_ca_inventory(INVENTORY_CONTENTS, CRL_CONTENTS))
+                 @puppet_cert.compute_ca_inventory(INVENTORY_CONTENTS, CRL_CONTENTS))
   end
 
   def test_should_clean_host
     #TODO
-    assert_respond_to Proxy::PuppetCa, :clean
-  end
-
-  def test_should_disable_host
-    #TODO
-    assert_respond_to Proxy::PuppetCa, :disable
+    assert_respond_to @puppet_cert, :clean
   end
 
   def test_should_sign_host
     #TODO
-    assert_respond_to Proxy::PuppetCa, :sign
+    assert_respond_to @puppet_cert, :sign
   end
 
 end
