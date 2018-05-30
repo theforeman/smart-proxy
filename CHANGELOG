@@ -1,3 +1,49 @@
+2018-05-23	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #23433 - lease uids are now parsed correctly
+
+2018-05-22	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #23666 - reduced length of systemd test socket path
+
+2018-05-10	dima <pronix.service@gmail.com>
+	* fixes #23383 - add support for srv dns records
+
+2018-04-27	swadeley <swadeley@redhat.com>
+	* Fixes #23399 - Fix puppet kick instructions
+
+2018-04-25	Matt Cahill <matt-cahill@users.noreply.github.com>
+	* Fixes #23236 - fix for choria puppetrun on Ubuntu
+
+2018-04-09	Lukas Zapletal <lzap+git@redhat.com>
+	* Fixes #23166 - MAC DHCP CRUD not case sensitive
+
+2018-04-08	Ewoud Kohl van Wijngaarden <ewoud@kohlvanwijngaarden.nl>
+	* Update the README
+
+2018-04-06	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #2677 - Removed sinatra workaround for "accept" headers
+
+2018-04-05	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #23031 - parse server duid's with nested double quotes
+
+2018-02-28	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Removed codeclimate badge from README.md
+	* Fixes #22704 - handle dhcpd's "never" expiring leases
+
+2018-02-27	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #22651 - extend dhcpd config parser support for "include"'s
+
+2018-02-19	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #22496 - use common free_ips code in ms dhcp provider
+
+2018-02-12	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #20826 - additional test for server-duid parser.
+
+2018-01-19	Partha Aji <paji@redhat.com>
+	* Fixes #22292 - Config option for tftp timeout
+
+2018-01-17	Michael Moll <kvedulv@kvedulv.de>
+	* Fixes #22304 - Allow Puppet 5.x in bundle
+
 2018-01-08	Ondrej Prazak <oprazak@redhat.com>
 	* Bump version to 1.18-develop
 
