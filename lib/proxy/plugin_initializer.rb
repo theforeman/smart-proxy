@@ -29,6 +29,10 @@ class ::Proxy::PluginGroup
     @https_enabled
   end
 
+  def capabilities
+    [members.map { |m| m.capabilities }.compact].flatten.uniq.sort
+  end
+
   def resolve_providers(all_plugins_and_providers)
     return if inactive?
     return unless @plugin.uses_provider?
@@ -188,6 +192,7 @@ class ::Proxy::PluginInitializer
       updated[:state] = group.state
       updated[:http_enabled] = group.http_enabled?
       updated[:https_enabled] = group.https_enabled?
+      updated[:capabilities] = group.capabilities
       group.providers.each do |group_member|
         updated = to_update.find {|loaded_plugin| loaded_plugin[:name] == group_member.plugin_name}
         updated[:di_container] = group.di_container

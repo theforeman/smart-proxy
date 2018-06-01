@@ -6,6 +6,11 @@ module Proxy::Dns
     uses_provider
     default_settings :use_provider => 'dns_nsupdate', :dns_ttl => 86_400
     plugin :dns, ::Proxy::VERSION
+    capability :TYPE_A
+    capability :TYPE_AAAA
+    capability :TYPE_CNAME
+    capability :TYPE_PTR
+    capability :TYPE_SRV
 
     load_classes ::Proxy::Dns::ConfigurationLoader
   end
