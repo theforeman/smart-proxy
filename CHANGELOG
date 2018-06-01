@@ -1,3 +1,12 @@
+2018-04-24	Michael Moll <kvedulv@kvedulv.de>
+	* Fixes #22098 - pin rdoc gem for Ruby <2.2
+
+2018-04-24	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #21728 - pinned rack and rack-test for rubies < 2.2
+
+2018-04-03	Daniel Lobato Garcia <me@daniellobato.me>
+	* Release 1.16.1
+
 2017-11-29	Daniel Lobato Garcia <me@daniellobato.me>
 	* Release 1.16.0
 
