@@ -16,6 +16,10 @@ module Proxy::Pluggable
     @bundler_group_name = name
   end
 
+  def capability(capability)
+    capabilities << capability
+  end
+
   # relative to ::Proxy::SETTINGS.settings_directory
   def settings_file(apath = nil)
     if apath.nil?
@@ -165,6 +169,10 @@ module Proxy::Pluggable
 
   def loading_failed(message)
     raise ::Proxy::PluginLoadingAborted, message
+  end
+
+  def capabilities
+    @capabilities ||= []
   end
 
   def dependencies
