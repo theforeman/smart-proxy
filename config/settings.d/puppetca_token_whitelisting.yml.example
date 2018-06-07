@@ -1,0 +1,10 @@
+---
+#
+# Configuration of the PuppetCA token_whitelisting provider
+#
+
+#:sign_all: false
+#:token_ttl: 360
+#:tokens_file: /var/lib/foreman-proxy/tokens.yml
+# Which certificate to use when encrypting tokens (nil to use the SSL certificate)
+#:certificate: nil

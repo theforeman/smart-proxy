@@ -29,10 +29,24 @@ module Proxy::PuppetCa
     post "/autosign/:certname" do
       content_type :json
       certname = params[:certname]
+      token_ttl = params[:token_ttl]
       begin
-        autosigner.autosign(certname)
+        autosigner.autosign(certname, token_ttl)
       rescue => e
         log_halt 406, "Failed to enable autosign for #{certname}: #{e}"
+      end
+    end
+
+    post "/validate" do
+      content_type :json
+      unless autosigner.respond_to?(:validate_csr)
+        log_halt 501, "Provider only supports trivial autosigning"
+      end
+      begin
+        request.body.rewind
+        autosigner.validate_csr(request.body.read) ? 200 : 404
+      rescue => e
+        log_halt 406, "Failed to validate CSR: #{e}"
       end
     end
 
