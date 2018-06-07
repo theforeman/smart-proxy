@@ -1,0 +1,2 @@
+require 'puppetca_token_whitelisting/plugin_configuration'
+require 'puppetca_token_whitelisting/puppetca_token_whitelisting_plugin'

@@ -29,7 +29,7 @@ class PuppetCaHostnameWhitelistingAutosignerTest < Test::Unit::TestCase
     content = []
     begin
       ## Execute
-      @autosigner.autosign 'foobar.example.com'
+      @autosigner.autosign 'foobar.example.com', 0
       ## Read output
       content = @file.read.split("\n")
     ensure
@@ -44,7 +44,7 @@ class PuppetCaHostnameWhitelistingAutosignerTest < Test::Unit::TestCase
       before_content = @file.read
       @file.seek(0)
       ## Execute
-      @autosigner.autosign 'foo.example.com'
+      @autosigner.autosign 'foo.example.com', 0
       ## Read output
       after_content = @file.read
     ensure

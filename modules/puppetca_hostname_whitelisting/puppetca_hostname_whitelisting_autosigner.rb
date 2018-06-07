@@ -33,7 +33,7 @@ module ::Proxy::PuppetCa::HostnameWhitelisting
 
     # add certname to puppet autosign file
     # parameter is certname to use
-    def autosign certname
+    def autosign certname, ttl
       FileUtils.touch(autosign_file) unless File.exist?(autosign_file)
 
       open(autosign_file, File::RDWR) do |autosign|
