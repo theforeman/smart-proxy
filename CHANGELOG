@@ -1,3 +1,9 @@
+2018-06-13	Stephen Benjamin <stephen@redhat.com>
+	* fixes #23917 - convert tls version to string
+
+2018-05-30	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Release 1.18.0-RC1
+
 2018-05-23	Dmitri Dolguikh <dmitri@appliedlogic.ca>
 	* Fixes #23433 - lease uids are now parsed correctly
 
