@@ -1,3 +1,6 @@
+2018-06-18	Ondrej Prazak <oprazak@redhat.com>
+	* Release 1.18.0-RC2
+
 2018-06-13	Stephen Benjamin <stephen@redhat.com>
 	* fixes #23917 - convert tls version to string
 
