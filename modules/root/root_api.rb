@@ -26,6 +26,7 @@ class Proxy::RootApi < Sinatra::Base
           'capabilities' => p[:capabilities],
           'http_enabled' => p[:http_enabled],
           'https_enabled' => p[:https_enabled],
+          'settings' => p[:settings],
         }
       end.to_json
     rescue => e
