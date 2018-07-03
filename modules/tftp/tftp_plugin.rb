@@ -10,5 +10,6 @@ module Proxy::TFTP
                      :tftp_connect_timeout => 10,
                      :tftp_dns_timeout => 10
 
+    expose_setting :tftp_servername
   end
 end

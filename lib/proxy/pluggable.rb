@@ -35,6 +35,10 @@ module Proxy::Pluggable
     @plugin_default_settings.merge!(a_hash)
   end
 
+  def expose_setting(setting)
+    exposed_settings << setting
+  end
+
   def initialize_after(*module_names)
     raise "#{plugin_name}: 'initialize_after' method has been removed."
   end
@@ -177,6 +181,10 @@ module Proxy::Pluggable
 
   def dependencies
     @dependencies ||= []
+  end
+
+  def exposed_settings
+    @exposed_settings ||= []
   end
 
   def bundler_group_name
