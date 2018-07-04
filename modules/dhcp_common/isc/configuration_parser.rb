@@ -427,11 +427,13 @@ module Proxy
         end
 
         def parse_file(a_path)
+          a_path = @@config_path + '/' + a_path if File.dirname(a_path) == '.'
           File.open(a_path, 'r:ASCII-8BIT') {|f| conf.parse!(f.read, a_path)}
         end
 
         # returns all_subnets, all_hosts, root_group
         def subnets_hosts_and_leases(conf_as_string, filename)
+          @@config_path = File.dirname(filename)
           parsed = conf.parse!(conf_as_string, filename)
           start_visiting_parse_tree_nodes(parsed)
         end
