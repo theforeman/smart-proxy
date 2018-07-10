@@ -20,15 +20,10 @@ class Proxy::RootApi < Sinatra::Base
           p[:class].ancestors.include?(::Proxy::Plugin)
       end
       content_type :json
-      enabled_plugins.sort { |x, y| x[:name] <=> y[:name] }.map do |p|
-        {
-          'name' => p[:name],
-          'capabilities' => p[:capabilities],
-          'http_enabled' => p[:http_enabled],
-          'https_enabled' => p[:https_enabled],
-          'settings' => p[:settings],
-        }
-      end.to_json
+
+      attributes = %i[capabilities http_enabled https_enabled settings]
+
+      Hash[enabled_plugins.collect { |p| [p[:name], Hash[attributes.map { |a| [a, p[a]] }]] }].to_json
     rescue => e
       log_halt 400, e
     end
