@@ -46,7 +46,7 @@ module Proxy::LogBuffer
           # we accept backtrace, exception and simple string
           backtrace = backtrace.is_a?(Exception) ? backtrace.backtrace : backtrace
           backtrace = backtrace.respond_to?(:join) ? backtrace.join("\n") : backtrace
-          rec = Proxy::LogBuffer::LogRecord.new(nil, severity, message, backtrace, request_id)
+          rec = Proxy::LogBuffer::LogRecord.new(nil, severity, message.to_s.encode('UTF-8', invalid: :replace, undef: :replace, replace: '?'), backtrace, request_id)
           @buffer.push(rec)
         end
       end
