@@ -481,6 +481,20 @@ OFMULTILNE_LEASE
                  included.select {|node| node.class == Proxy::DHCP::CommonISC::ConfigurationParser::HostNode}.map(&:fqdn)
   end
 
+  def test_include_relative_case1
+    included = Proxy::DHCP::CommonISC::ConfigurationParser.new.subnets_hosts_and_leases(File.read('test/fixtures/dhcp/dhcp_include_relative_testcase1.conf'),
+                                                                                        'test/fixtures/dhcp/dhcp_include_relative_testcase1.conf').flatten
+    assert_equal ['test.example.com'],
+                 included.select {|node| node.class == Proxy::DHCP::CommonISC::ConfigurationParser::Host}.map(&:name)
+  end
+
+  def test_include_relative_case2
+    included = Proxy::DHCP::CommonISC::ConfigurationParser.new.subnets_hosts_and_leases(File.read('test/fixtures/dhcp/dhcp_include_relative_testcase2.conf'),
+                                                                                        'test/fixtures/dhcp/dhcp_include_relative_testcase2.conf').flatten
+    assert_equal ['test.example.com'],
+                 included.select {|node| node.class == Proxy::DHCP::CommonISC::ConfigurationParser::Host}.map(&:name)
+  end
+
   def test_include_in_shared_network
     included =
       Proxy::DHCP::CommonISC::ConfigurationParser.new.conf.parse!('shared-network "testing" {include "test/fixtures/dhcp/dhcp_subnets.conf";}')
