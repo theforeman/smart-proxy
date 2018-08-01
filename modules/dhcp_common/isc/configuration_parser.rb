@@ -403,7 +403,7 @@ module Proxy
           Rsec::Fail.reset
           include_keyword = word('include').fail 'include_keyword'
           seq_(include_keyword, literal) do |_, filename_in_quotes|
-            ConfigurationParser.new.parse_file(literal_to_filename(filename_in_quotes))
+            parse_file(literal_to_filename(filename_in_quotes))
           end
         end
 
@@ -411,7 +411,8 @@ module Proxy
            a_literal[1..-2]
         end
 
-        def conf
+        def conf(config_basedir = nil)
+          @config_basedir = config_basedir
           SPACE.join(option | host | lease | group | subnet | shared_network | include_file | COMMENT | server_duid | ignored_declaration | ignored_block | EOSTMT).odd.eof
         end
 
@@ -433,12 +434,14 @@ module Proxy
         end
 
         def parse_file(a_path)
+          a_path = File.absolute_path(a_path, @config_basedir) unless @config_basedir.nil?
           File.open(a_path, 'r:ASCII-8BIT') {|f| conf.parse!(f.read, a_path)}
         end
 
         # returns all_subnets, all_hosts, root_group
         def subnets_hosts_and_leases(conf_as_string, filename)
-          parsed = conf.parse!(conf_as_string, filename)
+          config_basedir = File.dirname(filename)
+          parsed = conf(config_basedir).parse!(conf_as_string, filename)
           start_visiting_parse_tree_nodes(parsed)
         end
       end
