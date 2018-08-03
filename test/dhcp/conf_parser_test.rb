@@ -476,10 +476,12 @@ OFMULTILNE_LEASE
   end
 
   def test_include_relative
-    included = Proxy::DHCP::CommonISC::ConfigurationParser.new.subnets_hosts_and_leases(File.read('test/fixtures/dhcp/dhcp_include_relative_testcase1.conf'), 'test/fixtures/dhcp/dhcp_include_relative_testcase1.conf').flatten
+    included = Proxy::DHCP::CommonISC::ConfigurationParser.new.subnets_hosts_and_leases(File.read('test/fixtures/dhcp/dhcp_include_relative_testcase1.conf'), 
+                                                                                        'test/fixtures/dhcp/dhcp_include_relative_testcase1.conf').flatten
     assert_equal ['test.example.com'],
                  included.select {|node| node.class == Proxy::DHCP::CommonISC::ConfigurationParser::Host}.map(&:name)
-    included = Proxy::DHCP::CommonISC::ConfigurationParser.new.subnets_hosts_and_leases(File.read('test/fixtures/dhcp/dhcp_include_relative_testcase2.conf'), 'test/fixtures/dhcp/dhcp_include_relative_testcase2.conf').flatten
+    included = Proxy::DHCP::CommonISC::ConfigurationParser.new.subnets_hosts_and_leases(File.read('test/fixtures/dhcp/dhcp_include_relative_testcase2.conf'),
+                                                                                        'test/fixtures/dhcp/dhcp_include_relative_testcase2.conf').flatten
     assert_equal ['test.example.com'],
                  included.select {|node| node.class == Proxy::DHCP::CommonISC::ConfigurationParser::Host}.map(&:name)
   end
