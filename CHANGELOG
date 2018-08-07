@@ -1,3 +1,12 @@
+2018-06-13	Stephen Benjamin <stephen@redhat.com>
+	* fixes #23917 - convert tls version to string
+
+2018-06-13	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Fixes #23433 - lease uids are now parsed correctly
+
+2018-05-17	Dmitri Dolguikh <dmitri@appliedlogic.ca>
+	* Release 1.17.1
+
 2018-05-17	swadeley <swadeley@redhat.com>
 	* Fixes #23399 - Fix puppet kick instructions
 
