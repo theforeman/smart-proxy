@@ -4,5 +4,8 @@
 #
 
 #:dns_key: /etc/rndc.key
-# use this setting if you are managing a dns server which is not localhost though this proxy
-#:dns_server: dns.domain.com
+
+# DNS server to talk to, usually localhost but can be an arbitrary (remote) host.
+# This can be also set to a blank value to let nsupdate to detect the master
+# server of a zone.
+#:dns_server: 127.0.0.1

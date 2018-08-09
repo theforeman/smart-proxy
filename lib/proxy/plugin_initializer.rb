@@ -338,7 +338,7 @@ module ::Proxy::DefaultSettingsLoader
   end
 
   def validate_settings(plugin, config)
-    result = execute_validators(plugin.plugin_default_settings.keys.map { |k| {:name => :presence, :setting => k} }, config)
+    result = execute_validators(plugin.plugin_default_settings.keys.map { |k| {:name => :presence_allow_empty, :setting => k} }, config)
     result + execute_validators(plugin.validations, config)
   end
 

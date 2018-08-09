@@ -42,4 +42,11 @@ module ::Proxy::PluginValidators
       true
     end
   end
+
+  class PresenceAllowEmpty < Base
+    def validate!(settings)
+      raise ::Proxy::Error::ConfigurationError, "Parameter '#{@setting_name}' is expected to be present" if settings[@setting_name].nil?
+      true
+    end
+  end
 end

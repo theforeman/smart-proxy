@@ -13,6 +13,12 @@ class DnsNsupdateConfigTest < Test::Unit::TestCase
     assert_nil Proxy::Dns::Nsupdate::Plugin.settings.dns_key
   end
 
+  def test_nsupdate_emty_dnsserver_setting
+    Proxy::Dns::Nsupdate::Plugin.load_test_settings(dns_server: '')
+
+    assert_equal "", Proxy::Dns::Nsupdate::Plugin.settings.dns_server
+  end
+
   def test_nsupdate_gss_default_settings
     Proxy::Dns::NsupdateGSS::Plugin.load_test_settings({})
 

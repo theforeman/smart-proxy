@@ -66,8 +66,8 @@ class ModuleLoaderTest < Test::Unit::TestCase
   def test_presence_validators_called_on_each_of_default_settings
     loader = ::Proxy::DefaultModuleLoader.new(TestPluginWithDefaultValues, nil)
     results = loader.validate_settings(TestPluginWithDefaultValues, :default_1 => "one", :default_2 => "two")
-    assert results.include?(:class => ::Proxy::PluginValidators::Presence, :setting => :default_1, :args => nil, :predicate => nil)
-    assert results.include?(:class => ::Proxy::PluginValidators::Presence, :setting => :default_2, :args => nil, :predicate => nil)
+    assert results.include?(:class => ::Proxy::PluginValidators::PresenceAllowEmpty, :setting => :default_1, :args => nil, :predicate => nil)
+    assert results.include?(:class => ::Proxy::PluginValidators::PresenceAllowEmpty, :setting => :default_2, :args => nil, :predicate => nil)
   end
 
   class TestValidator < ::Proxy::PluginValidators::Base

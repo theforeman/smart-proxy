@@ -39,8 +39,10 @@ module Proxy::Dns::Nsupdate
       nsupdate_cmd = "#{@nsupdate} #{nsupdate_args}"
       logger.debug "running #{nsupdate_cmd}"
       @om = IO.popen(nsupdate_cmd, "r+")
-      logger.debug "nsupdate: executed - server #{@server}"
-      @om.puts "server #{@server}"
+      unless @server.nil? || @server.empty?
+        logger.debug "nsupdate: executed - server #{@server}"
+        @om.puts "server #{@server}"
+      end
     end
 
     def nsupdate_disconnect
