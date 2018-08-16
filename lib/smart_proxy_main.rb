@@ -80,6 +80,7 @@ module Proxy
   require 'realm/realm'
   require 'realm_freeipa/realm_freeipa'
   require 'logs/logs'
+  require 'httpboot/httpboot'
 
   def self.version
     {:version => VERSION}

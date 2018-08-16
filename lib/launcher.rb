@@ -50,7 +50,7 @@ module Proxy
         :DoNotListen => true,
         :Port => http_port, # only being used to correctly log http port being used
         :Logger => ::Proxy::LogBuffer::Decorator.instance,
-        :ServerSoftware => '',
+        :ServerSoftware => "foreman-proxy/#{Proxy::VERSION}",
         :daemonize => false
       }
     end
@@ -91,7 +91,7 @@ module Proxy
         :DoNotListen => true,
         :Port => https_port, # only being used to correctly log https port being used
         :Logger => ::Proxy::LogBuffer::Decorator.instance,
-        :ServerSoftware => '',
+        :ServerSoftware => "foreman-proxy/#{Proxy::VERSION}",
         :SSLEnable => true,
         :SSLVerifyClient => OpenSSL::SSL::VERIFY_PEER,
         :SSLPrivateKey => load_ssl_private_key(settings.ssl_private_key),
