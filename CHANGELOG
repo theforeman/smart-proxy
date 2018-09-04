@@ -1,3 +1,6 @@
+2018-08-07	Ondrej Prazak <oprazak@redhat.com>
+	* Release 1.18.1
+
 2018-08-07	Lukáš Zapletal <lzap@redhat.com>
 	* Fixes #24364 - non-ascii logs are readable now (#598)
 
