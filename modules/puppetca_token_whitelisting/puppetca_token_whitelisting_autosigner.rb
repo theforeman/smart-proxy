@@ -7,7 +7,7 @@ module ::Proxy::PuppetCa::TokenWhitelisting
     include ::Proxy::Util
 
     JWT_ALGORITHM = 'RS512'
-    RSA_BITSIZE = '2048'
+    RSA_BITSIZE = 2048
 
     def tokens_file
       Proxy::PuppetCa::TokenWhitelisting::Plugin.settings.tokens_file
@@ -50,6 +50,7 @@ module ::Proxy::PuppetCa::TokenWhitelisting
           true
         end
       end
+      nil
     end
 
     # Create a new token for a certname
