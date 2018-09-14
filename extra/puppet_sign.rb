@@ -26,14 +26,14 @@ end
 SETTINGS         = YAML.load_file(settings_file)
 PUPPETCA         = YAML.load_file(SETTINGS[:settings_directory] + '/puppetca.yml')
 unless PUPPETCA[:enabled]
-  log('PuppetCa is not enabled!')
+  log('PuppetCA smart-proxy module is not enabled!')
   exit 1
 end
 protocol         = PUPPETCA[:enabled] == true ? 'https' : PUPPETCA[:enabled]
 port             = protocol == 'https' ? SETTINGS[:https_port] : SETTINGS[:http_port]
 fqdn             = Socket.gethostbyname(Socket.gethostname).first
-# e.g. https://hostname.localdomain.com:8443/puppet/ca/autosign
-uri              = URI.parse("#{protocol}://#{fqdn}:#{port}/puppet/ca/autosign")
+# e.g. POST https://hostname.localdomain.com:8443/puppet/ca/validate
+uri              = URI.parse("#{protocol}://#{fqdn}:#{port}/puppet/ca/validate")
 res              = Net::HTTP.new(uri.host, uri.port)
 if protocol == 'https'
   res.use_ssl      = true
@@ -45,7 +45,7 @@ end
 res.open_timeout = SETTINGS[:timeout]
 res.read_timeout = SETTINGS[:timeout]
 req              = Net::HTTP::Post.new(uri.request_uri)
-req.add_field('Accept', 'application/json,version=2' )
+req.add_field('Accept', 'application/json,version=2')
 req.body         = csr
 begin
   res.start do |http|
