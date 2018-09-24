@@ -269,10 +269,16 @@ module Proxy
         def option
           Rsec::Fail.reset
           keyword_option = word('option').fail 'keyword_option'
-          keyword_supersede = word('supersede').fail 'keyword_option'
+          keyword_supersede = word('supersede').fail 'keyword_supersede'
           option_name = /[\w\.-]+/.r
           seq_(keyword_option | keyword_supersede, option_name, '='.r._?, option_values, EOSTMT) {|maybe_supersede, name, _, values, _| OptionNode[maybe_supersede == 'supersede', name, values]} |
               vendor_option_space | filename | next_server
+        end
+
+        def set
+          Rsec::Fail.reset
+          keyword_set = word('set').fail 'keyword_set'
+          seq_(keyword_set, /[\w\.-]+/.r, '='.r._?, literal, EOSTMT) {|_, iname, _, ivalue, _| IgnoredDeclaration[["#{iname}=#{ivalue}"]]}
         end
 
         # used in host and lease blocks
@@ -343,7 +349,7 @@ module Proxy
           Rsec::Fail.reset
           keyword = word('lease').fail 'keyword_lease'
           seq_(keyword, IPV4_ADDRESS, LFT_BRACKET,
-               SPACE.join(option | hardware | lease_time_stamp | lease_binding_state | lease_uid | lease_hostname | COMMENT | ignored_declaration | ignored_block).odd,
+               SPACE.join(option | hardware | lease_time_stamp | lease_binding_state | lease_uid | lease_hostname | set | COMMENT | ignored_declaration | ignored_block).odd,
                SPACE._?, RGT_BRACKET) {|_, ip, _, statements, _| LeaseNode[ip, statements]}
         end
 

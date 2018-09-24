@@ -404,7 +404,7 @@ EOMULTILINE_HOST
     assert_equal [Proxy::DHCP::CommonISC::ConfigurationParser::LeaseNode['192.168.1.1', []]], Proxy::DHCP::CommonISC::ConfigurationParser.new.conf.parse!('lease 192.168.1.1 { }')
   end
 
-  MULTILINE_LEASE =<<OFMULTILNE_LEASE
+  MULTILINE_LEASE =<<'OFMULTILNE_LEASE'
   lease 192.168.10.1 {
     starts 2 2017/05/01 14:20:25;
     ends 2 2017/05/01 16:20:25;
@@ -414,6 +414,8 @@ EOMULTILINE_HOST
     hardware ethernet ec:f4:bb:c6:ca:fe;
     client-hostname "testing";
     uid "123";
+    set ddns-dhcid = "\000\000\001lcD\232Lq\226J\023R\265\336g?\332D\177h\301 \027\017\010r0\306\235\314a\302}\200";
+    set vendor-class-identifier = "MSFT 5.0";
     # a comment
     something_ignored;
     ignored {
@@ -430,6 +432,8 @@ OFMULTILNE_LEASE
       Proxy::DHCP::CommonISC::ConfigurationParser::HardwareNode['ethernet', 'ec:f4:bb:c6:ca:fe'],
       Proxy::DHCP::CommonISC::ConfigurationParser::KeyValueNode[:client_hostname, '"testing"'],
       Proxy::DHCP::CommonISC::ConfigurationParser::KeyValueNode[:uid, '"123"'],
+      Proxy::DHCP::CommonISC::ConfigurationParser::IgnoredDeclaration[['ddns-dhcid="\000\000\001lcD\232Lq\226J\023R\265\336g?\332D\177h\301 \027\017\010r0\306\235\314a\302}\200"']],
+      Proxy::DHCP::CommonISC::ConfigurationParser::IgnoredDeclaration[['vendor-class-identifier="MSFT 5.0"']],
       Proxy::DHCP::CommonISC::ConfigurationParser::CommentNode['# a comment'],
       Proxy::DHCP::CommonISC::ConfigurationParser::IgnoredDeclaration[['something_ignored']],
       Proxy::DHCP::CommonISC::ConfigurationParser::IgnoredBlock[['i', 'g', 'n', 'o', 'r', 'e', 'd'], []]
