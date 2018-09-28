@@ -19,6 +19,14 @@ module Proxy::PuppetCa
 
     # list of all certificates and their state/fingerprint
     def list
+      if to_bool(::Proxy::PuppetCa::Plugin.settings.puppet_6, false)
+        list_puppet_6
+      else
+        list_legacy
+      end
+    end
+
+    def list_legacy
       find_puppetca
       command = "#{@sudo} #{@puppetca} --list --all"
       logger.debug "Executing #{command}"
@@ -36,6 +44,44 @@ module Proxy::PuppetCa
       # note that this ignores certificates which were revoked multiple times, displaying only the last
       # revocation state
       # additionally, we don't merge revocation info if the host has a pending certificate request
+      hash.merge(ca_inventory) {|key, h1, h2| h1[:state] == "pending" ?  h1 : h1.merge(h2)}
+    end
+
+    def list_puppet_6
+      find_puppetca_6
+      command = "#{@sudo} #{@puppetca} list --all"
+      logger.debug "Executing #{command}"
+      response = `#{command}`
+      unless $? == 0
+        logger.warn "Failed to run puppetca: #{response}"
+        raise "Execution of puppetca failed, check log files"
+      end
+
+      hash_name = "unknown"
+      hash = {}
+      valid = {}
+      revoked = {}
+      pending = {}
+
+      response.split("\n").each do |line|
+        if line.include? 'Signed Certificates:'
+          hash_name = 'valid'
+          next
+        elsif line.include? 'Requested Certificates:'
+          hash_name = 'pending'
+          next
+        elsif line.include? 'Revoked Certificates:'
+          hash_name = 'revoked'
+          next
+        end
+
+        (eval "#{hash_name}").merge! certificate_puppet_6(line, hash_name) rescue logger.warn("Failed to parse line: #{line}")
+      end
+
+      hash.merge! valid
+      hash.merge! revoked
+      hash.merge! pending
+
       hash.merge(ca_inventory) {|key, h1, h2| h1[:state] == "pending" ?  h1 : h1.merge(h2)}
     end
 
@@ -79,6 +125,23 @@ module Proxy::PuppetCa
       end
     end
 
+    def find_puppetca_6
+      # Tell puppetca to use the ssl dir that Foreman has been told to use
+      @puppetca = "/opt/puppetlabs/bin/puppetserver ca "
+
+      if to_bool(::Proxy::PuppetCa::Plugin.settings.puppetca_use_sudo, true)
+        @sudo = ::Proxy::PuppetCa::Plugin.settings.sudo_command || which("sudo")
+        unless File.exist?(@sudo)
+          logger.warn "unable to find sudo binary"
+          raise "Unable to find sudo"
+        end
+        logger.debug "Found sudo at #{@sudo}"
+        @sudo = "#{@sudo} -S"
+      else
+        @sudo = ""
+      end
+    end
+
     def ssldir
       Proxy::PuppetCa::Plugin.settings.ssldir
     end
@@ -93,6 +156,16 @@ module Proxy::PuppetCa
           return { $1.strip => { :state => "pending", :fingerprint => $2 } }
         else
           return {}
+      end
+    end
+
+    # parse the puppetca --list output
+    def certificate_puppet_6 str, state
+      begin
+        sp = str.split()
+        return { sp[0] => { :state => state, :fingerprint => sp[2] } }
+      rescue
+        return {}
       end
     end
 
@@ -131,9 +204,16 @@ module Proxy::PuppetCa
 
     def puppetca mode, certname
       raise "Invalid mode #{mode}" unless mode =~ /^(clean|sign)$/
-      find_puppetca
       certname.downcase!
-      command = "#{@sudo} #{@puppetca} --#{mode} #{certname}"
+
+      if to_bool(::Proxy::PuppetCa::Plugin.settings.puppet_6, false)
+        find_puppetca_6
+        command = "#{@sudo} #{@puppetca} #{mode} --cername #{certname}"
+      else
+        find_puppetca
+        command = "#{@sudo} #{@puppetca} --#{mode} #{certname}"
+      end
+
       logger.debug "Executing #{command}"
       response = `#{command} 2>&1`
       if $?.success?
