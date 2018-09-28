@@ -208,7 +208,7 @@ module Proxy::PuppetCa
 
       if to_bool(::Proxy::PuppetCa::Plugin.settings.puppet_6, false)
         find_puppetca_6
-        command = "#{@sudo} #{@puppetca} #{mode} --cername #{certname}"
+        command = "#{@sudo} #{@puppetca} #{mode} --certname #{certname}"
       else
         find_puppetca
         command = "#{@sudo} #{@puppetca} --#{mode} #{certname}"
