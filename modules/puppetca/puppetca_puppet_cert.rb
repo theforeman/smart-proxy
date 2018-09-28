@@ -203,6 +203,7 @@ module Proxy::PuppetCa
     end
 
     def puppetca mode, certname
+
       raise "Invalid mode #{mode}" unless mode =~ /^(clean|sign)$/
       certname.downcase!
 
@@ -218,6 +219,8 @@ module Proxy::PuppetCa
       response = `#{command} 2>&1`
       if $?.success?
         logger.debug "#{mode}ed puppet certificate for #{certname}"
+      elsif response =~ /Could not find files to clean/
+        logger.debug "PUPPET 6 CASE"
       elsif response =~ /Could not find client certificate/ || $?.exitstatus == 24
         logger.debug "Attempt to remove nonexistent client certificate for #{certname}"
         raise NotPresent, "Attempt to remove nonexistent client certificate for #{certname}"
@@ -225,6 +228,7 @@ module Proxy::PuppetCa
         logger.warn "Failed to run puppetca: #{response}"
         raise "Execution of puppetca failed, check log files"
       end
+
       $?.success?
     end
   end
