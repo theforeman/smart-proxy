@@ -239,12 +239,12 @@ class BmcApiTest < Test::Unit::TestCase
     assert_equal(expected, data["available_resources"])
   end
 
-  def test_api_uses_default_smart_proxy_logger
-    Proxy::BMC::IPMI.logger = nil
-    Proxy::BMC::Plugin.load_test_settings(:provider_log_level => nil)
-    Proxy::BMC::IPMI.any_instance.stubs(:poweron?).returns(true)
-    get "/#{host}/chassis/power/on", args
-    assert_not_equal 'Rubyipmi', Proxy::BMC::IPMI.logger.progname
+  def test_api_can_use_default_smart_proxy_logger
+    Proxy::BMC::IPMI.logger = Proxy::LogBuffer::Decorator.instance
+    Proxy::BMC::IPMI.logger.error "TEST ERROR"
+    found = false
+    Proxy::LogBuffer::Buffer.instance.iterate_descending{|x| found = true if x.message == "TEST ERROR" }
+    assert found
   end
 
   def test_api_can_put_power_action

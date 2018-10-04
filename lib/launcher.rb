@@ -2,6 +2,7 @@ require 'proxy/log'
 require 'proxy/sd_notify'
 require 'proxy/settings'
 require 'proxy/signal_handler'
+require 'proxy/log_buffer/trace_decorator'
 require 'thread'
 
 module Proxy
@@ -49,7 +50,8 @@ module Proxy
         :server => :webrick,
         :DoNotListen => true,
         :Port => http_port, # only being used to correctly log http port being used
-        :Logger => ::Proxy::LogBuffer::Decorator.instance,
+        :Logger => ::Proxy::LogBuffer::TraceDecorator.instance,
+        :AccessLog => [],
         :ServerSoftware => "foreman-proxy/#{Proxy::VERSION}",
         :daemonize => false
       }
