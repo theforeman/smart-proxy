@@ -46,10 +46,9 @@ module Proxy
 
   ::Sinatra::Base.set :run, false
   ::Sinatra::Base.set :root, APP_ROOT
-  ::Sinatra::Base.set :logging, false # we are not going to use Rack::Logger
+  ::Sinatra::Base.set :logging, false
   ::Sinatra::Base.use ::Proxy::RequestIdMiddleware
-  ::Sinatra::Base.use ::Proxy::LoggerMiddleware # instead, we have our own logging middleware
-  ::Sinatra::Base.use ::Rack::CommonLogger, ::Proxy::LogBuffer::Decorator.instance
+  ::Sinatra::Base.use ::Proxy::LoggerMiddleware
   ::Sinatra::Base.set :env, :production
   ::Sinatra::Base.register ::Sinatra::Authorization
 

@@ -64,6 +64,16 @@
 # Uncomment and modify if you want to change the log level
 # WARN, DEBUG, ERROR, FATAL, INFO, UNKNOWN
 #:log_level: INFO
+# The maximum size of a log file before it's rolled (in MiB)
+#:file_rolling_size: 100
+# The maximum age of a log file before it's rolled (in seconds). Also accepts 'daily', 'weekly', or 'monthly'.
+#:file_rolling_age: weekly
+# Number of log files to keep
+#:file_rolling_keep: 6
+# Logging pattern for file-based loging
+#:file_logging_pattern: '%d %.8X{request} [%.1l] %m'
+# Logging pattern for syslog or journal loging
+#:system_logging_pattern: '%.8X{request} [%.1l] %m'
 
 # Log buffer size and extra buffer size (for errors). Defaults to 3000 messages in total,
 # which is about 500 kB request.

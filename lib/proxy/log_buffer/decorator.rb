@@ -38,6 +38,7 @@ module Proxy::LogBuffer
             message = progname
           end
         end
+        return if message == ''
         # add to the logger first
         @logger.add(severity, message)
         @logger.add(::Logger::Severity::DEBUG, backtrace) if backtrace
@@ -52,30 +53,68 @@ module Proxy::LogBuffer
       end
     end
 
-    def debug(msg_or_progname, exception_or_backtrace = nil, &block)
+    def trace?
+      @trace ||= !!ENV['FOREMAN_PROXY_TRACE']
+    end
+
+    def trace(msg_or_progname = nil, exception_or_backtrace = nil, &block)
+      add(::Logger::Severity::DEBUG, nil, msg_or_progname, exception_or_backtrace, &block) if trace?
+    end
+
+    def debug(msg_or_progname = nil, exception_or_backtrace = nil, &block)
       add(::Logger::Severity::DEBUG, nil, msg_or_progname, exception_or_backtrace, &block)
     end
 
-    def info(msg_or_progname, exception_or_backtrace = nil, &block)
+    def info(msg_or_progname = nil, exception_or_backtrace = nil, &block)
       add(::Logger::Severity::INFO, nil, msg_or_progname, exception_or_backtrace, &block)
     end
     alias_method :write, :info
 
-    def warn(msg_or_progname, exception_or_backtrace = nil, &block)
+    def warn(msg_or_progname = nil, exception_or_backtrace = nil, &block)
       add(::Logger::Severity::WARN, nil, msg_or_progname, exception_or_backtrace, &block)
     end
     alias_method :warning, :warn
 
-    def error(msg_or_progname, exception_or_backtrace = nil, &block)
+    def error(msg_or_progname = nil, exception_or_backtrace = nil, &block)
       add(::Logger::Severity::ERROR, nil, msg_or_progname, exception_or_backtrace, &block)
     end
 
-    def fatal(msg_or_progname, exception_or_backtrace = nil, &block)
+    def fatal(msg_or_progname = nil, exception_or_backtrace = nil, &block)
       add(::Logger::Severity::FATAL, nil, msg_or_progname, exception_or_backtrace, &block)
     end
 
     def request_id
-      (r = Thread.current.thread_variable_get(:request_id)).nil? ? r : r.to_s[0..7]
+      (r = ::Logging.mdc['request']).nil? ? r : r.to_s[0..7]
+    end
+
+    # Structured fields to log in addition to log messages. Every log line created within given block is enriched with these fields.
+    # Fields appear in joruand and/or JSON output (hash named 'ndc').
+    def with_fields(fields = {})
+      ::Logging.ndc.push(fields) do
+        yield
+      end
+    end
+
+    # Standard way for logging exceptions to get the most data in the log. By default
+    # it logs via warn level, this can be changed via options[:level]
+    def exception(context_message, exception, options = {})
+      level = options[:level] || :warn
+      unless ::Logging::LEVELS.keys.include?(level.to_s)
+        raise "Unexpected log level #{level}, expected one of #{::Logging::LEVELS.keys}"
+      end
+      # send class, message and stack as structured fields in addition to message string
+      backtrace = exception.backtrace ? exception.backtrace : []
+      extra_fields = {
+        exception_class: exception.class.name,
+        exception_message: exception.message,
+        exception_backtrace: backtrace
+      }
+      extra_fields[:foreman_code] = exception.code if exception.respond_to?(:code)
+      with_fields(extra_fields) do
+        public_send(level) do
+          ([context_message, "#{exception.class}: #{exception.message}"] + backtrace).join("\n")
+        end
+      end
     end
 
     def method_missing(symbol, *args);

@@ -1,6 +1,5 @@
 require 'test_helper'
 require 'bmc/ipmi'
-require 'logger'
 
 class BmcTest < Test::Unit::TestCase
 

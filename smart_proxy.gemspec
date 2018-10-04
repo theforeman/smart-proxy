@@ -16,6 +16,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'json'
   s.add_dependency 'rack', '>= 1.1'
   s.add_dependency 'sinatra'
+  s.add_dependency 'logging'
   s.description = <<EOF
 Foreman Proxy is used via The Foreman Project, it allows Foreman to manage
 Remote DHCP, DNS, TFTP and Puppet servers via a REST API

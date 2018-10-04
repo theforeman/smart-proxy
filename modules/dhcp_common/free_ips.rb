@@ -1,5 +1,4 @@
 require 'concurrent'
-require 'logger'
 require 'set'
 require 'dhcp_common/pingable'
 
