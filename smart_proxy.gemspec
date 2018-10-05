@@ -11,7 +11,6 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib", "modules"]
   s.test_files = Dir.glob("{test}/**/*test.rb")
   s.license = 'GPL-3.0'
-  s.has_rdoc = true
   s.extra_rdoc_files = ["README.md"]
   s.add_dependency 'json'
   s.add_dependency 'rack', '>= 1.1'
