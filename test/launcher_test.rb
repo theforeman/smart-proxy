@@ -40,10 +40,10 @@ class LauncherTest < Test::Unit::TestCase
     FileUtils.rm_f @launcher.pid_path
   end
 
-  def test_install_webrick_callback
+  def test_install_http_server_callback
     app1 = {app: 1}
     app2 = {app: 2}
-    @launcher.install_webrick_callback!(app1, nil, app2)
+    @launcher.install_http_server_callback!(app1, nil, app2)
     @launcher.expects(:launched).never
     app1[:StartCallback].call
     @launcher.expects(:launched).with([app1, app2])

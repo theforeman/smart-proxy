@@ -1,8 +1,20 @@
+require 'bundler'
 require 'proxy/log'
 require 'proxy/sd_notify'
 require 'proxy/settings'
 require 'proxy/signal_handler'
 require 'thread'
+require 'rack'
+require 'webrick'
+begin
+  require 'puma'
+  require 'rack/handler/puma'
+  require 'puma_patch'
+  $HAS_PUMA = true
+rescue LoadError
+  $stderr.puts 'Puma was requested but not installed'
+  $HAS_PUMA = false
+end
 
 module Proxy
   class Launcher
@@ -12,18 +24,24 @@ module Proxy
 
     def initialize(settings = SETTINGS)
       @settings = settings
+      @settings.http_server_type = Proxy::SETTINGS.http_server_type.to_sym
+      if @settings.http_server_type == :puma && !$HAS_PUMA
+        logger.warn 'Puma was requested but not installed, falling back to webrick'
+        @settings.http_server_type = :webrick
+      end
+      @servers = []
     end
 
     def pid_path
-      settings.daemon_pid
+      @settings.daemon_pid
     end
 
     def http_enabled?
-      !settings.http_port.nil?
+      !@settings.http_port.nil?
     end
 
     def https_enabled?
-      settings.ssl_private_key && settings.ssl_certificate && settings.ssl_ca_file
+      @settings.ssl_private_key && @settings.ssl_certificate && @settings.ssl_ca_file
     end
 
     def plugins
@@ -46,7 +64,7 @@ module Proxy
 
       {
         :app => app,
-        :server => :webrick,
+        :server => @settings.http_server_type,
         :DoNotListen => true,
         :Port => http_port, # only being used to correctly log http port being used
         :Logger => ::Proxy::LogBuffer::Decorator.instance,
@@ -72,8 +90,8 @@ module Proxy
       ssl_options |= OpenSSL::SSL::OP_NO_SSLv3 if defined?(OpenSSL::SSL::OP_NO_SSLv3)
       ssl_options |= OpenSSL::SSL::OP_NO_TLSv1 if defined?(OpenSSL::SSL::OP_NO_TLSv1)
 
-      if Proxy::SETTINGS.tls_disabled_versions
-        Proxy::SETTINGS.tls_disabled_versions.each do |version|
+      if @settings.tls_disabled_versions
+        @settings.tls_disabled_versions.each do |version|
           constant = OpenSSL::SSL.const_get("OP_NO_TLSv#{version.to_s.gsub(/\./, '_')}") rescue nil
 
           if constant
@@ -85,21 +103,31 @@ module Proxy
         end
       end
 
-      {
+      app_details = {
         :app => app,
-        :server => :webrick,
+        :server => @settings.http_server_type,
         :DoNotListen => true,
         :Port => https_port, # only being used to correctly log https port being used
         :Logger => ::Proxy::LogBuffer::Decorator.instance,
         :ServerSoftware => "foreman-proxy/#{Proxy::VERSION}",
         :SSLEnable => true,
         :SSLVerifyClient => OpenSSL::SSL::VERIFY_PEER,
-        :SSLPrivateKey => load_ssl_private_key(settings.ssl_private_key),
-        :SSLCertificate => load_ssl_certificate(settings.ssl_certificate),
-        :SSLCACertificateFile => settings.ssl_ca_file,
+        :SSLCACertificateFile => @settings.ssl_ca_file,
         :SSLOptions => ssl_options,
         :daemonize => false
       }
+      case @settings.http_server_type
+      when :webrick
+        app_details[:SSLPrivateKey] = load_ssl_private_key(@settings.ssl_private_key)
+        app_details[:SSLCertificate] = load_ssl_certificate(@settings.ssl_certificate)
+      when :puma
+        app_details[:SSLArgs] = {
+          :ca => @settings.ssl_ca_file,
+          :key => @settings.ssl_private_key,
+          :cert => @settings.ssl_certificate
+        }
+      end
+      app_details
     end
 
     def load_ssl_private_key(path)
@@ -147,17 +175,55 @@ module Proxy
       retry
     end
 
-    def webrick_server(app, addresses, port)
+    def add_puma_server(app, addresses, port, conn_type)
+      # IMPORTANT:
+      # The following code takes only a single host.
+      # The current reason for it, is that "run" is blocking, and in order to
+      # add support for more hosts, additional threads requires to be created
+      address = addresses.first
+      address = '0.0.0.0' if address == '*'
+      if conn_type == :ssl
+        host = "ssl://#{address}/"
+        require 'cgi'
+        query_list = []
+        app[:SSLArgs].each_pair do |name, value|
+          query_list << "#{CGI::escape(name.to_s)}=#{CGI::escape(value)}"
+        end
+        host = "#{host}?#{query_list.join('&')}"
+      else
+        host = address
+      end
+      Rack::Handler::Puma.run(app[:app],
+                              Verbose: true,
+                              Port: port,
+                              Host: host
+                             )
+    end
+
+    def add_webrick_server(app, addresses, port)
       server = ::WEBrick::HTTPServer.new(app)
-      addresses.each {|a| server.listen(a, port)}
-      server.mount "/", Rack::Handler::WEBrick, app[:app]
+      addresses.each { |a| server.listen(a, port) }
+      server.mount '/', Rack::Handler::WEBrick, app[:app]
       server
+    end
+
+    def add_threaded_server(server_name, conn_type, app, addresses, port)
+      case server_name
+      when :webrick
+        Thread.new do
+          @servers << add_webrick_server(app, addresses, port).start
+        end
+      when :puma
+        Thread.new do
+          add_puma_server(app, addresses, port, conn_type)
+        end
+      end
     end
 
     def launch
       raise Exception.new("Both http and https are disabled, unable to start.") unless http_enabled? || https_enabled?
 
-      if settings.daemon
+      if @settings.daemon
         check_pid
         Process.daemon
         write_pid
@@ -165,14 +231,29 @@ module Proxy
 
       ::Proxy::PluginInitializer.new(::Proxy::Plugins.instance).initialize_plugins
 
-      http_app = http_app(settings.http_port)
-      https_app = https_app(settings.https_port)
-      install_webrick_callback!(http_app, https_app)
+      http_app = http_app(@settings.http_port)
+      https_app = https_app(@settings.https_port)
+      install_http_server_callback!(http_app, https_app)
 
-      t1 = Thread.new { webrick_server(https_app, settings.bind_host, settings.https_port).start } unless https_app.nil?
-      t2 = Thread.new { webrick_server(http_app, settings.bind_host, settings.http_port).start } unless http_app.nil?
+      http_server_name = @settings.http_server_type
+      https_server_name = @settings.http_server_type
+      if https_app
+        t1 = add_threaded_server(https_server_name,
+                                 :ssl,
+                                 https_app,
+                                 @settings.bind_host,
+                                 @settings.https_port)
+      end
 
-      Proxy::SignalHandler.install_traps
+      if http_app
+        t2 = add_threaded_server(http_server_name,
+                                 :tcp,
+                                 http_app,
+                                 @settings.bind_host,
+                                 @settings.http_port)
+      end
+
+      Proxy::SignalHandler.install_traps(@servers)
 
       (t1 || t2).join
     rescue SignalException => e
@@ -187,19 +268,19 @@ module Proxy
       exit(1)
     end
 
-    def install_webrick_callback!(*apps)
+    def install_http_server_callback!(*apps)
       apps.compact!
 
-      # track how many webrick apps are still starting up
-      @pending_webrick = apps.size
-      @pending_webrick_lock = Mutex.new
+      # track how many apps are still starting up
+      @pending_server = apps.size
+      @pending_server_lock = Mutex.new
 
       apps.each do |app|
         # add a callback to each server, decrementing the pending counter
         app[:StartCallback] = lambda do
-          @pending_webrick_lock.synchronize do
-            @pending_webrick -= 1
-            launched(apps) if @pending_webrick.zero?
+          @pending_server_lock.synchronize do
+            @pending_server -= 1
+            launched(apps) if @pending_server.zero?
           end
         end
       end

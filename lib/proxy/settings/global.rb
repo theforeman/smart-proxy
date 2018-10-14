@@ -2,6 +2,7 @@ module ::Proxy::Settings
   class Global < ::OpenStruct
     DEFAULT_SETTINGS = {
       :settings_directory => Pathname.new(__FILE__).join("..","..","..","..","config","settings.d").expand_path.to_s,
+      :http_server_type => :webrick,
       :https_port => 8443,
       :log_file => "/var/log/foreman-proxy/proxy.log",
       :log_level => "INFO",

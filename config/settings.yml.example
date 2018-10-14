@@ -58,6 +58,11 @@
 # default values for https_port is 8443
 #:https_port: 8443
 
+# http server type configuration
+# A string that indicates the server type (possible values: 'webrick', 'puma').
+# Default value is 'webrick'
+#:http_server_type: 'puma'
+
 # Log configuration
 # Uncomment and modify if you want to change the location of the log file or use STDOUT or SYSLOG values
 #:log_file: /var/log/foreman-proxy/proxy.log
