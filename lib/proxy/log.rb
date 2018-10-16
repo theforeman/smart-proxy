@@ -82,14 +82,14 @@ module Proxy
       logger.info { "Started #{env['REQUEST_METHOD']} #{env['PATH_INFO']} #{env['QUERY_STRING']}" }
       logger.trace { 'Headers: ' + env.select {|k,v| k.start_with? 'HTTP_'}.inspect }
       logger.trace { (body = env['rack.input'].read).empty? ? '' : 'Body: ' + body }
-      before = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+      before = Time.now.to_f
       status, _, _ = @app.call(env)
     rescue Exception => e
       logger.exception "Error processing request '#{::Logging.mdc['request']}", e
       raise e
     ensure
       logger.info do
-        after = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+        after = Time.now.to_f
         duration = (after - before) * 1000
         "Finished #{env["REQUEST_METHOD"]} #{env["PATH_INFO"]} with #{status} (#{duration.round(2)} ms)"
       end
