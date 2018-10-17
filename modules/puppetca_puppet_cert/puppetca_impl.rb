@@ -1,11 +1,8 @@
 require 'openssl'
 require 'set'
 
-module Proxy::PuppetCa
-
-  class NotPresent < RuntimeError; end
-
-  class PuppetCert
+module ::Proxy::PuppetCa::PuppetcaPuppetCert
+  class PuppetcaImpl
     include ::Proxy::Log
     include ::Proxy::Util
 
@@ -66,8 +63,8 @@ module Proxy::PuppetCa
       # Tell puppetca to use the ssl dir that Foreman has been told to use
       @puppetca << " --ssldir #{ssl_dir}"
 
-      if to_bool(::Proxy::PuppetCa::Plugin.settings.puppetca_use_sudo, true)
-        @sudo = ::Proxy::PuppetCa::Plugin.settings.sudo_command || which("sudo")
+      if use_sudo?
+        @sudo = sudo_command || which("sudo")
         unless File.exist?(@sudo)
           logger.warn "unable to find sudo binary"
           raise "Unable to find sudo"
@@ -80,7 +77,15 @@ module Proxy::PuppetCa
     end
 
     def ssldir
-      Proxy::PuppetCa::Plugin.settings.ssldir
+      Proxy::PuppetCa::PuppetcaPuppetCert::Plugin.settings.ssldir
+    end
+
+    def use_sudo?
+      to_bool(::Proxy::PuppetCa::PuppetcaPuppetCert::Plugin.settings.puppetca_use_sudo, true)
+    end
+
+    def sudo_command
+      ::Proxy::PuppetCa::PuppetcaPuppetCert::Plugin.settings.sudo_command
     end
 
     # parse the puppetca --list output

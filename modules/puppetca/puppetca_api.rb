@@ -1,7 +1,7 @@
 module Proxy::PuppetCa
   class Api < ::Sinatra::Base
     extend Proxy::PuppetCa::DependencyInjection
-    inject_attr :puppet_cert, :puppet_cert
+    inject_attr :puppetca_impl, :puppetca_impl
     inject_attr :autosigner, :autosigner
 
     helpers ::Proxy::Helpers
@@ -11,7 +11,7 @@ module Proxy::PuppetCa
     get "/?" do
       content_type :json
       begin
-        puppet_cert.list.to_json
+        puppetca_impl.list.to_json
       rescue => e
         log_halt 406, "Failed to list certificates: #{e}"
       end
@@ -66,7 +66,7 @@ module Proxy::PuppetCa
       content_type :json
       certname = params[:certname]
       begin
-        puppet_cert.sign(certname)
+        puppetca_impl.sign(certname)
       rescue => e
         log_halt 406, "Failed to sign certificate(s) for #{certname}: #{e}"
       end
@@ -76,7 +76,7 @@ module Proxy::PuppetCa
       begin
         content_type :json
         certname = params[:certname]
-        puppet_cert.clean(certname)
+        puppetca_impl.clean(certname)
       rescue Proxy::PuppetCa::NotPresent => e
         log_halt 404, e.to_s
       rescue => e
