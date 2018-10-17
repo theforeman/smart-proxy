@@ -1,3 +1,42 @@
+2018-10-16	Lukas Zapletal <lzap+git@redhat.com>
+	* Refs #25100 - do not use Process::CLOCK_MONOTONIC yet
+
+2018-10-15	Lukas Zapletal <lzap+git@redhat.com>
+	* Fixes #25100 - Ruby logging stack replaced with logging gem
+
+2018-10-10	Michael Moll <kvedulv@kvedulv.de>
+	* remove has_rdoc from gemspec
+
+2018-10-03	Lukas Zapletal <lzap+git@redhat.com>
+	* Fixes #24978 - support for DDNS lease entries
+
+2018-09-21	Timo Goebel <mail@timogoebel.name>
+	* refs #23211 - make PuppetCA token provider more resilient
+
+2018-09-18	Ewoud Kohl van Wijngaarden <ewoud@kohlvanwijngaarden.nl>
+	* Correct the gemspec
+
+2018-08-27	Julian Todt <julian.todt@dm.de>
+	* Fixes #23211 - Add PuppetCa TokenWhitelisting provider
+
+2018-08-24	Lukas Zapletal <lzap+git@redhat.com>
+	* Fixes #24631 - httpboot module
+
+2018-08-13	Lukas Zapletal <lzap+git@redhat.com>
+	* Fixes #24591 - fixed debug message in MSDHCP
+
+2018-08-09	Julian Todt <julian.todt@dm.de>
+	* Fixes #24553 - Fix PuppetCa migrations
+
+2018-08-01	Eric Helms <eric.d.helms@gmail.com>
+	* Generate source with the actual version specified in VERSION (#599)
+
+2018-07-27	Lukáš Zapletal <lzap@redhat.com>
+	* Fixes #24364 - non-ascii logs are readable now
+
+2018-07-17	Tomer Brisker <tbrisker@users.noreply.github.com>
+	* Bump version to 1.20-develop (#594)
+
 2018-06-21	Julian Todt <julian.todt@dm.de>
 	* Fixes #23799 - Refactor: Make PuppetCa pluggable
 
