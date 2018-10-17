@@ -1,0 +1,4 @@
+---
+#:ssldir: /var/lib/puppet/ssl
+#:puppetca_use_sudo: true
+#:sudo_command: /usr/bin/sudo

@@ -6,6 +6,6 @@
 #   - puppetca_hostname_whitelisting (verify CSRs based on a hostname whitelist)
 #   - puppetca_token_whitelisting (verify CSRs based on a token whitelist)
 #:use_provider: puppetca_hostname_whitelisting
-#:ssldir: /var/lib/puppet/ssl
-#:puppetca_use_sudo: true
-#:sudo_command: /usr/bin/sudo
+
+# Puppet version used
+#:puppet_version: '4.1'

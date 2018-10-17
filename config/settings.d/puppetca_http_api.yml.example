@@ -1,0 +1,8 @@
+---
+# URL of the puppet master itself for API requests.
+#:puppet_url: https://puppet.example.com:8140
+#
+# SSL certificates used to access the CA API.
+#:puppet_ssl_ca: /etc/puppetlabs/ssl/certs/ca.pem
+#:puppet_ssl_cert: /etc/puppetlabs/ssl/certs/puppet.example.com.pem
+#:puppet_ssl_key: /etc/puppetlabs/ssl/private_keys/puppet.example.com.pem
