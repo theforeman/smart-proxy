@@ -261,6 +261,7 @@ EOMULTILNE_SHARED_NETWORK
 
   MULTILINE_POOL =<<EOMULTILINE_POOL
     subnet 192.168.1.0 netmask 255.255.255.128 {
+      option interface-mtu 9000;
       pool {
         authoritative;
         range 192.168.1.1 192.168.1.100;
@@ -271,6 +272,7 @@ EOMULTILNE_SHARED_NETWORK
 EOMULTILINE_POOL
   def test_parse_multiline_pool
     assert_equal [Proxy::DHCP::CommonISC::ConfigurationParser::IpV4SubnetNode['192.168.1.0', '255.255.255.128', [
+      Proxy::DHCP::CommonISC::ConfigurationParser::OptionNode[false, 'interface-mtu', [['9000']]],
       Proxy::DHCP::CommonISC::ConfigurationParser::GroupNode['pool', [
         Proxy::DHCP::CommonISC::ConfigurationParser::IgnoredDeclaration[['authoritative']],
         Proxy::DHCP::CommonISC::ConfigurationParser::RangeNode['192.168.1.1', '192.168.1.100', false],

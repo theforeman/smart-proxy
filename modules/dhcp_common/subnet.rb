@@ -26,7 +26,7 @@ module Proxy::DHCP
       @options[:domain_name] = options[:domain_name] if options[:domain_name]
       @options[:domain_name_servers] = options[:domain_name_servers] if options[:domain_name_servers]
       @options[:ntp_servers] = options[:ntp_servers] if options[:ntp_servers]
-      @options[:interface_mtu] = options[:interface_mtu].to_i if options[:interface_mtu]
+      @options[:interface_mtu] = options[:interface_mtu].flatten.first.to_i if options[:interface_mtu]
       @options[:range] = options[:range] if options[:range] && options[:range][0] && options[:range][1] && validate_subnet_range!(options[:range][0], options[:range][1])
 
       @m = Monitor.new
