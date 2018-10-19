@@ -75,7 +75,7 @@ module Proxy::DHCP
             return possible_ip
           end
         rescue Exception => e
-          logger.error("Exception when pinging #{possible_ip}. Skipping the address.", e)
+          logger.error "Exception when pinging #{possible_ip}. Skipping the address.", e
         end
       end
 

@@ -107,14 +107,14 @@ module Proxy
     def load_ssl_private_key(path)
       OpenSSL::PKey::RSA.new(File.read(path))
     rescue Exception => e
-      logger.error "Unable to load private SSL key. Are the values correct in settings.yml and do permissions allow reading?: #{e}"
+      logger.error "Unable to load private SSL key. Are the values correct in settings.yml and do permissions allow reading?", e
       raise e
     end
 
     def load_ssl_certificate(path)
       OpenSSL::X509::Certificate.new(File.read(path))
     rescue Exception => e
-      logger.error "Unable to load SSL certificate. Are the values correct in settings.yml and do permissions allow reading?: #{e}"
+      logger.error "Unable to load SSL certificate. Are the values correct in settings.yml and do permissions allow reading?", e
       raise e
     end
 
@@ -184,7 +184,7 @@ module Proxy
       # do nothing. This is to prevent the exception handler below from catching SystemExit exceptions.
       raise
     rescue Exception => e
-      logger.error("Error during startup, terminating. #{e}", e.backtrace)
+      logger.error "Error during startup, terminating", e
       puts "Errors detected on startup, see log for details. Exiting: #{e}"
       exit(1)
     end

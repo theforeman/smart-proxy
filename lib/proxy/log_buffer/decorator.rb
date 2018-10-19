@@ -41,7 +41,6 @@ module Proxy::LogBuffer
         return if message == ''
         # add to the logger first
         @logger.add(severity, message)
-        @logger.add(::Logger::Severity::DEBUG, backtrace) if backtrace
         # add add to the buffer
         if severity >= @logger.level
           # we accept backtrace, exception and simple string
@@ -51,6 +50,8 @@ module Proxy::LogBuffer
           @buffer.push(rec)
         end
       end
+      # exceptions are also sent to structured log if available
+      self.exception("Error details", backtrace) if backtrace && backtrace.is_a?(Exception)
     end
 
     def trace?

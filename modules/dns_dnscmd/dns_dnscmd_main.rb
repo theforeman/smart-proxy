@@ -60,9 +60,9 @@ module Proxy::Dns::Dnscmd
 
     def report msg, response, error_only
       if response.grep(/completed successfully/).empty?
-        logger.error "Dnscmd failed:\n" + response.join("\n")
-        msg.sub! /Removed/,    "remove"
-        msg.sub! /Added/,      "add"
+        logger.error "Command dnscmd failed:\n" + response.join("\n")
+        msg.sub!(/Removed/, "remove")
+        msg.sub!(/Added/, "add")
         msg  = "Failed to #{msg}"
         raise Proxy::Dns::Error.new(msg) unless response.grep(/DNS_ERROR_NAME_DOES_NOT_EXIST/).any? && msg == "Failed to EnumRecords"
       else
@@ -71,7 +71,7 @@ module Proxy::Dns::Dnscmd
     rescue Proxy::Dns::Error
       raise
     rescue
-      logger.error "Dnscmd failed:\n" + (response.is_a?(Array) ? response.join("\n") : "Response was not an array! #{response}")
+      logger.error "Command dnscmd failed:\n" + (response.is_a?(Array) ? response.join("\n") : "Response was not an array! #{response}")
       raise Proxy::Dns::Error.new("Unknown error while processing '#{msg}'")
     end
 

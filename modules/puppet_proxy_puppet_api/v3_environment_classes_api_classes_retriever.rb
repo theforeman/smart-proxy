@@ -81,7 +81,7 @@ class Proxy::PuppetApi::V3EnvironmentClassesApiClassesRetriever
         response, etag = @puppet_api.new(puppet_url, ssl_ca, ssl_cert, ssl_key).list_classes(environment, etag, MAX_PUPPETAPI_TIMEOUT)
       rescue Exception => e
         @m.synchronize { @futures_cache[environment] = nil }
-        logger.error("Error while retrieving puppet classes for '%s' environment" % [environment], e)
+        logger.error "Error while retrieving puppet classes for '%s' environment" % [environment], e
         raise e
       end
 

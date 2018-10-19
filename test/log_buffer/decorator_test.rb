@@ -10,6 +10,7 @@ class DecoratorTest < Test::Unit::TestCase
 
   DEBUG = ::Logger::Severity::DEBUG
   INFO = ::Logger::Severity::INFO
+  WARNING = ::Logger::Severity::WARN
   ERR = ::Logger::Severity::ERROR
   FATAL = ::Logger::Severity::FATAL
 
@@ -39,7 +40,7 @@ class DecoratorTest < Test::Unit::TestCase
   def test_should_pass_and_log_exception
     e = Exception.new('exception')
     @logger.expects(:add).with(DEBUG, "message")
-    @logger.expects(:add).with(DEBUG, e)
+    @decorator.expects(:exception).with("Error details", e)
     @decorator.debug("message", e)
   end
 

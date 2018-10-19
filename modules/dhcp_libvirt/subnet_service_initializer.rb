@@ -37,7 +37,8 @@ module Proxy::DHCP::Libvirt
       raise Proxy::DHCP::Error("Only one subnet is supported") if ret_val.size > 1
       ret_val
     rescue Exception => e
-      logger.error msg = "Unable to parse subnets XML: #{e}"
+      msg = "Unable to parse subnets XML"
+      logger.error msg, e
       logger.debug xml if defined?(xml)
       raise Proxy::DHCP::Error, msg
     end
@@ -57,7 +58,8 @@ module Proxy::DHCP::Libvirt
       end
       to_ret
     rescue Exception => e
-      logger.error msg = "Unable to parse reservations XML: #{e}"
+      msg = "Unable to parse reservations XML"
+      logger.error msg, e
       logger.debug xml if defined?(xml)
       raise Proxy::DHCP::Error, msg
     end
