@@ -12,6 +12,7 @@ class DhcpIscSubnetServiceInitializationTest < Test::Unit::TestCase
 # This is a comment.
 
 subnet 192.168.122.0 netmask 255.255.255.0 {
+  option interface-mtu 9000;
   option routers 192.168.122.250; # This is an inline comment
   next-server 192.168.122.251;
 }
@@ -73,6 +74,12 @@ END
     assert_equal "192.168.123.0", subnets[1].network
     assert_equal "192.168.124.0", subnets[2].network
     assert_equal "192.168.1.0", subnets[3].network
+  end
+
+  def test_interface_mtu_option
+    @initialization.load_configuration_file(DHCPD_CONFIG)
+    subnets =  @subnet_service.all_subnets
+    assert_equal 9000, subnets[0].options[:interface_mtu]
   end
 
   def test_managed_subnets_netmask
