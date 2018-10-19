@@ -6,7 +6,7 @@ group :test do
   gem 'public_suffix', '< 3' if RUBY_VERSION < '2.1'
   gem 'benchmark-ips'
   gem 'ruby-prof'
-  gem 'rubocop', '0.38.0'
+  gem 'rubocop', '~> 0.50.0'
 
   if RUBY_VERSION < '2.2.2'
     gem 'rack-test', '~> 0.7.0'
@@ -19,7 +19,7 @@ group :test do
   else
     gem 'rdoc'
   end
-  
+
   gem 'rake'
   gem 'rubocop-checkstyle_formatter', '~> 0.2'
   gem 'webmock'

@@ -1,52 +1,52 @@
 inherit_from: .rubocop_todo.yml
 
+AllCops:
+  TargetRubyVersion: 2.0
+
+# Don't prefer is_a? over kind_of?
+Style/ClassCheck:
+  Enabled: false
+
+# Don't enforce certain methods, e.g. detect over find
+Style/CollectionMethods:
+  Enabled: false
+
+# Don't enforce documentation
+Style/Documentation:
+  Enabled: false
+
+# Both double and single quotes are OK
+Style/StringLiterals:
+  Enabled: false
+
+# Don't enforce frozen string literals
+Style/FrozenStringLiteralComment:
+  Enabled: false
+
 Metrics/ClassLength:
   Exclude:
     - 'test/**/*'
 
-# Offense count: 11
 Lint/AmbiguousRegexpLiteral:
   Enabled: false
 
-# Offense count: 14
-# Configuration parameters: AllowSafeAssignment.
 Lint/AssignmentInCondition:
   Enabled: false
 
-# Offense count: 3
-Lint/Eval:
+Security/Eval:
   Enabled: false
 
-# Offense count: 13
-# Cop supports --auto-correct.
 Lint/RescueException:
   Enabled: false
 
-# Offense count: 9
-# Cop supports --auto-correct.
-Lint/StringConversionInInterpolation:
-  Enabled: true
-
-# Offense count: 9
-# Cop supports --auto-correct.
 Lint/UnusedBlockArgument:
   Enabled: false
 
-# Offense count: 18
-# Cop supports --auto-correct.
 Lint/UnusedMethodArgument:
   Enabled: false
 
-# Offense count: 5
-Metrics/BlockNesting:
-  Max: 4
-
 Style/SymbolProc:
   Enabled: false
-
-# Some logging methods need more params than usual
-Metrics/ParameterLists:
-  Max: 8
 
 Style/Lambda:
   Enabled: false
@@ -55,3 +55,61 @@ Style/Lambda:
 Style/HashSyntax:
   Enabled: false
 
+Performance/Casecmp:
+  Enabled: false
+
+Performance/RedundantMatch:
+  Enabled: true
+
+Performance/RedundantMerge:
+  Enabled: true
+
+#Allow both ['a', 'b'], %w[a b] and %w(a b) style arrays
+Style/WordArray:
+  Enabled: false
+
+Style/AndOr:
+  EnforcedStyle: conditionals
+
+Style/TernaryParentheses:
+  EnforcedStyle: require_parentheses_when_complex
+
+Style/InverseMethods:
+  Enabled: false
+
+Layout/FirstParameterIndentation:
+  EnforcedStyle: consistent
+
+Bundler/OrderedGems:
+  Enabled: false
+
+Style/Alias:
+  EnforcedStyle: prefer_alias_method
+
+Layout/DotPosition:
+  Enabled: false
+
+Style/IfUnlessModifier:
+  Enabled: false
+
+Style/ConditionalAssignment:
+  Enabled: false
+
+Style/EmptyMethod:
+  EnforcedStyle: expanded
+
+Style/ParenthesesAroundCondition:
+  Enabled: false
+
+Layout/AlignHash:
+  Enabled: false
+
+Layout/AlignParameters:
+  Enabled: false
+
+# disabled until we can configure "+" as concat sign
+Style/LineEndConcatenation:
+  Enabled: false
+
+Style/ParallelAssignment:
+  Enabled: false
