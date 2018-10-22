@@ -7,6 +7,8 @@ module Proxy::LogBuffer
       @@instance ||= new(::Proxy::LoggerFactory.logger, ::Proxy::LoggerFactory.log_file)
     end
 
+    attr_accessor :formatter
+
     def initialize(logger, log_file, buffer = Proxy::LogBuffer::Buffer.instance)
       @logger = logger
       @buffer = buffer
@@ -28,17 +30,18 @@ module Proxy::LogBuffer
     end
 
     def add(severity, message = nil, progname = nil, backtrace = nil)
+      severity ||= UNKNOWN
+      if message.nil?
+        if block_given?
+          message = yield
+        else
+          message = progname
+        end
+      end
+      message = formatter.call(severity, Time.now.utc, progname, message) if formatter
+      return if message == ''
       @mutex.synchronize do
         handle_log_rolling if @roll_log
-        severity ||= UNKNOWN
-        if message.nil?
-          if block_given?
-            message = yield
-          else
-            message = progname
-          end
-        end
-        return if message == ''
         # add to the logger first
         @logger.add(severity, message)
         @logger.add(::Logger::Severity::DEBUG, backtrace) if backtrace
