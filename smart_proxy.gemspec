@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = "smart_proxy"
-  s.version = File.read(File.join(File.dirname(__FILE__), 'VERSION')).chomp.gsub('-', '.')
+  s.version = File.read(File.join(File.dirname(__FILE__), 'VERSION')).chomp.tr('-', '.')
   s.author = "Ohad Levy"
   s.email = "ohadlevy@gmail.com"
   s.homepage = "https://theforeman.org/"
