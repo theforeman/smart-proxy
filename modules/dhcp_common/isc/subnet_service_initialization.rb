@@ -176,7 +176,7 @@ module Proxy::DHCP::CommonISC
         when 'SUNW.JumpStart-server'
           [:jumpstart_server_path, strip_quotes(values.flatten.first)]
         else
-          [name.gsub('.', '_').gsub('-', '_').to_sym, values.map {|vv| vv.map{|v| strip_quotes(v)}}]
+          [name.tr('.', '_').tr('-', '_').to_sym, values.map {|vv| vv.map{|v| strip_quotes(v)}}]
         #TODO: check if adding a new reservation with omshell for a free lease still
         #generates a conflict
       end

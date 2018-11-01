@@ -76,7 +76,7 @@ module Proxy
 
       if Proxy::SETTINGS.tls_disabled_versions
         Proxy::SETTINGS.tls_disabled_versions.each do |version|
-          constant = OpenSSL::SSL.const_get("OP_NO_TLSv#{version.to_s.gsub(/\./, '_')}") rescue nil
+          constant = OpenSSL::SSL.const_get("OP_NO_TLSv#{version.to_s.tr('.', '_')}") rescue nil
 
           if constant
             logger.info "TLSv#{version} will be disabled."

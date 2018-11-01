@@ -332,7 +332,7 @@ module Proxy
           binding_state_keyword = word('binding state').fail 'keyword_binding_state'
           next_binding_state_keyword = word('next binding state').fail 'keyword_next_binding_state'
 
-          seq_(binding_state_keyword | next_binding_state_keyword, state_matcher, EOSTMT) {|state, value| KeyValueNode[state.gsub(' ', '_').to_sym, value]}
+          seq_(binding_state_keyword | next_binding_state_keyword, state_matcher, EOSTMT) {|state, value| KeyValueNode[state.tr(' ', '_').to_sym, value]}
         end
 
         def lease_uid
