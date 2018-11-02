@@ -16,13 +16,20 @@ class Proxy::TemplatesApi < Sinatra::Base
 
   get "/:kind/:template/:hostgroup" do |kind, template, hostgroup|
     log_halt(500, "Failed to retrieve #{kind} hostgroup template for #{params.inspect}: ") do
-      Proxy::Templates::TemplateProxyRequest.new.get_template([kind, template, hostgroup].join('/'), request.env, params)
+      Proxy::Templates::TemplateProxyRequest.new.get([kind, template, hostgroup].join('/'), request.env, params)
     end
   end
 
   get "/:kind" do |kind|
-    log_halt(500, "Failed to retrieve #{kind} template for #{params.inspect}: ") do
-      Proxy::Templates::TemplateProxyRequest.new.get_template([kind].join('/'), request.env, params)
+    log_halt(500, "Failed to proxy /#{kind} for #{params.inspect}: ") do
+      Proxy::Templates::TemplateProxyRequest.new.get([kind].join('/'), request.env, params)
+    end
+  end
+
+  post "/:kind" do |kind|
+    log_halt(500, "Failed to proxy /#{kind} for #{params.inspect}: ") do
+      params["Content-Type"] = "text/plain"
+      Proxy::Templates::TemplateProxyRequest.new.post([kind].join('/'), request.env, params, request.body.read)
     end
   end
 end
