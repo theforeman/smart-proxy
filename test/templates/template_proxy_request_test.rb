@@ -40,15 +40,32 @@ class TemplateProxyRequestTest < Test::Unit::TestCase
     @expected_body = "my template"
     args = { :token => "test-token" }
     stub_request(:get, @foreman_url+'/unattended/provision?token=test-token&url='+@template_url).to_return(:status => [200, 'OK'], :body => @expected_body)
-    result = Proxy::Templates::TemplateProxyRequest.new.get_template('provision', @request_env, args)
+    result = Proxy::Templates::TemplateProxyRequest.new.get('provision', @request_env, args)
     assert_equal(@expected_body, result)
+  end
+
+  def test_template_requests_via_post
+    @expected_body = "my template"
+    args = { :token => "test-token" }
+    stub_request(:post, @foreman_url+'/unattended/built?token=test-token&url='+@template_url).
+      with(
+        body: "my template",
+        headers: {
+            'Accept'=>['*/*', 'application/json,version=2'],
+            'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
+            'Content-Type'=>'application/json',
+            'User-Agent'=>'Ruby',
+            'X-Forwarded-For'=>'1.2.3.4, proxy.lan'
+        }).
+      to_return(status: 200, body: "", headers: {})
+    Proxy::Templates::TemplateProxyRequest.new.post('built', @request_env, args, @expected_body)
   end
 
   def test_template_requests_pass_static_flag_to_foreman
     @expected_body = "my template"
     args = { :token => "test-token", :static => "true" }
     stub_request(:get, @foreman_url+'/unattended/provision?static=true&token=test-token&url='+@template_url).to_return(:status => [200, 'OK'], :body => @expected_body)
-    result = Proxy::Templates::TemplateProxyRequest.new.get_template('provision', @request_env, args)
+    result = Proxy::Templates::TemplateProxyRequest.new.get('provision', @request_env, args)
     assert_equal(@expected_body, result)
   end
 
@@ -56,7 +73,7 @@ class TemplateProxyRequestTest < Test::Unit::TestCase
     @expected_body = "my template"
     args = { :mac => "aa:bb:cc:dd:ee:ff" }
     stub_request(:get, @foreman_url+'/unattended/provision?mac=aa:bb:cc:dd:ee:ff&url='+@template_url).to_return(:status => [200, 'OK'], :body => @expected_body)
-    result = Proxy::Templates::TemplateProxyRequest.new.get_template('provision', @request_env, args)
+    result = Proxy::Templates::TemplateProxyRequest.new.get('provision', @request_env, args)
     assert_equal(@expected_body, result)
   end
 
@@ -67,7 +84,7 @@ class TemplateProxyRequestTest < Test::Unit::TestCase
     stub_request(:get, @foreman_url+'/unattended/provision?token=test-token&url='+@template_url).
       with(:headers => {'X-Forwarded-For'=>'1.2.3.4, proxy.lan', 'X-Rhn-Provisioning-Mac-0'=>'aa:bb:cc:dd:ee:ff'}).
       to_return(:status => [200, 'OK'], :body => @expected_body)
-    result = Proxy::Templates::TemplateProxyRequest.new.get_template('provision', @request_env, args)
+    result = Proxy::Templates::TemplateProxyRequest.new.get('provision', @request_env, args)
     assert_equal(@expected_body, result)
   end
 end

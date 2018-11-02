@@ -2,6 +2,7 @@ require 'net/http'
 require 'net/https'
 require 'uri'
 require 'cgi'
+require 'hash-patch'
 
 module Proxy::HttpRequest
   class ForemanRequestFactory
@@ -10,7 +11,7 @@ module Proxy::HttpRequest
     end
 
     def query_string(input={})
-      input.map{|k,v| "#{CGI.escape(k.to_s)}=#{CGI.escape(v)}"}.join("&")
+      input.compact.map{|k,v| "#{CGI.escape(k.to_s)}=#{CGI.escape(v)}"}.join("&")
     end
 
     def create_get(path, query={}, headers={})
@@ -26,15 +27,17 @@ module Proxy::HttpRequest
 
     def add_headers(req, headers={})
       req.add_field('Accept', 'application/json,version=2')
-      req.content_type = 'application/json'
+      req.content_type = headers["Content-Type"] || 'application/json'
       headers.each do |k, v|
         req.add_field(k, v)
       end
       req
     end
 
-    def create_post(path, body, headers={})
-      req = Net::HTTP::Post.new(uri(path).path)
+    def create_post(path, body, headers={}, query={})
+      uri = uri(path)
+      uri.query = query_string(query)
+      req = Net::HTTP::Post.new(uri)
       req = add_headers(req, headers)
       req.body = body
       req
