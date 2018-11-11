@@ -118,6 +118,13 @@ class IscOmapiProviderTest < Test::Unit::TestCase
     assert_equal [], @dhcp.ztp_options_statements(:filename => 'foo.cfg')
     assert_equal ['option option-150 = c0:a8:7a:01;', 'option FM_ZTP.config-file-name = \\"ztp.cfg\\";'],
                  @dhcp.ztp_options_statements(:filename => 'ztp.cfg', :nextServer => '192.168.122.1')
+    assert_equal ['option option-150 = c0:a8:7a:01;', 'option FM_ZTP.config-file-name = \\"ztp.cfg\\";'],
+                 @dhcp.ztp_options_statements(:filename => 'ztp.cfg', :nextServer => '192.168.122.1', :ztp_vendor => 'junos')
+    assert_equal ['option option-150 = c0:a8:7a:01;', 'option FM_ZTP.config-file-name = \\"ztp.cfg\\";',
+                  'option option-143 = \\"vrpfile=firmware.cc;webfile=web.7z;\\";'],
+                 @dhcp.ztp_options_statements(:filename => 'ztp.cfg', :nextServer => '192.168.122.1',
+                                              :ztp_vendor => 'huawei', :ztp_firmware => { :core => 'firmware.cc',
+                                                                                          :web => 'web.7z'})
   end
 
   def test_poap_quirks

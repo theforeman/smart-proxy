@@ -136,7 +136,7 @@ class TftpZtpServerTest < Test::Unit::TestCase
 
   def setup_paths
     @subject = Proxy::TFTP::Ztp.new
-    @pxe_config_files = ["ztp.cfg/AABBCCDDEEFF"]
+    @pxe_config_files = ["ztp.cfg/AABBCCDDEEFF", "ztp.cfg/AABBCCDDEEFF.cfg"]
   end
 
   def test_create_default
