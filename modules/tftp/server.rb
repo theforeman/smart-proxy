@@ -110,7 +110,7 @@ module Proxy::TFTP
       [pxeconfig_dir]
     end
     def pxeconfig_file mac
-      ["#{pxeconfig_dir}/"+mac.delete(':').upcase]
+      ["#{pxeconfig_dir}/"+mac.delete(':').upcase, "#{pxeconfig_dir}/"+mac.delete(':').upcase+".cfg"]
     end
   end
 

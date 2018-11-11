@@ -159,6 +159,19 @@ module Proxy::DHCP::CommonISC
       statements
     end
 
+    def vendor_specific_ztp_statements(options)
+      statements = []
+      if options.has_key?(:ztp_vendor) 
+        case options[:ztp_vendor]
+          when "huawei"
+            if options.has_key?(:ztp_firmware)
+              statements << "option option-143 = \\\"vrpfile=#{options[:ztp_firmware][:core]};webfile=#{options[:ztp_firmware][:web]};\\\";"
+            end
+        end
+      end
+      statements
+    end
+
     # Quirk: Junos ZTP requires special DHCP options
     def ztp_options_statements(options)
       statements = []
@@ -167,6 +180,8 @@ module Proxy::DHCP::CommonISC
         opt150 = ip2hex validate_ip(options[:nextServer])
         statements << "option option-150 = #{opt150};"
         statements << "option FM_ZTP.config-file-name = \\\"#{options[:filename]}\\\";"
+
+        statements.concat(vendor_specific_ztp_statements(options))
       end
       statements
     end
