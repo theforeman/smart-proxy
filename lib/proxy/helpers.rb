@@ -29,8 +29,8 @@ module Proxy::Helpers
   end
 
   # read the HTTPS client certificate from the environment and extract its CN
-  def https_cert_cn
-    certificate_raw = request.env['SSL_CLIENT_CERT'].to_s
+  def https_cert_cn(request)
+    certificate_raw = ssl_client_cert(request)
     log_halt 403, 'could not read client cert from environment' if certificate_raw.empty?
 
     begin
@@ -105,5 +105,20 @@ module Proxy::Helpers
     else
       fqdn
     end
+  end
+
+  def ssl_client_cert(request)
+    if request.env.key?('SSL_CLIENT_CERT')
+      request.env['SSL_CLIENT_CERT'].to_s
+    elsif request.env.key?('puma.peercert')
+      request.env['puma.peercert'].to_s
+    else
+      ''
+    end
+  end
+
+  def https?(request)
+    # test env variable for puma and also webrick
+    request.env['HTTPS'].to_s == 'https' || request.env['HTTPS'].to_s =~ /yes|on|1/
   end
 end

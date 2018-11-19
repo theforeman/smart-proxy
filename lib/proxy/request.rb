@@ -5,17 +5,15 @@ require 'cgi'
 
 module Proxy::HttpRequest
   class ForemanRequestFactory
+    include Proxy::Util
+
     def initialize(base_uri)
       @base_uri = base_uri
     end
 
-    def query_string(input = {})
-      input.compact.map { |k, v| "#{CGI.escape(k.to_s)}=#{CGI.escape(v)}" }.join("&")
-    end
-
     def create_get(path, query = {}, headers = {})
       uri = uri(path)
-      req = Net::HTTP::Get.new("#{uri.path || '/'}?#{query_string(query)}")
+      req = Net::HTTP::Get.new("#{uri.path || '/'}?#{hash_to_query_string(query)}")
       req = add_headers(req, headers)
       req
     end
@@ -35,7 +33,7 @@ module Proxy::HttpRequest
 
     def create_post(path, body, headers = {}, query = {})
       uri = uri(path)
-      uri.query = query_string(query)
+      uri.query = hash_to_query_string(query)
       req = Net::HTTP::Post.new(uri)
       req = add_headers(req, headers)
       req.body = body

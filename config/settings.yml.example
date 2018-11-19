@@ -7,15 +7,17 @@
 #:ssl_ca_file: ssl/certs/ca.pem
 #:ssl_private_key: ssl/private_keys/fqdn.key
 
-# Use this option only if you need to disable certain cipher suites.
-# Note: we use the OpenSSL suite name, such as "RC4-MD5".
-# The complete list of cipher suite names can be found at:
-# https://www.openssl.org/docs/manmaster/man1/ciphers.html#CIPHER-SUITE-NAMES
-#:ssl_disabled_ciphers: [CIPHER-SUITE-1, CIPHER-SUITE-2]
+# Enabled ciphers for SSL. The complete list of cipher suite
+# names and list format can be found at:
+# https://www.openssl.org/docs/man1.0.2/man1/ciphers.html
+# Accepts both array and colon-separated (OpenSSL) string.
+# The default value (when commented out) is defined in:
+# /usr/share/foreman-proxy/lib/proxy/settings/global.rb
+#:ssl_enabled_ciphers: ['ECDHE-RSA-AES128-GCM-SHA256','ECDHE-RSA-AES256-GCM-SHA384','AES128-GCM-SHA256','AES256-GCM-SHA384','AES128-SHA256','AES256-SHA256','AES128-SHA','AES256-SHA']
+#:ssl_enabled_ciphers: "ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256"
 
-# Use this option only if you need to strictly specify TLS versions to be
-# disabled. SSLv3 and TLS v1.0 are always disabled and cannot be configured.
-# Specify versions like: '1.1', or '1.2'
+# SSLv3 and TLS 1.0 and 1.1 are disabled in smart-proxy. To disable additional
+# versions of TLS, use this setting. Specify versions in an array, e.g. ['1.2'].
 #:tls_disabled_versions: []
 
 # Hosts which the proxy accepts connections from
@@ -49,7 +51,7 @@
 #:daemon_pid: /var/run/foreman-proxy/foreman-proxy.pid
 
 # host and ports configuration
-# an array of interfaces to bind ports to (possible values: *, localhost, 0.0.0.0)
+# an array of interfaces to bind ports to (possible values: *, localhost, 0.0.0.0, ::1, ::)
 #:bind_host: ['*']
 # http is disabled by default. To enable, uncomment 'http_port' setting
 #:http_port: 8000
@@ -57,6 +59,11 @@
 # ssl_certificate, ssl_ca_file, and ssl_private_key correspondingly
 # default values for https_port is 8443
 #:https_port: 8443
+
+# http server type configuration
+# A string that indicates the server type (possible values: 'webrick', 'puma').
+# Default value is 'puma'
+#:http_server_type: 'puma'
 
 # Log configuration
 # Uncomment and modify if you want to change the location of the log file or use STDOUT or SYSLOG values

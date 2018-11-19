@@ -121,6 +121,12 @@ module Proxy::LogBuffer
       end
     end
 
+    # for Puma Event compatibility
+    def sync=(_)
+    end
+    alias_method :log, :info
+    alias_method :puts, :info
+
     def method_missing(symbol, *args)
       @logger.send(symbol, *args)
     end

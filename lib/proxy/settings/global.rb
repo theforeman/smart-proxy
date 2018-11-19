@@ -2,6 +2,7 @@ module ::Proxy::Settings
   class Global < ::OpenStruct
     DEFAULT_SETTINGS = {
       :settings_directory => Pathname.new(__FILE__).join("..", "..", "..", "..", "config", "settings.d").expand_path.to_s,
+      :http_server_type => "puma",
       :https_port => 8443,
       :log_file => "/var/log/foreman-proxy/proxy.log",
       :file_rolling_keep => 6,
@@ -16,7 +17,7 @@ module ::Proxy::Settings
       :bind_host => ["*"],
       :log_buffer => 2000,
       :log_buffer_errors => 1000,
-      :ssl_disabled_ciphers => [],
+      :ssl_enabled_ciphers => ['ECDHE-RSA-AES128-GCM-SHA256', 'ECDHE-RSA-AES256-GCM-SHA384', 'AES128-GCM-SHA256', 'AES256-GCM-SHA384', 'AES128-SHA256', 'AES256-SHA256', 'AES128-SHA', 'AES256-SHA'],
       :tls_disabled_versions => [],
       :dns_resolv_timeouts => [5, 8, 13], # Ruby default is [5, 20, 40] which is a bit too much for us
     }

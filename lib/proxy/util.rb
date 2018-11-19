@@ -103,4 +103,8 @@ module Proxy::Util
       Base64.encode64(str).delete("\n")
     end
   end
+
+  def hash_to_query_string(input = {})
+    input.compact.map { |k, v| "#{CGI.escape(k.to_s)}=#{CGI.escape(v)}" }.join("&")
+  end
 end

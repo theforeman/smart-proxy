@@ -1,21 +1,28 @@
 require 'proxy/log'
+require 'proxy/util'
+require 'proxy/sd_notify_all'
 require 'proxy/settings'
 require 'proxy/signal_handler'
 require 'proxy/log_buffer/trace_decorator'
 require 'sd_notify'
-
-CIPHERS = ['ECDHE-RSA-AES128-GCM-SHA256', 'ECDHE-RSA-AES256-GCM-SHA384',
-           'AES128-GCM-SHA256', 'AES256-GCM-SHA384', 'AES128-SHA256',
-           'AES256-SHA256', 'AES128-SHA', 'AES256-SHA'].freeze
+require 'rack'
+require 'webrick'
 
 module Proxy
   class Launcher
     include ::Proxy::Log
+    include ::Proxy::Util
 
     attr_reader :settings
 
-    def initialize(settings = SETTINGS)
+    def initialize(settings = Proxy::SETTINGS)
       @settings = settings
+      if @settings.http_server_type == "puma"
+        require 'puma'
+        require 'rack/handler/puma'
+        require 'puma-patch'
+      end
+      @servers = []
     end
 
     def pid_path
@@ -50,7 +57,7 @@ module Proxy
 
       {
         :app => app,
-        :server => :webrick,
+        :server => settings.http_server_type.to_sym,
         :DoNotListen => true,
         :Port => http_port, # only being used to correctly log http port being used
         :Logger => ::Proxy::LogBuffer::TraceDecorator.instance,
@@ -70,41 +77,69 @@ module Proxy
         plugins.each { |p| instance_eval(p.https_rackup) }
       end
 
-      ssl_options = OpenSSL::SSL::SSLContext::DEFAULT_PARAMS[:options]
-      ssl_options |= OpenSSL::SSL::OP_CIPHER_SERVER_PREFERENCE if defined?(OpenSSL::SSL::OP_CIPHER_SERVER_PREFERENCE)
-      # This is required to disable SSLv3 on Ruby 1.8.7
-      ssl_options |= OpenSSL::SSL::OP_NO_SSLv2 if defined?(OpenSSL::SSL::OP_NO_SSLv2)
-      ssl_options |= OpenSSL::SSL::OP_NO_SSLv3 if defined?(OpenSSL::SSL::OP_NO_SSLv3)
-      ssl_options |= OpenSSL::SSL::OP_NO_TLSv1 if defined?(OpenSSL::SSL::OP_NO_TLSv1)
-      ssl_options |= OpenSSL::SSL::OP_NO_TLSv1_1 if defined?(OpenSSL::SSL::OP_NO_TLSv1_1)
+      ssl_enabled_ciphers = if settings.ssl_enabled_ciphers.is_a?(String)
+                              settings.ssl_enabled_ciphers.split(':')
+                            else
+                              settings.ssl_enabled_ciphers
+                            end
 
-      Proxy::SETTINGS.tls_disabled_versions&.each do |version|
-        constant = OpenSSL::SSL.const_get("OP_NO_TLSv#{version.to_s.tr('.', '_')}") rescue nil
-
-        if constant
-          logger.info "TLSv#{version} will be disabled."
-          ssl_options |= constant
-        else
-          logger.warn "TLSv#{version} was not found."
-        end
-      end
-
-      {
+      app_details = {
         :app => app,
-        :server => :webrick,
+        :server => settings.http_server_type,
         :DoNotListen => true,
         :Port => https_port, # only being used to correctly log https port being used
         :Logger => ::Proxy::LogBuffer::Decorator.instance,
         :ServerSoftware => "foreman-proxy/#{Proxy::VERSION}",
-        :SSLEnable => true,
-        :SSLVerifyClient => OpenSSL::SSL::VERIFY_PEER,
-        :SSLPrivateKey => load_ssl_private_key(settings.ssl_private_key),
-        :SSLCertificate => load_ssl_certificate(settings.ssl_certificate),
-        :SSLCACertificateFile => settings.ssl_ca_file,
-        :SSLOptions => ssl_options,
-        :SSLCiphers => CIPHERS - Proxy::SETTINGS.ssl_disabled_ciphers,
+        :SSLCiphers => ssl_enabled_ciphers,
         :daemonize => false,
       }
+
+      case settings.http_server_type
+      when "webrick"
+        ssl_options = OpenSSL::SSL::SSLContext::DEFAULT_PARAMS[:options]
+        ssl_options |= OpenSSL::SSL::OP_CIPHER_SERVER_PREFERENCE if defined?(OpenSSL::SSL::OP_CIPHER_SERVER_PREFERENCE)
+        ssl_options |= OpenSSL::SSL::OP_NO_SSLv2 if defined?(OpenSSL::SSL::OP_NO_SSLv2)
+        ssl_options |= OpenSSL::SSL::OP_NO_SSLv3 if defined?(OpenSSL::SSL::OP_NO_SSLv3)
+        ssl_options |= OpenSSL::SSL::OP_NO_TLSv1 if defined?(OpenSSL::SSL::OP_NO_TLSv1)
+        ssl_options |= OpenSSL::SSL::OP_NO_TLSv1_1 if defined?(OpenSSL::SSL::OP_NO_TLSv1_1)
+
+        if settings.tls_disabled_versions
+          settings.tls_disabled_versions&.each do |version|
+            constant = OpenSSL::SSL.const_get("OP_NO_TLSv#{version.to_s.tr('.', '_')}") rescue nil
+
+            if constant
+              logger.info "TLSv#{version} will be disabled."
+              ssl_options |= constant
+            else
+              logger.warn "TLSv#{version} was not found."
+            end
+          end
+        end
+
+        app_details[:SSLEnable] = true
+        app_details[:SSLVerifyClient] = OpenSSL::SSL::VERIFY_PEER
+        app_details[:SSLCACertificateFile] = settings.ssl_ca_file
+        app_details[:SSLPrivateKey] = load_ssl_private_key(settings.ssl_private_key)
+        app_details[:SSLCertificate] = load_ssl_certificate(settings.ssl_certificate)
+        app_details[:SSLOptions] = ssl_options
+      when "puma"
+        # https://github.com/puma/puma#binding-tcp--sockets
+        app_details[:SSLArgs] = {
+          :ca => settings.ssl_ca_file,
+          :key => settings.ssl_private_key,
+          :cert => settings.ssl_certificate,
+          :verify_mode => 'peer',
+        }
+        app_details[:SSLArgs][:no_tlsv1] = "true"
+        app_details[:SSLArgs][:no_tlsv1_1] = "true"
+        # no additional TLS versions via tls_disabled_versions can be currently disabled for puma
+        if settings.ssl_enabled_ciphers
+          app_details[:SSLArgs][:ssl_cipher_list] = ssl_enabled_ciphers.join(':')
+        end
+      else
+        raise "Unknown http_server_type: #{settings.http_server_type}"
+      end
+      app_details
     end
 
     def load_ssl_private_key(path)
@@ -152,11 +187,85 @@ module Proxy
       retry
     end
 
-    def webrick_server(app, addresses, port)
+    def add_puma_server_callback(sd_notify)
+      events = ::Puma::Events.new(::Proxy::LogBuffer::Decorator.instance, ::Proxy::LogBuffer::Decorator.instance)
+      events.register(:state) do |status|
+        if status == :running
+          sd_notify.ready_all { sd_notify.status("Started all #{sd_notify.total} threads, ready", logger) }
+          sd_notify.status("Started, #{sd_notify.pending} threads to go", logger) if sd_notify.pending > 0
+        end
+      end
+      events
+    end
+
+    def format_ip_for_url(address)
+      addr = IPAddr.new(address)
+      addr.ipv6? ? "[#{addr}]" : addr.to_s
+    rescue IPAddr::InvalidAddressError
+      address
+    end
+
+    def add_puma_server(app, address, port, conn_type, sd_notify)
+      address = format_ip_for_url(address)
+      logger.debug "Launching Puma listener at #{address} port #{port}"
+      if conn_type == :ssl
+        host = "ssl://#{address}:#{port}/?#{hash_to_query_string(app[:SSLArgs])}"
+      else
+        host = address
+      end
+      logger.debug "Host URL: #{host}"
+      # the following lines are from lib/rack/handler/puma.rb#run
+      options = {Verbose: true, Port: port, Host: host}
+      conf = Rack::Handler::Puma.config(app[:app], options)
+      # install callback to notify systemd
+      events = add_puma_server_callback(sd_notify)
+      launcher = ::Puma::Launcher.new(conf, :events => events)
+      @servers << launcher
+      launcher.run
+    end
+
+    def add_webrick_server_callback(app, sd_notify)
+      app[:StartCallback] = lambda do
+        sd_notify.ready_all { sd_notify.status("Started all #{sd_notify.total} threads, ready", logger) }
+        sd_notify.status("Started, #{sd_notify.pending} threads to go", logger) if sd_notify.pending > 0
+      end
+    end
+
+    def add_webrick_server(app, addresses, port, sd_notify)
+      # install callback to notify systemd
+      add_webrick_server_callback(app, sd_notify)
+      # initialize the server
       server = ::WEBrick::HTTPServer.new(app)
-      addresses.each { |a| server.listen(a, port) }
-      server.mount "/", Rack::Handler::WEBrick, app[:app]
+      addresses.each do |address|
+        logger.debug "Launching Webrick listener at #{address} port #{port}"
+        server.listen(address, port)
+      end
+      server.mount '/', Rack::Handler::WEBrick, app[:app]
       server
+    end
+
+    def ipv6_enabled?
+      File.exist?('/proc/net/if_inet6') || (RUBY_PLATFORM =~ /cygwin|mswin|mingw|bccwin|wince|emx/)
+    end
+
+    def add_threaded_server(server_name, conn_type, app, addresses, port, sd_notify)
+      result = []
+      case server_name
+      when "webrick"
+        result << Thread.new do
+          @servers << add_webrick_server(app, addresses, port, sd_notify).start
+        end
+      when "puma"
+        addresses.flatten.each do |address|
+          # Puma listens both on IPv4 and IPv6 on '::', there is no way to make Puma
+          # to listen only on IPv6.
+          address = '::' if address == '*' && ipv6_enabled?
+          result << Thread.new do
+            add_puma_server(app, address, port, conn_type, sd_notify)
+          end
+        end
+      end
+      result
     end
 
     def launch
@@ -172,14 +281,35 @@ module Proxy
 
       http_app = http_app(settings.http_port)
       https_app = https_app(settings.https_port)
-      install_webrick_callback!(http_app, https_app)
+      hosts = settings.bind_host.is_a?(Array) ? settings.bind_host.size : 1
+      expected = [http_app, https_app].compact.size * hosts
+      logger.debug "Expected number of instances to launch: #{expected}"
+      sd_notify = Proxy::SdNotifyAll.new(expected)
+      sd_notify.status("Starting #{expected} threads", logger)
 
-      t1 = Thread.new { webrick_server(https_app, settings.bind_host, settings.https_port).start } unless https_app.nil?
-      t2 = Thread.new { webrick_server(http_app, settings.bind_host, settings.http_port).start } unless http_app.nil?
+      http_server_name = settings.http_server_type
+      https_server_name = settings.http_server_type
+      threads = []
+      if https_app
+        threads += add_threaded_server(https_server_name,
+                                       :ssl,
+                                       https_app,
+                                       settings.bind_host,
+                                       settings.https_port,
+                                       sd_notify)
+      end
 
-      Proxy::SignalHandler.install_traps
+      if http_app
+        threads += add_threaded_server(http_server_name,
+                                       :tcp,
+                                       http_app,
+                                       settings.bind_host,
+                                       settings.http_port,
+                                       sd_notify)
+      end
 
-      (t1 || t2).join
+      Proxy::SignalHandler.install_traps(@servers)
+      threads.each(&:join)
     rescue SignalException => e
       logger.debug("Caught #{e}. Exiting")
       raise
@@ -190,29 +320,6 @@ module Proxy
       logger.error "Error during startup, terminating", e
       puts "Errors detected on startup, see log for details. Exiting: #{e}"
       exit(1)
-    end
-
-    def install_webrick_callback!(*apps)
-      apps.compact!
-
-      # track how many webrick apps are still starting up
-      @pending_webrick = apps.size
-      @pending_webrick_lock = Mutex.new
-
-      apps.each do |app|
-        # add a callback to each server, decrementing the pending counter
-        app[:StartCallback] = lambda do
-          @pending_webrick_lock.synchronize do
-            @pending_webrick -= 1
-            launched(apps) if @pending_webrick.zero?
-          end
-        end
-      end
-    end
-
-    def launched(apps)
-      logger.info("Smart proxy has launched on #{apps.size} socket(s), waiting for requests")
-      SdNotify.ready
     end
   end
 end

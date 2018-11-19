@@ -32,8 +32,8 @@ module Sinatra
         if trusted_hosts
           logger.debug "verifying remote client #{request.env['REMOTE_ADDR']} against trusted_hosts #{trusted_hosts}"
 
-          if ['yes', 'on', 1].include? request.env['HTTPS'].to_s
-            fqdn = https_cert_cn
+          if https?(request)
+            fqdn = https_cert_cn(request)
           else
             fqdn = remote_fqdn(Proxy::SETTINGS.forward_verify)
           end
@@ -46,8 +46,8 @@ module Sinatra
       end
 
       def do_authorize_with_ssl_client
-        if ['yes', 'on', '1'].include? request.env['HTTPS'].to_s
-          if request.env['SSL_CLIENT_CERT'].to_s.empty?
+        if https?(request)
+          if ssl_client_cert(request).empty?
             log_halt 403, "No client SSL certificate supplied"
           end
         else

@@ -16,15 +16,20 @@ class SSLClientVerificationTest < Test::Unit::TestCase
     assert last_response.ok?
   end
 
-  ['yes', 'on', '1'].each do |yes|
+  ['yes', 'on', '1', 'https'].each do |yes|
     define_method("test_https_no_cert_https_#{yes}") do
       get '/test', {}, 'HTTPS' => yes
       assert last_response.forbidden?
     end
   end
 
-  def test_https_cert
-    get '/test', {}, 'HTTPS' => 'on', 'SSL_CLIENT_CERT' => '...'
+  def test_https_cert_webrick
+    get '/test', {}, 'HTTPS' => 'yes', 'SSL_CLIENT_CERT' => '...'
+    assert last_response.ok?
+  end
+
+  def test_https_cert_puma
+    get '/test', {}, 'HTTPS' => 'https', 'puma.peercert' => '...'
     assert last_response.ok?
   end
 

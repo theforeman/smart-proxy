@@ -1,5 +1,8 @@
 require 'test_helper'
 require 'launcher'
+require 'puma'
+require 'rack/handler/puma'
+require 'puma-patch'
 
 class LauncherTest < Test::Unit::TestCase
   def setup
@@ -40,19 +43,22 @@ class LauncherTest < Test::Unit::TestCase
     FileUtils.rm_f @launcher.pid_path
   end
 
-  def test_install_webrick_callback
-    app1 = {app: 1}
-    app2 = {app: 2}
-    @launcher.install_webrick_callback!(app1, nil, app2)
-    @launcher.expects(:launched).never
-    app1[:StartCallback].call
-    @launcher.expects(:launched).with([app1, app2])
-    app2[:StartCallback].call
+  def test_add_webrick_server_callback
+    an_app = {}
+    sdn = Proxy::SdNotifyAll.new(2)
+    sdn.stubs(:status)
+    sdn.expects(:ready)
+    @launcher.add_webrick_server_callback(an_app, sdn)
+    an_app[:StartCallback].call
+    an_app[:StartCallback].call
   end
 
-  def test_launched_with_sdnotify
-    @launcher.logger.expects(:info).with(includes('2 socket(s)'))
-    ::SdNotify.expects(:ready)
-    @launcher.launched([:app1, :app2])
+  def test_add_puma_server_callback
+    sdn = Proxy::SdNotifyAll.new(2)
+    sdn.stubs(:status)
+    sdn.expects(:ready)
+    events = @launcher.add_puma_server_callback(sdn)
+    events.fire(:state, :running)
+    events.fire(:state, :running)
   end
 end

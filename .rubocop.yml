@@ -39,6 +39,9 @@ Lint/UnusedBlockArgument:
 Lint/UnusedMethodArgument:
   Enabled: false
 
+Naming/FileName:
+  Enabled: false
+
 Metrics:
   Enabled: false
 

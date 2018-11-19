@@ -3,11 +3,11 @@ require 'proxy/log'
 class Proxy::SignalHandler
   include ::Proxy::Log
 
-  def self.install_traps
+  def self.install_traps(servers)
     handler = new
     handler.install_ttin_trap unless RUBY_PLATFORM =~ /mingw/
-    handler.install_int_trap
-    handler.install_term_trap
+    handler.install_int_trap(servers)
+    handler.install_term_trap(servers)
     handler.install_usr1_trap unless RUBY_PLATFORM =~ /mingw/
   end
 
@@ -25,12 +25,28 @@ class Proxy::SignalHandler
     end
   end
 
-  def install_int_trap
-    trap(:INT) { exit(0) }
+  def install_int_trap(servers)
+    trap(:INT) do
+      servers&.each do |server|
+        server.shutdown if
+      server&.respond_to?(:shutdown)
+        server.stop if
+      server&.respond_to?(:stop)
+      end
+      exit(0)
+    end
   end
 
-  def install_term_trap
-    trap(:TERM) { exit(0) }
+  def install_term_trap(servers)
+    trap(:TERM) do
+      servers&.each do |server|
+        server.shutdown if
+      server&.respond_to?(:shutdown)
+        server.stop if
+      server&.respond_to?(:stop)
+      end
+      exit(0)
+    end
   end
 
   def install_usr1_trap
