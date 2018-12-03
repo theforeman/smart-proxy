@@ -12,23 +12,6 @@ class Proxy::RootApi < Sinatra::Base
     end
   end
 
-  get "/v2/features" do
-    begin
-      enabled_plugins = ::Proxy::Plugins.instance.select do |p|
-        p[:name] != :foreman_proxy && \
-          p[:state] == :running && \
-          p[:class].ancestors.include?(::Proxy::Plugin)
-      end
-      content_type :json
-
-      attributes = %i[capabilities http_enabled https_enabled settings]
-
-      Hash[enabled_plugins.collect { |p| [p[:name], Hash[attributes.map { |a| [a, p[a]] }]] }].to_json
-    rescue => e
-      log_halt 400, e
-    end
-  end
-
   get "/version" do
     begin
       content_type :json
