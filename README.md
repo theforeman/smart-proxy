@@ -18,6 +18,10 @@ Currently Supported modules:
  * Puppet CA - Manage certificate signing, cleaning and autosign on a Puppet CA server
  * Realm - Manage host registration to a realm (e.g. FreeIPA)
  * TFTP - any UNIX based tftp server
+ * Facts - module to gather facts from facter (used only on discovered nodes)
+ * HTTPBoot - endpoint exposing a (TFTP) directory via HTTP(s) for UEFI HTTP booting
+ * Logs - log buffer of proxy logs for easier troubleshooting
+ * Templates - unattended Foreman endpoint proxy
 
 # Installation
 Read the [Smart Proxy Installation section](https://theforeman.org/manuals/latest/index.html#4.3.1SmartProxyInstallation) of the manual.

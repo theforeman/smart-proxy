@@ -19,7 +19,7 @@ class BmcApiShellTest < Test::Unit::TestCase
   end
 
   def test_api_shell_should_powercycle_with_shutdown
-    Proxy::BMC::Shell.any_instance.stubs(:powercycle).returns(true)
+    Proxy::BMC::Shell.any_instance.stubs(:bmc_ssh_powercycle).returns(true)
     args = { :bmc_provider => 'shell' }
     get "/#{host}/chassis/power/cycle", args
     @args = { :username => "user", :password => "pass", :bmc_provider => "ipmitool", :host => "host" }
