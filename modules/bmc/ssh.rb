@@ -10,10 +10,10 @@ module Proxy
         @host = host
         @ssh_user = Proxy::BMC::Plugin.settings.bmc_ssh_user || 'root'
         @ssh_key = Proxy::BMC::Plugin.settings.bmc_ssh_key
-        @poweron = Proxy::BMC::Plugin.settings.poweron || 'false'
-        @poweroff = Proxy::BMC::Plugin.settings.poweroff || 'shutdown +1'
-        @powerstatus = Proxy::BMC::Plugin.settings.powerstatus || 'true'
-        @powercycle = Proxy::BMC::Plugin.settings.powercycle || 'shutdown -r +1'
+        @poweron = Proxy::BMC::Plugin.settings.bmc_ssh_poweron || 'false'
+        @poweroff = Proxy::BMC::Plugin.settings.bmc_ssh_poweroff || 'shutdown +1'
+        @powerstatus = Proxy::BMC::Plugin.settings.bmc_ssh_powerstatus || 'true'
+        @powercycle = Proxy::BMC::Plugin.settings.bmc_ssh_powercycle || 'shutdown -r +1'
       end
 
       # call remote command and return bool

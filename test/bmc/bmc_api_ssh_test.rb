@@ -16,10 +16,10 @@ class BmcApiShellTest < Test::Unit::TestCase
     @host = "somehost"
     @args = { :bmc_provider => "ssh" }
     Proxy::BMC::Plugin.load_test_settings(
-      :poweron => 'echo poweron',
-      :poweroff => 'echo poweroff',
-      :powerstatus => 'echo powerstatus',
-      :powercycle => 'echo powercycle'
+      :bmc_ssh_poweron => 'echo poweron',
+      :bmc_ssh_poweroff => 'echo poweroff',
+      :bmc_ssh_powerstatus => 'echo powerstatus',
+      :bmc_ssh_powercycle => 'echo powercycle'
     )
   end
 
