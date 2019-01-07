@@ -1,10 +1,10 @@
-class Proxy::ProtectedRootApi < Sinatra::Base
+class Proxy::RootV2Api < Sinatra::Base
   helpers ::Proxy::Helpers
 
   authorize_with_trusted_hosts
   authorize_with_ssl_client
 
-  get "/v2/features" do
+  get "/features" do
     begin
 
       enabled_plugins = ::Proxy::Plugins.instance.select do |plugin|

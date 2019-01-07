@@ -1,7 +1,7 @@
 require 'test_helper'
 require 'json'
 require 'root/root'
-require 'root/protected_root_api'
+require 'root/root_v2_api'
 
 ENV['RACK_ENV'] = 'test'
 
@@ -17,11 +17,11 @@ class TestPlugin3 < ::Proxy::Plugin
   plugin :test3, "0.0.1"
 end
 
-class ProtectedRootApiTest < Test::Unit::TestCase
+class RootV2ApiTest < Test::Unit::TestCase
   include Rack::Test::Methods
 
   def app
-    Proxy::ProtectedRootApi.new
+    Proxy::RootV2Api.new
   end
 
   def test_features
@@ -31,7 +31,7 @@ class ProtectedRootApiTest < Test::Unit::TestCase
         [{:name => :foreman_proxy, :version => "0.0.1", :class => TestPlugin1, :state => :running},
          {:name => :test2, :version => "0.0.1", :class => TestPlugin2, :state => :running, :capabilities => ['c', proc2], :settings => 'foo'},
          {:name => :test3, :version => "0.0.1", :class => TestPlugin3, :state => :disabled, :capabilities => ['d', proc3]}])
-    get "/v2/features"
+    get "/features"
 
     response = JSON.parse(last_response.body)
 
