@@ -39,7 +39,7 @@ class RootV2ApiTest < Test::Unit::TestCase
     test3 = response['test3']
 
     assert test2
-    assert_equal ['c', 'a', 'b'], test2['capabilities']
+    assert_equal ['a', 'b', 'c'], test2['capabilities']
     assert_equal test2['settings'], 'foo'
 
     assert test3

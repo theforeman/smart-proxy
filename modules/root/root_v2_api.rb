@@ -33,7 +33,7 @@ class Proxy::RootV2Api < Sinatra::Base
     capabilities = capabilities.map do |capability|
       capability.is_a?(Proc) ? capability.call : capability
     end
-    capabilities.flatten.compact
+    capabilities.flatten.uniq.compact.sort
   end
 
 end

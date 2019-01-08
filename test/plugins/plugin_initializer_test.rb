@@ -6,6 +6,12 @@ class PluginInitializerTest < Test::Unit::TestCase
   class TestPlugin3 < Proxy::Plugin; plugin :plugin_3, "1.0"; uses_provider; default_settings :enabled => true, :use_provider => :plugin_4; end
   class TestPlugin4 < Proxy::Provider; plugin :plugin_4, "1.0"; default_settings :enabled => true; end
   class TestPlugin5 < Proxy::Plugin; plugin :plugin_5, "1.0"; default_settings :enabled => false; end
+  class TestPlugin6 < Proxy::Plugin
+    plugin :plugin_6, "1.0"
+    capability(lambda{})
+    capability(proc{})
+    capability('foo')
+  end
 
   def test_initialize_plugins
     plugins = ::Proxy::Plugins.new
@@ -13,7 +19,8 @@ class PluginInitializerTest < Test::Unit::TestCase
                     {:name => :plugin_2, :version => '1.0', :class => TestPlugin2, :state => :uninitialized},
                     {:name => :plugin_3, :version => '1.0', :class => TestPlugin3, :state => :uninitialized},
                     {:name => :plugin_4, :version => '1.0', :class => TestPlugin4, :state => :uninitialized},
-                    {:name => :plugin_5, :version => '1.0', :class => TestPlugin5, :state => :uninitialized}])
+                    {:name => :plugin_5, :version => '1.0', :class => TestPlugin5, :state => :uninitialized},
+                    {:name => :plugin_6, :version => '1.0', :class => TestPlugin6, :state => :uninitialized}])
 
     initializer = ::Proxy::PluginInitializer.new(plugins)
     initializer.initialize_plugins
@@ -35,6 +42,7 @@ class PluginInitializerTest < Test::Unit::TestCase
          {:name => :plugin_3, :version => '1.0', :class => TestPlugin3, :state => :running, :http_enabled => true, :https_enabled => true},
          # :http_enabled and :https_enabled are not defined for providers
          {:name => :plugin_4, :version => '1.0', :class => TestPlugin4, :state => :running, :http_enabled => nil, :https_enabled => nil},
-         {:name => :plugin_5, :version => '1.0', :class => TestPlugin5, :state => :disabled, :http_enabled => false, :https_enabled => false}], loaded)
+         {:name => :plugin_5, :version => '1.0', :class => TestPlugin5, :state => :disabled, :http_enabled => false, :https_enabled => false},
+         {:name => :plugin_6, :version => '1.0', :class => TestPlugin6, :state => :disabled, :http_enabled => false, :https_enabled => false}], loaded)
   end
 end

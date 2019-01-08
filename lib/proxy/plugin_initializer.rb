@@ -30,7 +30,7 @@ class ::Proxy::PluginGroup
   end
 
   def capabilities
-    [members.map { |m| m.capabilities }.compact].flatten.uniq.sort
+    members.map(&:capabilities).compact.flatten
   end
 
   def settings
