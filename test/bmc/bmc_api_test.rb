@@ -174,7 +174,7 @@ class BmcApiTest < Test::Unit::TestCase
   def test_api_recovers_from_nil_provider
     Proxy::BMC::Plugin.load_test_settings(:bmc_default_provider => nil)
     Proxy::BMC::IPMI.stubs(:providers_installed).returns(['freeipmi'])
-    test_args = { 'bmc_provider' => nil }
+    test_args = { 'bmc_provider' => '' }
     Proxy::BMC::IPMI.any_instance.stubs(:test).returns(true)
     get "/#{host}/test", test_args
     assert last_response.ok?, "Last response was not ok"
