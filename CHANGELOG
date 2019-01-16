@@ -1,3 +1,36 @@
+2019-01-16	Tomer Brisker <tbrisker@gmail.com>
+	* Release 1.21.0-RC1
+
+2019-01-15	Lukas Zapletal <lzap+git@redhat.com>
+	* Fixes #25825 - fixed BMC SSH config names
+
+2019-01-10	Lukas Zapletal <lzap+git@redhat.com>
+	* Fixes #25824 - BMC provider nil exception test fixed
+
+2019-01-08	Sven Lueder <mail@svenlueder.de>
+	* Fixes #23353 - included DHCP files default directory
+
+2018-12-19	UXabre <arend.lapere@gmail.com>
+	* Fixes #25432 - Support Huawei VRP
+
+2018-12-15	Michael Moll <kvedulv@kvedulv.de>
+	* Fixes #25370 - Fix Performance/StringReplacement cop
+
+2018-11-30	Adam Price <komidore64@gmail.com>
+	* allow for PUPPET_VERSION to be set
+
+2018-11-08	Lukas Zapletal <lzap+git@redhat.com>
+	* Fixes #25243 - option interface-mtu parsed correctly
+
+2018-11-01	Michael Moll <kvedulv@kvedulv.de>
+	* Fixes #25249 - update Rubocop to 0.50.x
+
+2018-10-23	Lukas Zapletal <lzap+git@redhat.com>
+	* Fixes #25267 - Provide Ruby logger API method formatter
+
+2018-10-17	Tomer Brisker <tbrisker@gmail.com>
+	* Bump version to 1.21-develop
+
 2018-10-16	Lukas Zapletal <lzap+git@redhat.com>
 	* Refs #25100 - do not use Process::CLOCK_MONOTONIC yet
 
