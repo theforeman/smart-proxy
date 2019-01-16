@@ -16,3 +16,4 @@ bundler.d/*.local.rb
 pkg/
 test/tmp/*
 /tmp/
+/vendor
