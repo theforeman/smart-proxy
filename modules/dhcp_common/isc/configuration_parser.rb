@@ -269,10 +269,12 @@ module Proxy
         def option
           Rsec::Fail.reset
           keyword_option = word('option').fail 'keyword_option'
+          keyword_code = /code \d+/.r 'keyword_code'
           keyword_supersede = word('supersede').fail 'keyword_supersede'
           option_name = /[\w\.-]+/.r
-          seq_(keyword_option | keyword_supersede, option_name, '='.r._?, option_values, EOSTMT) {|maybe_supersede, name, _, values, _| OptionNode[maybe_supersede == 'supersede', name, values]} |
-              vendor_option_space | filename | next_server
+          seq_(keyword_option | keyword_supersede, option_name, keyword_code._?, '='.r._?, LFT_BRACKET._?, option_values, RGT_BRACKET._?, EOSTMT) do |maybe_supersede, name, _, _, _, values, _, _|
+            OptionNode[maybe_supersede == 'supersede', name, values]
+          end | vendor_option_space | filename | next_server
         end
 
         def set

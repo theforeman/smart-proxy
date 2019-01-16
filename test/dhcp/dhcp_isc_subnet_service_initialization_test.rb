@@ -11,8 +11,24 @@ class DhcpIscSubnetServiceInitializationTest < Test::Unit::TestCase
   DHCPD_CONFIG =<<END
 # This is a comment.
 
+omapi-port 7911;
+default-lease-time 43200;
+max-lease-time 86400;
+ddns-update-style none;
+option domain-name "some.example.com";
+option domain-name-servers 192.168.121.101;
+option ntp-servers none;
+allow booting;
+allow bootp;
+option fqdn.no-client-update on;
+option fqdn.rcode2 255;
+option pxegrub code 150 = text ;
+
+option voip-tftp-server code 150 = { ip-address };
+
 subnet 192.168.122.0 netmask 255.255.255.0 {
   option interface-mtu 9000;
+  option voip-tftp-server 1.2.3.4;
   option routers 192.168.122.250; # This is an inline comment
   next-server 192.168.122.251;
 }
