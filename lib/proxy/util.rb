@@ -27,7 +27,7 @@ module Proxy::Util
               logger.debug "[#{pid}] #{line}"
             end
             stderr.each do |line|
-              logger.error "[#{pid}] #{line}"
+              logger.warn "[#{pid}] #{line}"
             end
             # In Ruby 1.8, popen3 always reports an error code of 0 in $?.
             # In Ruby >= 1.9, call thr.value to wait for a Process::Status object.
@@ -100,7 +100,7 @@ module Proxy::Util
       end
       Process.wait(c.pid)
     rescue Exception => e
-      logger.error("Exception '#{e}' when executing '#{cmd}'")
+      logger.error "Error when executing '#{cmd}'", e
       return false
     end
     logger.warn("Non-null exit code when executing '#{cmd}'") if $?.exitstatus != 0

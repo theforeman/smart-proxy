@@ -13,7 +13,8 @@ module Proxy::DHCP::Libvirt
       libvirt_network.add_dhcp_record record
       record
     rescue ::Libvirt::Error => e
-      logger.error msg = "Error adding DHCP record: #{e}"
+      msg = "Error adding DHCP record"
+      logger.error msg, e
       raise Proxy::DHCP::Error, msg
     end
 
@@ -21,7 +22,8 @@ module Proxy::DHCP::Libvirt
       # libvirt only supports one subnet per network
       libvirt_network.del_dhcp_record record
     rescue ::Libvirt::Error => e
-      logger.error msg = "Error removing DHCP record: #{e}"
+      msg = "Error removing DHCP record"
+      logger.error msg, e
       raise Proxy::DHCP::Error, msg
     end
   end

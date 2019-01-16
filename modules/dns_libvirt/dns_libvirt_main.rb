@@ -16,7 +16,8 @@ module Proxy::Dns::Libvirt
     def create_a_record(fqdn, ip)
       libvirt_network.add_dns_a_record fqdn, ip
     rescue ::Libvirt::Error => e
-      logger.error msg = "Error adding DNS A record: #{e}"
+      msg = "Error adding DNS A record"
+      logger.error msg, e
       raise Proxy::Dns::Error, msg
     end
     alias :create_aaaa_record :create_a_record
@@ -28,7 +29,8 @@ module Proxy::Dns::Libvirt
     def remove_a_record(fqdn)
       libvirt_network.del_dns_a_record fqdn, find_ip_for_host(fqdn)
     rescue ::Libvirt::Error => e
-      logger.error msg = "Error adding DNS A record: #{e}"
+      msg = "Error adding DNS A record"
+      logger.error msg, e
       raise Proxy::Dns::Error, msg
     end
     alias :remove_aaaa_record :remove_a_record
@@ -46,7 +48,8 @@ module Proxy::Dns::Libvirt
           end
         end
       rescue Exception => e
-        logger.error msg = "Unable to retrieve IP for #{host}: #{e}"
+        msg = "Unable to retrieve IP for #{host}"
+        logger.error msg, e
         logger.debug xml if defined?(xml)
         raise Proxy::Dns::Error, msg
       end

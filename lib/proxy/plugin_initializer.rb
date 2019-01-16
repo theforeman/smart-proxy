@@ -100,9 +100,9 @@ class ::Proxy::PluginGroup
     fail_group_with_message("Disabling all modules in the group #{printable_module_names(member_names)} due to a failure in one of them: #{an_exception}", an_exception.backtrace)
   end
 
-  def fail_group_with_message(a_message, a_backtrace = nil)
+  def fail_group_with_message(a_message, an_exception = nil)
     set_group_state_to_failed
-    logger.error(a_message, a_backtrace)
+    logger.error(a_message, an_exception)
     members.each do |m|
       ::Proxy::LogBuffer::Buffer.instance.failed_module(m.plugin_name, a_message)
     end
@@ -210,7 +210,7 @@ module ::Proxy::LegacyRuntimeConfigurationLoader
     plugin.class_eval(&plugin.after_activation_blk)
     logger.info("Successfully initialized '#{plugin.plugin_name}'")
   rescue Exception => e
-    logger.error("Couldn't enable '#{plugin.plugin_name}': #{e}", e.backtrace)
+    logger.error "Couldn't enable '#{plugin.plugin_name}'", e
     ::Proxy::LogBuffer::Buffer.instance.failed_module(plugin.plugin_name, e.message)
   end
 end
@@ -221,7 +221,7 @@ module ::Proxy::DefaultRuntimeConfigurationLoader
     start_services(plugin.services, di_container)
     logger.info("Successfully initialized '#{plugin.plugin_name}'")
   rescue Exception => e
-    logger.error("Couldn't enable '#{plugin.plugin_name}': #{e}", e.backtrace)
+    logger.error "Couldn't enable '#{plugin.plugin_name}'", e
     ::Proxy::LogBuffer::Buffer.instance.failed_module(plugin.plugin_name, e.message)
     raise e
   end
