@@ -80,19 +80,24 @@ class Proxy::PuppetApi::V3EnvironmentClassesApiClassesRetriever
       begin
         response, etag = @puppet_api.new(puppet_url, ssl_ca, ssl_cert, ssl_key).list_classes(environment, etag, MAX_PUPPETAPI_TIMEOUT)
       rescue Exception => e
-        @m.synchronize { @futures_cache[environment] = nil }
+        @m.synchronize { @futures_cache.delete(environment) }
         logger.error "Error while retrieving puppet classes for '%s' environment" % [environment], e
         raise e
       end
 
       if response == Proxy::PuppetApi::EnvironmentClassesApiv3::NOT_MODIFIED
-        @m.synchronize { @futures_cache[environment] = nil }
+        @m.synchronize do
+          @futures_cache.delete(environment)
+          logger.debug { "Puppet cache counts: classes %d, etag %d, futures %d" % [@classes_cache.size, @etag_cache.size, @futures_cache.size] }
+        end
         classes
       else
         @m.synchronize do
-          @futures_cache[environment] = nil
+          @futures_cache.delete(environment)
           @etag_cache[environment] = etag
           @classes_cache[environment] = response
+          logger.debug { "Puppet cache counts: classes %d, etag %d, futures %d" % [@classes_cache.size, @etag_cache.size, @futures_cache.size] }
+          response
         end
       end
     end
