@@ -6,14 +6,13 @@ class Proxy::RootV2Api < Sinatra::Base
 
   get "/features" do
     begin
-
       enabled_plugins = ::Proxy::Plugins.instance.select do |plugin|
         plugin[:name] != :foreman_proxy && \
           plugin[:class].ancestors.include?(::Proxy::Plugin)
       end
       content_type :json
 
-      attributes = %i[http_enabled https_enabled settings state]
+      attributes = [:http_enabled, :https_enabled, :settings, :state]
 
       plugins = enabled_plugins.inject({}) do |hash, plugin|
         result = Hash[attributes.map { |attribute| [attribute, plugin[attribute]] }]

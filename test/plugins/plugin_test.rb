@@ -136,4 +136,12 @@ class PluginTest < Test::Unit::TestCase
   def test_plugins_provide_capabilities
     assert_equal(['FOO'], TestCapabilityPlugin.capabilities)
   end
+
+  class TestExposedSettings < ::Proxy::Plugin
+    default_settings(:foo => :bar)
+    expose_setting(:foo)
+  end
+  def test_plugins_expose_settings
+    assert_equal([:foo], TestExposedSettings.exposed_settings)
+  end
 end
