@@ -15,6 +15,7 @@ begin
     task :rubocop do
       system("bundle exec rubocop \
         --require rubocop/formatter/checkstyle_formatter \
+        --format progress \
         --format RuboCop::Formatter::CheckstyleFormatter \
         --no-color --out rubocop.xml")
       exit($?.exitstatus)
