@@ -47,7 +47,7 @@ module Proxy::Dns::Dnscmd
           response  = std_out.readlines
           response += std_err.readlines
         end
-      rescue TimeoutError
+      rescue Timeout::Error
         raise Proxy::Dns::Error.new("dnscmd did not respond within #{tsecs} seconds")
       ensure
         std_in.close  unless std_in.nil?
