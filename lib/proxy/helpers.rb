@@ -20,6 +20,7 @@ module Proxy::Helpers
     end
     content_type :json if request.accept?("application/json")
     logger.error message, exception
+    logger.exception(message, exception) if exception.is_a?(Exception)
     halt code, message
   end
 
