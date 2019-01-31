@@ -29,6 +29,15 @@ class ::Proxy::PluginGroup
     @https_enabled
   end
 
+  def capabilities
+    members.map(&:capabilities).compact.flatten
+  end
+
+  def settings
+    exposed_settings = [members.map { |m| m.exposed_settings }.compact].flatten.uniq.sort
+    Hash[exposed_settings.map { |setting| [setting, @plugin.settings[setting]] }]
+  end
+
   def resolve_providers(all_plugins_and_providers)
     return if inactive?
     return unless @plugin.uses_provider?
@@ -188,6 +197,8 @@ class ::Proxy::PluginInitializer
       updated[:state] = group.state
       updated[:http_enabled] = group.http_enabled?
       updated[:https_enabled] = group.https_enabled?
+      updated[:capabilities] = group.capabilities
+      updated[:settings] = group.settings
       group.providers.each do |group_member|
         updated = to_update.find {|loaded_plugin| loaded_plugin[:name] == group_member.plugin_name}
         updated[:di_container] = group.di_container

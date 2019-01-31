@@ -1,5 +1,5 @@
 require 'ostruct'
-
+# rubocop:disable Metrics/ModuleLength
 module Proxy::Pluggable
   attr_reader :plugin_name, :version, :after_activation_blk
 
@@ -16,6 +16,10 @@ module Proxy::Pluggable
     @bundler_group_name = name
   end
 
+  def capability(capability)
+    capabilities << capability
+  end
+
   # relative to ::Proxy::SETTINGS.settings_directory
   def settings_file(apath = nil)
     if apath.nil?
@@ -29,6 +33,10 @@ module Proxy::Pluggable
   def default_settings(a_hash = {})
     @plugin_default_settings ||= {}
     @plugin_default_settings.merge!(a_hash)
+  end
+
+  def expose_setting(setting)
+    exposed_settings << setting
   end
 
   def initialize_after(*module_names)
@@ -167,8 +175,16 @@ module Proxy::Pluggable
     raise ::Proxy::PluginLoadingAborted, message
   end
 
+  def capabilities
+    @capabilities ||= []
+  end
+
   def dependencies
     @dependencies ||= []
+  end
+
+  def exposed_settings
+    @exposed_settings ||= []
   end
 
   def bundler_group_name

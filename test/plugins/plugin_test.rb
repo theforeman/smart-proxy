@@ -129,4 +129,19 @@ class PluginTest < Test::Unit::TestCase
   def test_custom_validators_returns_empty_hash_if_mappings_were_omitted
     assert TestPluginWithoutCustomValidators.custom_validators.empty?
   end
+
+  class TestCapabilityPlugin < ::Proxy::Plugin
+    capability('FOO')
+  end
+  def test_plugins_provide_capabilities
+    assert_equal(['FOO'], TestCapabilityPlugin.capabilities)
+  end
+
+  class TestExposedSettings < ::Proxy::Plugin
+    default_settings(:foo => :bar)
+    expose_setting(:foo)
+  end
+  def test_plugins_expose_settings
+    assert_equal([:foo], TestExposedSettings.exposed_settings)
+  end
 end
