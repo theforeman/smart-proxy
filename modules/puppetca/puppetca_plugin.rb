@@ -5,6 +5,7 @@ module Proxy::PuppetCa
 
     uses_provider
     default_settings :use_provider => 'puppetca_hostname_whitelisting'
+    expose_setting :use_provider
 
     load_classes ::Proxy::PuppetCa::PluginConfiguration
     load_programmable_settings ::Proxy::PuppetCa::PluginConfiguration

@@ -6,6 +6,8 @@ module ::Proxy::Dns::Libvirt
 
     default_settings :url => "qemu:///system", :network => 'default'
 
+    capability "record_type_a"
+
     load_classes ::Proxy::Dns::Libvirt::PluginConfiguration
     load_dependency_injection_wirings ::Proxy::Dns::Libvirt::PluginConfiguration
   end

@@ -15,8 +15,9 @@ class Proxy::RootV2Api < Sinatra::Base
       attributes = [:http_enabled, :https_enabled, :settings, :state]
 
       plugins = enabled_plugins.inject({}) do |hash, plugin|
-        result = Hash[attributes.map { |attribute| [attribute, plugin[attribute]] }]
-        result[:capabilities] = process_capabilities(plugin[:state], plugin[:capabilities])
+        result = Hash[attributes.map { |attribute| [attribute, plugin[attribute]] }.delete_if { |k, v| v.nil? || (v.instance_of?(Hash) && v.empty?) }]
+        capabilities = process_capabilities(plugin[:state], plugin[:capabilities])
+        result[:capabilities] = capabilities unless capabilities.empty?
         hash[plugin[:name]] = result
         hash
       end
