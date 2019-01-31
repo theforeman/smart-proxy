@@ -22,7 +22,7 @@ class PuppetApiFeaturesTest < Test::Unit::TestCase
 
     mod = response['puppet']
     refute_nil(mod)
-    assert_equal([], mod['capabilities'])
-    assert_equal({}, mod['settings'])
+    assert_nil(mod['capabilities'])
+    assert_nil(mod['settings'])
   end
 end
