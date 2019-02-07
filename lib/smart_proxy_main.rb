@@ -72,7 +72,6 @@ module Proxy
   require 'puppet_proxy_legacy/puppet_proxy_legacy'
   require 'puppet_proxy_mcollective/puppet_proxy_mcollective'
   require 'puppet_proxy_puppet_api/puppet_proxy_puppet_api'
-  require 'puppet_proxy_puppetrun/puppet_proxy_puppetrun'
   require 'puppet_proxy_salt/puppet_proxy_salt'
   require 'puppet_proxy_ssh/puppet_proxy_ssh'
   require 'bmc/bmc'

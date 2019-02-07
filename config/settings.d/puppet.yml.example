@@ -3,12 +3,8 @@
 :enabled: false
 
 # valid providers:
-#   puppet_proxy_puppetrun   (for puppetrun/kick, deprecated in Puppet 3)
 #   puppet_proxy_mcollective (uses mco puppet)
 #   puppet_proxy_ssh         (run puppet over ssh)
 #   puppet_proxy_salt        (uses salt puppet.run)
 #   puppet_proxy_customrun   (calls a custom command with args)
-#:use_provider: puppet_proxy_puppetrun
-
-# Puppet version used
-#:puppet_version: 4.1
+#:use_provider: puppet_proxy_customrun

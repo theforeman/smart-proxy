@@ -1,9 +1,3 @@
-#
-# puppet_proxy_pupppet_api module is used for puppet versions 4.0 and higher
-#
-# puppet_proxy_pupppet_api is configured automatcially based on
-# :puppet_version setting in smart-proxy's puppet.yml configuration file.
-#
 ---
 # URL of the puppet master itself for API requests.
 #:puppet_url: https://puppet.example.com:8140

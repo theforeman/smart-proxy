@@ -23,16 +23,6 @@ class ProxyPuppetMigrationTest < Test::Unit::TestCase
     assert_equal [:puppet, :use_provider, 'puppet_proxy_salt'], @migration.remap_parameter(:puppet_provider, 'salt').flatten
   end
 
-  def test_puppet_legacy_parameter_mapping
-    assert_equal [:puppet_proxy_legacy, :puppet_conf, 'some/path'], @migration.remap_parameter(:puppet_conf, 'some/path').first
-    assert_equal [:puppet_proxy_legacy, :use_cache, true], @migration.remap_parameter(:use_cache, true).first
-    assert_equal [:puppet_proxy_legacy, :use_environment_api, true], @migration.remap_parameter(:puppet_use_environment_api, true).first
-    assert_equal [:puppet_proxy_legacy, :puppet_url, 'http://localhost'], @migration.remap_parameter(:puppet_url, "http://localhost").first
-    assert_equal [:puppet_proxy_legacy, :puppet_ssl_ca, 'some/path'], @migration.remap_parameter(:puppet_ssl_ca, "some/path").first
-    assert_equal [:puppet_proxy_legacy, :puppet_ssl_cert, 'some/path'], @migration.remap_parameter(:puppet_ssl_cert, "some/path").first
-    assert_equal [:puppet_proxy_legacy, :puppet_ssl_key, 'some/path'], @migration.remap_parameter(:puppet_ssl_key, "some/path").first
-  end
-
   def test_puppet_api_parameter_mapping
     assert_equal [:puppet_proxy_puppet_api, :puppet_url, 'http://localhost'], @migration.remap_parameter(:puppet_url, "http://localhost").last
     assert_equal [:puppet_proxy_puppet_api, :puppet_ssl_ca, 'some/path'], @migration.remap_parameter(:puppet_ssl_ca, "some/path").last
@@ -81,17 +71,8 @@ class ProxyPuppetMigrationTest < Test::Unit::TestCase
   end
 
   def test_migrate_puppet_configuration
-    @migration.stubs(:puppet_version).returns("4.3.1")
-    assert_equal({:puppet => {:enabled => true, :puppet_version => "4.3.1"},
-                  :puppet_proxy_legacy => {:puppet_url => "http://localhost"},
-                  :puppet_proxy_puppet_api => {:puppet_url => "http://localhost"}},
+    assert_equal({:puppet => {:enabled => true}, :puppet_proxy_puppet_api => {:puppet_url => "http://localhost"}},
                  @migration.migrate_puppet_configuration(:enabled => true, :puppet_url => "http://localhost"))
-  end
-
-  def test_migration_adds_puppet_version
-    @migration.stubs(:puppet_version).returns("4.3.1")
-    migrated = @migration.migrate_puppet_configuration({})
-    assert_equal "4.3.1", migrated[:puppet][:puppet_version]
   end
 end
 
