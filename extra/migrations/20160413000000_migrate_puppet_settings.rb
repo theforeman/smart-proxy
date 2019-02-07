@@ -8,13 +8,10 @@ class MigratePuppetSettings < ::Proxy::Migration
       :salt_puppetrun_cmd => [:puppet_proxy_salt, :command],
       :customrun_cmd => [:puppet_proxy_customrun, :command],
       :customrun_args => [:puppet_proxy_customrun, :command_arguments],
-      :use_cache => [:puppet_proxy_legacy, :use_cache],
-      :puppet_conf => [:puppet_proxy_legacy, :puppet_conf],
-      :puppet_use_environment_api => [:puppet_proxy_legacy, :use_environment_api],
-      :puppet_url => [:puppet_proxy_legacy, :puppet_proxy_puppet_api, :puppet_url],
-      :puppet_ssl_ca => [:puppet_proxy_legacy, :puppet_proxy_puppet_api, :puppet_ssl_ca],
-      :puppet_ssl_cert => [:puppet_proxy_legacy, :puppet_proxy_puppet_api, :puppet_ssl_cert],
-      :puppet_ssl_key => [:puppet_proxy_legacy, :puppet_proxy_puppet_api, :puppet_ssl_key],
+      :puppet_url => [:puppet_proxy_puppet_api, :puppet_url],
+      :puppet_ssl_ca => [:puppet_proxy_puppet_api, :puppet_ssl_ca],
+      :puppet_ssl_cert => [:puppet_proxy_puppet_api, :puppet_ssl_cert],
+      :puppet_ssl_key => [:puppet_proxy_puppet_api, :puppet_ssl_key],
       :puppetssh_sudo => [:puppet_proxy_ssh, :use_sudo],
       :puppetssh_command => [:puppet_proxy_ssh, :command],
       :puppetssh_wait => [:puppet_proxy_ssh, :wait],
@@ -54,13 +51,6 @@ class MigratePuppetSettings < ::Proxy::Migration
     end
   end
 
-  def puppet_version
-    require 'puppet'
-    Puppet::PUPPETVERSION
-  rescue Exception
-    "4.3.1"
-  end
-
   def migrate_puppet_configuration(to_migrate)
     migrated = Hash.new { |h,k| h[k] = Hash.new }
     to_migrate.each do |option, value|
@@ -79,8 +69,6 @@ class MigratePuppetSettings < ::Proxy::Migration
         migrated[:puppet_proxy_mcollective][:user] = puppet_user
       end
     end
-
-    migrated[:puppet][:puppet_version] = puppet_version
 
     migrated
   end

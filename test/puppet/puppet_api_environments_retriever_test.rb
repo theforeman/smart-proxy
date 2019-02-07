@@ -2,15 +2,19 @@ require 'test_helper'
 require 'puppet_proxy_common/environment'
 require 'puppet_proxy_common/environments_retriever_base'
 require 'puppet_proxy_common/errors'
-require 'puppet_proxy_legacy/puppet_api_v2_environments_retriever'
 require 'puppet_proxy_puppet_api/v3_environments_retriever'
 
-module PuppetApiEnvironmentsRetrieverTestSuite
+class PuppetApiV3EnvironmentsRetrieverTest < Test::Unit::TestCase
   class EnvironmentApiForTesting
     attr_accessor :find_environments_response
     def find_environments
       find_environments_response
     end
+  end
+
+  def setup
+    @api = PuppetApiV3EnvironmentsRetrieverTest::EnvironmentApiForTesting.new
+    @retriever =  Proxy::PuppetApi::V3EnvironmentsRetriever.new(nil, nil, nil, nil, @api)
   end
 
   def test_api_response_parsing
@@ -30,23 +34,5 @@ module PuppetApiEnvironmentsRetrieverTestSuite
     assert_raises Proxy::Puppet::DataError do
       @retriever.all
     end
-  end
-end
-
-class PuppetApiV2EnvironmentsRetrieverTest < Test::Unit::TestCase
-  include PuppetApiEnvironmentsRetrieverTestSuite
-
-  def setup
-    @api = PuppetApiEnvironmentsRetrieverTestSuite::EnvironmentApiForTesting.new
-    @retriever = Proxy::PuppetLegacy::PuppetApiV2EnvironmentsRetriever.new(nil, nil, nil, nil, @api)
-  end
-end
-
-class PuppetApiV3EnvironmentsRetrieverTest < Test::Unit::TestCase
-  include PuppetApiEnvironmentsRetrieverTestSuite
-
-  def setup
-    @api = PuppetApiEnvironmentsRetrieverTestSuite::EnvironmentApiForTesting.new
-    @retriever =  Proxy::PuppetApi::V3EnvironmentsRetriever.new(nil, nil, nil, nil, @api)
   end
 end
