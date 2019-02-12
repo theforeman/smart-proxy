@@ -1,3 +1,6 @@
+2019-01-10	Lukas Zapletal <lzap+git@redhat.com>
+	* Fixes #25824 - BMC provider nil exception test fixed
+
 2018-12-06	Tomer Brisker <tbrisker@gmail.com>
 	* Release 1.20.1
 
