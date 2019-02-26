@@ -10,6 +10,7 @@ module Proxy::PuppetApi
     load_dependency_injection_wirings ::Proxy::PuppetApi::PluginConfiguration
 
     validate :puppet_url, :url => true
+    expose_setting :puppet_url
     validate_readable :puppet_ssl_ca, :puppet_ssl_cert, :puppet_ssl_key
 
     start_services :class_cache_initializer

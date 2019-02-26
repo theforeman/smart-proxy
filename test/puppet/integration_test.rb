@@ -35,7 +35,7 @@ class PuppetApiFeaturesTest < Test::Unit::TestCase
       assert_equal('running', mod['state'], Proxy::LogBuffer::Buffer.instance.info[:failed_modules][:puppet])
       assert_equal([], mod['capabilities'])
 
-      expected_settings = {'use_provider' => ['puppet_proxy_puppet_api']}
+      expected_settings = {'use_provider' => ['puppet_proxy_puppet_api'], 'puppet_url' => 'https://puppet.example.com:8140'}
       assert_equal(expected_settings, mod['settings'])
     ensure
       ssl_ca.unlink
