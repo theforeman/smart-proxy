@@ -35,6 +35,7 @@ class ::Proxy::PluginGroup
 
   def settings
     exposed_settings = [members.map { |m| m.exposed_settings }.compact].flatten.uniq.sort
+    exposed_settings << 'use_provider' if @plugin.uses_provider?
     Hash[exposed_settings.map { |setting| [setting, @plugin.settings[setting]] }]
   end
 

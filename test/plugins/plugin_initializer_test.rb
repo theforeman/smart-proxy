@@ -47,7 +47,7 @@ class PluginInitializerTest < Test::Unit::TestCase
          {:name => :plugin_2, :version => '1.0', :class => TestPlugin2, :state => :running, :http_enabled => true, :https_enabled => true,
           :settings => {}, :capabilities => []},
          {:name => :plugin_3, :version => '1.0', :class => TestPlugin3, :state => :running, :http_enabled => true, :https_enabled => true,
-          :settings => {}, :capabilities => []},
+          :settings => {"use_provider" => :plugin_4}, :capabilities => []},
          # :http_enabled and :https_enabled are not defined for providers
          {:name => :plugin_4, :version => '1.0', :class => TestPlugin4, :state => :running, :http_enabled => nil, :https_enabled => nil,
             :settings => nil, :capabilities => nil},

@@ -31,7 +31,7 @@ class DhcpIscApiFeaturesTest < Test::Unit::TestCase
       assert_equal('running', mod['state'], Proxy::LogBuffer::Buffer.instance.info[:failed_modules][:dhcp])
       assert_equal([], mod['capabilities'])
 
-      expected_settings = {}
+      expected_settings = {'use_provider' => 'dhcp_isc'}
       assert_equal(expected_settings, mod['settings'])
     ensure
       config.unlink
