@@ -25,7 +25,9 @@ class PuppetcaApiFeaturesTest < Test::Unit::TestCase
     mod = response['puppetca']
     refute_nil(mod)
     assert_nil(mod['capabilities'])
-    assert_nil(mod['settings'])
+
+    expected_settings = {'use_provider' => ['puppetca_hostname_whitelisting', 'puppetca_http_api']}
+    assert_equal(expected_settings, mod['settings'])
   end
 
 end
