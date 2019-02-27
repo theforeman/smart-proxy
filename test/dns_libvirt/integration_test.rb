@@ -25,7 +25,7 @@ class DnsLibvirtApiFeaturesTest < Test::Unit::TestCase
     assert_equal('running', mod['state'], Proxy::LogBuffer::Buffer.instance.info[:failed_modules][:dns])
     assert_equal([], mod['capabilities'])
 
-    expected_settings = {}
+    expected_settings = {'use_provider' => 'dns_libvirt'}
     assert_equal(expected_settings, mod['settings'])
   end
 end

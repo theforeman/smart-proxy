@@ -37,7 +37,7 @@ class PuppetcaApiFeaturesTest < Test::Unit::TestCase
       assert_equal('running', mod['state'], Proxy::LogBuffer::Buffer.instance.info[:failed_modules][:puppetca])
       assert_equal([], mod['capabilities'])
 
-      expected_settings = {}
+      expected_settings = {'use_provider' => ['puppetca_hostname_whitelisting', 'puppetca_http_api']}
       assert_equal(expected_settings, mod['settings'])
     ensure
       ssl_ca.unlink
