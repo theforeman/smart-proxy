@@ -113,3 +113,6 @@ Style/LineEndConcatenation:
 
 Style/ParallelAssignment:
   Enabled: false
+
+Metrics/LineLength:
+  Max: 250
