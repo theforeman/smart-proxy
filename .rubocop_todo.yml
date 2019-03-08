@@ -236,49 +236,6 @@ Lint/RescueWithoutErrorClass:
 Lint/ScriptPermission:
   Enabled: false
 
-# Offense count: 224
-Metrics/AbcSize:
-  Max: 56
-
-# Offense count: 7
-# Configuration parameters: CountComments, ExcludedMethods.
-Metrics/BlockLength:
-  Max: 37
-
-# Offense count: 17
-# Configuration parameters: CountComments.
-Metrics/ClassLength:
-  Max: 368
-
-# Offense count: 30
-Metrics/CyclomaticComplexity:
-  Max: 25
-
-# Offense count: 2335
-# Configuration parameters: AllowHeredoc, AllowURI, URISchemes, IgnoreCopDirectives, IgnoredPatterns.
-# URISchemes: http, https
-Metrics/LineLength:
-  Max: 201
-
-# Offense count: 168
-# Configuration parameters: CountComments.
-Metrics/MethodLength:
-  Max: 52
-
-# Offense count: 3
-# Configuration parameters: CountComments.
-Metrics/ModuleLength:
-  Max: 133
-
-# Offense count: 5
-# Configuration parameters: CountKeywordArgs.
-Metrics/ParameterLists:
-  Max: 8
-
-# Offense count: 25
-Metrics/PerceivedComplexity:
-  Max: 16
-
 # Offense count: 2
 Naming/ConstantName:
   Enabled: false

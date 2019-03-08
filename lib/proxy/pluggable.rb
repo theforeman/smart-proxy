@@ -1,5 +1,4 @@
 require 'ostruct'
-# rubocop:disable Metrics/ModuleLength
 module Proxy::Pluggable
   attr_reader :plugin_name, :version, :after_activation_blk
 

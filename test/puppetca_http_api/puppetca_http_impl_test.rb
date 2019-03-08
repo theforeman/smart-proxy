@@ -8,7 +8,6 @@ class PuppetCaHttpImplTest < Test::Unit::TestCase
     def sign(certname); end
     def clean(certname); end
 
-    # rubocop:disable Metrics/LineLength
     def search(key = 'foreman')
       [
         {
@@ -30,7 +29,6 @@ class PuppetCaHttpImplTest < Test::Unit::TestCase
   end
 
   class FakeCaApiV1Request63 < FakeCaApiV1Request
-    # rubocop:disable Metrics/LineLength
     def search(key = 'foreman')
       [
         {
