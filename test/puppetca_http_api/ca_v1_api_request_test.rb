@@ -52,7 +52,6 @@ class CaApiv1RequestTest < Test::Unit::TestCase
     stub_request(:get, 'https://puppet:8140/puppet-ca/v1/certificate_statuses/foreman').
       to_return(:status => 200, :body => fixture('ca_search.json'))
 
-    # rubocop:disable Metrics/LineLength
     expected = [
       {
         'dns_alt_names' => ['DNS:puppet', 'DNS:puppet.example.com'],

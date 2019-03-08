@@ -11,9 +11,6 @@ class Proxy::PuppetLegacy::PuppetConfigEnvironmentsRetriever < Proxy::Puppet::En
     @puppet_configuration.get
   end
 
-  # rubocop:disable Metrics/PerceivedComplexity
-  # rubocop:disable Metrics/AbcSize
-  # rubocop:disable Metrics/MethodLength
   def all
     if !conf.has_key?(:main) || !conf.has_key?(:master)
       raise Exception, "Puppet configuration at #{@puppet_config_file_path} is missing 'main' and/or 'master' sections."

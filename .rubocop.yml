@@ -23,9 +23,8 @@ Style/StringLiterals:
 Style/FrozenStringLiteralComment:
   Enabled: false
 
-Metrics/ClassLength:
-  Exclude:
-    - 'test/**/*'
+Metrics:
+  Enabled: false
 
 Lint/AmbiguousRegexpLiteral:
   Enabled: false
