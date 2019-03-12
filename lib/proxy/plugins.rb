@@ -21,7 +21,7 @@ class ::Proxy::Plugins
   # :name: module name
   # :version: module version
   # :class: module class
-  # :state: one of :unitialized, :loaded, :staring, :running, :disabled, or :failed
+  # :state: one of :uninitialized, :loaded, :staring, :running, :disabled, or :failed
   # :di_container: dependency injection container used by the module
   # :http_enabled: true or false (not used by providers)
   # :https_enabled: true or false (not used by providers)
