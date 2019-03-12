@@ -33,10 +33,20 @@ class ::Proxy::PluginGroup
     members.map(&:capabilities).compact.flatten
   end
 
-  def settings
-    exposed_settings = [members.map { |m| m.exposed_settings }.compact].flatten.uniq.sort
-    exposed_settings << 'use_provider' if @plugin.uses_provider?
-    Hash[exposed_settings.map { |setting| [setting, @plugin.settings[setting]] }]
+  def exposed_settings
+    result = {}
+
+    members.each do |member|
+      member.exposed_settings.each do |setting|
+        result[setting] = member.settings[setting]
+      end
+    end
+
+    if @plugin.uses_provider?
+      result[:use_provider] = @plugin.settings['use_provider']
+    end
+
+    result
   end
 
   def resolve_providers(all_plugins_and_providers)
@@ -199,7 +209,7 @@ class ::Proxy::PluginInitializer
       updated[:http_enabled] = group.http_enabled?
       updated[:https_enabled] = group.https_enabled?
       updated[:capabilities] = group.capabilities
-      updated[:settings] = group.settings
+      updated[:settings] = group.exposed_settings
       group.providers.each do |group_member|
         updated = to_update.find {|loaded_plugin| loaded_plugin[:name] == group_member.plugin_name}
         updated[:di_container] = group.di_container
