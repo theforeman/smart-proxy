@@ -40,7 +40,7 @@ module ::Proxy::PuppetCa::PuppetcaHttpApi
       case entry['state']
       when 'signed'
         # Versions before puppetserver 6.3 do not send not_after
-        if entry['not_after'] && Time.parse(entry['not_after']) > Time.now
+        if entry['not_after'] && Time.parse(entry['not_after']) < Time.now
           'revoked'
         else
           'valid'
