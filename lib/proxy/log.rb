@@ -77,12 +77,19 @@ module Proxy
     end
 
     def call(env)
+      before = Time.now.to_f
       status = 500
       env['rack.logger'] = logger
-      logger.info { "Started #{env['REQUEST_METHOD']} #{env['PATH_INFO']} #{env['QUERY_STRING']}" }
+      logger.info { "Started #{env['REQUEST_METHOD']} #{env['REQUEST_PATH']} #{env['QUERY_STRING']}" }
       logger.trace { 'Headers: ' + env.select {|k,v| k.start_with? 'HTTP_'}.inspect }
-      logger.trace { (body = env['rack.input'].read).empty? ? '' : 'Body: ' + body }
-      before = Time.now.to_f
+      logger.trace do
+        if env['rack.input'] && !(body = env['rack.input'].read).empty?
+          env['rack.input'].rewind
+          "Body: #{body}"
+        else
+          ''
+        end
+      end
       status, _, _ = @app.call(env)
     rescue Exception => e
       logger.exception "Error processing request '#{::Logging.mdc['request']}", e
