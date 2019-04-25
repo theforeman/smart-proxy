@@ -61,16 +61,17 @@ module Proxy::DHCP::CommonISC
     end
 
     def om_connect
-      om.puts "key #{@key_name} \"#{@key_secret}\"" if @key_name && @key_secret
-      om.puts "server #{name}"
-      om.puts "port #{@omapi_port}"
-      om.puts "connect"
-      om.puts "new host"
+      omcmd("key #{@key_name} \"#{@key_secret}\"", true) if @key_name && @key_secret
+      omcmd "server #{name}"
+      omcmd "port #{@omapi_port}"
+      omcmd "connect"
+      omcmd "new host"
     end
 
-    def omcmd(command)
-      logger.debug filter_log "omshell: executed - #{command}"
+    def omcmd(command, filter_key = false)
       om.puts(command)
+      command = command.gsub(/key .*/, "key [filtered] [filtered]") if filter_key
+      logger.debug "omshell> #{command}"
     end
 
     def om_disconnect(msg)
@@ -83,29 +84,26 @@ module Proxy::DHCP::CommonISC
       @om = nil  # we cannot serialize an IO object, even if closed.
     end
 
+    def format_omshell_output(output)
+      output.map{|x| "omshell= #{x.chomp}"}.join("\n")
+    end
+
     def report msg, response=""
+      logger.debug(format_omshell_output(response))
       if response.nil? || (!response.empty? && !response.grep(/can't|no more|not connected|Syntax error/).empty?)
-        logger.error "Omshell failed:\n" + (response.nil? ? "No response from DHCP server" : response.join(", "))
+        logger.error "Omshell failed: " + (response.nil? ? "Problem launching omshell" : format_omshell_output(response))
         msg.sub!(/Removed/, "remove")
         msg.sub!(/Added/, "add")
         msg.sub!(/Enumerated/, "enumerate")
         msg  = "Failed to #{msg}"
         msg += ": Entry already exists" if response && !response.grep(/object: already exists/).empty?
-        msg += ": No response from DHCP server" if response.nil? || !response.grep(/not connected/).empty?
+        msg += ": No response from DHCP server" if response.nil? || !response.grep(/(not connected|no more)/).empty?
         raise Proxy::DHCP::Collision, "Hardware address conflict." if response && !response.grep(/object: key conflict/).empty?
         raise Proxy::DHCP::InvalidRecord if response && !response.grep(/can\'t open object: not found/).empty?
         raise Proxy::DHCP::Error.new(msg)
       else
         logger.debug msg
       end
-    end
-
-    def filter_log log
-      secret = Proxy::DhcpPlugin.settings.dhcp_key_secret
-      if secret.is_a?(String) && !secret.empty?
-        log.gsub!(Proxy::DhcpPlugin.settings.dhcp_key_secret,"[filtered]")
-      end
-      logger.debug log
     end
 
     def vendor_options_supported?
@@ -161,7 +159,7 @@ module Proxy::DHCP::CommonISC
 
     def vendor_specific_ztp_statements(options)
       statements = []
-      if options.has_key?(:ztp_vendor) 
+      if options.has_key?(:ztp_vendor)
         case options[:ztp_vendor]
           when "huawei"
             if options.has_key?(:ztp_firmware)
