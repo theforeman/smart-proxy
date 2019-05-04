@@ -16,6 +16,7 @@ group :test do
 
   if RUBY_VERSION < '2.2'
     gem 'rdoc', '< 6'
+    gem 'parallel', '< 1.14' # rubocop dependency
   else
     gem 'rdoc'
   end
