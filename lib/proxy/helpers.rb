@@ -7,8 +7,12 @@ module Proxy::Helpers
   # Accepts a html error code and a message, which is then returned to the caller after adding to the proxy log
   # OR  a block which is executed and its errors handled in a similar way.
   # If no code is supplied when the block is declared then the html error used is 400.
-  def log_halt code=nil, exception=nil
-    message = exception.is_a?(String) ? exception : exception.to_s
+  def log_halt code=nil, exception_or_msg=nil, custom_msg=nil
+    message = exception_or_msg.to_s
+    message = "#{custom_msg}: #{message}" if custom_msg
+    exception = exception_or_msg.is_a?(Exception) ? exception_or_msg : Exception.new(exception_or_msg)
+    # just in case exception is passed in the 3rd parameter let's not loose the valuable info
+    exception = custom_msg.is_a?(Exception) ? custom_msg : exception
     begin
       if block_given?
         return yield
@@ -16,7 +20,7 @@ module Proxy::Helpers
     rescue => e
       exception = e
       message += e.message
-      code     = code || 400
+      code = code || 400
     end
     content_type :json if request.accept?("application/json")
     logger.error message, exception

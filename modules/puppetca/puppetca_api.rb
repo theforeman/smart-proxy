@@ -13,7 +13,7 @@ module Proxy::PuppetCa
       begin
         puppetca_impl.list.to_json
       rescue => e
-        log_halt 406, "Failed to list certificates: #{e}"
+        log_halt 406, e, "Failed to list certificates"
       end
     end
 
@@ -22,7 +22,7 @@ module Proxy::PuppetCa
       begin
         autosigner.autosign_list.to_json
       rescue => e
-        log_halt 406, "Failed to list autosign entries: #{e}"
+        log_halt 406, e, "Failed to list autosign entries"
       end
     end
 
@@ -33,7 +33,7 @@ module Proxy::PuppetCa
       begin
         autosigner.autosign(certname, token_ttl)
       rescue => e
-        log_halt 406, "Failed to enable autosign for #{certname}: #{e}"
+        log_halt 406, e, "Failed to enable autosign for #{certname}"
       end
     end
 
@@ -46,7 +46,7 @@ module Proxy::PuppetCa
         request.body.rewind
         autosigner.validate_csr(request.body.read) ? 200 : 404
       rescue => e
-        log_halt 406, "Failed to validate CSR: #{e}"
+        log_halt 406, e, "Failed to validate CSR"
       end
     end
 
@@ -58,7 +58,7 @@ module Proxy::PuppetCa
       rescue ::Proxy::PuppetCa::NotPresent => e
         log_halt 404, e.to_s
       rescue => e
-        log_halt 406, "Failed to remove autosign for #{certname}: #{e}"
+        log_halt 406, e, "Failed to remove autosign for #{certname}"
       end
     end
 
@@ -68,7 +68,7 @@ module Proxy::PuppetCa
       begin
         puppetca_impl.sign(certname)
       rescue => e
-        log_halt 406, "Failed to sign certificate(s) for #{certname}: #{e}"
+        log_halt 406, e, "Failed to sign certificate(s) for #{certname}"
       end
     end
 
@@ -78,9 +78,9 @@ module Proxy::PuppetCa
         certname = params[:certname]
         puppetca_impl.clean(certname)
       rescue ::Proxy::PuppetCa::NotPresent => e
-        log_halt 404, e.to_s
+        log_halt 404, e
       rescue => e
-        log_halt 406, "Failed to remove certificate(s) for #{certname}: #{e}"
+        log_halt 406, e, "Failed to remove certificate(s) for #{certname}"
       end
     end
   end
