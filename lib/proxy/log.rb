@@ -98,7 +98,7 @@ module Proxy
       logger.info do
         after = Time.now.to_f
         duration = (after - before) * 1000
-        "Finished #{env["REQUEST_METHOD"]} #{env["PATH_INFO"]} with #{status} (#{duration.round(2)} ms)"
+        "Finished #{env["REQUEST_METHOD"]} #{env["REQUEST_PATH"]} with #{status} (#{duration.round(2)} ms)"
       end
     end
   end
