@@ -145,7 +145,7 @@ module ::Proxy::PuppetCa::PuppetcaPuppetCert
         logger.debug "#{mode}ed puppet certificate for #{certname}"
       elsif response =~ /Could not find client certificate/ || $?.exitstatus == 24
         logger.debug "Attempt to remove nonexistent client certificate for #{certname}"
-        raise NotPresent, "Attempt to remove nonexistent client certificate for #{certname}"
+        raise ::Proxy::PuppetCa::NotPresent, "Attempt to remove nonexistent client certificate for #{certname}"
       else
         logger.warn "Failed to run puppetca: #{response}"
         raise "Execution of puppetca failed, check log files"
