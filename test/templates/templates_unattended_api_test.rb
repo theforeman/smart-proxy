@@ -1,14 +1,14 @@
 require 'test_helper'
 require 'json'
-require 'templates/templates_api'
+require 'templates/templates_unattended_api'
 require 'templates/templates'
 require 'webmock/test_unit'
 
-class TemplateApiTest < Test::Unit::TestCase
+class TemplatesUnattendedApiTest < Test::Unit::TestCase
   include Rack::Test::Methods
 
   def app
-    Proxy::TemplatesApi.new
+    Proxy::TemplatesUnattendedApi.new
   end
 
   def setup
