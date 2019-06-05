@@ -73,7 +73,7 @@
 # Logging pattern for file-based loging
 #:file_logging_pattern: '%d %.8X{request} [%.1l] %m'
 # Logging pattern for syslog or journal loging
-#:system_logging_pattern: '%.8X{request} [%.1l] %m'
+#:system_logging_pattern: '%m'
 
 # Log buffer size and extra buffer size (for errors). Defaults to 3000 messages in total,
 # which is about 500 kB request.

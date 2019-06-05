@@ -8,7 +8,7 @@ module ::Proxy::Settings
       :file_rolling_size => 100,
       :file_rolling_age => 'weekly',
       :file_logging_pattern => '%d %.8X{request} [%.1l] %m',
-      :system_logging_pattern => '%.8X{request} [%.1l] %m',
+      :system_logging_pattern => '%m',
       :log_level => "INFO",
       :daemon => false,
       :daemon_pid => "/var/run/foreman-proxy/foreman-proxy.pid",
