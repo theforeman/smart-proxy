@@ -39,9 +39,8 @@ class Proxy::PuppetSsh::Runner < Proxy::Puppet::Runner
       end
     end
 
-    ssh_command = RUBY_VERSION <= '1.8.7' ? escape_for_shell(command) : command
     nodes.each do |node|
-      shell_command(cmd + [escape_for_shell(node), ssh_command], wait_for_command_to_finish)
+      shell_command(cmd + [escape_for_shell(node), command], wait_for_command_to_finish)
     end
   end
 end

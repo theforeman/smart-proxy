@@ -43,7 +43,7 @@ module Proxy::DHCP::Pingable
 
   def icmp_pingable? ip
     # Always shell to ping, instead of using net-ping
-    if PLATFORM =~ /mingw/
+    if RUBY_PLATFORM =~ /mingw/
       # Windows uses different options for ping and does not have /dev/null
       system("ping -n 1 -w 1000 #{ip} > NUL")
     else

@@ -4,11 +4,11 @@ class ProxyUtilTest < Test::Unit::TestCase
   class UtilClass; extend Proxy::Util; end
 
   def test_util_should_support_path
-    assert Proxy::Util.instance_methods.include? RUBY_VERSION =~ /^1\.8/ ? "which" : :which
+    assert Proxy::Util.instance_methods.include? :which
   end
 
   def test_util_shell_escape
-    assert Proxy::Util.instance_methods.include? RUBY_VERSION =~ /^1\.8/ ? "escape_for_shell" : :escape_for_shell
+    assert Proxy::Util.instance_methods.include? :escape_for_shell
 
     test_class = eval "class ProxyUtilTestHelper; include Proxy::Util; end"
     assert_equal test_class.new.escape_for_shell("; rm -rf"), '\;\ rm\ -rf'
@@ -23,8 +23,7 @@ class ProxyUtilTest < Test::Unit::TestCase
 
   def test_commandtask_with_exit_1
     t = Proxy::Util::CommandTask.new('false').start
-    # In Ruby 1.8, the return code is always 0
-    assert_equal t.join, RUBY_VERSION =~ /^1\.8/ ? 0 : 1
+    assert_equal t.join, 1
   end
 
   def test_strict_encode64

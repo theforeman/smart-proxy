@@ -5,7 +5,6 @@ require 'launcher'
 
 require 'fileutils'
 require 'pathname'
-require 'checks'
 require 'webrick/https'
 require 'daemon'
 

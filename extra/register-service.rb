@@ -6,7 +6,6 @@ end
 require 'rubygems'
 require 'highline/import'
 require 'win32/service'
-require 'rbconfig' if RUBY_VERSION < '1.9'
 
 include Win32
 include RbConfig

@@ -110,7 +110,6 @@ class FreeIPATest < Test::Unit::TestCase
   end
 
   def test_ensure_utf
-    return if RUBY_VERSION =~ /^1\.8/
     unicode_string = 'žluťoučký'
     malformed_string = unicode_string.dup.force_encoding('ASCII-8BIT')
     malformed_hash = { malformed_string => { malformed_string => [malformed_string, 'test'],
