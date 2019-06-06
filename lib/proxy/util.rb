@@ -71,24 +71,7 @@ module Proxy::Util
   end
 
   def escape_for_shell(command)
-    # This is a backport for  using the core Shellwords#escape that's in 1.9.2
-    # when using 1.8.7.
-    if RUBY_VERSION < '1.9.2'
-      return command.shellescape if command.respond_to? :shellescape
-
-      # An empty argument will be skipped, so return empty quotes.
-      return "''" if command.empty?
-      command = command.dup
-
-      # Process as a single byte sequence because not all shell
-      # implementations are multibyte aware.
-      command.gsub!(/([^A-Za-z0-9_\-.,:\/@\n])/n, "\\\\\\1")
-      command.gsub!(/\n/, "'\n'")
-
-      return command
-    else
-      Shellwords.escape(command)
-    end
+    Shellwords.escape(command)
   end
 
   def shell_command(cmd, wait = true)
@@ -108,8 +91,6 @@ module Proxy::Util
   end
 
   def popen(cmd)
-    # 1.8.7 note: this assumes that cli options are space-separated
-    cmd = cmd.join(' ') if RUBY_VERSION <= '1.8.7'
     logger.debug("about to execute: #{cmd}")
     IO.popen(cmd)
   end

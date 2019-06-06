@@ -1,4 +1,3 @@
-require 'checks'
 require 'open3'
 require 'dhcp_common/server'
 require 'ipaddr'

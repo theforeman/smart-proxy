@@ -9,11 +9,7 @@ class PuppetSshTest < Test::Unit::TestCase
     puppetssh.stubs(:which).with("sudo", anything).returns("/usr/bin/sudo")
     puppetssh.stubs(:which).with("ssh", anything).returns("/usr/bin/ssh")
 
-    command = if RUBY_VERSION <= '1.8.7'
-                "puppet\\ agent\\ --onetime\\ --no-usecacheonfailure"
-              else
-                "puppet agent --onetime --no-usecacheonfailure"
-              end
+    command = "puppet agent --onetime --no-usecacheonfailure"
 
     puppetssh.
       expects(:shell_command).

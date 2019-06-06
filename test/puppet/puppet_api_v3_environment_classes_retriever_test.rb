@@ -189,14 +189,12 @@ EOL
   end
 end
 
-if RUBY_VERSION > "1.8.7"
-  require 'puppet_proxy_puppet_api/v3_environment_classes_api_classes_retriever'
-  class EnvironmentClassesApiRetrieverForTesting < Proxy::PuppetApi::V3EnvironmentClassesApiClassesRetriever
-    attr_accessor :etag_cache, :classes_cache, :futures_cache
-  end
+require 'puppet_proxy_puppet_api/v3_environment_classes_api_classes_retriever'
+class EnvironmentClassesApiRetrieverForTesting < Proxy::PuppetApi::V3EnvironmentClassesApiClassesRetriever
+  attr_accessor :etag_cache, :classes_cache, :futures_cache
+end
 
-  class PuppetApiv3EnvironmentClassesApiRetrieverTest < Test::Unit::TestCase
-    include PuppetApiv3EnvironmentClassesApiRetrieverTests
-    include PuppetApiv3EnvironmentClassesApiParsingTests
-  end
+class PuppetApiv3EnvironmentClassesApiRetrieverTest < Test::Unit::TestCase
+  include PuppetApiv3EnvironmentClassesApiRetrieverTests
+  include PuppetApiv3EnvironmentClassesApiParsingTests
 end
