@@ -72,8 +72,10 @@ module Proxy::Helpers
     begin
       dns = Resolv.new
       fqdn = dns.getname(ip)
+    rescue Resolv::ResolvTimeout => e
+      log_halt 403, "timeout while resolving hostname for ip address #{ip}: #{e.message}"
     rescue Resolv::ResolvError => e
-      log_halt 403, "unable to resolve hostname for ip address #{ip}\n\n#{e.message}"
+      log_halt 403, "unable to resolve hostname for ip address #{ip}: #{e.message}"
     end
 
     unless forward_verify
@@ -81,8 +83,10 @@ module Proxy::Helpers
     else
       begin
         forward = dns.getaddresses(fqdn)
+      rescue Resolv::ResolvTimeout => e
+        log_halt 403, "timeout while resolving hostname for ip address #{ip}: #{e.message}"
       rescue Resolv::ResolvError => e
-        log_halt 403, "could not forward verify the remote hostname - #{fqdn} (#{ip})\n\n#{e.message}"
+        log_halt 403, "could not forward verify the remote hostname - #{fqdn} (#{ip}): #{e.message}"
       end
 
       if forward.include?(ip)

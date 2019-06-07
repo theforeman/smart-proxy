@@ -200,7 +200,7 @@ module Proxy::DHCP::CommonISC
         ns = ip2hex validate_ip(server)
       rescue
         begin
-          ns = ip2hex Resolv.new.getaddress(server)
+          ns = ip2hex resolver.getaddress(Resolv.new)
         rescue
           logger.warn "Failed to resolve IP address for #{server}"
           ns = "\\\"#{server}\\\""

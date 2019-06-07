@@ -30,7 +30,7 @@ module Sinatra
         # HTTP: test the reverse DNS entry of the remote IP
         trusted_hosts = Proxy::SETTINGS.trusted_hosts
         if trusted_hosts
-          logger.debug "verifying remote client #{request.env['REMOTE_ADDR']} against trusted_hosts #{trusted_hosts}"
+          logger.debug "authorize via trusted hosts: #{request.env['REMOTE_ADDR']} against trusted_hosts #{trusted_hosts}"
 
           if [ 'yes', 'on', 1 ].include? request.env['HTTPS'].to_s
             fqdn = https_cert_cn
@@ -51,14 +51,15 @@ module Sinatra
             log_halt 403, "No client SSL certificate supplied"
           end
         else
-          logger.debug('require_ssl_client_verification: skipping, non-HTTPS request')
+          logger.debug('authorize via ssl client: skipped')
         end
       end
 
       # Common set of authorization methods used in foreman-proxy
       def do_authorize_any
-        do_authorize_with_trusted_hosts
+        # keep the more likely auth methods first
         do_authorize_with_ssl_client
+        do_authorize_with_trusted_hosts
       end
     end
 
