@@ -8,7 +8,7 @@ module ::Proxy::PluginValidators
     end
 
     def required_setting?
-      @plugin.plugin_default_settings.has_key?(@setting_name)
+      @plugin.plugin_default_settings.has_key?(@setting_name) && !@plugin.plugin_default_settings[@setting_name].nil?
     end
 
     def evaluate_predicate(settings)

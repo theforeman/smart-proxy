@@ -1,5 +1,6 @@
 require 'proxy/default_di_wirings'
 require 'proxy/default_plugin_validators'
+require 'proxy/settings_from_env'
 
 class ::Proxy::PluginGroup
   HTTP_ENABLED = [true, 'http']
@@ -264,17 +265,21 @@ end
 
 module ::Proxy::DefaultSettingsLoader
   def load_plugin_settings
-    load_settings({}) {|s| log_used_settings(s)}
+    load_settings({}) {|settings, settings_by_source| log_used_settings(settings, settings_by_source)}
   end
 
   def load_provider_settings(main_plugin_settings)
-    load_settings(main_plugin_settings) {|s| log_provider_settings(s)}
+    load_settings(main_plugin_settings) {|settings, settings_by_source| log_provider_settings(settings, settings_by_source)}
   end
 
   def load_settings(main_plugin_settings)
     config_file_settings = load_configuration_file(plugin.settings_file)
 
-    merged_with_defaults = plugin.default_settings.merge(config_file_settings)
+    log_settings_without_defaults(config_file_settings)
+
+    environment_settings = load_settings_from_env(ENV)
+
+    merged_with_defaults = plugin.default_settings.merge(config_file_settings.merge(environment_settings))
 
     return merged_with_defaults unless module_enabled?(merged_with_defaults)
 
@@ -287,11 +292,20 @@ module ::Proxy::DefaultSettingsLoader
 
     plugin.settings = ::Proxy::Settings::Plugin.new({}, settings)
 
-    yield settings
+    settings_by_source = { :config_file => config_file_settings, :environment => environment_settings }
+
+    yield settings, settings_by_source
 
     validate_settings(plugin, settings)
 
     settings
+  end
+
+  def log_settings_without_defaults(config_file_settings)
+    return unless plugin.programmable_settings.nil?
+    settings_without_defaults = config_file_settings.keys - plugin.default_settings.keys - [:enabled]
+    return if settings_without_defaults.empty?
+    logger.warn("Plugin #{plugin.plugin_name} does not have default settings for #{settings_without_defaults.join(', ')}. This is most likely a bug.")
   end
 
   def module_enabled?(user_settings)
@@ -299,11 +313,23 @@ module ::Proxy::DefaultSettingsLoader
     !!user_settings[:enabled]
   end
 
+  def load_settings_from_env(env)
+    {:enabled => false}.merge(plugin.default_settings).each_with_object({}) do |(setting_key, setting_value), obj|
+      env_key = "FOREMAN_PROXY_#{plugin.plugin_name.upcase}_#{setting_key.to_s.upcase}"
+
+      next unless env.key?(env_key)
+      value = env[env_key]
+      setting_type = Proxy::SettingsFromEnv.guess_setting_type(setting_value)
+      casted_value = Proxy::SettingsFromEnv.cast_value(setting_type, value)
+      obj[setting_key] = casted_value
+    end
+  end
+
   def load_configuration_file(settings_file)
     begin
       settings = Proxy::Settings.read_settings_file(settings_file)
     rescue Errno::ENOENT
-      logger.warn("Couldn't find settings file #{::Proxy::SETTINGS.settings_directory}/#{settings_file}. Using default settings.")
+      logger.warn("Couldn't find settings file #{File.join(::Proxy::SETTINGS.settings_directory, settings_file)}. Using default settings.")
       settings = {}
     end
     settings
@@ -318,17 +344,23 @@ module ::Proxy::DefaultSettingsLoader
     provider_settings.merge(main_plugin_settings)
   end
 
-  def log_used_settings(settings)
-    log_provider_settings(settings)
+  def log_used_settings(settings, settings_by_source = {})
+    log_provider_settings(settings, settings_by_source)
     logger.debug("'%s' ports: 'http': %s, 'https': %s" % [plugin.plugin_name,
                                                           ::Proxy::PluginGroup::HTTP_ENABLED.include?(settings[:enabled]),
                                                           ::Proxy::PluginGroup::HTTPS_ENABLED.include?(settings[:enabled])])
   end
 
-  def log_provider_settings(settings)
+  def log_provider_settings(settings, settings_by_source = {})
     default_settings = plugin.plugin_default_settings
     sorted_keys = settings.keys.map(&:to_s).sort.map(&:to_sym) # ruby 1.8.7 doesn't support sorting of symbols
-    to_log = sorted_keys.map {|k| "'%s': %s%s" % [k, settings[k], (default_settings.include?(k) && default_settings[k] == settings[k]) ? " (default)" : ""] }.join(", ")
+    to_log = sorted_keys.map do |k|
+      hints = []
+      hints << 'default' if default_settings.include?(k) && default_settings[k] == settings[k]
+      hints << 'environment' if settings_by_source[:environment] && settings_by_source[:environment].include?(k) && settings_by_source[:environment][k] == settings[k]
+      hints << 'config file' if settings_by_source[:config_file] && settings_by_source[:config_file].include?(k) && settings_by_source[:config_file][k] == settings[k]
+      "'%s': %s%s" % [k, settings[k], hints.any? ? " (#{hints.join(', ')})" : ""]
+    end.join(", ")
     logger.debug "'%s' settings: %s" % [plugin.plugin_name, to_log]
   end
 

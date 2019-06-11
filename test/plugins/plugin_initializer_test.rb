@@ -14,11 +14,14 @@ class PluginInitializerTest < Test::Unit::TestCase
     capability(CAP_LAMBDA)
     capability(CAP_PROC)
     capability('foo')
-    default_settings :enabled => true, :foo => :bar, :secret => :password
+    default_settings :enabled => false, :foo => :baz, :secret => :password
     expose_setting(:foo)
   end
 
   def test_initialize_plugins
+    ENV['FOREMAN_PROXY_PLUGIN_6_ENABLED'] = 'true'
+    ENV['FOREMAN_PROXY_PLUGIN_6_FOO'] = 'bar'
+
     plugins = ::Proxy::Plugins.new
     plugins.update([{:name => :plugin_1, :version => '1.0', :class => TestPlugin1, :state => :uninitialized},
                     {:name => :plugin_2, :version => '1.0', :class => TestPlugin2, :state => :uninitialized},
@@ -55,5 +58,8 @@ class PluginInitializerTest < Test::Unit::TestCase
             :settings => {}, :capabilities => []},
          {:name => :plugin_6, :version => '1.0', :class => TestPlugin6, :state => :running, :http_enabled => true, :https_enabled => true,
             :settings=>{:foo=>:bar}, :capabilities => [CAP_LAMBDA, CAP_PROC, 'foo']}], loaded)
+
+    ENV.delete('FOREMAN_PROXY_PLUGIN_6_ENABLED')
+    ENV.delete('FOREMAN_PROXY_PLUGIN_6_FOO')
   end
 end

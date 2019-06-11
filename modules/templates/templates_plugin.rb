@@ -5,6 +5,8 @@ module Proxy::Templates
 
     plugin :templates, ::Proxy::VERSION
 
+    default_settings :template_url => nil
+
     validate_presence :template_url
 
     after_activation do

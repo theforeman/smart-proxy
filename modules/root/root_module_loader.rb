@@ -5,7 +5,7 @@ class ::Proxy::RootPluginLoader < ::Proxy::DefaultModuleLoader
   end
 
   # no need to log setting for this module as they aren't user-configurable and never change
-  def log_used_settings(settings)
+  def log_used_settings(settings, settings_by_source = {})
     # noop
   end
 end

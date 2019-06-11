@@ -40,4 +40,14 @@ class GlobalSettingsTest < Test::Unit::TestCase
     settings.apply_argv(['--no-daemonize'])
     assert_equal false, settings.daemon
   end
+
+  def test_apply_env_settings
+    env = {
+      'FOREMAN_PROXY_HTTPS_PORT' => 123
+    }
+    settings = ::Proxy::Settings::Global.new(https_port: 456)
+    assert_equal 456, settings.https_port
+    settings.apply_env(env)
+    assert_equal 123, settings.https_port
+  end
 end

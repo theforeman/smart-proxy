@@ -1,3 +1,6 @@
+require 'proxy/settings_from_env'
+require 'ostruct'
+
 module ::Proxy::Settings
   class Global < ::OpenStruct
     DEFAULT_SETTINGS = {
@@ -52,6 +55,18 @@ module ::Proxy::Settings
     def apply_argv(args)
       self.daemon = true if args.include?('--daemonize')
       self.daemon = false if args.include?('--no-daemonize')
+    end
+
+    def apply_env(env)
+      DEFAULT_SETTINGS.each do |setting_key, setting_value|
+        env_key = "FOREMAN_PROXY_#{setting_key.to_s.upcase}"
+        next unless env.key?(env_key)
+        value = env[env_key]
+        setting_type = Proxy::SettingsFromEnv.guess_setting_type(setting_value)
+        casted_value = Proxy::SettingsFromEnv.cast_value(setting_type, value)
+        normalized_value = normalize_setting(setting_key, casted_value, HOW_TO_NORMALIZE)
+        self[setting_key] = normalized_value
+      end
     end
   end
 end

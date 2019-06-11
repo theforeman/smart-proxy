@@ -6,7 +6,8 @@ module ::Proxy
       class Plugin < ::Proxy::Provider
         plugin :puppetca_http_api, ::Proxy::VERSION
 
-        default_settings :puppet_ssl_ca => '/etc/puppetlabs/puppet/ssl/certs/ca.pem'
+        default_settings :puppet_ssl_ca => '/etc/puppetlabs/puppet/ssl/certs/ca.pem',
+          :puppet_url => nil, :puppet_ssl_cert => nil, :puppet_ssl_key => nil
 
         load_validators :url => ::Proxy::Puppet::Validators::UrlValidator
         requires :puppetca, ::Proxy::VERSION
