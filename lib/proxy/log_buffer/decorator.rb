@@ -17,7 +17,7 @@ module Proxy::LogBuffer
       self.roll_log = false
     end
 
-    def add(severity, message = nil, progname = nil, backtrace = nil)
+    def add(severity, message = nil, progname = nil, exception_or_backtrace = nil)
       severity ||= UNKNOWN
       if message.nil?
         if block_given?
@@ -40,16 +40,21 @@ module Proxy::LogBuffer
         @logger.add(severity, message)
         # add add to the buffer
         if severity >= @logger.level
-          # we accept backtrace, exception and simple string
-          backtrace = backtrace.is_a?(Exception) ? backtrace.backtrace : backtrace
-          backtrace = backtrace.respond_to?(:join) ? backtrace.join("\n") : backtrace
+          # accepts backtrace, exception and simple string for historical reasons
+          backtrace = if exception_or_backtrace.is_a?(Exception) && !exception_or_backtrace.backtrace.nil?
+                        exception_or_backtrace.message + ': ' + exception_or_backtrace.backtrace.join("\n")
+                      elsif backtrace.respond_to?(:join)
+                        exception_or_backtrace.backtrace.join("\n")
+                      else
+                        exception_or_backtrace
+                      end
           rec = Proxy::LogBuffer::LogRecord.new(nil, severity, message.to_s.encode('UTF-8', invalid: :replace, undef: :replace, replace: '?'), backtrace, request_id)
           @buffer.push(rec)
         end
       end
       info("Logging file reopened via USR1 signal") if reopened
       # exceptions are also sent to structured log if available
-      self.exception("Error details", backtrace) if backtrace&.is_a?(Exception)
+      self.exception("Error details for #{message}", exception_or_backtrace) if exception_or_backtrace&.is_a?(Exception)
     end
 
     def trace?
@@ -111,7 +116,7 @@ module Proxy::LogBuffer
       extra_fields[:foreman_code] = exception.code if exception.respond_to?(:code)
       with_fields(extra_fields) do
         public_send(level) do
-          ([context_message, "#{exception.class}: #{exception.message}"] + backtrace).join("\n")
+          (["#{context_message}: <#{exception.class}>: #{exception.message}"] + backtrace).join("\n")
         end
       end
     end

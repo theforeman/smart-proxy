@@ -21,6 +21,33 @@ class DecoratorTest < Test::Unit::TestCase
     @decorator = ::Proxy::LogBuffer::Decorator.new(@logger, "STDOUT", @buffer)
   end
 
+  def test_add_no_message
+    @logger.expects(:add).with(WARNING, nil)
+    @buffer.expects(:push)
+    @decorator.add(::Logger::Severity::WARN)
+  end
+
+  def test_add_text_message
+    @logger.expects(:add).with(WARNING, "text")
+    @buffer.expects(:push)
+    @decorator.add(::Logger::Severity::WARN, "text")
+  end
+
+  def test_add_exception
+    exception = Exception.new("ex")
+    @logger.expects(:add).with(WARNING, "test")
+    @buffer.expects(:push)
+    @decorator.expects(:exception).with("Error details for test", exception)
+    @decorator.add(::Logger::Severity::WARN, "test", nil, exception)
+  end
+
+  def test_add_backtrace_array_legacy
+    exception = ['backtrace1', 'backtrace2']
+    @logger.expects(:add).with(WARNING, "test")
+    @buffer.expects(:push)
+    @decorator.add(::Logger::Severity::WARN, "test", nil, exception)
+  end
+
   def test_should_pass_logs
     @logger.expects(:add).with(DEBUG, "message")
     @decorator.debug("message")
@@ -40,7 +67,7 @@ class DecoratorTest < Test::Unit::TestCase
   def test_should_pass_and_log_exception
     e = Exception.new('exception')
     @logger.expects(:add).with(DEBUG, "message")
-    @decorator.expects(:exception).with("Error details", e)
+    @decorator.expects(:exception).with("Error details for message", e)
     @decorator.debug("message", e)
   end
 
