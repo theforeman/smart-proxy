@@ -97,36 +97,44 @@ module Proxy::Dns
     end
 
     def get_name(a_ptr)
+      logger.warn('Deprecated: Proxy::Dns::Record#get_name is deprecated and will be removed in 1.24')
       get_resource_as_string(a_ptr, Resolv::DNS::Resource::IN::PTR, :name)
     end
 
     def get_name!(a_ptr)
+      logger.warn('Deprecated: Proxy::Dns::Record#get_name! is deprecated and will be removed in 1.24')
       get_resource_as_string!(a_ptr, Resolv::DNS::Resource::IN::PTR, :name)
     end
 
     def get_ipv4_address!(fqdn)
+      logger.warn('Deprecated: Proxy::Dns::Record#get_ipv4_address! is deprecated and will be removed in 1.24')
       get_resource_as_string!(fqdn, Resolv::DNS::Resource::IN::A, :address)
     end
 
     def get_ipv4_address(fqdn)
+      logger.warn('Deprecated: Proxy::Dns::Record#get_ipv4_address is deprecated and will be removed in 1.24')
       get_resource_as_string(fqdn, Resolv::DNS::Resource::IN::A, :address)
     end
 
     def get_ipv6_address!(fqdn)
+      logger.warn('Deprecated: Proxy::Dns::Record#get_ipv6_address! is deprecated and will be removed in 1.24')
       get_resource_as_string!(fqdn, Resolv::DNS::Resource::IN::AAAA, :address)
     end
 
     def get_ipv6_address(fqdn)
+      logger.warn('Deprecated: Proxy::Dns::Record#get_ipv6_address is deprecated and will be removed in 1.24')
       get_resource_as_string(fqdn, Resolv::DNS::Resource::IN::AAAA, :address)
     end
 
     def get_resource_as_string(value, resource_type, attr)
+      logger.warn('Deprecated: Proxy::Dns::Record#get_resource_as_string is deprecated and will be removed in 1.24')
       resolver.getresource(value, resource_type).send(attr).to_s
     rescue Resolv::ResolvError
       false
     end
 
     def get_resource_as_string!(value, resource_type, attr)
+      logger.warn('Deprecated: Proxy::Dns::Record#get_resource_as_string! is deprecated and will be removed in 1.24')
       resolver.getresource(value, resource_type).send(attr).to_s
     rescue Resolv::ResolvError
       raise Proxy::Dns::NotFound.new("Cannot find DNS entry for #{value}")
@@ -161,6 +169,7 @@ module Proxy::Dns
     end
 
     def to_ipaddress ip
+      logger.warn('Deprecated: Proxy::Dns::Record#to_ipaddress is deprecated and will be removed in 1.24')
       IPAddr.new(ip) rescue false
     end
 
