@@ -157,6 +157,7 @@ class BmcTest < Test::Unit::TestCase
   end
 
   def test_frulist_2xquirk_freeipmi
+    Rubyipmi.stubs(:is_provider_installed?).returns(true)
     Rubyipmi::Freeipmi::Fru.any_instance.expects(:list).times(2).raises(StandardError).then.returns(true)
     args = { :username => "user", :password => "pass", :bmc_provider => "freeipmi", :host => "host" }
     bmc  = Proxy::BMC::IPMI.new(args)
@@ -171,6 +172,7 @@ class BmcTest < Test::Unit::TestCase
   end
 
   def test_frulist_2xquirk_fail
+    Rubyipmi.stubs(:is_provider_installed?).returns(true)
     Rubyipmi::Freeipmi::Fru.any_instance.expects(:list).times(2).raises(StandardError)
     args = { :username => "user", :password => "pass", :bmc_provider => "freeipmi", :host => "host" }
     bmc  = Proxy::BMC::IPMI.new(args)
