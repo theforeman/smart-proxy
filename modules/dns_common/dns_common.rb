@@ -96,18 +96,6 @@ module Proxy::Dns
       raise(Proxy::Dns::Error, "Deletion of #{type} not implemented")
     end
 
-    def dns_find(key)
-      logger.warn(%q{Proxy::Dns::Record#dns_find has been deprecated and will be removed in future versions of Smart-Proxy.
-                      Please use ::Proxy::Dns::Record#get_name or ::Proxy::Dns::Record#get_address instead.})
-      if key =~ /\.in-addr\.arpa$/ || key =~ /\.ip6\.arpa$/
-        get_name(key)
-      else
-        resolver.getaddress(key).to_s
-      end
-    rescue Resolv::ResolvError
-      false
-    end
-
     def get_name(a_ptr)
       get_resource_as_string(a_ptr, Resolv::DNS::Resource::IN::PTR, :name)
     end
@@ -169,11 +157,6 @@ module Proxy::Dns
     end
 
     def ptr_record_conflicts(content, name)
-      if name.match(Resolv::IPv4::Regex) || name.match(Resolv::IPv6::Regex)
-        logger.warn(%q{Proxy::Dns::Record#ptr_record_conflicts with a non-ptr record parameter has been deprecated and will be removed in future versions of Smart-Proxy.
-                      Please use ::Proxy::Dns::Record#ptr_record_conflicts('101.212.58.216.in-addr.arpa') format instead.})
-        name = IPAddr.new(name).reverse
-      end
       record_conflicts_name(name, Resolv::DNS::Resource::IN::PTR, content)
     end
 
