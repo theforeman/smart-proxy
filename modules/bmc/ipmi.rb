@@ -18,6 +18,7 @@ module Proxy
 
       # returns boolean true if the specified provider is installed
       def self.installed?(provider)
+        return false if provider.empty?
         # check with the lib to see if at least one provider is installed
         Rubyipmi.is_provider_installed?(provider)
       end
