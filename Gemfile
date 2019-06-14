@@ -4,10 +4,7 @@ gemspec
 
 if RUBY_VERSION < '2.2'
   gem 'sinatra', '< 2'
-  gem 'rack', '>= 1.1', '< 2.0.0'
-else
-  gem 'sinatra'
-  gem 'rack', '>= 1.1'
+  gem 'rack', '>= 1.3', '< 2.0.0'
 end
 gem 'concurrent-ruby', '~> 1.0', require: 'concurrent'
 
