@@ -13,7 +13,7 @@ Gem::Specification.new do |s|
   s.license = 'GPL-3.0'
   s.extra_rdoc_files = ["README.md"]
   s.add_dependency 'json'
-  s.add_dependency 'rack', '>= 1.1'
+  s.add_dependency 'rack', '>= 1.3'
   s.add_dependency 'sinatra'
   s.add_dependency 'logging'
   s.description = <<EOF
