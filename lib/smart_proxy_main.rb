@@ -6,7 +6,6 @@ require 'launcher'
 require 'fileutils'
 require 'pathname'
 require 'webrick/https'
-require 'daemon'
 
 require 'proxy/log'
 require 'proxy/settings'
