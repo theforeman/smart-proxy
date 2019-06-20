@@ -1,7 +1,7 @@
 require 'test_helper'
 require 'json'
 require 'root/root_v2_api'
-require 'bmc/bmc'
+require 'bmc/bmc_plugin'
 require 'bmc/ipmi'
 
 class BmcApiFeaturesTest < Test::Unit::TestCase
