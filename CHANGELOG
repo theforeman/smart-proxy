@@ -1,3 +1,12 @@
+2019-07-02	Tomer Brisker <tbrisker@gmail.com>
+	* Release 1.20.3
+
+2019-06-20	Michael Moll <kvedulv@kvedulv.de>
+	* Fixes #26742 - use Ruby 2.0 compatible gem versions
+
+2019-02-12	Tomer Brisker <tbrisker@gmail.com>
+	* Release 1.20.2
+
 2019-01-10	Lukas Zapletal <lzap+git@redhat.com>
 	* Fixes #25824 - BMC provider nil exception test fixed
 
