@@ -40,11 +40,11 @@ module Proxy::FreeIPARealm
       parsed_uri, realm_name = nil
 
       io.readlines.each do |line|
-        if line =~ /xmlrpc_uri/
+        if line =~ /^\s*xmlrpc_uri\s*=\s*\S+/
           uri = line.split("=")[1].strip
           parsed_uri = URI.parse(uri)
           logger.debug "freeipa: uri is #{uri}"
-        elsif line =~ /realm/
+        elsif line =~ /^\s*realm\s*=\s*\S+/
           realm_name = line.split("=")[1].strip
           logger.debug "freeipa: realm #{realm_name}"
         end
