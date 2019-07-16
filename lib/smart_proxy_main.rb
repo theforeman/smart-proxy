@@ -69,7 +69,6 @@ module Proxy
   require 'puppetca_token_whitelisting/puppetca_token_whitelisting'
   require 'puppet_proxy/puppet'
   require 'puppet_proxy_customrun/puppet_proxy_customrun'
-  require 'puppet_proxy_legacy/puppet_proxy_legacy'
   require 'puppet_proxy_mcollective/puppet_proxy_mcollective'
   require 'puppet_proxy_puppet_api/puppet_proxy_puppet_api'
   require 'puppet_proxy_salt/puppet_proxy_salt'
