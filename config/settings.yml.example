@@ -64,8 +64,8 @@
 # Uncomment and modify if you want to change the log level
 # WARN, DEBUG, ERROR, FATAL, INFO, UNKNOWN
 #:log_level: INFO
-# The maximum size of a log file before it's rolled (in MiB)
-#:file_rolling_size: 100
+# The maximum size of a log file before it's rolled (in MiB) or zero to use external log rotation (default)
+#:file_rolling_size: 0
 # The maximum age of a log file before it's rolled (in seconds). Also accepts 'daily', 'weekly', or 'monthly'.
 #:file_rolling_age: weekly
 # Number of log files to keep
