@@ -5,7 +5,7 @@ module ::Proxy::Settings
       :https_port => 8443,
       :log_file => "/var/log/foreman-proxy/proxy.log",
       :file_rolling_keep => 6,
-      :file_rolling_size => 100,
+      :file_rolling_size => 0,
       :file_rolling_age => 'weekly',
       :file_logging_pattern => '%d %.8X{request} [%.1l] %m',
       :system_logging_pattern => '%m',

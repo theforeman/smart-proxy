@@ -49,8 +49,11 @@ module Proxy
           keep = ::Proxy::SETTINGS.file_rolling_keep
           size = BASE_LOG_SIZE * ::Proxy::SETTINGS.file_rolling_size
           age = ::Proxy::SETTINGS.file_rolling_age
-          logger.add_appenders(Logging.appenders.rolling_file(
-            logger_name, layout: layout, filename: log_file, keep: keep, size: size, age: age, roll_by: 'date'))
+          if size > 0
+            logger.add_appenders(Logging.appenders.rolling_file(logger_name, layout: layout, filename: log_file, keep: keep, size: size, age: age, roll_by: 'date'))
+          else
+            logger.add_appenders(Logging.appenders.file(logger_name, layout: layout, filename: log_file))
+          end
         rescue ArgumentError => ae
           logger.add_appenders(Logging.appenders.stdout(logger_name, layout: layout))
           logger.warn "Log file #{log_file} cannot be opened. Falling back to STDOUT: #{ae}"
