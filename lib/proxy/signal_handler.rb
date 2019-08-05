@@ -35,7 +35,7 @@ class Proxy::SignalHandler
 
   def install_usr1_trap
     trap(:USR1) do
-      ::Proxy::LogBuffer::Decorator.instance.roll_log
+      ::Proxy::LogBuffer::Decorator.instance.roll_log = true
     end
   end
 end

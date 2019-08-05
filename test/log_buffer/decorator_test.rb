@@ -71,31 +71,12 @@ class DecoratorTest < Test::Unit::TestCase
     ::Logging.mdc['request'] = nil
   end
 
-  def test_should_not_roll_log_if_stdout_is_used
-    ::Proxy::LoggerFactory.stubs(:logger).returns(::Logger.new("/dev/null"))
-    (d = DecoratorForTesting.new(@logger, "STDOUT", nil)).handle_log_rolling
-    assert_equal @logger, d.logger
-  end
-
-  def test_should_not_roll_log_if_syslog_is_used
-    ::Proxy::LoggerFactory.stubs(:logger).returns(::Logger.new("/dev/null"))
-    (d = DecoratorForTesting.new(@logger, "SYSLOG", nil)).handle_log_rolling
-    assert_equal @logger, d.logger
-  end
-
-  def test_should_roll_log_if_file_logger_is_used
-    ::Proxy::LoggerFactory.stubs(:logger).returns(::Logger.new("/dev/null"))
-    (d = DecoratorForTesting.new(@logger, "/dev/null", nil)).handle_log_rolling
-    assert_not_equal @logger, d.logger
-  end
-
   def test_should_roll_log_if_flag_is_set
     ::Proxy::LoggerFactory.stubs(:logger).returns(::Logger.new("/dev/null"))
     d = DecoratorForTesting.new(@logger, "/dev/null", @buffer)
 
-    d.roll_log
+    d.roll_log = true
     d.add(DEBUG)
-
-    assert_not_equal @logger, d.logger
+    refute d.roll_log
   end
 end
