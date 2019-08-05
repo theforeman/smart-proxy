@@ -7,26 +7,15 @@ module Proxy::LogBuffer
       @@instance ||= new(::Proxy::LoggerFactory.logger, ::Proxy::LoggerFactory.log_file)
     end
 
-    attr_accessor :formatter
+    attr_accessor :formatter, :roll_log
+    alias_method :roll_log?, :roll_log
 
     def initialize(logger, log_file, buffer = Proxy::LogBuffer::Buffer.instance)
       @logger = logger
       @buffer = buffer
       @log_file = log_file
       @mutex = Mutex.new
-      @roll_log = false
-    end
-
-    # due to synchronization can't re-open the log from the signal trap
-    def roll_log
-      @roll_log = true
-    end
-
-    def handle_log_rolling
-      return if @log_file.casecmp('STDOUT') == 0 || @log_file.casecmp('SYSLOG') == 0
-      @roll_log = false
-      @logger.close rescue nil
-      @logger = ::Proxy::LoggerFactory.logger
+      self.roll_log = false
     end
 
     def add(severity, message = nil, progname = nil, backtrace = nil)
@@ -40,8 +29,14 @@ module Proxy::LogBuffer
       end
       message = formatter.call(severity, Time.now.utc, progname, message) if formatter
       return if message == ''
+      reopened = false
       @mutex.synchronize do
-        handle_log_rolling if @roll_log
+        if self.roll_log?
+          # decorator is in-memory only, reopen underlaying logging appenders
+          ::Logging.reopen
+          self.roll_log = false
+          reopened = true
+        end
         # add to the logger first
         @logger.add(severity, message)
         # add add to the buffer
@@ -53,6 +48,7 @@ module Proxy::LogBuffer
           @buffer.push(rec)
         end
       end
+      info("Logging file reopened via USR1 signal") if reopened
       # exceptions are also sent to structured log if available
       self.exception("Error details", backtrace) if backtrace && backtrace.is_a?(Exception)
     end
