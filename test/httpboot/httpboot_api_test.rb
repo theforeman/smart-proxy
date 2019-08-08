@@ -16,6 +16,10 @@ class HttpbootApiTest < Test::Unit::TestCase
     @tempdir = Dir.mktmpdir 'httpboot-test'
     FileUtils.touch "#{@tempdir}/valid_file"
     Dir.mkdir "#{@tempdir}/valid_dir"
+    Dir.mkdir "#{@tempdir}/grub2"
+    FileUtils.touch "#{@tempdir}/grub2/valid_file"
+    FileUtils.touch "#{@tempdir}/grub2/grub.cfg"
+    FileUtils.touch "#{@tempdir}/grub2/grub.cfg-00-01-02-03-04-05-06"
     FileUtils.ln_s "#{@tempdir}/valid_file", "#{@tempdir}/valid_symlink"
     FileUtils.ln_s "#{@tempdir}/does_not_exist", "#{@tempdir}/invalid_symlink"
     Proxy::Httpboot::Plugin.load_test_settings(root_dir: @tempdir)
@@ -35,6 +39,27 @@ class HttpbootApiTest < Test::Unit::TestCase
     result = get "/valid_dir"
     assert_equal 403, last_response.status
     assert_equal 'Directory listing not allowed', result.body
+  end
+
+  def test_valid_file_in_grub2
+    env = { 'REQUEST_PATH' => "/grub2/valid_file" }
+    result = get "/irrelevant", {}, env
+    assert_equal 200, last_response.status
+    assert_equal '', result.body
+  end
+
+  def test_grubcfg_in_grub2
+    env = { 'REQUEST_PATH' => "/grub.cfg" }
+    result = get "/irrelevant", {}, env
+    assert_equal 200, last_response.status
+    assert_equal '', result.body
+  end
+
+  def test_grubcfg_with_mac_in_grub2
+    env = { 'REQUEST_PATH' => "/grub.cfg-00-01-02-03-04-05-06" }
+    result = get "/irrelevant", {}, env
+    assert_equal 200, last_response.status
+    assert_equal '', result.body
   end
 
   def test_valid_symlink
