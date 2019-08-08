@@ -98,7 +98,7 @@ module Proxy::TFTP
       ["#{pxeconfig_dir}/grub.cfg"]
     end
     def pxeconfig_file mac
-      ["#{pxeconfig_dir}/grub.cfg-01-"+mac.tr(':','-').downcase]
+      ["#{pxeconfig_dir}/grub.cfg-01-"+mac.tr(':','-').downcase, "#{pxeconfig_dir}/grub.cfg-#{mac.downcase}"]
     end
   end
 
