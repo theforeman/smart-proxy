@@ -356,6 +356,40 @@ EOMULTILINE_HOST
     ]]], Proxy::DHCP::CommonISC::ConfigurationParser.new.conf.parse!(MULTILINE_HOST)
   end
 
+  HOST_WITH_MAC64 =<<EOHOST_WITH_MAC64
+    host eui64 {
+      hardware ethernet 00:25:96:FF:FE:12:34:56;
+      fixed-address 192.168.1.1;
+      option routers 204.254.239.1;
+      filename "pxelinux.0";
+    }
+EOHOST_WITH_MAC64
+  def test_multiline_host_parser_with_mac64
+    assert_equal [Proxy::DHCP::CommonISC::ConfigurationParser::HostNode['eui64', [
+      Proxy::DHCP::CommonISC::ConfigurationParser::HardwareNode['ethernet', '00:25:96:FF:FE:12:34:56'],
+      Proxy::DHCP::CommonISC::ConfigurationParser::KeyValueNode[:fixed_address, '192.168.1.1'],
+      Proxy::DHCP::CommonISC::ConfigurationParser::OptionNode[false, 'routers', [['204.254.239.1']]],
+      Proxy::DHCP::CommonISC::ConfigurationParser::OptionNode[false, 'filename', [['"pxelinux.0"']]]
+    ]]], Proxy::DHCP::CommonISC::ConfigurationParser.new.conf.parse!(HOST_WITH_MAC64)
+  end
+
+  HOST_WITH_IBMAC =<<EOHOST_WITH_IBMAC
+    host infiniband {
+      hardware ethernet 80:00:02:08:fe:80:00:00:00:00:00:00:00:02:aa:bb:cc:dd:ee:ff;
+      fixed-address 192.168.1.1;
+      option routers 204.254.239.1;
+      filename "pxelinux.0";
+    }
+EOHOST_WITH_IBMAC
+  def test_multiline_host_parser_with_infiniband
+    assert_equal [Proxy::DHCP::CommonISC::ConfigurationParser::HostNode['infiniband', [
+      Proxy::DHCP::CommonISC::ConfigurationParser::HardwareNode['ethernet', '80:00:02:08:fe:80:00:00:00:00:00:00:00:02:aa:bb:cc:dd:ee:ff'],
+      Proxy::DHCP::CommonISC::ConfigurationParser::KeyValueNode[:fixed_address, '192.168.1.1'],
+      Proxy::DHCP::CommonISC::ConfigurationParser::OptionNode[false, 'routers', [['204.254.239.1']]],
+      Proxy::DHCP::CommonISC::ConfigurationParser::OptionNode[false, 'filename', [['"pxelinux.0"']]]
+    ]]], Proxy::DHCP::CommonISC::ConfigurationParser.new.conf.parse!(HOST_WITH_IBMAC)
+  end
+
   def test_lease_timestamp_parser
     assert_equal Proxy::DHCP::CommonISC::ConfigurationParser::KeyValueNode[:starts, Time.parse('2 2017/05/01 14:20:25 UTC')],
                  Proxy::DHCP::CommonISC::ConfigurationParser.new.lease_time_stamp.parse!('starts 2 2017/05/01 14:20:25;')

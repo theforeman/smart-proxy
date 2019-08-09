@@ -207,7 +207,9 @@ module Proxy
         EOSTMT = ';'.r 'end of statement'
         COMMA =  /\s*,\s*/.r 'comma'
         HEX = /([a-fA-F0-9][a-fA-F0-9]?:)+[a-fA-F0-9][a-fA-F0-9]?/.r
-        MAC_ADDRESS = /([a-fA-F0-9][a-fA-F0-9]?:){5}[a-fA-F0-9][a-fA-F0-9]?/.r 'mac address'
+        MAC_ADDRESS = /([a-fA-F0-9][a-fA-F0-9]?:){5}[a-fA-F0-9][a-fA-F0-9]?/.r 'EUI-48 mac address'
+        MAC64_ADDRESS = /([a-fA-F0-9][a-fA-F0-9]?:){7}[a-fA-F0-9][a-fA-F0-9]?/.r 'EUI-64 mac address'
+        MACIB_ADDRESS = /([a-fA-F0-9][a-fA-F0-9]?:){19}[a-fA-F0-9][a-fA-F0-9]?/.r 'infiniband mac address'
         IPV4_ADDRESS = /\d+\.\d+\.\d+\.\d+/.r 'ipv4 address'
         IPV4_ADDRESS_LIST = IPV4_ADDRESS.join(COMMA).even
         IPV6_ADDRESS = /[a-fA-F0-9:]+/.r 'ipv6 address'
@@ -289,7 +291,7 @@ module Proxy
           hardware_keyword = word('hardware').fail 'keyword_hardware'
           ethernet_keyword = word('ethernet').fail 'keyword_ethernet'
           token_ring_keyword = word('token-ring').fail 'keyword_token_ring'
-          seq_(hardware_keyword, ethernet_keyword | token_ring_keyword, MAC_ADDRESS, EOSTMT) {|_, type, address, _| HardwareNode[type, address]}
+          seq_(hardware_keyword, ethernet_keyword | token_ring_keyword, MACIB_ADDRESS | MAC64_ADDRESS | MAC_ADDRESS, EOSTMT) {|_, type, address, _| HardwareNode[type, address]}
         end
 
         def fixed_address
