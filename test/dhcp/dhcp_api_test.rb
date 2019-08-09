@@ -46,20 +46,11 @@ class DhcpApiTest < Test::Unit::TestCase
                                                   @subnet,
                                                   :hostname   => "ten.example.com")]
 
-    @leases = [Proxy::DHCP::Lease.new(nil,
-                                      "192.168.122.2",
-                                      "00:aa:bb:cc:dd:ee",
-                                      @subnet,
-                                      date_format("Sat Jul 12 10:08:29 UTC 2014"),
-                                      nil,
-                                      "active"),
-               Proxy::DHCP::Lease.new(nil,
-                                      "192.168.122.89",
-                                      "ec:f4:bb:c6:ca:fe",
-                                      @subnet,
-                                      date_format("2014-10-16 12:59:40 UTC"),
-                                      date_format("2199-01-01 00:00:01 UTC"),
-                                      "active")]
+    @leases = [
+      Proxy::DHCP::Lease.new(nil, "192.168.122.2", "00:aa:bb:cc:dd:ee", @subnet, date_format("Sat Jul 12 10:08:29 UTC 2014"), nil, "active"),
+      Proxy::DHCP::Lease.new(nil, "192.168.122.89", "ec:f4:bb:c6:ca:fe", @subnet, date_format("2014-10-16 12:59:40 UTC"), date_format("2199-01-01 00:00:01 UTC"), "active"),
+      Proxy::DHCP::Lease.new(nil, "192.168.122.5", "80:00:02:08:fe:80:00:00:00:00:00:00:00:02:aa:bb:cc:dd:ee:ff", @subnet, date_format("Sat Jul 12 10:08:29 UTC 2015"), nil, "active"),
+    ]
   end
 
   # Date formats change between Ruby versions and JSON libraries & versions
@@ -208,6 +199,25 @@ class DhcpApiTest < Test::Unit::TestCase
       "mac"        =>"00:11:bb:cc:dd:ee",
       "name"       => 'test.example.com',
       "subnet"     =>"192.168.122.0/255.255.255.0" # NOTE: 'subnet' attribute isn't being used by foreman, which adds a 'network' attribute instead
+    }
+    assert_equal expected, JSON.parse(last_response.body)
+  end
+
+  def test_get_record_by_mac_64
+    @server.expects(:find_record_by_mac).with("192.168.122.0", "80:00:02:08:fe:80:00:00:00:00:00:00:00:02:aa:bb:cc:dd:ee:ff").returns(@leases.last)
+
+    get "/192.168.122.0/mac/80:00:02:08:fe:80:00:00:00:00:00:00:00:02:aa:bb:cc:dd:ee:ff"
+
+    assert last_response.ok?, "Last response was not ok: #{last_response.status} #{last_response.body}"
+    expected = {
+      "ends"=>nil,
+      "ip"=>"192.168.122.5",
+      "mac"=>"80:00:02:08:fe:80:00:00:00:00:00:00:00:02:aa:bb:cc:dd:ee:ff",
+      "name"=>"lease-80000208fe800000000000000002aabbccddeeff",
+      "starts"=>"2015-07-12 10:08:29 UTC",
+      "state"=>"active",
+      "subnet"=>"192.168.122.0/255.255.255.0",
+      "type"=>"lease"
     }
     assert_equal expected, JSON.parse(last_response.body)
   end

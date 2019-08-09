@@ -43,34 +43,36 @@ class IscOmapiProviderTest < Test::Unit::TestCase
   end
 
   def test_om_add_record
-    omio = OMIO.new
-    @dhcp.stubs(:om).returns(omio)
-    @dhcp.expects(:om_connect)
-    @dhcp.expects(:om_disconnect)
+    ['01:02:03:04:05:06', '80:00:02:08:fe:80:00:00:00:00:00:00:00:02:aa:bb:cc:dd:ee:ff'].each do |mac_address|
+      omio = OMIO.new
+      @dhcp.stubs(:om).returns(omio)
+      @dhcp.expects(:om_connect)
+      @dhcp.expects(:om_disconnect)
 
-    @dhcp.expects(:solaris_options_statements).returns([])
-    @dhcp.expects(:ztp_options_statements).returns([])
-    @dhcp.expects(:poap_options_statements).returns([])
+      @dhcp.expects(:solaris_options_statements).returns([])
+      @dhcp.expects(:ztp_options_statements).returns([])
+      @dhcp.expects(:poap_options_statements).returns([])
 
-    record_to_add = Proxy::DHCP::Reservation.new('a-test-01',
-                                                 '192.168.42.100',
-                                                 '01:02:03:04:05:06',
-                                                 Proxy::DHCP::Subnet.new('192.168.42.0', '255.255.255.0'),
-                                                 :hostname => 'a-test',
-                                                 :filename => 'a_file',
-                                                 :nextServer => '192.168.42.10')
+      record_to_add = Proxy::DHCP::Reservation.new('a-test-01',
+                                                   '192.168.42.100',
+                                                   mac_address,
+                                                   Proxy::DHCP::Subnet.new('192.168.42.0', '255.255.255.0'),
+                                                   :hostname => 'a-test',
+                                                   :filename => 'a_file',
+                                                   :nextServer => '192.168.42.10')
 
-    @dhcp.om_add_record(record_to_add)
+      @dhcp.om_add_record(record_to_add)
 
-    expected_om_output = [
-      "set name = \"#{record_to_add.name}\"",
-      "set ip-address = #{record_to_add.ip}",
-      "set hardware-address = #{record_to_add.mac}",
-      "set hardware-type = 1",
-      "set statements = \"filename = \\\"#{record_to_add.options[:filename]}\\\"; next-server = c0:a8:2a:0a; option host-name = \\\"#{record_to_add.hostname}\\\";\"",
-      "create"
-    ]
-    assert_equal expected_om_output, omio.input_commands
+      expected_om_output = [
+        "set name = \"#{record_to_add.name}\"",
+        "set ip-address = #{record_to_add.ip}",
+        "set hardware-address = #{record_to_add.mac}",
+        "set hardware-type = 1",
+        "set statements = \"filename = \\\"#{record_to_add.options[:filename]}\\\"; next-server = c0:a8:2a:0a; option host-name = \\\"#{record_to_add.hostname}\\\";\"",
+        "create"
+      ]
+      assert_equal expected_om_output, omio.input_commands
+    end
   end
 
   def test_del_record
