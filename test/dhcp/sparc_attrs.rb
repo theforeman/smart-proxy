@@ -1,7 +1,7 @@
 module SparcAttrs
   def sparc_attrs
     {
-        "hostname"=>"itgsyddev910.macbank",
+        "hostname"=>"someserver.somedomain",
         "mac"=>"00:21:28:6d:62:e8",
         "ip"=>"192.168.122.11",
         "network"=>"192.168.122.0",
