@@ -105,10 +105,10 @@ class IscOmapiProviderTest < Test::Unit::TestCase
     assert_equal [
       %q{option SUNW.JumpStart-server \"192.168.122.24:/Solaris/jumpstart\";},
       %q{option SUNW.install-path \"/Solaris/install/Solaris_5.10_sparc_hw0811\";},
-      %q{option SUNW.install-server-hostname \"itgsyddev807.macbank\";},
+      %q{option SUNW.install-server-hostname \"example-server.example.com\";},
       %q{option SUNW.install-server-ip-address 192.168.122.24;},
       %q{option SUNW.root-path-name \"/Solaris/install/Solaris_5.10_sparc_hw0811/Solaris_10/Tools/Boot\";},
-      %q{option SUNW.root-server-hostname \"itgsyddev807.macbank\";},
+      %q{option SUNW.root-server-hostname \"example-server.example.com\";},
       %q{option SUNW.root-server-ip-address 192.168.122.24;},
       %q{option SUNW.sysid-config-file-server \"192.168.122.24:/Solaris/jumpstart/sysidcfg/sysidcfg_primary\";},
       %q{vendor-option-space SUNW;}
