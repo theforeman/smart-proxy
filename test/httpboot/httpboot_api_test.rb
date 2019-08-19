@@ -1,5 +1,6 @@
 require 'test_helper'
 require 'tempfile'
+require 'httpboot/httpboot_plugin_configuration'
 require 'httpboot/httpboot_plugin'
 require 'httpboot/httpboot_api'
 

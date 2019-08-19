@@ -1,6 +1,7 @@
 require 'test_helper'
 require 'json'
 require 'root/root_v2_api'
+require 'httpboot/httpboot_plugin_configuration'
 require 'httpboot/httpboot_plugin'
 
 class HttpbootApiFeaturesTest < Test::Unit::TestCase
@@ -23,6 +24,7 @@ class HttpbootApiFeaturesTest < Test::Unit::TestCase
     assert_equal('running', mod['state'], Proxy::LogBuffer::Buffer.instance.info[:failed_modules][:httpboot])
     assert_equal([], mod['capabilities'])
 
-    assert_equal({}, mod['settings'])
+    expected_settings = {'http_port' => nil, 'https_port' => 8443}
+    assert_equal(expected_settings, mod['settings'])
   end
 end
