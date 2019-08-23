@@ -5,7 +5,7 @@ class Proxy::FactsPlugin < ::Proxy::Plugin
   default_settings :enabled => false
   plugin :facts, ::Proxy::VERSION
 
-  after_activation do
+  load_classes do
     begin
       require "facter"
     rescue LoadError => e
