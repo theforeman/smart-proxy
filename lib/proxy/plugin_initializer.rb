@@ -2,9 +2,6 @@ require 'proxy/default_di_wirings'
 require 'proxy/default_plugin_validators'
 
 class ::Proxy::PluginGroup
-  HTTP_ENABLED = [true, 'http']
-  HTTPS_ENABLED = [true, 'https']
-
   include ::Proxy::Log
   attr_reader :plugin, :providers, :state, :di_container
 
@@ -87,8 +84,8 @@ class ::Proxy::PluginGroup
   end
 
   def update_group_initial_state(enabled_setting)
-    @http_enabled = HTTP_ENABLED.include?(enabled_setting)
-    @https_enabled = HTTPS_ENABLED.include?(enabled_setting)
+    @http_enabled = ::Proxy::Settings::Plugin.http_enabled?(enabled_setting)
+    @https_enabled = ::Proxy::Settings::Plugin.https_enabled?(enabled_setting)
     @state = (http_enabled? || https_enabled?) ? :starting : :disabled
   end
 
@@ -321,8 +318,8 @@ module ::Proxy::DefaultSettingsLoader
   def log_used_settings(settings)
     log_provider_settings(settings)
     logger.debug("'%s' ports: 'http': %s, 'https': %s" % [plugin.plugin_name,
-                                                          ::Proxy::PluginGroup::HTTP_ENABLED.include?(settings[:enabled]),
-                                                          ::Proxy::PluginGroup::HTTPS_ENABLED.include?(settings[:enabled])])
+                                                          ::Proxy::Settings::Plugin.http_enabled?(settings[:enabled]),
+                                                          ::Proxy::Settings::Plugin.https_enabled?(settings[:enabled])])
   end
 
   def log_provider_settings(settings)
