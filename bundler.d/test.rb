@@ -24,4 +24,8 @@ group :test do
   gem 'rake'
   gem 'rubocop-checkstyle_formatter', '~> 0.2'
   gem 'webmock'
+
+  # Technically this is a hard dependency of the facts module but that's only
+  # used in discovery. This at least allows us to run the tests on it
+  gem 'facter', :require => false
 end
