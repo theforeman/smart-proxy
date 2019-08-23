@@ -66,6 +66,7 @@ module Proxy::DHCP
             false
           end
         end
+        return possible_ip unless Proxy::DhcpPlugin.settings.ping_free_ip
         begin
           logger.debug "Searching for free IP - pinging #{possible_ip}."
           if tcp_pingable?(possible_ip) || icmp_pingable?(possible_ip)

@@ -10,3 +10,8 @@
 #:server: 127.0.0.1
 # subnets restricts the subnets queried to a subset, to reduce the query time.
 #:subnets: [192.168.205.0/255.255.255.128, 192.168.205.128/255.255.255.128]
+
+# Perform ICMP and TCP ping when searching free IPs from the pool. This makes
+# sure that active IP address is not suggested as free, however in locked down
+# network environments this can cause no free IPs. Enabled by default
+#:ping_free_ip: true
