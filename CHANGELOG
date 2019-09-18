@@ -1,3 +1,9 @@
+2019-09-18	Tomer Brisker <tbrisker@gmail.com>
+	* Release 1.21.4
+
+2019-06-20	Michael Moll <kvedulv@kvedulv.de>
+	* Fixes #26742 - use Ruby 2.0 compatible gem versions
+
 2019-04-18	Tomer Brisker <tbrisker@gmail.com>
 	* Release 1.21.3
 
