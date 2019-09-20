@@ -1,5 +1,6 @@
 require 'logging'
 require 'proxy/log_buffer/decorator'
+require 'proxy/time_utils'
 
 module Proxy
   module Log
@@ -74,13 +75,14 @@ module Proxy
 
   class LoggerMiddleware
     include Log
+    include ::Proxy::TimeUtils
 
     def initialize(app)
       @app = app
     end
 
     def call(env)
-      before = Time.now.to_f
+      before = time_monotonic
       status = 500
       env['rack.logger'] = logger
       logger.info { "Started #{env['REQUEST_METHOD']} #{env['REQUEST_PATH']} #{env['QUERY_STRING']}" }
@@ -99,7 +101,7 @@ module Proxy
       raise e
     ensure
       logger.info do
-        after = Time.now.to_f
+        after = time_monotonic
         duration = (after - before) * 1000
         "Finished #{env["REQUEST_METHOD"]} #{env["REQUEST_PATH"]} with #{status} (#{duration.round(2)} ms)"
       end

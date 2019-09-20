@@ -1,5 +1,6 @@
 require 'resolv'
 require 'ipaddr'
+require 'proxy/logging_resolv'
 
 module Proxy::Dns
   class Error < RuntimeError; end
@@ -8,16 +9,18 @@ module Proxy::Dns
 
   class Record
     include ::Proxy::Log
+    include ::Proxy::TimeUtils
+    include ::Proxy::Helpers
 
     attr_reader :server, :ttl
 
     def initialize(server = nil, ttl = nil)
       @server = server || "localhost"
-      @ttl    = ttl || "86400"
+      @ttl = ttl || "86400"
     end
 
-    def resolver
-      Resolv::DNS.new(:nameserver => @server)
+    def resolver(override_nameserver = @server)
+      dns_resolv(:nameserver => override_nameserver)
     end
 
     def create_srv_record(service, value)

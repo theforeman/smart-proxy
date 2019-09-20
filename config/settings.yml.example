@@ -79,3 +79,10 @@
 # which is about 500 kB request.
 #:log_buffer: 2000
 #:log_buffer_errors: 1000
+
+# DNS resolver timeout(s). This may be a single positive number
+# or an array of positive numbers representing timeouts in seconds.
+# If an array is specified, a DNS request will retry and wait for
+# each successive interval in the array until a successful response
+# is received. See Ruby Resolv#timeouts documentation for more info.
+#:dns_resolv_timeouts: [5, 8, 13]
