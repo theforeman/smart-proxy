@@ -2,6 +2,9 @@ module ::Proxy::DHCP::ISC
   class Plugin < ::Proxy::Provider
     plugin :dhcp_isc, ::Proxy::VERSION
 
+    capability 'dhcp_filename_ipv4'
+    capability 'dhcp_filename_hostname'
+
     default_settings :config => '/etc/dhcp/dhcpd.conf', :leases => '/var/lib/dhcpd/dhcpd.leases',
                      :omapi_port => '7911', :blacklist_duration_minutes => 30*60
 

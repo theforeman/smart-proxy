@@ -136,4 +136,13 @@ class IscOmapiProviderTest < Test::Unit::TestCase
     assert_equal ['option tftp-server-name = \\"192.168.122.1\\";', 'option bootfile-name = \\"poap.cfg/something.py\\";'],
                  @dhcp.poap_options_statements(:filename => 'poap.cfg/something.py', :nextServer => '192.168.122.1')
   end
+
+  def test_boot_server_ip
+    assert_equal "7f:00:00:01", @dhcp.bootServer("127.0.0.1")
+  end
+
+  def test_boot_server_hostname
+    ::Proxy::LoggingResolv.any_instance.expects(:getaddress).with("ptr-doesnotexist.example.com").returns("127.0.0.2")
+    assert_equal "7f:00:00:02", @dhcp.bootServer("ptr-doesnotexist.example.com")
+  end
 end
