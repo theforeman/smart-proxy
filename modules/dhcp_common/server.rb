@@ -4,6 +4,7 @@ require "dhcp_common/record/lease"
 require "dhcp_common/record/reservation"
 require 'dhcp_common/record/deleted_reservation'
 require 'dhcp_common/pingable'
+require 'proxy/logging_resolv'
 
 module Proxy::DHCP
   class Server
@@ -14,6 +15,8 @@ module Proxy::DHCP
     include Proxy::DHCP::Pingable
     include Proxy::Log
     include Proxy::Validations
+    include ::Proxy::TimeUtils
+    include ::Proxy::Helpers
 
     def initialize(name, managed_subnets, subnet_service, free_ips_service = nil)
       @name = name

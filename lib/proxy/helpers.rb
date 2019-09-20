@@ -1,5 +1,5 @@
 require 'openssl'
-require 'resolv'
+require 'proxy/logging_resolv'
 
 module Proxy::Helpers
   include Proxy::Log
@@ -68,13 +68,23 @@ module Proxy::Helpers
     json_data
   end
 
+  def dns_resolv(*args)
+      resolv = Resolv::DNS.new(*args)
+      resolv.timeouts = Proxy::SETTINGS.dns_resolv_timeouts
+      ::Proxy::LoggingResolv.new(resolv)
+  end
+
+  def resolv(*args)
+      ::Proxy::LoggingResolv.new(Resolv.new(*args))
+  end
+
   # reverse lookup an IP address while verifying it via forward resolv
   def remote_fqdn(forward_verify=true)
     ip = request.env['REMOTE_ADDR']
     log_halt 403, 'could not get remote address from environment' if ip.empty?
 
     begin
-      dns = Resolv.new
+      dns = resolv
       fqdn = dns.getname(ip)
     rescue Resolv::ResolvError => e
       log_halt 403, "unable to resolve hostname for ip address #{ip}\n\n#{e.message}"
