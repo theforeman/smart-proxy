@@ -5,6 +5,7 @@ config/settings.d/*.yml
 config/migration_state
 config_*/*
 .idea
+.solargraph.yml
 /logs
 *swp
 Gemfile.lock
