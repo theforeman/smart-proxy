@@ -42,7 +42,7 @@ module Proxy::DHCP::CommonISC
       # TODO: Extract this block into a generic dhcp options helper
       statements = []
       statements << "filename = \\\"#{options[:filename]}\\\";" if options[:filename]
-      statements << bootServer(options[:nextServer])            if options[:nextServer]
+      statements << "next-server = #{bootServer(options[:nextServer])};" if options[:nextServer]
       statements << "option host-name = \\\"#{options[:hostname] || record.name}\\\";"
 
       statements += solaris_options_statements(options)
@@ -175,8 +175,7 @@ module Proxy::DHCP::CommonISC
       statements = []
       if options[:filename] && options[:filename].match(/^ztp.cfg.*/i)
         logger.debug "setting ZTP options"
-        opt150 = ip2hex validate_ip(options[:nextServer])
-        statements << "option option-150 = #{opt150};"
+        statements << "option option-150 = #{bootServer(options[:nextServer])};" if options[:nextServer]
         statements << "option FM_ZTP.config-file-name = \\\"#{options[:filename]}\\\";"
 
         statements.concat(vendor_specific_ztp_statements(options))
@@ -195,22 +194,22 @@ module Proxy::DHCP::CommonISC
       statements
     end
 
-    def bootServer server
+    def bootServer(server)
+      ip2hex(validate_ip(server))
+    rescue
       begin
-        ns = ip2hex validate_ip(server)
-      rescue
-        begin
-          ns = ip2hex Resolv.new.getaddress(server)
-        rescue
-          logger.warn "Failed to resolve IP address for #{server}"
-          ns = "\\\"#{server}\\\""
-        end
+        logger.info "Next-server option not IPv4, trying to resolve '#{server}'"
+        ip2hex(dns_resolv.getaddress(server))
+      rescue Resolv::ResolvError => e
+        logger.warn "Unable to resolve PTR query for '#{server}', will use the hostname"
+        logger.debug "Reason: #{e}"
+        # use hostname as the next-server entry
+        "\\\"#{server}\\\""
       end
-      "next-server = #{ns};"
     end
 
-    def ip2hex ip
-      ip.split(".").map{|i| "%02x" % i }.join(":")
+    def ip2hex(ip)
+      ip.to_s.split(".").map{|i| "%02x" % i }.join(":")
     end
   end
 end

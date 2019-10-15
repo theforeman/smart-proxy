@@ -29,7 +29,7 @@ class DhcpIscApiFeaturesTest < Test::Unit::TestCase
       mod = response['dhcp']
       refute_nil(mod)
       assert_equal('running', mod['state'], Proxy::LogBuffer::Buffer.instance.info[:failed_modules][:dhcp])
-      assert_equal([], mod['capabilities'])
+      assert_equal(["dhcp_filename_hostname", "dhcp_filename_ipv4"], mod['capabilities'])
 
       expected_settings = {'use_provider' => 'dhcp_isc'}
       assert_equal(expected_settings, mod['settings'])
