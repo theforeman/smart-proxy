@@ -16,13 +16,23 @@ module Proxy::DHCP::CommonISC
 
     def del_record(record)
       validate_record record
-      raise InvalidRecord, "#{record} is static - unable to delete" unless record.deleteable?
 
-      om_connect
-      omcmd "set hardware-address = #{record.mac}"
-      omcmd "open"
-      omcmd "remove"
-      om_disconnect("Removed DHCP reservation for #{record.name} => #{record}")
+      if record.is_a?(Proxy::DHCP::Lease)
+        logger.debug filter_log "Trying to remove lease - #{record.class}"
+        om_connect "lease"
+        omcmd "set hardware-address = #{record.mac}"
+        omcmd "open"
+        omcmd "set ends = 00:00:00:00"
+        omcmd "update"
+        om_disconnect("Removed DHCP lease for #{record.name} => #{record}")
+      else
+        logger.debug filter_log "Trying to remove host reservation - #{record.class}"
+        om_connect "host"
+        omcmd "set hardware-address = #{record.mac}"
+        omcmd "open"
+        omcmd "remove"
+        om_disconnect("Removed DHCP reservation for #{record.name} => #{record}")
+      end
     end
 
     def add_record options = {}
@@ -60,12 +70,12 @@ module Proxy::DHCP::CommonISC
       @om = IO.popen("/bin/sh -c '#{om_binary} 2>&1'", "r+")
     end
 
-    def om_connect
+    def om_connect(obj_type = "host")
       omcmd("key #{@key_name} \"#{@key_secret}\"", true) if @key_name && @key_secret
       omcmd "server #{name}"
       omcmd "port #{@omapi_port}"
       omcmd "connect"
-      omcmd "new host"
+      omcmd "new #{obj_type}"
     end
 
     def omcmd(command, filter_key = false)
