@@ -69,7 +69,7 @@ class TftpTest < Test::Unit::TestCase
         :tftp_dns_timeout => tftp_dns_timeout
     )
 
-    ::Proxy::HttpDownload.expects(:new).returns(stub(:start)).
+    ::Proxy::HttpDownload.expects(:new).returns(stub('tftp', :start => true)).
       with(src, dst, tftp_read_timeout, tftp_connect_timeout, tftp_dns_timeout)
 
     Proxy::TFTP.choose_protocol_and_fetch src, dst
@@ -84,7 +84,7 @@ class TftpTest < Test::Unit::TestCase
 
     Proxy::TFTP::Plugin.load_test_settings(:tftp_read_timeout => tftp_read_timeout)
 
-    ::Proxy::HttpDownload.expects(:new).returns(stub(:start)).
+    ::Proxy::HttpDownload.expects(:new).returns(stub('tftp', :start => true)).
       with(src, dst, tftp_read_timeout, tftp_connect_timeout, tftp_dns_timeout)
 
     Proxy::TFTP.choose_protocol_and_fetch src, dst

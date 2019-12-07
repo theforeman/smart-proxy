@@ -14,7 +14,7 @@ ENV['RACK_ENV'] = 'test'
 ENV['TMPDIR'] = 'test/tmp'
 FileUtils.rm_f Dir.glob 'test/tmp/*.tmp'
 
-require "mocha/setup"
+require "mocha/test_unit"
 require "rack/test"
 require 'timeout'
 require 'webmock/test_unit'
