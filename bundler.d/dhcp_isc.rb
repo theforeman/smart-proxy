@@ -1,5 +1,5 @@
 group :dhcp_isc_inotify do
-  gem 'rsec'
+  gem 'rsec', '< 1'
   if RUBY_VERSION < '2.2'
     gem 'rb-inotify', '< 0.10'
   else
@@ -8,6 +8,6 @@ group :dhcp_isc_inotify do
 end
 
 group :dhcp_isc_kqueue do
-  gem 'rsec'
+  gem 'rsec', '< 1'
   gem 'rb-kqueue'
 end
