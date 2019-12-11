@@ -79,6 +79,7 @@ module Proxy
 
     def initialize(app)
       @app = app
+      @max_body_size = ENV['FOREMAN_LOG_MAX_BODY_SIZE'] || 2000
     end
 
     def call(env)
@@ -90,7 +91,11 @@ module Proxy
       logger.trace do
         if env['rack.input'] && !(body = env['rack.input'].read).empty?
           env['rack.input'].rewind
-          "Body: #{body}"
+          if env['CONTENT_TYPE'] = 'application/json' && body.size < @max_body_size
+            "Body: #{body}"
+          else
+            "Body: [unknown content type or body too large - filtered out]"
+          end
         else
           ''
         end
