@@ -29,9 +29,6 @@ Metrics:
 Lint/AmbiguousRegexpLiteral:
   Enabled: false
 
-Lint/AssignmentInCondition:
-  Enabled: false
-
 Security/Eval:
   Enabled: false
 
