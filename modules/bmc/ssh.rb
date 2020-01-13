@@ -18,7 +18,7 @@ module Proxy
 
       # call remote command and return bool
       def ssh(command)
-        unless ssh_binary = which('ssh')
+        unless (ssh_binary = which('ssh'))
           logger.warn 'Unable to locate ssh binary'
           return false
         end

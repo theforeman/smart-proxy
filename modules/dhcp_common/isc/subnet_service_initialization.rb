@@ -33,7 +33,7 @@ module Proxy::DHCP::CommonISC
           end
           reservation_to_add = to_reservation(record)
           next if reservation_to_add.nil?
-          if dupe = service.find_host_by_mac(reservation_to_add.subnet_address, reservation_to_add.mac)
+          if (dupe = service.find_host_by_mac(reservation_to_add.subnet_address, reservation_to_add.mac))
             service.delete_host(dupe)
           end
           service.add_host(reservation_to_add.subnet_address, reservation_to_add)
@@ -47,10 +47,10 @@ module Proxy::DHCP::CommonISC
             next
           end
 
-          if dupe = service.find_lease_by_mac(lease.subnet_address, lease.mac)
+          if (dupe = service.find_lease_by_mac(lease.subnet_address, lease.mac))
             service.delete_lease(dupe)
           end
-          if dupe = service.find_lease_by_ip(lease.subnet_address, lease.ip)
+          if (dupe = service.find_lease_by_ip(lease.subnet_address, lease.ip))
             service.delete_lease(dupe)
           end
 
