@@ -91,7 +91,7 @@ module Proxy
       logger.trace do
         if env['rack.input'] && !(body = env['rack.input'].read).empty?
           env['rack.input'].rewind
-          if env['CONTENT_TYPE'] = 'application/json' && body.size < @max_body_size
+          if env['CONTENT_TYPE'] == 'application/json' && body.size < @max_body_size
             "Body: #{body}"
           else
             "Body: [unknown content type or body too large - filtered out]"
