@@ -1,3 +1,199 @@
+2020-02-18	Tomer Brisker <tbrisker@gmail.com>
+	* Release 2.0.0-rc1
+
+2020-01-25	Michael Moll <kvedulv@kvedulv.de>
+	* Fixes #28742 - Enable Lint/AssignmentInCondition cop
+
+2020-01-13	Lukas Zapletal <lzap+git@redhat.com>
+	* Fixes #28741 - content type true class fix
+
+2020-01-06	Tomer Brisker <tbrisker@gmail.com>
+	* bump version to 2.0.0-develop
+
+2019-12-13	Michael Moll <kvedulv@kvedulv.de>
+	* Refs #28482 - pin rsec
+
+2019-12-11	Lukáš Zapletal <lzap+git@redhat.com>
+	* Fixes #27789 - skip debug logging of large bodies (#681)
+
+2019-12-07	Michael Moll <kvedulv@kvedulv.de>
+	* Fixes #28426 - update mocha to 1.10
+
+2019-12-06	Michael Moll <kvedulv@kvedulv.de>
+	* Refs #28426 - pin mocha
+
+2019-12-04	Ewoud Kohl van Wijngaarden <ewoud@kohlvanwijngaarden.nl>
+	* Fixes #27693 - Port facts to the DefaultModuleLoader
+
+2019-11-29	Ewoud Kohl van Wijngaarden <ewoud@kohlvanwijngaarden.nl>
+	* Refs #26591 - Drop unused ResourceTypeApiv3
+
+2019-10-28	Tomer Brisker <tbrisker@gmail.com>
+	* bump version to 1.25-develop
+
+2019-10-15	Lukáš Zapletal <lzap+git@redhat.com>
+	* Fixes #27896 - DHCP providers filename option as hostname (#682)
+
+2019-10-14	Lukas Zapletal <lzap+git@redhat.com>
+	* Fixes #27993 - remove CBC ciphers
+
+2019-09-20	Lukas Zapletal <lzap+git@redhat.com>
+	* Fixes #27032 - improve logging and timeout
+
+2019-08-30	Ewoud Kohl van Wijngaarden <ewoud@kohlvanwijngaarden.nl>
+	* Refs #27654 - Account for module enabled over http or not
+	* Refs #27654 - Move HTTP(S) enabled logic to plugin settings
+
+2019-08-23	Lukas Zapletal <lzap+git@redhat.com>
+	* Fixes #27692 - ping optional for unused_ip call
+
+2019-08-19	Lukas Zapletal <lzap+git@redhat.com>
+	* Fixes #27654 - expose http(s) port setting
+
+2019-08-19	Nathan Dietsch <njd@ndietsch.com>
+	* fixes #27649 - Anonymise server references
+
+2019-08-17	Lukas Zapletal <lzap+git@redhat.com>
+	* Fixes #26785 - improved exception handling
+
+2019-08-14	Lukas Zapletal <lzap+git@redhat.com>
+	* Fixes #27509 - logging reopen USR1 handler fixed
+
+2019-08-13	Lukas Zapletal <lzap+git@redhat.com>
+	* Fixes #27557 - support EUI-48, 64 and InfiniBand MACs
+
+2019-08-09	Pablo Hess <phess@redhat.com>
+	* Fixes #27218: revamps regex for finding realm name
+
+2019-08-08	Lukas Zapletal <lzap+git@redhat.com>
+	* Fixes #27550 - grub2 native config files
+
+2019-07-30	Tomer Brisker <tbrisker@gmail.com>
+	* bump version to 1.24-develop
+
+2019-07-19	Lukas Zapletal <lzap+git@redhat.com>
+	* Fixes #27351 - don't use rolling appender by default
+
+2019-07-16	Evgeni Golov <evgeni@golov.de>
+	* Refs #26591 - don't try to load puppet_proxy_legacy anymore
+
+2019-07-15	Ewoud Kohl van Wijngaarden <ewoud@kohlvanwijngaarden.nl>
+	* Fixes #26591 - Remove puppet_proxy_legacy (Puppet 3)
+	* Refs #26591 - Stub Rubyipmi.is_provider_installed?
+	* Refs #26591 - Optimize Proxy::Bmc.installed?
+	* Refs #26591 - Improve BMC logging output
+
+2019-06-20	Michael Moll <kvedulv@kvedulv.de>
+	* Fixes #26742 - use Ruby 2.0 compatible gem versions
+
+2019-06-18	Timo Goebel <mail@timogoebel.name>
+	* fixes #24885 - proxy cloud init templates
+
+2019-06-14	Ewoud Kohl van Wijngaarden <ewoud@kohlvanwijngaarden.nl>
+	* Fixes #27048 - Deprecate methods to get DNS records
+	* Fixes #27047 - Remove dns_find and clean up ptr_record_conflicts
+	* Refs #26979 - Remove old platforms
+	* Refs #26979 - Require at least rack 1.3
+	* Refs #26979 - Remove left over require
+
+2019-06-13	Ewoud Kohl van Wijngaarden <ewoud@kohlvanwijngaarden.nl>
+	* Fixes #26979 - Remove Ruby 1.x compatibility code
+
+2019-06-13	Lukas Zapletal <lzap+git@redhat.com>
+	* Fixes #26962 - put session id into mdc too
+
+2019-05-21	Ewoud Kohl van Wijngaarden <ewoud@kohlvanwijngaarden.nl>
+	* Fixes #26823 - NotPresent exception in PuppetcaPuppetCert (#652)
+
+2019-05-19	Ewoud Kohl van Wijngaarden <ewoud@kohlvanwijngaarden.nl>
+	* Refs #26642 - Correct path logging
+
+2019-05-04	Lukas Zapletal <lzap+git@redhat.com>
+	* Fixes #26642 - logging post data fix
+	* Fixes #26680 - improved omshell logging
+
+2019-04-18	Tomer Brisker <tbrisker@gmail.com>
+	* Bump version to 1.23-develop
+
+2019-04-11	Ewoud Kohl van Wijngaarden <ewoud@kohlvanwijngaarden.nl>
+	* Refs #25065 - Move puppetca_cert migration
+
+2019-03-27	Alexander Fisher <alex@linfratech.co.uk>
+	* fixes #26458 - Fix expired certificate logic
+
+2019-03-13	Ewoud Kohl van Wijngaarden <ewoud@kohlvanwijngaarden.nl>
+	* Fixes #26322 - Expose the puppet URL settings
+	* Refs #25614 - Expose settings from the correct layer
+	* Refs #25614 - Always expose the provider setting
+	* Refs #25614 - Add integration tests for capabilities
+	* Refs #25614 - Fix typo in a comment
+
+2019-03-13	Lukas Zapletal <lzap+git@redhat.com>
+	* Fixes #26329 - TFTP not needed active for HTTPBoot
+
+2019-03-08	Lukas Zapletal <lzap+git@redhat.com>
+	* Refs #21605 - remove rubocop metrics
+
+2019-03-08	Ivan Nečas <inecas@redhat.com>
+	* Fixes #21605 - more authorization options
+
+2019-02-25	Timo Goebel <mail@timogoebel.name>
+	* fixes #25065 - use puppetca http api
+
+2019-02-07	Lukas Zapletal <lzap+git@redhat.com>
+	* Fixes #25390 - pass post via template API
+
+2019-02-06	Ivan Nečas <inecas@redhat.com>
+	* Fixes #25942 - Fix ::TimeoutError is deprecated message
+
+2019-01-31	Lukas Zapletal <lzap+git@redhat.com>
+	* Fixes #25769 - dhcp conf parser option code fixed
+
+2019-01-31	Justin Sherrill <jlsherrill@gmail.com>
+	* Fixes #25614 - v2/features API with Capabilities and exposed settings
+
+2019-01-30	Ivan Nečas <inecas@redhat.com>
+	* Show rubocop results in STDOUT in jenkins:rubocop
+
+2019-01-29	Lukas Zapletal <lzap+git@redhat.com>
+	* Refs #15095 - improve cache debug logging
+
+2019-01-16	Lukáš Zapletal <lzap@redhat.com>
+	* Fixes #25244 - structured logging of exceptions (#617)
+
+2019-01-15	Lukas Zapletal <lzap+git@redhat.com>
+	* Fixes #25825 - fixed BMC SSH config names
+
+2019-01-14	Tomer Brisker <tbrisker@gmail.com>
+	* Bump version to 1.22-develop
+
+2019-01-10	Lukas Zapletal <lzap+git@redhat.com>
+	* Fixes #25824 - BMC provider nil exception test fixed
+
+2019-01-08	Sven Lueder <mail@svenlueder.de>
+	* Fixes #23353 - included DHCP files default directory
+
+2018-12-19	UXabre <arend.lapere@gmail.com>
+	* Fixes #25432 - Support Huawei VRP
+
+2018-12-15	Michael Moll <kvedulv@kvedulv.de>
+	* Fixes #25370 - Fix Performance/StringReplacement cop
+
+2018-11-30	Adam Price <komidore64@gmail.com>
+	* allow for PUPPET_VERSION to be set
+
+2018-11-08	Lukas Zapletal <lzap+git@redhat.com>
+	* Fixes #25243 - option interface-mtu parsed correctly
+
+2018-11-01	Michael Moll <kvedulv@kvedulv.de>
+	* Fixes #25249 - update Rubocop to 0.50.x
+
+2018-10-23	Lukas Zapletal <lzap+git@redhat.com>
+	* Fixes #25267 - Provide Ruby logger API method formatter
+
+2018-10-17	Tomer Brisker <tbrisker@gmail.com>
+	* Bump version to 1.21-develop
+
 2018-10-16	Lukas Zapletal <lzap+git@redhat.com>
 	* Refs #25100 - do not use Process::CLOCK_MONOTONIC yet
 
