@@ -16,11 +16,7 @@ module ::Proxy::PuppetCa::TokenWhitelisting
     end
 
     def read
-      if RUBY_VERSION < '2.1'
-        YAML.load_file @tokens_file
-      else
-        YAML.safe_load File.read @tokens_file
-      end
+      YAML.safe_load File.read @tokens_file
     end
 
     def write content
