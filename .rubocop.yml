@@ -1,7 +1,10 @@
+require:
+  - rubocop-performance
+
 inherit_from: .rubocop_todo.yml
 
 AllCops:
-  TargetRubyVersion: 2.0
+  TargetRubyVersion: 2.5
 
 # Don't prefer is_a? over kind_of?
 Style/ClassCheck:
@@ -73,7 +76,7 @@ Style/TernaryParentheses:
 Style/InverseMethods:
   Enabled: false
 
-Layout/FirstParameterIndentation:
+Layout/IndentFirstArgument:
   EnforcedStyle: consistent
 
 Bundler/OrderedGems:
