@@ -35,11 +35,6 @@ Layout/CommentIndentation:
 Layout/EmptyLineAfterGuardClause:
   Enabled: false
 
-# Offense count: 1
-# Cop supports --auto-correct.
-Layout/EmptyLineAfterMagicComment:
-  Enabled: false
-
 # Offense count: 32
 # Cop supports --auto-correct.
 # Configuration parameters: AllowAdjacentOneLineDefs, NumberOfEmptyLines.
@@ -406,11 +401,6 @@ Style/EmptyLiteral:
 # Configuration parameters: EnforcedStyle.
 # SupportedStyles: compact, expanded
 Style/EmptyMethod:
-  Enabled: false
-
-# Offense count: 1
-# Cop supports --auto-correct.
-Style/Encoding:
   Enabled: false
 
 # Offense count: 1

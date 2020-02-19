@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 require 'test_helper'
 require 'xmlrpc/client'
 require 'realm_freeipa/provider'
