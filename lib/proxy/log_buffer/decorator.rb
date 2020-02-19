@@ -107,7 +107,7 @@ module Proxy::LogBuffer
       extra_fields = {
         exception_class: exception.class.name,
         exception_message: exception.message,
-        exception_backtrace: backtrace
+        exception_backtrace: backtrace,
       }
       extra_fields[:foreman_code] = exception.code if exception.respond_to?(:code)
       with_fields(extra_fields) do

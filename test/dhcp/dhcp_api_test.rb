@@ -30,7 +30,7 @@ class DhcpApiTest < Test::Unit::TestCase
                                         "range" => ["192.168.123.2", "192.168.123.62"]),
                 Proxy::DHCP::Subnet.new("192.168.124.0", "255.255.255.0",
                                         "routers" => ["192.168.124.1", "192.168.124.2"],
-                                        "domain_name_servers" => ["192.168.123.1", "192.168.122.250"])
+                                        "domain_name_servers" => ["192.168.123.1", "192.168.122.250"]),
     ]
 
     @subnet = @subnets.first
@@ -118,7 +118,7 @@ class DhcpApiTest < Test::Unit::TestCase
     expected = {
       "hostname" =>"test.example.com",
       "ip"       =>"192.168.122.1",
-      "mac"      =>"00:11:bb:cc:dd:ee"
+      "mac"      =>"00:11:bb:cc:dd:ee",
     }
     assert_equal expected, JSON.parse(last_response.body)
   end
@@ -148,7 +148,7 @@ class DhcpApiTest < Test::Unit::TestCase
       "ip"         => "192.168.122.1",
       "mac"        => "00:11:bb:cc:dd:ee",
       "name"       => 'test.example.com',
-      "subnet"     => "192.168.122.0/255.255.255.0"
+      "subnet"     => "192.168.122.0/255.255.255.0",
     }]
     assert_equal expected, JSON.parse(last_response.body)
   end
@@ -168,7 +168,7 @@ class DhcpApiTest < Test::Unit::TestCase
       "starts" => "2014-07-12 10:08:29 UTC",
       "state" => "active",
       "subnet" => "192.168.122.0/255.255.255.0",
-      "type" => "lease"
+      "type" => "lease",
     }]
     assert_equal expected, JSON.parse(last_response.body)
   end
@@ -198,7 +198,7 @@ class DhcpApiTest < Test::Unit::TestCase
       "ip"         =>"192.168.122.1",
       "mac"        =>"00:11:bb:cc:dd:ee",
       "name"       => 'test.example.com',
-      "subnet"     =>"192.168.122.0/255.255.255.0" # NOTE: 'subnet' attribute isn't being used by foreman, which adds a 'network' attribute instead
+      "subnet"     =>"192.168.122.0/255.255.255.0", # NOTE: 'subnet' attribute isn't being used by foreman, which adds a 'network' attribute instead
     }
     assert_equal expected, JSON.parse(last_response.body)
   end
@@ -217,7 +217,7 @@ class DhcpApiTest < Test::Unit::TestCase
       "starts"=>"2015-07-12 10:08:29 UTC",
       "state"=>"active",
       "subnet"=>"192.168.122.0/255.255.255.0",
-      "type"=>"lease"
+      "type"=>"lease",
     }
     assert_equal expected, JSON.parse(last_response.body)
   end
@@ -235,7 +235,7 @@ class DhcpApiTest < Test::Unit::TestCase
       "ip"         =>"192.168.122.1",
       "mac"        =>"00:11:bb:cc:dd:ee",
       "name"       => 'test.example.com',
-      "subnet"     =>"192.168.122.0/255.255.255.0" # NOTE: 'subnet' attribute isn't being used by foreman, which adds a 'network' attribute instead
+      "subnet"     =>"192.168.122.0/255.255.255.0", # NOTE: 'subnet' attribute isn't being used by foreman, which adds a 'network' attribute instead
     }
     assert_equal expected, JSON.parse(last_response.body)
   end

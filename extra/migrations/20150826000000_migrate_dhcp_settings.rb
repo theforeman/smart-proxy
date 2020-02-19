@@ -10,7 +10,7 @@ class MigrateDhcpSettings < ::Proxy::Migration
       :dhcp_key_name => [:dhcp_isc, :key_name],
       :dhcp_key_secret => [:dhcp_isc, :key_secret],
       :dhcp_omapi_port => [:dhcp_isc, :omapi_port],
-      :dhcp_server => [:dhcp, :server]
+      :dhcp_server => [:dhcp, :server],
   }
 
   def remap_parameter(aparameter, avalue)

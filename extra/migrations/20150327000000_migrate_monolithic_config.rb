@@ -48,7 +48,7 @@ class MigrateMonolithicConfig < ::Proxy::Migration
         :sudo_command       => :puppetca,
         :customrun_args     => :puppet,
         :customrun_cmd      => :puppet,
-        :freeipa_remove_dns => :realm
+        :freeipa_remove_dns => :realm,
     }
   end
 

@@ -68,7 +68,7 @@ class SSLClientVerificationIntegrationTest < Test::Unit::TestCase
            settings: {
              ssl_private_key: File.join(fixtures, 'private_keys', 'server.example.com.pem'),
              ssl_certificate: File.join(fixtures, 'certs', 'server.example.com.pem'),
-             ssl_ca_file:     File.join(fixtures, 'certs', 'ca.pem')
+             ssl_ca_file:     File.join(fixtures, 'certs', 'ca.pem'),
            }
   end
 

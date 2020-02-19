@@ -6,9 +6,9 @@ module Proxy::DHCP
     :domain_name           => {:code => 15, :kind => "String"    },
     :PXEClient             => {:code => 60, :kind => "String"    }, # Needs to be empty for foreman to function
     :nextServer            => {:code => 66, :kind => "String"    }, # From where we download the pxeboot image via TFTP
-    :filename              => {:code => 67, :kind => "String"    },  # The pxeboot image
+    :filename              => {:code => 67, :kind => "String"    }, # The pxeboot image
     :ntp_servers           => {:code => 4,  :kind => "String", :is_list => true },
-    :interface_mtu         => {:code => 26, :kind => "String"    }
+    :interface_mtu         => {:code => 26, :kind => "String"    },
   }
 
   SUNW = {
@@ -19,7 +19,7 @@ module Proxy::DHCP
     :install_server_name   => {:code => 11, :kind => "String"    }, # mediahost
     :install_path          => {:code => 12, :kind => "String"    }, # /vol/solgi_5.10/sol10_hw0910
     :sysid_server_path     => {:code => 13, :kind => "String"    }, # 192.168.216.241:/vol/jumpstart/sysidcfg/sysidcfg_primary
-    :jumpstart_server_path => {:code => 14, :kind => "String"    }  # 192.168.216.241:/vol/jumpstart
+    :jumpstart_server_path => {:code => 14, :kind => "String"    }, # 192.168.216.241:/vol/jumpstart
   }
 
   class Error < RuntimeError; end

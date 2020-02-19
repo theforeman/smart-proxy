@@ -242,7 +242,7 @@ EOMULTILNE_SHARED_NETWORK
       Proxy::DHCP::CommonISC::ConfigurationParser::KeyValueNode[:deleted, true],
       Proxy::DHCP::CommonISC::ConfigurationParser::IgnoredDeclaration[['something_ignored']],
       Proxy::DHCP::CommonISC::ConfigurationParser::IgnoredBlock[['u', 'n', 'k', 'n', 'o', 'w', 'n'], []],
-      Proxy::DHCP::CommonISC::ConfigurationParser::HostNode['nested-host', []]
+      Proxy::DHCP::CommonISC::ConfigurationParser::HostNode['nested-host', []],
     ]]], Proxy::DHCP::CommonISC::ConfigurationParser.new.conf.parse!(MULTILINE_SHARED_NETWORK)
   end
 
@@ -288,37 +288,37 @@ EOMULTILINE_POOL
 
   def test_deleted_host_parser
     assert_equal [Proxy::DHCP::CommonISC::ConfigurationParser::HostNode['testing', [
-      Proxy::DHCP::CommonISC::ConfigurationParser::KeyValueNode[:deleted, true]
+      Proxy::DHCP::CommonISC::ConfigurationParser::KeyValueNode[:deleted, true],
     ]]], Proxy::DHCP::CommonISC::ConfigurationParser.new.conf.parse!('host testing { deleted; }')
   end
 
   def test_dynamic_host_parser
     assert_equal [Proxy::DHCP::CommonISC::ConfigurationParser::HostNode['testing', [
-      Proxy::DHCP::CommonISC::ConfigurationParser::KeyValueNode[:dynamic, true]
+      Proxy::DHCP::CommonISC::ConfigurationParser::KeyValueNode[:dynamic, true],
     ]]], Proxy::DHCP::CommonISC::ConfigurationParser.new.conf.parse!('host testing { dynamic; }')
   end
 
   def test_host_parser_with_hardware
     assert_equal [Proxy::DHCP::CommonISC::ConfigurationParser::HostNode['testing', [
-      Proxy::DHCP::CommonISC::ConfigurationParser::HardwareNode['ethernet', '01:02:03:04:05:06']
+      Proxy::DHCP::CommonISC::ConfigurationParser::HardwareNode['ethernet', '01:02:03:04:05:06'],
     ]]], Proxy::DHCP::CommonISC::ConfigurationParser.new.conf.parse!('host testing { hardware ethernet 01:02:03:04:05:06; }')
   end
 
   def test_host_parser_with_fixed_address
     assert_equal [Proxy::DHCP::CommonISC::ConfigurationParser::HostNode['testing', [
-      Proxy::DHCP::CommonISC::ConfigurationParser::KeyValueNode[:fixed_address, '192.168.1.1']
+      Proxy::DHCP::CommonISC::ConfigurationParser::KeyValueNode[:fixed_address, '192.168.1.1'],
     ]]], Proxy::DHCP::CommonISC::ConfigurationParser.new.conf.parse!('host testing { fixed-address 192.168.1.1; }')
   end
 
   def test_host_parser_with_option
     assert_equal [Proxy::DHCP::CommonISC::ConfigurationParser::HostNode['testing', [
-      Proxy::DHCP::CommonISC::ConfigurationParser::OptionNode[false, 'domain-name', [['"testing.test"']]]
+      Proxy::DHCP::CommonISC::ConfigurationParser::OptionNode[false, 'domain-name', [['"testing.test"']]],
     ]]], Proxy::DHCP::CommonISC::ConfigurationParser.new.conf.parse!('host testing { option domain-name "testing.test"; }')
   end
 
   def test_host_parser_with_comment
     assert_equal [Proxy::DHCP::CommonISC::ConfigurationParser::HostNode['testing', [
-      Proxy::DHCP::CommonISC::ConfigurationParser::CommentNode['#a comment']
+      Proxy::DHCP::CommonISC::ConfigurationParser::CommentNode['#a comment'],
     ]]], Proxy::DHCP::CommonISC::ConfigurationParser.new.conf.parse!(%[
       host testing { #a comment
       }
@@ -327,13 +327,13 @@ EOMULTILINE_POOL
 
   def test_host_parser_with_ignored_statement
     assert_equal [Proxy::DHCP::CommonISC::ConfigurationParser::HostNode['testing', [
-      Proxy::DHCP::CommonISC::ConfigurationParser::IgnoredDeclaration[['unknown', 'statement']]
+      Proxy::DHCP::CommonISC::ConfigurationParser::IgnoredDeclaration[['unknown', 'statement']],
     ]]], Proxy::DHCP::CommonISC::ConfigurationParser.new.conf.parse!('host testing { unknown statement; }')
   end
 
   def test_host_parser_with_ignored_block
     assert_equal [Proxy::DHCP::CommonISC::ConfigurationParser::HostNode['testing', [
-      Proxy::DHCP::CommonISC::ConfigurationParser::IgnoredBlock[['u', 'n', 'k', 'n', 'o', 'w', 'n'], []]
+      Proxy::DHCP::CommonISC::ConfigurationParser::IgnoredBlock[['u', 'n', 'k', 'n', 'o', 'w', 'n'], []],
     ]]], Proxy::DHCP::CommonISC::ConfigurationParser.new.conf.parse!('host testing { unknown {} }')
   end
 
@@ -352,7 +352,7 @@ EOMULTILINE_HOST
       Proxy::DHCP::CommonISC::ConfigurationParser::KeyValueNode[:fixed_address, '192.168.1.1'],
       Proxy::DHCP::CommonISC::ConfigurationParser::OptionNode[false, 'domain-name', [['"testing.test"']]],
       Proxy::DHCP::CommonISC::ConfigurationParser::OptionNode[false, 'routers', [['204.254.239.1']]],
-      Proxy::DHCP::CommonISC::ConfigurationParser::OptionNode[false, 'filename', [['"pxelinux.0"']]]
+      Proxy::DHCP::CommonISC::ConfigurationParser::OptionNode[false, 'filename', [['"pxelinux.0"']]],
     ]]], Proxy::DHCP::CommonISC::ConfigurationParser.new.conf.parse!(MULTILINE_HOST)
   end
 
@@ -369,7 +369,7 @@ EOHOST_WITH_MAC64
       Proxy::DHCP::CommonISC::ConfigurationParser::HardwareNode['ethernet', '00:25:96:FF:FE:12:34:56'],
       Proxy::DHCP::CommonISC::ConfigurationParser::KeyValueNode[:fixed_address, '192.168.1.1'],
       Proxy::DHCP::CommonISC::ConfigurationParser::OptionNode[false, 'routers', [['204.254.239.1']]],
-      Proxy::DHCP::CommonISC::ConfigurationParser::OptionNode[false, 'filename', [['"pxelinux.0"']]]
+      Proxy::DHCP::CommonISC::ConfigurationParser::OptionNode[false, 'filename', [['"pxelinux.0"']]],
     ]]], Proxy::DHCP::CommonISC::ConfigurationParser.new.conf.parse!(HOST_WITH_MAC64)
   end
 
@@ -386,7 +386,7 @@ EOHOST_WITH_IBMAC
       Proxy::DHCP::CommonISC::ConfigurationParser::HardwareNode['ethernet', '80:00:02:08:fe:80:00:00:00:00:00:00:00:02:aa:bb:cc:dd:ee:ff'],
       Proxy::DHCP::CommonISC::ConfigurationParser::KeyValueNode[:fixed_address, '192.168.1.1'],
       Proxy::DHCP::CommonISC::ConfigurationParser::OptionNode[false, 'routers', [['204.254.239.1']]],
-      Proxy::DHCP::CommonISC::ConfigurationParser::OptionNode[false, 'filename', [['"pxelinux.0"']]]
+      Proxy::DHCP::CommonISC::ConfigurationParser::OptionNode[false, 'filename', [['"pxelinux.0"']]],
     ]]], Proxy::DHCP::CommonISC::ConfigurationParser.new.conf.parse!(HOST_WITH_IBMAC)
   end
 
@@ -472,7 +472,7 @@ OFMULTILNE_LEASE
       Proxy::DHCP::CommonISC::ConfigurationParser::IgnoredDeclaration[['vendor-class-identifier="MSFT 5.0"']],
       Proxy::DHCP::CommonISC::ConfigurationParser::CommentNode['# a comment'],
       Proxy::DHCP::CommonISC::ConfigurationParser::IgnoredDeclaration[['something_ignored']],
-      Proxy::DHCP::CommonISC::ConfigurationParser::IgnoredBlock[['i', 'g', 'n', 'o', 'r', 'e', 'd'], []]
+      Proxy::DHCP::CommonISC::ConfigurationParser::IgnoredBlock[['i', 'g', 'n', 'o', 'r', 'e', 'd'], []],
     ]]], Proxy::DHCP::CommonISC::ConfigurationParser.new.conf.parse!(MULTILINE_LEASE)
   end
 

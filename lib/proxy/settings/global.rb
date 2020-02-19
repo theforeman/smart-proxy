@@ -18,12 +18,12 @@ module ::Proxy::Settings
       :log_buffer_errors => 1000,
       :ssl_disabled_ciphers => [],
       :tls_disabled_versions => [],
-      :dns_resolv_timeouts => [5, 8, 13] # Ruby default is [5, 20, 40] which is a bit too much for us
+      :dns_resolv_timeouts => [5, 8, 13], # Ruby default is [5, 20, 40] which is a bit too much for us
     }
 
     HOW_TO_NORMALIZE = {
       :foreman_url => lambda { |value| value.end_with?("/") ? value : value + "/" },
-      :bind_host => lambda { |value| value.is_a?(Array) ? value : [value] }
+      :bind_host => lambda { |value| value.is_a?(Array) ? value : [value] },
     }
 
     attr_reader :used_defaults

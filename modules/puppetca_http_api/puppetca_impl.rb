@@ -24,7 +24,7 @@ module ::Proxy::PuppetCa::PuppetcaHttpApi
           'fingerprint' => entry['fingerprint'],
           'serial' => entry['serial_number'],
           'not_before' => entry['not_before'],
-          'not_after' => entry['not_after']
+          'not_after' => entry['not_after'],
         }
       end
     end

@@ -14,7 +14,7 @@ class TemplateProxyRequestTest < Test::Unit::TestCase
     @template_url = 'http://proxy.lan:8443'
     Proxy::Templates::Plugin.settings.stubs(:template_url).returns(@template_url)
     @request_env = {
-      'REMOTE_ADDR' => '1.2.3.4'
+      'REMOTE_ADDR' => '1.2.3.4',
     }
   end
 
@@ -55,7 +55,7 @@ class TemplateProxyRequestTest < Test::Unit::TestCase
             'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
             'Content-Type'=>'application/json',
             'User-Agent'=>'Ruby',
-            'X-Forwarded-For'=>'1.2.3.4, proxy.lan'
+            'X-Forwarded-For'=>'1.2.3.4, proxy.lan',
         }).
       to_return(status: 200, body: "", headers: {})
     Proxy::Templates::TemplateProxyRequest.new.post('built', @request_env, args, @expected_body)

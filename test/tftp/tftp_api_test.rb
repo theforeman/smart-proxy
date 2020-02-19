@@ -16,7 +16,7 @@ class TftpApiTest < Test::Unit::TestCase
     Proxy::TFTP::Plugin.load_test_settings(:tftproot => "/some/root")
     @args = {
       :pxeconfig => "foo",
-      :menu => "bar"
+      :menu => "bar",
     }
   end
 

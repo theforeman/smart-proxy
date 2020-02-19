@@ -17,7 +17,7 @@ class MigratePuppetSettings < ::Proxy::Migration
       :puppetssh_wait => [:puppet_proxy_ssh, :wait],
       :puppetssh_user => [:puppet_proxy_ssh, :user],
       :puppetssh_keyfile => [:puppet_proxy_ssh, :keyfile],
-      :mcollective_user => [:puppet_proxy_mcollective, :user]
+      :mcollective_user => [:puppet_proxy_mcollective, :user],
   }
 
   def migrate
