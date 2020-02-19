@@ -388,7 +388,8 @@ module Proxy::BMC
     def bmc_setup
       # Either use the default provider or allow user to specify provider in request
       provider_type = params['bmc_provider'] || body_parameters['bmc_provider'] || Proxy::BMC::Plugin.settings.bmc_default_provider
-      provider_type.downcase! if provider_type
+      provider_type&.downcase!
+
       # unless the provider is shell find a suitable provider
       unless non_ipmi_providers.include? provider_type
         provider_type = find_ipmi_provider(provider_type)

@@ -32,7 +32,7 @@ module Proxy::DHCP::Pingable
     rescue Timeout::Error => err
       @exception = err
     ensure
-      tcp.close if tcp
+      tcp&.close
     end
 
     bool

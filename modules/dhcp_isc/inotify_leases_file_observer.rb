@@ -44,7 +44,7 @@ module ::Proxy::DHCP::ISC
     end
 
     def stop
-      @notifier.stop unless @notifier.nil?
+      @notifier&.stop
       observer.stop
     end
   end

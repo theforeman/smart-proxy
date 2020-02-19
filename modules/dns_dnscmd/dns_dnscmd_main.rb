@@ -50,7 +50,7 @@ module Proxy::Dns::Dnscmd
       rescue Timeout::Error
         raise Proxy::Dns::Error.new("dnscmd did not respond within #{tsecs} seconds")
       ensure
-        std_in.close  unless std_in.nil?
+        std_in&.close
         std_out.close unless std_in.nil?
         std_err.close unless std_in.nil?
       end
