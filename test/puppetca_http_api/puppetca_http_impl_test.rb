@@ -25,7 +25,6 @@ class PuppetCaHttpImplTest < Test::Unit::TestCase
         }
       ]
     end
-  # rubocop:enable Metrics/LineLength
   end
 
   class FakeCaApiV1Request63 < FakeCaApiV1Request

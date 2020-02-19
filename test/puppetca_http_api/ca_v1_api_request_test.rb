@@ -71,7 +71,6 @@ class CaApiv1RequestTest < Test::Unit::TestCase
         'subject_alt_names' => ['DNS:puppet', 'DNS:puppet.example.com']
       }
     ]
-    # rubocop:enable Metrics/LineLength
 
     assert_equal expected, @client.search
   end
