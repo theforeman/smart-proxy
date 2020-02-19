@@ -85,8 +85,8 @@ class MigrateMonolithicConfig < ::Proxy::Migration
     end
 
     # Rename the port to whichever is correct
-    if output[:settings].keys.include?(:port)
-      if output[:settings].keys.include?(:ssl_certificate)
+    if output[:settings].key?(:port)
+      if output[:settings].key?(:ssl_certificate)
         output[:settings][:https_port] = output[:settings].delete(:port)
       else
         output[:settings][:http_port] = output[:settings].delete(:port)
