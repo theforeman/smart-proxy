@@ -90,9 +90,7 @@ module Proxy::Helpers
       log_halt 403, "unable to resolve hostname for ip address #{ip}\n\n#{e.message}"
     end
 
-    unless forward_verify
-      fqdn
-    else
+    if forward_verify
       begin
         forward = dns.getaddresses(fqdn)
       rescue Resolv::ResolvError => e
@@ -104,6 +102,8 @@ module Proxy::Helpers
       else
         log_halt 403, "untrusted client has no matching forward DNS lookup - #{fqdn} (#{ip})"
       end
+    else
+      fqdn
     end
   end
 
