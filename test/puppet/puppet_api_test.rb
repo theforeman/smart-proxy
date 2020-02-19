@@ -31,7 +31,7 @@ class ApiTestClassesRetriever
       [
         {"classes" => [{"name" => "dns::config", "params" => []}], "path" => "/manifests/config.pp"},
         { "classes" => [{"name" => "dns::install", "params" => []}], "path" => "/manifests/install.pp"},
-        {"error" => "Syntax error at '=>' at /manifests/witherror.pp:20:19", "path" => "/manifests/witherror.pp"}
+        {"error" => "Syntax error at '=>' at /manifests/witherror.pp:20:19", "path" => "/manifests/witherror.pp"},
       ]
   end
 

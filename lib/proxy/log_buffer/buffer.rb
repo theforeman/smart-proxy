@@ -103,7 +103,7 @@ module Proxy::LogBuffer
         :tail_size => size_tail,
         :level => @level,
         :level_tail => @level_tail,
-        :failed_modules => @failed_modules
+        :failed_modules => @failed_modules,
       }
     end
   end

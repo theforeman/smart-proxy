@@ -42,7 +42,7 @@ class MigratePuppetCaSettings < ::Proxy::Migration
     [
       :ssldir,
       :puppetca_use_sudo,
-      :sudo_command
+      :sudo_command,
     ]
   end
 end

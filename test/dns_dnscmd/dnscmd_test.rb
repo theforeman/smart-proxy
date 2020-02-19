@@ -116,7 +116,7 @@ Command completed successfully.'.split("\n")
       "f.e.e.d.8.b.d.0.1.0.0.2.ip6.arpa",
       "bar.domain.local",
       "domain.local",
-      "TrustAnchors"
+      "TrustAnchors",
     ], Proxy::Dns::Dnscmd::Record.new('server', 999).enum_zones
   end
 

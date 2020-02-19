@@ -17,7 +17,7 @@ module Proxy::PuppetCa::TokenWhitelisting
       @csr.attributes.map do |attr|
         {
           oid: attr.oid,
-          value: attr.value.value.first.value
+          value: attr.value.value.first.value,
         }
       end
     end

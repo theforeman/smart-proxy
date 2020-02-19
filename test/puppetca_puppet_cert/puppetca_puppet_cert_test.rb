@@ -112,7 +112,7 @@ OUTPUT
       'Puppet' => {
         :not_after => '2023-06-09T09:30:19UTC',
         :not_before => '2018-06-09T09:30:19UTC',
-        :serial => 1
+        :serial => 1,
       },
       'tfmcentos7.beispiel.xyz' =>
       {
@@ -120,15 +120,15 @@ OUTPUT
         :not_after => '2023-09-12T17:31:00UTC',
         :not_before => '2018-09-12T17:31:00UTC',
         :serial => 4,
-        :state => 'valid'
+        :state => 'valid',
       },
       'tfmdemo.beispiel.xyz' => {
         :fingerprint => 'SHA256',
         :not_after => '2023-06-09T09:30:21UTC',
         :not_before => '2018-06-09T09:30:21UTC',
         :serial => 2,
-        :state => 'valid'
-      }
+        :state => 'valid',
+      },
     }
 
     assert_equal expected, @puppet_cert.list

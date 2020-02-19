@@ -53,7 +53,7 @@ module Proxy
         :Logger => ::Proxy::LogBuffer::TraceDecorator.instance,
         :AccessLog => [],
         :ServerSoftware => "foreman-proxy/#{Proxy::VERSION}",
-        :daemonize => false
+        :daemonize => false,
       }
     end
 
@@ -98,7 +98,7 @@ module Proxy
         :SSLCertificate => load_ssl_certificate(settings.ssl_certificate),
         :SSLCACertificateFile => settings.ssl_ca_file,
         :SSLOptions => ssl_options,
-        :daemonize => false
+        :daemonize => false,
       }
     end
 

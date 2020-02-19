@@ -22,7 +22,7 @@ class MigrateDnsSettings < ::Proxy::Migration
         :dns_server         => [:dns_nsupdate, :dns_nsupdate_gss, :dns_dnscmd],
         :dns_ttl            => [:dns],
         :dns_tsig_keytab    => [:dns_nsupdate_gss],
-        :dns_tsig_principal => [:dns_nsupdate_gss]
+        :dns_tsig_principal => [:dns_nsupdate_gss],
     }
   end
 

@@ -69,7 +69,7 @@ class IscOmapiProviderTest < Test::Unit::TestCase
         "set hardware-address = #{record_to_add.mac}",
         "set hardware-type = 1",
         "set statements = \"filename = \\\"#{record_to_add.options[:filename]}\\\"; next-server = c0:a8:2a:0a; option host-name = \\\"#{record_to_add.hostname}\\\";\"",
-        "create"
+        "create",
       ]
       assert_equal expected_om_output, omio.input_commands
     end
@@ -93,7 +93,7 @@ class IscOmapiProviderTest < Test::Unit::TestCase
     expected_om_output = [
       "set hardware-address = #{record_to_delete.mac}",
       "open",
-      "remove"
+      "remove",
     ]
 
     assert_equal expected_om_output, omio.input_commands
@@ -111,7 +111,7 @@ class IscOmapiProviderTest < Test::Unit::TestCase
       %q{option SUNW.root-server-hostname \"example-server.example.com\";},
       %q{option SUNW.root-server-ip-address 192.168.122.24;},
       %q{option SUNW.sysid-config-file-server \"192.168.122.24:/Solaris/jumpstart/sysidcfg/sysidcfg_primary\";},
-      %q{vendor-option-space SUNW;}
+      %q{vendor-option-space SUNW;},
     ], @dhcp.solaris_options_statements(sparc_attrs).sort
   end
 

@@ -14,7 +14,7 @@ module SparcAttrs
         "<SPARC-Enterprise-T5120>install_server_name"=>"example-server.example.com",
         "<SPARC-Enterprise-T5120>root_server_hostname"=>"example-server.example.com",
         "<SPARC-Enterprise-T5120>root_server_ip"=>"192.168.122.24",
-        "<SPARC-Enterprise-T5120>install_path"=>"/Solaris/install/Solaris_5.10_sparc_hw0811"
+        "<SPARC-Enterprise-T5120>install_path"=>"/Solaris/install/Solaris_5.10_sparc_hw0811",
     }
   end
 end

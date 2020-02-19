@@ -213,7 +213,7 @@ module Proxy::BMC
                 if @bmc.bootdevices.include?(params[:action])
                   { :action => params[:action],
                     :result => @bmc.bootdevice = {:device => params[:action], :reboot => params[:reboot],
-                                                  :persistent => params[:persistent]}
+                                                  :persistent => params[:persistent]},
                   }.to_json
                 else
                   { :error => "#{params[:action]} is not a valid boot device" }.to_json

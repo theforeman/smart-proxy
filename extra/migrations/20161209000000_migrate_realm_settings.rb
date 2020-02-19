@@ -6,7 +6,7 @@ class MigrateRealmSettings < ::Proxy::Migration
       :realm_provider => [:realm, :use_provider],
       :realm_keytab => [:realm_freeipa, :keytab_path],
       :realm_principal => [:realm_freeipa, :principal],
-      :freeipa_remove_dns => [:realm_freeipa, :remove_dns]
+      :freeipa_remove_dns => [:realm_freeipa, :remove_dns],
   }
 
   def migrate

@@ -30,7 +30,7 @@ module Proxy::Puppet
       {
           'json_class' => self.class.name,
           'klass' => klass,
-          'params' => params
+          'params' => params,
       }.to_json(*a)
     end
 
