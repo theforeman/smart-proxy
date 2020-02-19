@@ -173,7 +173,7 @@ module Proxy::DHCP::CommonISC
     # Quirk: Junos ZTP requires special DHCP options
     def ztp_options_statements(options)
       statements = []
-      if options[:filename] && options[:filename].match(/^ztp.cfg.*/i)
+      if options[:filename]&.match(/^ztp.cfg.*/i)
         logger.debug "setting ZTP options"
         statements << "option option-150 = #{bootServer(options[:nextServer])};" if options[:nextServer]
         statements << "option FM_ZTP.config-file-name = \\\"#{options[:filename]}\\\";"
@@ -186,7 +186,7 @@ module Proxy::DHCP::CommonISC
     # Cisco NX-OS POAP requires special DHCP options
     def poap_options_statements(options)
       statements = []
-      if options[:filename] && options[:filename].match(/^poap.cfg.*/i)
+      if options[:filename]&.match(/^poap.cfg.*/i)
         logger.debug "setting POAP options"
         statements << "option tftp-server-name = \\\"#{options[:nextServer]}\\\";"
         statements << "option bootfile-name = \\\"#{options[:filename]}\\\";"

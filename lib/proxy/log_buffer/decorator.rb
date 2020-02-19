@@ -50,7 +50,7 @@ module Proxy::LogBuffer
       end
       info("Logging file reopened via USR1 signal") if reopened
       # exceptions are also sent to structured log if available
-      self.exception("Error details", backtrace) if backtrace && backtrace.is_a?(Exception)
+      self.exception("Error details", backtrace) if backtrace&.is_a?(Exception)
     end
 
     def trace?

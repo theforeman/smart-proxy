@@ -39,7 +39,7 @@ module ::Proxy::DHCP::ISC
     end
 
     def stop
-      @queue.stop unless @queue.nil?
+      @queue&.stop
       observer.stop
     end
   end

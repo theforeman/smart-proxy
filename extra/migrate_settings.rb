@@ -32,7 +32,7 @@ module ::Proxy
       migration_state = File.open(File.join(result_dir_path, "migration_state"), "w")
       migration_state.write((past_migrations + migrations).uniq.join("\n"))
     ensure
-      migration_state.close unless migration_state.nil?
+      migration_state&.close
     end
   end
 

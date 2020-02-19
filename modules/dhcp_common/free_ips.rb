@@ -45,7 +45,7 @@ module Proxy::DHCP
     end
 
     def stop
-      @timer_task.shutdown unless @timer_task.nil?
+      @timer_task&.shutdown
     end
 
     def time_now

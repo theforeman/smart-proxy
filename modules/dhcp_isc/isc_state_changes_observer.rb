@@ -85,7 +85,7 @@ module Proxy::DHCP
 
       def stop
         events.stopped
-        worker.wakeup unless worker.nil?
+        worker&.wakeup
       end
 
       def leases_modified
@@ -162,7 +162,7 @@ module Proxy::DHCP
       end
 
       def close_leases_file
-        @leases_file.close unless @leases_file.nil?
+        @leases_file&.close
         @leases_file = nil
       end
 

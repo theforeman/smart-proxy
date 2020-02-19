@@ -330,12 +330,12 @@ module ::Proxy::DefaultSettingsLoader
   end
 
   def load_programmable_settings(settings)
-    plugin.programmable_settings.load_programmable_settings(settings) unless plugin.programmable_settings.nil?
+    plugin.programmable_settings&.load_programmable_settings(settings)
     settings
   end
 
   def load_classes
-    plugin.class_loader.load_classes unless plugin.class_loader.nil?
+    plugin.class_loader&.load_classes
   end
 
   def validate_settings(plugin, config)
