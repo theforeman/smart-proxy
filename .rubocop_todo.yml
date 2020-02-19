@@ -302,11 +302,6 @@ Naming/RescuedExceptionsVariableName:
 Naming/UncommunicativeMethodParamName:
   Enabled: false
 
-# Offense count: 3
-# Cop supports --auto-correct.
-Performance/InefficientHashSearch:
-  Enabled: false
-
 # Offense count: 29
 # Cop supports --auto-correct.
 Performance/RegexpMatch:

@@ -99,7 +99,7 @@ module Proxy::LogBuffer
     # it logs via warn level, this can be changed via options[:level]
     def exception(context_message, exception, options = {})
       level = options[:level] || :warn
-      unless ::Logging::LEVELS.keys.include?(level.to_s)
+      unless ::Logging::LEVELS.key?(level.to_s)
         raise "Unexpected log level #{level}, expected one of #{::Logging::LEVELS.keys}"
       end
       # send class, message and stack as structured fields in addition to message string
