@@ -210,12 +210,6 @@ Layout/SpaceInsideParens:
 Layout/TrailingBlankLines:
   Enabled: false
 
-# Offense count: 1
-# Cop supports --auto-correct.
-# Configuration parameters: AllowInHeredoc.
-Layout/TrailingWhitespace:
-  Enabled: false
-
 # Offense count: 3
 Lint/AmbiguousBlockAssociation:
   Enabled: false
