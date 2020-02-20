@@ -5,7 +5,6 @@ require 'proxy/log_buffer/ring_buffer'
 # Copyright (c) 2011-2014 Tony Arcieri. Distributed under the MIT License.
 # https://github.com/celluloid/celluloid/blob/0-16-stable/lib/celluloid/logging/ring_buffer.rb
 module Proxy::LogBuffer
-
   LogRecord = Struct.new(:timestamp, :level, :message, :backtrace, :request_id) do
     def to_h
       h = {}
