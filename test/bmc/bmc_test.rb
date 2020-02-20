@@ -240,6 +240,7 @@ class BmcTest < Test::Unit::TestCase
   end
 
   private
+
   attr_reader :bmc
 
 end
