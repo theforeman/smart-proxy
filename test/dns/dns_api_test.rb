@@ -57,7 +57,6 @@ module Proxy::Dns
   end
 end
 
-
 require 'dns/dns_api'
 
 class DnsApiTest < Test::Unit::TestCase

@@ -6,7 +6,6 @@ require 'templates/templates_plugin'
 require 'templates/template_proxy_request'
 require 'webmock/test_unit'
 
-
 class TemplateProxyRequestTest < Test::Unit::TestCase
   def setup
     @foreman_url = 'https://foreman.example.com'
