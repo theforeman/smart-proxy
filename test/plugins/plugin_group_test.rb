@@ -184,6 +184,7 @@ class PluginGroupTest < Test::Unit::TestCase
     def start
       @state = :started
     end
+
     def stop
       @state = :stopped
     end
