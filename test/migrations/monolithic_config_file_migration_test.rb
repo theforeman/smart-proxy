@@ -4,7 +4,6 @@ require File.join(File.dirname(__FILE__),'../../extra/migrate_settings')
 require File.join(File.dirname(__FILE__),'../../extra/migrations/20150327000000_migrate_monolithic_config')
 
 class MonolithicConfigMigrationTest < Test::Unit::TestCase
-
   def setup
     @old_config = YAML.load_file(File.join(File.dirname(__FILE__),'./migration_settings.yml'))
     @output, @unknown = MigrateMonolithicConfig.new("/tmp").migrate_monolithic_config(@old_config)

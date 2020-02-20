@@ -24,5 +24,4 @@ class Proxy::FactsApi < Sinatra::Base
       log_halt 400, e
     end
   end
-
 end

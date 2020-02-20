@@ -28,5 +28,4 @@ class BmcApiShellTest < Test::Unit::TestCase
   private
 
   attr_reader :host, :args
-
 end

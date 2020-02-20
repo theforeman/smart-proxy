@@ -2,7 +2,6 @@ require 'test_helper'
 require 'bmc/ipmi'
 
 class BmcTest < Test::Unit::TestCase
-
   def setup
     @args = { :username => "user", :password => "pass", :bmc_provider => "ipmitool", :host => "host" }
     @bmc  = Proxy::BMC::IPMI.new(@args)
@@ -242,5 +241,4 @@ class BmcTest < Test::Unit::TestCase
   private
 
   attr_reader :bmc
-
 end

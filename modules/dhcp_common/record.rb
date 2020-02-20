@@ -4,7 +4,6 @@ require "proxy/validations"
 module Proxy::DHCP
   # represent a DHCP Record
   class Record
-
     attr_reader :ip, :mac, :subnet, :options, :type
     include Proxy::DHCP
     include Proxy::Log

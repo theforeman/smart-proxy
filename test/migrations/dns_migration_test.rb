@@ -4,7 +4,6 @@ require File.join(File.dirname(__FILE__),'../../extra/migrate_settings')
 require File.join(File.dirname(__FILE__),'../../extra/migrations/20150611000000_migrate_dns_settings')
 
 class ProxyDnsMigrationTest < Test::Unit::TestCase
-
   def setup
     @old_config = YAML.load_file(File.join(File.dirname(__FILE__),'./migration_dns_settings.yml'))
     @migration = MigrateDnsSettings.new("/tmp")

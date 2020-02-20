@@ -67,7 +67,6 @@ module Proxy
         # let's return true and finish the request
         return true
       end
-
     end
   end
 end
