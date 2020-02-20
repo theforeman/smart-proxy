@@ -106,5 +106,4 @@ module Proxy::Helpers
       fqdn
     end
   end
-
 end

@@ -1,5 +1,4 @@
 module Proxy::Validations
-
   MAC_REGEXP_48BIT = /\A([a-f0-9]{1,2}:){5}[a-f0-9]{1,2}\z/i
   MAC_REGEXP_64BIT = /\A([a-f0-9]{1,2}:){19}[a-f0-9]{1,2}\z/i
 
@@ -38,5 +37,4 @@ module Proxy::Validations
     raise Proxy::DHCP::Error, "Invalid Record #{record}" unless record.is_a?(Proxy::DHCP::Record)
     record
   end
-
 end
