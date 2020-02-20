@@ -74,7 +74,6 @@ class DhcpApiTest < Test::Unit::TestCase
     get "/192.168.122.0"
     assert last_response.ok?, "Last response was not ok: #{last_response.status} #{last_response.body}"
 
-
     data = JSON.parse(last_response.body)
     expected_reservations = JSON.parse(@reservations.to_json).to_set
     expected_leases = JSON.parse(@leases.to_json).to_set

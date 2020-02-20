@@ -25,11 +25,6 @@ Layout/EmptyLineAfterGuardClause:
 
 # Offense count: 7
 # Cop supports --auto-correct.
-Layout/EmptyLines:
-  Enabled: false
-
-# Offense count: 7
-# Cop supports --auto-correct.
 Layout/EmptyLinesAroundArguments:
   Enabled: false
 

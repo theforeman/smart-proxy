@@ -7,7 +7,6 @@ require "proxy/util"
 require 'proxy/request'
 require 'webmock/test_unit'
 
-
 class RequestTest < Test::Unit::TestCase
   def setup
     @foreman_url = 'https://foreman.example.com'

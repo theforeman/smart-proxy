@@ -51,7 +51,6 @@ class ModuleLoaderTest < Test::Unit::TestCase
     ::Proxy::DefaultModuleLoader.new(TestPluginWithClassLoader, nil).load_classes
   end
 
-
   class TestPluginWithClassLoaderBlock < ::Proxy::Plugin
     class << self; attr_reader :block_executed; end
     load_classes { @block_executed = true }

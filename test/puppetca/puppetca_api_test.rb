@@ -17,7 +17,6 @@ class TestPuppetcaImpl
   def clean(certname); end
 end
 
-
 module Proxy::PuppetCa
   module DependencyInjection
     include Proxy::DependencyInjection::Accessors

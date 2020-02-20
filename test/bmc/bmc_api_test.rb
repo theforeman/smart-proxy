@@ -11,7 +11,6 @@ ENV['RACK_ENV'] = 'test'
 # instead you must testing something like:
 #     put "/#{host}/chassis/power/on", body, "CONTENT_TYPE" => "application/json"
 
-
 class BmcApiTest < Test::Unit::TestCase
   include Rack::Test::Methods
 
