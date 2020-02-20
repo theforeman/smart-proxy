@@ -69,9 +69,11 @@ module Proxy::TFTP
     def pxeconfig_dir
       "#{path}/pxelinux.cfg"
     end
+
     def pxe_default
       ["#{pxeconfig_dir}/default"]
     end
+
     def pxeconfig_file mac
       ["#{pxeconfig_dir}/01-"+mac.tr(':',"-").downcase]
     end
@@ -82,9 +84,11 @@ module Proxy::TFTP
     def pxeconfig_dir
       "#{path}/grub"
     end
+
     def pxe_default
       ["#{pxeconfig_dir}/menu.lst", "#{pxeconfig_dir}/efidefault"]
     end
+
     def pxeconfig_file mac
       ["#{pxeconfig_dir}/menu.lst.01"+mac.delete(':').upcase, "#{pxeconfig_dir}/01-"+mac.tr(':','-').upcase]
     end
@@ -94,9 +98,11 @@ module Proxy::TFTP
     def pxeconfig_dir
       "#{path}/grub2"
     end
+
     def pxe_default
       ["#{pxeconfig_dir}/grub.cfg"]
     end
+
     def pxeconfig_file mac
       ["#{pxeconfig_dir}/grub.cfg-01-"+mac.tr(':','-').downcase, "#{pxeconfig_dir}/grub.cfg-#{mac.downcase}"]
     end
@@ -106,9 +112,11 @@ module Proxy::TFTP
     def pxeconfig_dir
       "#{path}/ztp.cfg"
     end
+
     def pxe_default
       [pxeconfig_dir]
     end
+
     def pxeconfig_file mac
       ["#{pxeconfig_dir}/"+mac.delete(':').upcase, "#{pxeconfig_dir}/"+mac.delete(':').upcase+".cfg"]
     end
@@ -118,9 +126,11 @@ module Proxy::TFTP
     def pxeconfig_dir
       "#{path}/poap.cfg"
     end
+
     def pxe_default
       [pxeconfig_dir]
     end
+
     def pxeconfig_file mac
       ["#{pxeconfig_dir}/"+mac.delete(':').upcase]
     end
@@ -130,9 +140,11 @@ module Proxy::TFTP
     def pxeconfig_dir
       "#{path}/pxelinux.cfg"
     end
+
     def pxe_default
       ["#{pxeconfig_dir}/default.ipxe"]
     end
+
     def pxeconfig_file mac
       ["#{pxeconfig_dir}/01-"+mac.tr(':',"-").downcase+".ipxe"]
     end

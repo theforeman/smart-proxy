@@ -8,30 +8,39 @@ class DnsApiTestProvider
   def create_a_record(fqdn, ip)
     @fqdn = fqdn; @ip = ip; @type = 'A'
   end
+
   def create_srv_record(fqdn, value)
     @fqdn = fqdn; @ip = value; @type = 'SRV'
   end
+
   def create_aaaa_record(fqdn, ip)
     @fqdn = fqdn; @ip = ip; @type = 'AAAA'
   end
+
   def create_ptr_record(fqdn, ip)
     @fqdn = fqdn; @ip = ip; @type = 'PTR'
   end
+
   def create_cname_record(fqdn, target)
     @fqdn = fqdn; @target = target; @type = 'CNAME'
   end
+
   def remove_a_record(fqdn)
     @fqdn = fqdn; @type = 'A'
   end
+
   def remove_aaaa_record(fqdn)
     @fqdn = fqdn; @type = 'AAAA'
   end
+
   def remove_ptr_record(ip)
     @ip = ip; @type = 'PTR'
   end
+
   def remove_cname_record(fqdn)
     @fqdn = fqdn; @type = 'CNAME'
   end
+
   def remove_srv_record(fqdn)
     @fqdn = fqdn; @type = 'SRV'
   end

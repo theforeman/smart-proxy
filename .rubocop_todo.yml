@@ -23,12 +23,6 @@ Layout/ClosingParenthesisIndentation:
 Layout/EmptyLineAfterGuardClause:
   Enabled: false
 
-# Offense count: 32
-# Cop supports --auto-correct.
-# Configuration parameters: AllowAdjacentOneLineDefs, NumberOfEmptyLines.
-Layout/EmptyLineBetweenDefs:
-  Enabled: false
-
 # Offense count: 7
 # Cop supports --auto-correct.
 Layout/EmptyLines:

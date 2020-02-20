@@ -115,6 +115,7 @@ class ModuleLoaderTest < Test::Unit::TestCase
     def started?
       !!@started
     end
+
     def start
       @started = true
     end
@@ -140,6 +141,7 @@ class ModuleLoaderTest < Test::Unit::TestCase
     def self.called_after_activation_block
       @after_activation_called = true
     end
+
     def self.called_after_activation_block?
       !!@after_activation_called
     end

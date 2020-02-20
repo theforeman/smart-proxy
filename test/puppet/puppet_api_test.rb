@@ -12,6 +12,7 @@ class ApiTestEnvironmentsRetriever < ::Proxy::Puppet::EnvironmentsRetrieverBase
     @first = ::Proxy::Puppet::Environment.new("first", ["path1", "path2"])
     @second = ::Proxy::Puppet::Environment.new("second", ["path3", "path4"])
   end
+
   def all
     [@first, @second]
   end

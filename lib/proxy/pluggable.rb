@@ -105,6 +105,7 @@ module Proxy::Pluggable
     def initialize(a_blk)
       @a_blk = a_blk
     end
+
     def load_classes
       @a_blk.call
     end
@@ -125,6 +126,7 @@ module Proxy::Pluggable
     def initialize(a_blk)
       @a_blk = a_blk
     end
+
     def load_programmable_settings(settings)
       @a_blk.call(settings)
     end
@@ -145,6 +147,7 @@ module Proxy::Pluggable
     def initialize(a_blk)
       @a_blk = a_blk
     end
+
     def load_dependency_injection_wirings(container, settings)
       @a_blk.call(container, settings)
     end
