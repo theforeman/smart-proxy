@@ -204,6 +204,7 @@ module Proxy
       end
 
       protected
+
       attr_reader :host
     end
   end

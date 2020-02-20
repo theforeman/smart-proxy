@@ -62,6 +62,7 @@ module Proxy::HttpRequest
     end
 
     private
+
     def http_init
       http             = Net::HTTP.new(uri.host, uri.port)
       http.use_ssl     = uri.scheme == 'https'

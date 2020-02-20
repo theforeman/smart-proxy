@@ -34,13 +34,6 @@ Layout/EmptyLineBetweenDefs:
 Layout/EmptyLines:
   Enabled: false
 
-# Offense count: 5
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: around, only_before
-Layout/EmptyLinesAroundAccessModifier:
-  Enabled: false
-
 # Offense count: 7
 # Cop supports --auto-correct.
 Layout/EmptyLinesAroundArguments:
