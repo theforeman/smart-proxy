@@ -45,5 +45,4 @@ class RootV2ApiTest < Test::Unit::TestCase
     assert test3
     assert_equal ['d'], test3['capabilities']
   end
-
 end

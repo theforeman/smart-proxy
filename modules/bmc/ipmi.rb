@@ -272,7 +272,6 @@ module Proxy
         return list[sensor] if list.is_a? Hash
         return nil
       end
-
     end
   end
 end

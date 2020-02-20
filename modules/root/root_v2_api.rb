@@ -34,5 +34,4 @@ class Proxy::RootV2Api < Sinatra::Base
     end
     capabilities.flatten.uniq.compact.sort
   end
-
 end

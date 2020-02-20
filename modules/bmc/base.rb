@@ -1,7 +1,6 @@
 module Proxy
   module BMC
     class Base
-
       # This is the base class for bmc control.  Treat this class as an interface
       def initialize(args)
         @host = connect(args)

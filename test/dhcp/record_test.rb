@@ -7,7 +7,6 @@ require 'dhcp_common/record/deleted_reservation'
 require 'dhcp_common/record/lease'
 
 class Proxy::DHCPRecordTest < Test::Unit::TestCase
-
   def setup
     @subnet = Proxy::DHCP::Subnet.new("192.168.0.0","255.255.255.0")
     @ip = "123.321.123.321"

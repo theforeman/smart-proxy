@@ -4,7 +4,6 @@ require File.join(File.dirname(__FILE__),'../../extra/migrate_settings')
 require File.join(File.dirname(__FILE__),'../../extra/migrations/20160411000000_migrate_libvirt_settings')
 
 class ProxyLibvirtMigrationTest < Test::Unit::TestCase
-
   def setup
     @old_config = YAML.load_file(File.join(File.dirname(__FILE__),'./migration_settings.yml'))
     @migration = MigrateVirshToLibvirtConfig.new("/tmp")

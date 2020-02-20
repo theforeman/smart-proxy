@@ -5,7 +5,6 @@ require 'dhcp_common/dhcp_common'
 require 'dhcp_common/server'
 
 class DHCPServerTest < Test::Unit::TestCase
-
   def setup
     @service = Proxy::DHCP::SubnetService.initialized_instance
     @free_ips = Object.new

@@ -81,7 +81,6 @@ require 'puppet_proxy/puppet_api'
 ENV['RACK_ENV'] = 'test'
 
 class PuppetApiTest < Test::Unit::TestCase
-
   include Rack::Test::Methods
 
   def setup

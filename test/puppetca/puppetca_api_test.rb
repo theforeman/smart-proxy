@@ -5,7 +5,6 @@ require 'puppetca/puppetca_plugin'
 ENV['RACK_ENV'] = 'test'
 
 class TestAutosigner
-
 end
 
 class TestPuppetcaImpl

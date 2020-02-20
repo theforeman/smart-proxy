@@ -2,7 +2,6 @@ require 'test_helper'
 require 'set'
 
 class MemoryStoreTest < Test::Unit::TestCase
-
   def setup
     @store = Proxy::MemoryStore.new
   end
