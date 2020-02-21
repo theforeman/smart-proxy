@@ -502,13 +502,6 @@ Style/Semicolon:
 Style/SignalException:
   Enabled: false
 
-# Offense count: 14
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: use_perl_names, use_english_names
-Style/SpecialGlobalVars:
-  Enabled: false
-
 # Offense count: 50
 # Cop supports --auto-correct.
 # Configuration parameters: MinSize.

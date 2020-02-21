@@ -1,5 +1,6 @@
 $LOAD_PATH.unshift(*Dir[File.expand_path("../../modules", __FILE__)])
 
+require 'English'
 require 'optparse'
 require 'dhcp_common/isc/configuration_parser'
 
@@ -29,7 +30,7 @@ rescue OptionParser::MissingArgument, OptionParser::InvalidOption => e
   raise e
 end
 
-if $0 == __FILE__ then
+if $PROGRAM_NAME == __FILE__ then
   begin
     options = parse_cli_options(ARGV)
     parser = ::Proxy::DHCP::CommonISC::ConfigurationParser.new

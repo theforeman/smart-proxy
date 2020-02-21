@@ -1,8 +1,9 @@
+require 'English'
 require "test/unit"
 require 'fileutils'
 
-$: << File.join(File.dirname(__FILE__), '..', 'lib')
-$: << File.join(File.dirname(__FILE__), '..', 'modules')
+$LOAD_PATH << File.join(File.dirname(__FILE__), '..', 'lib')
+$LOAD_PATH << File.join(File.dirname(__FILE__), '..', 'modules')
 
 logdir = File.join(File.dirname(__FILE__), '..', 'logs')
 FileUtils.mkdir_p(logdir) unless File.exist?(logdir)

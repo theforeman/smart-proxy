@@ -1,3 +1,4 @@
+require 'English'
 require 'openssl'
 require 'set'
 
@@ -20,7 +21,7 @@ module ::Proxy::PuppetCa::PuppetcaPuppetCert
       command = "#{@sudo} #{@puppetca} --list --all"
       logger.debug "Executing #{command}"
       response = `#{command}`
-      unless $? == 0
+      unless $CHILD_STATUS == 0
         logger.warn "Failed to run puppetca: #{response}"
         raise "Execution of puppetca failed, check log files"
       end
@@ -141,16 +142,16 @@ module ::Proxy::PuppetCa::PuppetcaPuppetCert
       command = "#{@sudo} #{@puppetca} --#{mode} #{certname}"
       logger.debug "Executing #{command}"
       response = `#{command} 2>&1`
-      if $?.success?
+      if $CHILD_STATUS.success?
         logger.debug "#{mode}ed puppet certificate for #{certname}"
-      elsif response =~ /Could not find client certificate/ || $?.exitstatus == 24
+      elsif response =~ /Could not find client certificate/ || $CHILD_STATUS.exitstatus == 24
         logger.debug "Attempt to remove nonexistent client certificate for #{certname}"
         raise ::Proxy::PuppetCa::NotPresent, "Attempt to remove nonexistent client certificate for #{certname}"
       else
         logger.warn "Failed to run puppetca: #{response}"
         raise "Execution of puppetca failed, check log files"
       end
-      $?.success?
+      $CHILD_STATUS.success?
     end
   end
 end

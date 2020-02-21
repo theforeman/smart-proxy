@@ -1,3 +1,5 @@
+require 'English'
+
 begin
   require "ci/reporter/rake/test_unit"
   namespace :jenkins do
@@ -18,7 +20,7 @@ begin
         --format progress \
         --format RuboCop::Formatter::CheckstyleFormatter \
         --no-color --out rubocop.xml")
-      exit($?.exitstatus)
+      exit($CHILD_STATUS.exitstatus)
     end
   end
 rescue LoadError # rubocop:disable Lint/HandleExceptions
