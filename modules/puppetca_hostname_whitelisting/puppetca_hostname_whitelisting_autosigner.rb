@@ -49,9 +49,7 @@ module ::Proxy::PuppetCa::HostnameWhitelisting
       return [] unless File.exist?(autosign_file)
       File.read(autosign_file).split("\n").reject do |v|
         v =~ /^\s*#.*|^$/ ## Remove comments and empty lines
-      end.map do |v|
-        v.chomp ## Strip trailing spaces
-      end
+      end.map(&:chomp)
     end
   end
 end

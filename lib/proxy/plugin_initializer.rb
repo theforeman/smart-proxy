@@ -68,7 +68,7 @@ class ::Proxy::PluginGroup
   end
 
   def member_names
-    members.map {|m| m.plugin_name }
+    members.map(&:plugin_name)
   end
 
   def printable_module_names(names)
@@ -164,7 +164,7 @@ class ::Proxy::PluginInitializer
     plugins.update(current_state_of_modules(plugins.loaded, grouped_with_providers))
 
     # load main plugin settings, as this may affect which providers will be selected
-    grouped_with_providers.each {|group| group.load_plugin_settings}
+    grouped_with_providers.each(&:load_plugin_settings)
 
     plugins.update(current_state_of_modules(plugins.loaded, grouped_with_providers))
 
@@ -179,12 +179,12 @@ class ::Proxy::PluginInitializer
     end
 
     # load provider plugin settings
-    grouped_with_providers.each {|group| group.load_provider_settings }
+    grouped_with_providers.each(&:load_provider_settings)
 
     plugins.update(current_state_of_modules(plugins.loaded, grouped_with_providers))
 
     # configure each plugin & providers
-    grouped_with_providers.each {|group| group.configure }
+    grouped_with_providers.each(&:configure)
 
     # validate prerequisites again, as some may have been disabled during loading
     all_enabled = all_enabled_plugins_and_providers(grouped_with_providers)
