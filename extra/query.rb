@@ -67,14 +67,14 @@ end
 unless key && cert && ca
   if RUBY_PLATFORM =~ /mingw/
     origin = Pathname.new(__FILE__).dirname.parent.join "config"
-    key    = origin.join "private.pem" unless key
-    cert   = origin.join "signed.pem"  unless cert
-    ca     = origin.join "ca.pem"      unless ca
+    key  ||= origin.join "private.pem"
+    cert ||= origin.join "signed.pem"
+    ca   ||= origin.join "ca.pem"
   else
     hostfile = %x{hostname -f}.chomp + ".pem"
-    key    = "/var/lib/puppet/ssl/private_keys/" + hostfile unless key
-    cert   = "/var/lib/puppet/ssl/certs/" + hostfile        unless cert
-    ca     = "/var/lib/puppet/ssl/certs/ca.pem"             unless ca
+    key  ||= "/var/lib/puppet/ssl/private_keys/" + hostfile
+    cert ||= "/var/lib/puppet/ssl/certs/" + hostfile
+    ca   ||= "/var/lib/puppet/ssl/certs/ca.pem"
   end
 end
 
