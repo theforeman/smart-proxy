@@ -31,12 +31,10 @@ module ::Proxy::PuppetCa::TokenWhitelisting
 
     def lock &block
       File.open(@tokens_file, "r+") do |f|
-        begin
-          f.flock File::LOCK_EX
-          yield
-        ensure
-          f.flock File::LOCK_UN
-        end
+        f.flock File::LOCK_EX
+        yield
+      ensure
+        f.flock File::LOCK_UN
       end
     end
 

@@ -6,11 +6,9 @@ class Proxy::FactsPlugin < ::Proxy::Plugin
   plugin :facts, ::Proxy::VERSION
 
   load_classes do
-    begin
-      require "facter"
-    rescue LoadError => e
-      logger.error "Facter gem was not found"
-      raise e
-    end
+    require "facter"
+  rescue LoadError => e
+    logger.error "Facter gem was not found"
+    raise e
   end
 end

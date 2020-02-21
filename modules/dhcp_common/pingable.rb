@@ -15,19 +15,17 @@ module Proxy::DHCP::Pingable
 
     begin
       Timeout.timeout(@timeout) do
-        begin
-          tcp = TCPSocket.new(ip, @port)
-        rescue Errno::ECONNREFUSED => err
-          if @service_check
-            bool = true
-          else
-            @exception = err
-          end
-        rescue Exception => err
-          @exception = err
-        else
+        tcp = TCPSocket.new(ip, @port)
+      rescue Errno::ECONNREFUSED => err
+        if @service_check
           bool = true
+        else
+          @exception = err
         end
+      rescue Exception => err
+        @exception = err
+      else
+        bool = true
       end
     rescue Timeout::Error => err
       @exception = err

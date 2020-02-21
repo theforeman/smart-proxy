@@ -7,14 +7,12 @@ class Proxy::LogsApi < Sinatra::Base
   authorize_with_ssl_client
 
   get "/" do
-    begin
-      content_type :json
-      buffer = ::Proxy::LogBuffer::Buffer.instance
-      from_timestamp = params[:from_timestamp].to_f rescue 0
-      records = buffer.to_a(from_timestamp).collect(&:to_h)
-      { :info => buffer.info, :logs => records }.to_json
-    rescue => e
-      log_halt 400, e
-    end
+    content_type :json
+    buffer = ::Proxy::LogBuffer::Buffer.instance
+    from_timestamp = params[:from_timestamp].to_f rescue 0
+    records = buffer.to_a(from_timestamp).collect(&:to_h)
+    { :info => buffer.info, :logs => records }.to_json
+  rescue => e
+    log_halt 400, e
   end
 end

@@ -10,12 +10,10 @@ class Proxy::Puppet::Api < ::Sinatra::Base
   inject_attr :puppet_runner_impl, :puppet_runner
 
   post "/run" do
-    begin
-      log_halt 400, "Failed puppet run: No nodes defined" unless params[:nodes]
-      log_halt 500, "Failed puppet run: Check Log files" unless puppet_runner.run([params[:nodes]].flatten)
-    rescue => e
-      log_halt 500, "Failed puppet run: #{e}"
-    end
+    log_halt 400, "Failed puppet run: No nodes defined" unless params[:nodes]
+    log_halt 500, "Failed puppet run: Check Log files" unless puppet_runner.run([params[:nodes]].flatten)
+  rescue => e
+    log_halt 500, "Failed puppet run: #{e}"
   end
 
   get "/environments" do
