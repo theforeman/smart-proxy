@@ -50,11 +50,11 @@ module Proxy::DHCP::Libvirt
       REXML::XPath.each(doc, "//network/ip[not(@family) or @family='ipv4']/dhcp/host") do |e|
         subnet = subnet_service.find_subnet(e.attributes['ip'])
         to_ret << Proxy::DHCP::Reservation.new(
-            e.attributes["name"],
-            e.attributes["ip"],
-            e.attributes["mac"],
-            subnet,
-            :hostname => e.attributes["name"])
+          e.attributes["name"],
+          e.attributes["ip"],
+          e.attributes["mac"],
+          subnet,
+          :hostname => e.attributes["name"])
       end
       to_ret
     rescue Exception => e
@@ -77,13 +77,13 @@ module Proxy::DHCP::Libvirt
       leases.map do |element|
         subnet = subnet_service.find_subnet(element['ipaddr'])
         Proxy::DHCP::Lease.new(
-            nil,
-            element['ipaddr'],
-            element['mac'],
-            subnet,
-            Time.now.utc,
-            Time.at(element['expirytime'] || 0).utc,
-            'active'
+          nil,
+          element['ipaddr'],
+          element['mac'],
+          subnet,
+          Time.now.utc,
+          Time.at(element['expirytime'] || 0).utc,
+          'active'
         )
       end
     end

@@ -88,10 +88,10 @@ end
 puts "#{$0} --verb #{verb} --key #{key} --cert #{cert} --ca #{ca} #{json ? "--json" : ""} --verbose #{url}" if verbose
 
 c = RestClient::Resource.new(
-    url,
-    :ssl_client_cert  =>  OpenSSL::X509::Certificate.new(File.read(cert)),
-    :ssl_client_key   =>  OpenSSL::PKey::RSA.new(File.read(key)),
-    :ssl_ca_file      =>  ca
+  url,
+  :ssl_client_cert  =>  OpenSSL::X509::Certificate.new(File.read(cert)),
+  :ssl_client_key   =>  OpenSSL::PKey::RSA.new(File.read(key)),
+  :ssl_ca_file      =>  ca
   )
 
 begin
