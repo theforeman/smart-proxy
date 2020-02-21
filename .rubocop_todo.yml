@@ -449,11 +449,6 @@ Style/NumericLiteralPrefix:
 Style/NumericPredicate:
   Enabled: false
 
-# Offense count: 6
-# Cop supports --auto-correct.
-Style/OrAssignment:
-  Enabled: false
-
 # Offense count: 18
 # Cop supports --auto-correct.
 # Configuration parameters: PreferredDelimiters.
