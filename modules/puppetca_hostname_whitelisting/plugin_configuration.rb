@@ -5,7 +5,7 @@ module ::Proxy::PuppetCa::HostnameWhitelisting
     end
 
     def load_dependency_injection_wirings(container_instance, settings)
-      container_instance.dependency :autosigner, lambda { ::Proxy::PuppetCa::HostnameWhitelisting::Autosigner.new }
+      container_instance.dependency :autosigner, -> { ::Proxy::PuppetCa::HostnameWhitelisting::Autosigner.new }
     end
   end
 end

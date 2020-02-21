@@ -22,8 +22,8 @@ module Proxy::PuppetCa
     include Proxy::DependencyInjection::Accessors
     def container_instance
       Proxy::DependencyInjection::Container.new do |c|
-        c.dependency :puppetca_impl, lambda { TestPuppetcaImpl.new }
-        c.dependency :autosigner, lambda { TestAutosigner.new }
+        c.dependency :puppetca_impl, -> { TestPuppetcaImpl.new }
+        c.dependency :autosigner, -> { TestAutosigner.new }
       end
     end
   end

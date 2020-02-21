@@ -8,7 +8,7 @@ module Proxy
         end
 
         def load_dependency_injection_wirings(container_instance, settings)
-          container_instance.dependency :puppetca_impl, lambda { ::Proxy::PuppetCa::PuppetcaHttpApi::PuppetcaImpl.new }
+          container_instance.dependency :puppetca_impl, -> { ::Proxy::PuppetCa::PuppetcaHttpApi::PuppetcaImpl.new }
           container_instance.dependency :http_api_impl,
                                         lambda {
                                           ::Proxy::PuppetCa::PuppetcaHttpApi::CaApiv1Request.new(

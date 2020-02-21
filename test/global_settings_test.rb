@@ -12,7 +12,7 @@ class GlobalSettingsTest < Test::Unit::TestCase
   end
 
   def test_normalize_setting
-    how_to = { :test => lambda { |value| value + 1 } }
+    how_to = { :test => ->(value) { value + 1 } }
     assert_equal 2, ::Proxy::Settings::Global.new({}).normalize_setting(:test, 1, how_to)
     assert_equal 3, ::Proxy::Settings::Global.new({}).normalize_setting(:test_2, 3, how_to)
   end

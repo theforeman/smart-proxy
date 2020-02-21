@@ -77,7 +77,7 @@ class ModuleLoaderTest < Test::Unit::TestCase
   end
   class TestPluginWithCustomValidators < ::Proxy::Plugin
     load_validators :testing => TestValidator
-    validate :setting, :testing => {:arg1 => "arg1", :arg2 => "arg2"}, :if => lambda {|settings| settings[:evaluate]}
+    validate :setting, :testing => {:arg1 => "arg1", :arg2 => "arg2"}, :if => ->(settings) { settings[:evaluate]}
   end
   def test_validate_runtime_config_executes_custom_validators
     loader = ::Proxy::DefaultModuleLoader.new(TestPluginWithCustomValidators, nil)

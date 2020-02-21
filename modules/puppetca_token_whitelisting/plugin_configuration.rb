@@ -7,7 +7,7 @@ module ::Proxy::PuppetCa::TokenWhitelisting
     end
 
     def load_dependency_injection_wirings(container_instance, settings)
-      container_instance.dependency :autosigner, lambda { ::Proxy::PuppetCa::TokenWhitelisting::Autosigner.new }
+      container_instance.dependency :autosigner, -> { ::Proxy::PuppetCa::TokenWhitelisting::Autosigner.new }
     end
   end
 end

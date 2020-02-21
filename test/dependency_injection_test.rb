@@ -31,9 +31,9 @@ class TestDependencies
   end
 
   dependency :test_dependency_one, TestDependencyOne
-  dependency :test_dependency_two, lambda { TestDependencyOne.new("a_parameter") }
+  dependency :test_dependency_two, -> { TestDependencyOne.new("a_parameter") }
   singleton_dependency :singleton_dependency, TestDependencyTwo
-  singleton_dependency :singleton_dependency_two, lambda { TestDependencyTwo.new("a_parameter") }
+  singleton_dependency :singleton_dependency_two, -> { TestDependencyTwo.new("a_parameter") }
 end
 
 class TestDependsOne

@@ -7,7 +7,7 @@ module ::Proxy::Dns::NsupdateGSS
 
     def load_dependency_injection_wirings(container_instance, settings)
       container_instance.dependency :dns_provider,
-                                    lambda { ::Proxy::Dns::NsupdateGSS::Record.new(settings[:dns_server], settings[:dns_ttl], settings[:dns_tsig_keytab], settings[:dns_tsig_principal]) }
+                                    -> { ::Proxy::Dns::NsupdateGSS::Record.new(settings[:dns_server], settings[:dns_ttl], settings[:dns_tsig_keytab], settings[:dns_tsig_principal]) }
     end
   end
 end
