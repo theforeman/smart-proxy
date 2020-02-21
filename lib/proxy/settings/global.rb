@@ -22,8 +22,8 @@ module ::Proxy::Settings
     }
 
     HOW_TO_NORMALIZE = {
-      :foreman_url => lambda { |value| value.end_with?("/") ? value : value + "/" },
-      :bind_host => lambda { |value| value.is_a?(Array) ? value : [value] },
+      :foreman_url => ->(value) { value.end_with?("/") ? value : value + "/" },
+      :bind_host => ->(value) { value.is_a?(Array) ? value : [value] },
     }
 
     attr_reader :used_defaults

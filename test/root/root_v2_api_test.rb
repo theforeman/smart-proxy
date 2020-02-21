@@ -25,8 +25,8 @@ class RootV2ApiTest < Test::Unit::TestCase
   end
 
   def test_features
-    proc2 = lambda{ ['a', 'b']}
-    proc3 = lambda{raise "Should not be called"}
+    proc2 = -> { ['a', 'b'] }
+    proc3 = -> { raise "Should not be called" }
     ::Proxy::Plugins.any_instance.expects(:loaded).returns(
       [{:name => :foreman_proxy, :version => "0.0.1", :class => TestPlugin1, :state => :running},
        {:name => :test2, :version => "0.0.1", :class => TestPlugin2, :state => :running, :capabilities => ['c', proc2], :settings => 'foo'},

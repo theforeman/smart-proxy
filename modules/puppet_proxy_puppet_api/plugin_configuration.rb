@@ -20,7 +20,7 @@ module ::Proxy::PuppetApi
 
     def load_dependency_injection_wirings(container_instance, settings)
       container_instance.dependency :environment_retriever_impl,
-                                    lambda {::Proxy::PuppetApi::V3EnvironmentsRetriever.new(settings[:puppet_url], settings[:puppet_ssl_ca], settings[:puppet_ssl_cert], settings[:puppet_ssl_key])}
+                                    -> {::Proxy::PuppetApi::V3EnvironmentsRetriever.new(settings[:puppet_url], settings[:puppet_ssl_ca], settings[:puppet_ssl_cert], settings[:puppet_ssl_key])}
 
       container_instance.singleton_dependency :class_retriever_impl,
                                               (lambda do

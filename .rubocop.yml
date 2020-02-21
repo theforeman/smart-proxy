@@ -44,9 +44,6 @@ Lint/UnusedBlockArgument:
 Lint/UnusedMethodArgument:
   Enabled: false
 
-Style/Lambda:
-  Enabled: false
-
 # enable both hash-rocket and ruby19 hashmap syntax
 Style/HashSyntax:
   Enabled: false
