@@ -247,11 +247,6 @@ Naming/RescuedExceptionsVariableName:
 Naming/UncommunicativeMethodParamName:
   Enabled: false
 
-# Offense count: 29
-# Cop supports --auto-correct.
-Performance/RegexpMatch:
-  Enabled: false
-
 # Offense count: 11
 # Cop supports --auto-correct.
 # Configuration parameters: AutoCorrect.
@@ -442,13 +437,6 @@ Style/Not:
 Style/NumericLiteralPrefix:
   Enabled: false
 
-# Offense count: 9
-# Cop supports --auto-correct.
-# Configuration parameters: AutoCorrect, EnforcedStyle, IgnoredMethods.
-# SupportedStyles: predicate, comparison
-Style/NumericPredicate:
-  Enabled: false
-
 # Offense count: 18
 # Cop supports --auto-correct.
 # Configuration parameters: PreferredDelimiters.
@@ -458,13 +446,6 @@ Style/PercentLiteralDelimiters:
 # Offense count: 10
 # Cop supports --auto-correct.
 Style/PerlBackrefs:
-  Enabled: false
-
-# Offense count: 15
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: short, verbose
-Style/PreferredHashMethods:
   Enabled: false
 
 # Offense count: 66

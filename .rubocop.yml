@@ -118,3 +118,15 @@ Style/TrailingCommaInArrayLiteral:
 
 Style/TrailingCommaInHashLiteral:
   EnforcedStyleForMultiline: comma
+
+Performance/RegexpMatch:
+  Enabled: false
+
+Style/MultipleComparison:
+  Enabled: false
+
+Style/NumericPredicate:
+  Enabled: false
+
+Style/PreferredHashMethods:
+  Enabled: false
