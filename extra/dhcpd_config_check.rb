@@ -29,7 +29,7 @@ rescue OptionParser::MissingArgument, OptionParser::InvalidOption => e
   raise e
 end
 
-if __FILE__ == $0 then
+if $0 == __FILE__ then
   begin
     options = parse_cli_options(ARGV)
     parser = ::Proxy::DHCP::CommonISC::ConfigurationParser.new

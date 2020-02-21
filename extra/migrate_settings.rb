@@ -250,7 +250,7 @@ def module_configuration_dir(main_config_file)
   main_config_file[:settings_directory] || Pathname.new(__FILE__).join("..", "..", "config", "settings.d").expand_path.to_s
 end
 
-if __FILE__ == $0 then
+if $0 == __FILE__ then
   options = parse_cli_options(ARGV)
 
   config_src_path = options[:cfg_path]
