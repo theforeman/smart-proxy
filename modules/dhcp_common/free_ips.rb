@@ -55,7 +55,7 @@ module Proxy::DHCP
     def find_free_ip(from_address, to_address, records)
       start_address_i, num_of_addresses = address_range_with_start_and_end(from_address, to_address)
 
-      record_ips = Set.new(records.collect{|record| record.ip})
+      record_ips = Set.new(records.collect(&:ip))
       random_index(num_of_addresses + 1) do |i|
         possible_ip = ::Proxy::DHCP.i_to_ipv4(start_address_i + i)
         next if @m.synchronize do

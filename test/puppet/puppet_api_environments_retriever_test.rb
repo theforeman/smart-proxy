@@ -21,7 +21,7 @@ class PuppetApiV3EnvironmentsRetrieverTest < Test::Unit::TestCase
     @api.find_environments_response = JSON.load(File.read(File.expand_path('../fixtures/environments_api.json', __FILE__)))
 
     envs = @retriever.all
-    assert_equal Set.new(['production', 'example_env', 'development', 'common']), Set.new(envs.map { |e| e.name })
+    assert_equal Set.new(['production', 'example_env', 'development', 'common']), Set.new(envs.map(&:name))
 
     expected = Set.new(['production', 'example_env', 'development', 'common'].map do |e|
       Set.new(["/etc/puppet/environments/#{e}/modules", "/etc/puppet/modules", "/usr/share/puppet/modules"])

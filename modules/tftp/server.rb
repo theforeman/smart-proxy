@@ -46,7 +46,7 @@ module Proxy::TFTP
 
     def read_file(file)
       raise("File #{file} not found") unless File.exist?(file)
-      File.open(file, 'r') {|f| f.readlines }
+      File.open(file, 'r', &:readlines)
     end
 
     def write_file(file, contents)

@@ -44,9 +44,6 @@ Lint/UnusedBlockArgument:
 Lint/UnusedMethodArgument:
   Enabled: false
 
-Style/SymbolProc:
-  Enabled: false
-
 Style/Lambda:
   Enabled: false
 
