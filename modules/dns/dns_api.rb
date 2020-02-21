@@ -86,7 +86,7 @@ module Proxy::Dns
         (0..65_535).cover?(Integer(priority)) &&
         (0..65_535).cover?(Integer(weight)) &&
         (1..65_535).cover?(Integer(port))
-          raise
+        raise
       end
     rescue ArgumentError, RuntimeError # if any of the three tests on integer above fails or the condition was not met
       raise Proxy::Dns::Error.new("Invalid DNS SRV value #{value}")

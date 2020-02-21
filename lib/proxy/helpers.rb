@@ -41,7 +41,7 @@ module Proxy::Helpers
         log_halt 403, 'could not read CN from the client certificate'
       end
     rescue OpenSSL::X509::CertificateError => e
-        log_halt 403, "could not parse the client certificate\n\n#{e.message}"
+      log_halt 403, "could not parse the client certificate\n\n#{e.message}"
     end
   end
 
@@ -69,13 +69,13 @@ module Proxy::Helpers
   end
 
   def dns_resolv(*args)
-      resolv = Resolv::DNS.new(*args)
+    resolv = Resolv::DNS.new(*args)
       resolv.timeouts = Proxy::SETTINGS.dns_resolv_timeouts
       ::Proxy::LoggingResolv.new(resolv)
   end
 
   def resolv(*args)
-      ::Proxy::LoggingResolv.new(Resolv.new(*args))
+    ::Proxy::LoggingResolv.new(Resolv.new(*args))
   end
 
   # reverse lookup an IP address while verifying it via forward resolv

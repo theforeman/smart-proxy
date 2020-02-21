@@ -412,7 +412,7 @@ module Proxy
         end
 
         def literal_to_filename(a_literal)
-           a_literal[1..-2]
+          a_literal[1..-2]
         end
 
         def conf(config_basedir = nil)

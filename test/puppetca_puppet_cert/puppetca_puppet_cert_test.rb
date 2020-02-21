@@ -54,18 +54,18 @@ Ldr9eKhzX/iwBRnlcwxVCLSUEP+46oGi8hawrhEUnPxPtftMjPVFTQ==
 -----END X509 CRL-----
 EOF
 
- PUPPET_CERT_LIST_OUTPUT = <<OUTPUT
+  PUPPET_CERT_LIST_OUTPUT = <<OUTPUT
 + "tfmcentos7.beispiel.xyz" (SHA256) B1:7C:A8:EC:2A:37:E6:2D:A6:55:B9:00:DE:2B:36:6B:E1:F0:BA:49:42:91:3D:60:4B:42:81:6F:5E:18:78:C8
 + "tfmdemo.beispiel.xyz"    (SHA256) 79:E3:98:2C:FF:53:74:02:6F:96:6D:61:05:85:1A:5F:C6:FB:67:AF:A6:05:24:FA:16:42:21:14:46:86:AC:AF (alt names: "DNS:puppet", "DNS:puppet.beispiel.xyz", "DNS:tfmdemo.beispiel.xyz")
 OUTPUT
 
-PUPPET_CERT_CLEAN_OUTPUT = <<OUTPUT
+  PUPPET_CERT_CLEAN_OUTPUT = <<OUTPUT
 Notice: Revoked certificate with serial 4
 Notice: Removing file Puppet::SSL::Certificate tfmcentos7.beispiel.xyz at '/etc/puppetlabs/puppet/ssl/ca/signed/tfmcentos7.beispiel.xyz.pem'
 Notice: Removing file Puppet::SSL::Certificate tfmcentos7.beispiel.xyz at '/etc/puppetlabs/puppet/ssl/certs/tfmcentos7.beispiel.xyz.pem'
 OUTPUT
 
-PUPPET_CERT_SIGN_OUTPUT = <<OUTPUT
+  PUPPET_CERT_SIGN_OUTPUT = <<OUTPUT
 Signing Certificate Request for:
   "tfmcentos7.beispiel.xyz" (SHA256) 23:B0:F0:83:72:ED:69:8A:E1:06:83:0E:A6:DE:0B:5D:83:0B:58:3B:AB:EE:82:F1:30:1B:39:19:84:5B:4B:10 **
 Notice: Signed certificate request for tfmcentos7.beispiel.xyz
@@ -73,7 +73,7 @@ Notice: Removing file Puppet::SSL::CertificateRequest tfmcentos7.beispiel.xyz at
 OUTPUT
 
   def test_revoked_serials
-   assert_equal Set.new([2, 4]), @puppet_cert.revoked_serials(CRL_CONTENTS)
+    assert_equal Set.new([2, 4]), @puppet_cert.revoked_serials(CRL_CONTENTS)
   end
 
   def test_compute_ca_inventory

@@ -63,7 +63,7 @@ class Proxy::DHCPSubnetTest < Test::Unit::TestCase
   end
 
   def test_should_provide_range_excluding_broadcast_address
-   assert_equal "192.168.0.254", @subnet.subnet_range_addresses[1]
+    assert_equal "192.168.0.254", @subnet.subnet_range_addresses[1]
   end
 
   def test_range

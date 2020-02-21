@@ -1,8 +1,8 @@
 desc "Send patch information to the foreman-dev list"
 task :mail_patches do
-    if !Dir.glob("00*.patch").empty?
-        raise "Patches already exist matching '00*.patch'; clean up first"
-    end
+  if !Dir.glob("00*.patch").empty?
+    raise "Patches already exist matching '00*.patch'; clean up first"
+  end
 
     # Create all of the patches
     sh "git format-patch -C -M -s -n --subject-prefix='PATCH/smart-proxy' origin/develop"
