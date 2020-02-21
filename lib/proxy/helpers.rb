@@ -70,8 +70,8 @@ module Proxy::Helpers
 
   def dns_resolv(*args)
     resolv = Resolv::DNS.new(*args)
-      resolv.timeouts = Proxy::SETTINGS.dns_resolv_timeouts
-      ::Proxy::LoggingResolv.new(resolv)
+    resolv.timeouts = Proxy::SETTINGS.dns_resolv_timeouts
+    ::Proxy::LoggingResolv.new(resolv)
   end
 
   def resolv(*args)
