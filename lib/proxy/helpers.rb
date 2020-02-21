@@ -20,7 +20,7 @@ module Proxy::Helpers
     rescue => e
       exception = e
       message += e.message
-      code = code || 400
+      code ||= 400
     end
     content_type :json if request.accept?("application/json")
     logger.error message, exception
