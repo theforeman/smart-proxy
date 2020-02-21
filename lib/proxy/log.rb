@@ -108,7 +108,7 @@ module Proxy
       logger.info do
         after = time_monotonic
         duration = (after - before) * 1000
-        "Finished #{env["REQUEST_METHOD"]} #{env["REQUEST_PATH"]} with #{status} (#{duration.round(2)} ms)"
+        "Finished #{env['REQUEST_METHOD']} #{env['REQUEST_PATH']} with #{status} (#{duration.round(2)} ms)"
       end
     end
   end

@@ -36,7 +36,7 @@ if __FILE__ == $0 then
     subnets, hosts, _, ignored = parser.subnets_hosts_and_leases(File.read(options[:cfg_path]), options[:cfg_path])
     puts "Subnets: %s" % [subnets.map {|s| "#{s.subnet_address}/#{s.subnet_mask}"}.join(', ')]
     puts "Hosts and leases: %s" % [hosts.map {|h| h.respond_to?(:ip_address) ? "Lease: #{h.ip_address}" : "Host: #{h.name}"}.join(', ')]
-    puts "Didn't recognize: \n%s" % [ignored.map {|i| "#{i.content}, parents: #{i.parents.join(", ")}"}.join("\n")]
+    puts "Didn't recognize: \n%s" % [ignored.map {|i| "#{i.content}, parents: #{i.parents.join(', ')}"}.join("\n")]
   rescue OptionParser::InvalidOption, OptionParser:: MissingArgument, MissingOption
     exit(1)
   rescue RuntimeError => e
