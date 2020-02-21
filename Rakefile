@@ -5,7 +5,6 @@ require 'fileutils'
 require 'tmpdir'
 require File.join(File.dirname(__FILE__),'extra/migrate_settings')
 
-load 'tasks/proxy_tasks.rake'
 load 'tasks/jenkins.rake'
 load 'tasks/pkg.rake'
 load 'tasks/rubocop.rake'
