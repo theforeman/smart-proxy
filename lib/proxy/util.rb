@@ -1,3 +1,4 @@
+require 'English'
 require 'open3'
 require 'shellwords'
 require 'base64'
@@ -33,7 +34,7 @@ module Proxy::Util
             # In Ruby >= 1.9, call thr.value to wait for a Process::Status object.
             status = thr.value unless thr.nil?
           end
-          status ? status.exitstatus : $?
+          status ? status.exitstatus : $CHILD_STATUS
         ensure
           yield if block_given?
         end
@@ -86,8 +87,8 @@ module Proxy::Util
       logger.error "Error when executing '#{cmd}'", e
       return false
     end
-    logger.warn("Non-null exit code when executing '#{cmd}'") if $?.exitstatus != 0
-    $?.exitstatus == 0
+    logger.warn("Non-null exit code when executing '#{cmd}'") if $CHILD_STATUS.exitstatus != 0
+    $CHILD_STATUS.exitstatus == 0
   end
 
   def popen(cmd)
