@@ -258,11 +258,11 @@ module Proxy::DHCP::NativeMS
     def dhcps_option_type_from_sunw_kind(kind)
       case kind
       when "IPAddress"
-       DhcpsApi::DHCP_OPTION_DATA_TYPE::DhcpIpAddressOption
+        DhcpsApi::DHCP_OPTION_DATA_TYPE::DhcpIpAddressOption
       when "String"
-       DhcpsApi::DHCP_OPTION_DATA_TYPE::DhcpStringDataOption
+        DhcpsApi::DHCP_OPTION_DATA_TYPE::DhcpStringDataOption
       else
-       raise "Unknown option type '#{kind}'"
+        raise "Unknown option type '#{kind}'"
       end
     end
 

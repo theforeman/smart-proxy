@@ -39,6 +39,6 @@ class HttpDownloadsTest < Test::Unit::TestCase
     locked = Proxy::FileLock.try_locking(tmp('other'))
     assert_equal false, Proxy::HttpDownload.new('src', locked.path).start
   ensure
-   File.delete(locked.path)
+    File.delete(locked.path)
   end
 end

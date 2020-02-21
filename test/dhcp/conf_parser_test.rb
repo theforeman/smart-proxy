@@ -39,7 +39,7 @@ EOFFQDNLIST
     assert_equal ['ns1.isc.org', 'ns1.isc.org', 'ns1.isc.org'], Proxy::DHCP::CommonISC::ConfigurationParser::FQDN_LIST.parse!(MULTILINE_FQDN_LIST)
   end
 
-MULTILINE_IP_LIST =<<EOFIPLIST
+  MULTILINE_IP_LIST =<<EOFIPLIST
 204.254.239.1,
  204.254.239.2,
   204.254.239.3

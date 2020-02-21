@@ -144,13 +144,13 @@ module Proxy::Dns
     end
 
     def ptr_to_ip ptr
-     if ptr =~ /\.in-addr\.arpa$/
-       ptr.split('.')[0..-3].reverse.join('.')
-     elsif ptr =~ /\.ip6\.arpa$/
-       ptr.split('.')[0..-3].reverse.each_slice(4).inject([]) {|address, word| address << word.join}.join(":")
-     else
-       raise Proxy::Dns::Error.new("Not a PTR address: '#{ptr}'")
-     end
+      if ptr =~ /\.in-addr\.arpa$/
+        ptr.split('.')[0..-3].reverse.join('.')
+      elsif ptr =~ /\.ip6\.arpa$/
+        ptr.split('.')[0..-3].reverse.each_slice(4).inject([]) {|address, word| address << word.join}.join(":")
+      else
+        raise Proxy::Dns::Error.new("Not a PTR address: '#{ptr}'")
+      end
     end
 
     # conflict methods return values:

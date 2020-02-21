@@ -69,7 +69,7 @@ module Proxy::TFTP
 
     # Get the value for next_server
     get "/serverName" do
-       {"serverName" => (Proxy::TFTP::Plugin.settings.tftp_servername || "")}.to_json
+      {"serverName" => (Proxy::TFTP::Plugin.settings.tftp_servername || "")}.to_json
     end
   end
 end
