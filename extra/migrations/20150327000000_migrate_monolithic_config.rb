@@ -93,7 +93,7 @@ class MigrateMonolithicConfig < ::Proxy::Migration
       end
     end
 
-    return output, data
+    [output, data]
   end
 
   def write_to_files(output,unknown)

@@ -489,12 +489,6 @@ Style/RandomWithOffset:
 Style/RedundantBegin:
   Enabled: false
 
-# Offense count: 26
-# Cop supports --auto-correct.
-# Configuration parameters: AllowMultipleReturnValues.
-Style/RedundantReturn:
-  Enabled: false
-
 # Offense count: 9
 # Cop supports --auto-correct.
 Style/RedundantSelf:

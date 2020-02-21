@@ -32,7 +32,7 @@ module Proxy::Dns
         when 1 then
           raise(Proxy::Dns::Collision, "'#{fqdn} 'is already in use")
         when 0 then
-          return nil
+          nil
         else
           do_create(fqdn, ip, "A")
       end
@@ -43,7 +43,7 @@ module Proxy::Dns
         when 1 then
           raise(Proxy::Dns::Collision, "'#{fqdn} 'is already in use")
         when 0 then
-          return nil
+          nil
         else
           do_create(fqdn, ip, "AAAA")
       end
@@ -54,7 +54,7 @@ module Proxy::Dns
         when 1 then
           raise(Proxy::Dns::Collision, "'#{fqdn} 'is already in use")
         when 0 then
-          return nil
+          nil
         else
           do_create(fqdn, target, "CNAME")
       end
@@ -65,7 +65,7 @@ module Proxy::Dns
         when 1 then
           raise(Proxy::Dns::Collision, "'#{ptr}' is already in use")
         when 0
-          return nil
+          nil
         else
           do_create(ptr, fqdn, "PTR")
       end

@@ -93,11 +93,11 @@ module ::Proxy::PuppetCa::PuppetcaPuppetCert
       case str
         when /(\+|\-)\s+["]{0,1}(.*\w)["]{0,1}\s+\((\S+)\)/
           state = $1 == "-" ? "revoked" : "valid"
-          return { $2.strip => { :state => state, :fingerprint => $3 } }
+          { $2.strip => { :state => state, :fingerprint => $3 } }
         when /\s*["]{0,1}(.*\w)["]{0,1}\s+\((\S+)\)/
-          return { $1.strip => { :state => "pending", :fingerprint => $2 } }
+          { $1.strip => { :state => "pending", :fingerprint => $2 } }
         else
-          return {}
+          {}
       end
     end
 

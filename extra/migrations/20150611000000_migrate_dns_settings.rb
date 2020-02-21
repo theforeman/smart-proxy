@@ -43,7 +43,7 @@ class MigrateDnsSettings < ::Proxy::Migration
       end
     end
 
-    return output, data
+    [output, data]
   end
 
   def migrate_dns_provider_name(aname)

@@ -41,7 +41,7 @@ module Proxy::TFTP
     # returns the absolute path
     def path(p = nil)
       p ||= Proxy::TFTP::Plugin.settings.tftproot
-      return (p =~ /^\//) ? p : Pathname.new(File.expand_path(File.dirname(__FILE__))).join(p).to_s
+      (p =~ /^\//) ? p : Pathname.new(File.expand_path(File.dirname(__FILE__))).join(p).to_s
     end
 
     def read_file(file)

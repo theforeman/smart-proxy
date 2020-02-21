@@ -3,12 +3,12 @@ require 'ipaddr'
 class IPAddr
   # Returns a dot-decimal netmask representation
   def to_mask
-    return _to_string(@mask_addr)
+    _to_string(@mask_addr)
   end
 
   # Returns the successor to the ipaddr.
   def succ
-    return self.clone.set(@addr + 1, @family)
+    self.clone.set(@addr + 1, @family)
   end
 
   # Compares the ipaddr with another.
@@ -17,7 +17,7 @@ class IPAddr
 
     return nil if other.family != @family
 
-    return @addr <=> other.to_i
+    @addr <=> other.to_i
   end
   include Comparable
 
@@ -46,6 +46,6 @@ class IPAddr
       raise "unsupported address family"
     end
 
-    return clone.set(begin_addr, @family)..clone.set(end_addr, @family)
+    clone.set(begin_addr, @family)..clone.set(end_addr, @family)
   end
 end

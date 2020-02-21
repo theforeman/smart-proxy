@@ -53,7 +53,7 @@ module Proxy::DHCP
               return false
             end
           end
-          return true
+          true
         end
 
         def pop

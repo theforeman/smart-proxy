@@ -167,9 +167,9 @@ module Proxy
       # return IP source of BMC device
       def ipsrc
         if host.bmc.lan.dhcp?
-          return "dhcp"
+          "dhcp"
         else
-          return "static"
+          "static"
         end
       end
 
@@ -270,7 +270,7 @@ module Proxy
       def sensorget(sensor)
         list = host.sensors.list
         return list[sensor] if list.is_a? Hash
-        return nil
+        nil
       end
     end
   end

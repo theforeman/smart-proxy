@@ -116,7 +116,7 @@ module ::Proxy::PuppetCa::TokenWhitelisting
         return false
       end
       storage.remove token
-      return true
+      true
     end
   end
 end
