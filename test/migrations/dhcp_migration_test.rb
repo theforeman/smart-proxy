@@ -53,9 +53,9 @@ class ProxyDhcpMigrationTest < Test::Unit::TestCase
       migration.create_migration_dirs
 
       migration.write_to_files(
-          :dhcp => {:enabled => true},
-          :dhcp_isc => {:config => 'some/path'},
-          :unknown => {:parameter => 'value'})
+        :dhcp => {:enabled => true},
+        :dhcp_isc => {:config => 'some/path'},
+        :unknown => {:parameter => 'value'})
 
       assert File.exist?(dhcp_config_path = File.join(migration.dst_dir, 'settings.d', 'dhcp.yml'))
       dhcp_contents = File.read(dhcp_config_path)

@@ -126,7 +126,7 @@ class DHCPServerMicrosoftTest < Test::Unit::TestCase
     client_ip = '192.168.42.10'
     @dhcpsapi.expects(:list_subnet_elements).with(@network, anything).returns([{:element => {:reserved_ip_address => client_ip}}])
     @dhcpsapi.expects(:get_client_by_ip_address).with(client_ip).returns(
-        :client_ip_address => client_ip, :subnet_mask => @netmask, :client_hardware_address => '00:01:02:03:04:05', :client_name => 'test', :client_lease_expires => nil
+      :client_ip_address => client_ip, :subnet_mask => @netmask, :client_hardware_address => '00:01:02:03:04:05', :client_name => 'test', :client_lease_expires => nil
     )
     @dhcpsapi.expects(:list_reserved_option_values).with(client_ip, @network).returns(@option_values)
 
@@ -143,7 +143,7 @@ class DHCPServerMicrosoftTest < Test::Unit::TestCase
     lease_expires = Time.now + 120
     @dhcpsapi.expects(:list_subnet_elements).with(@network, anything).returns([{:element => {:reserved_ip_address => '192.168.42.11'}}])
     @dhcpsapi.expects(:get_client_by_ip_address).with(client_ip).returns(
-        :client_ip_address => client_ip, :subnet_mask => @netmask, :client_hardware_address => '00:01:02:03:04:05', :client_name => 'test', :client_lease_expires => lease_expires
+      :client_ip_address => client_ip, :subnet_mask => @netmask, :client_hardware_address => '00:01:02:03:04:05', :client_name => 'test', :client_lease_expires => lease_expires
     )
     @dhcpsapi.expects(:list_subnet_option_values).with(@network).returns(@option_values)
 
@@ -158,7 +158,7 @@ class DHCPServerMicrosoftTest < Test::Unit::TestCase
     client_ip = '192.168.42.10'
     @dhcpsapi.expects(:list_subnet_elements).with(@network, anything).returns([{:element => {:reserved_ip_address => client_ip}}])
     @dhcpsapi.expects(:get_client_by_ip_address).with(client_ip).returns(
-        :client_ip_address => client_ip, :subnet_mask => @netmask, :client_hardware_address => '00:01:02:03:04:05', :client_name => 'test', :client_lease_expires => nil
+      :client_ip_address => client_ip, :subnet_mask => @netmask, :client_hardware_address => '00:01:02:03:04:05', :client_name => 'test', :client_lease_expires => nil
     )
     @dhcpsapi.expects(:list_reserved_option_values).with(client_ip, @network).returns(@option_values)
 
@@ -175,7 +175,7 @@ class DHCPServerMicrosoftTest < Test::Unit::TestCase
     lease_expires = Time.now + 120
     @dhcpsapi.expects(:list_subnet_elements).with(@network, anything).returns([{:element => {:reserved_ip_address => '192.168.42.11'}}])
     @dhcpsapi.expects(:get_client_by_ip_address).with(client_ip).returns(
-        :client_ip_address => client_ip, :subnet_mask => @netmask, :client_hardware_address => '00:01:02:03:04:05', :client_name => 'test', :client_lease_expires => lease_expires
+      :client_ip_address => client_ip, :subnet_mask => @netmask, :client_hardware_address => '00:01:02:03:04:05', :client_name => 'test', :client_lease_expires => lease_expires
     )
     @dhcpsapi.expects(:list_subnet_option_values).with(@network).returns(@option_values)
 
@@ -191,7 +191,7 @@ class DHCPServerMicrosoftTest < Test::Unit::TestCase
     client_ip = '192.168.42.10'
     @dhcpsapi.expects(:list_subnet_elements).with(@network, anything).returns([{:element => {:reserved_ip_address => client_ip}}])
     @dhcpsapi.expects(:get_client_by_mac_address).with('192.168.42.0', client_mac).returns(
-        :client_ip_address => client_ip, :subnet_mask => @netmask, :client_hardware_address => client_mac, :client_name => 'test', :client_lease_expires => nil
+      :client_ip_address => client_ip, :subnet_mask => @netmask, :client_hardware_address => client_mac, :client_name => 'test', :client_lease_expires => nil
     )
     @dhcpsapi.expects(:list_reserved_option_values).with(client_ip, @network).returns(@option_values)
 
@@ -209,7 +209,7 @@ class DHCPServerMicrosoftTest < Test::Unit::TestCase
     lease_expires = Time.now + 120
     @dhcpsapi.expects(:list_subnet_elements).with(@network, anything).returns([{:element => {:reserved_ip_address => '192.168.42.11'}}])
     @dhcpsapi.expects(:get_client_by_mac_address).with('192.168.42.0', client_mac).returns(
-        :client_ip_address => client_ip, :subnet_mask => @netmask, :client_hardware_address => client_mac, :client_name => 'test', :client_lease_expires => lease_expires
+      :client_ip_address => client_ip, :subnet_mask => @netmask, :client_hardware_address => client_mac, :client_name => 'test', :client_lease_expires => lease_expires
     )
     @dhcpsapi.expects(:list_subnet_option_values).with(@network).returns(@option_values)
 

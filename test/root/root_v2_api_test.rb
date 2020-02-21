@@ -28,9 +28,9 @@ class RootV2ApiTest < Test::Unit::TestCase
     proc2 = lambda{ ['a', 'b']}
     proc3 = lambda{raise "Should not be called"}
     ::Proxy::Plugins.any_instance.expects(:loaded).returns(
-        [{:name => :foreman_proxy, :version => "0.0.1", :class => TestPlugin1, :state => :running},
-         {:name => :test2, :version => "0.0.1", :class => TestPlugin2, :state => :running, :capabilities => ['c', proc2], :settings => 'foo'},
-         {:name => :test3, :version => "0.0.1", :class => TestPlugin3, :state => :disabled, :capabilities => ['d', proc3]}])
+      [{:name => :foreman_proxy, :version => "0.0.1", :class => TestPlugin1, :state => :running},
+       {:name => :test2, :version => "0.0.1", :class => TestPlugin2, :state => :running, :capabilities => ['c', proc2], :settings => 'foo'},
+       {:name => :test3, :version => "0.0.1", :class => TestPlugin3, :state => :disabled, :capabilities => ['d', proc3]}])
     get "/features"
 
     response = JSON.parse(last_response.body)

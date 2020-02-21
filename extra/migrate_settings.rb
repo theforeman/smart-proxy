@@ -80,8 +80,8 @@ module ::Proxy
     def copy_original_configuration_except(*exceptions)
       FileUtils.cp_r(Dir.glob(path(src_dir, "*.yml")) - exceptions.map { |e| path(src_dir, e) }, dst_dir)
       FileUtils.cp_r(
-          Dir.glob(path(src_dir, "settings.d", "*.*")) - exceptions.map { |e| path(src_dir, e) },
-          path(dst_dir, "settings.d"))
+        Dir.glob(path(src_dir, "settings.d", "*.*")) - exceptions.map { |e| path(src_dir, e) },
+        path(dst_dir, "settings.d"))
     end
 
     def create_migration_dirs
@@ -260,7 +260,7 @@ if $0 == __FILE__ then
   migrations_state_file_path = options[:migrations_state]
 
   ::Proxy::Migrator.new(
-      working_dir_path, migrations_dir_path, config_src_path, modules_config_src_path,
-      ::Proxy::Migrations.new(migrations_state_file_path).load_past_migrations!).migrate
+    working_dir_path, migrations_dir_path, config_src_path, modules_config_src_path,
+    ::Proxy::Migrations.new(migrations_state_file_path).load_past_migrations!).migrate
   exit(0)
 end

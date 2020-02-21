@@ -63,11 +63,11 @@ module Proxy::DHCP::NativeMS
         k = Standard[key] || Standard[key.to_sym]
         next if k.nil?
         dhcpsapi.set_reserved_option_value(
-            k[:code],
-            ip_address,
-            subnet_address,
-            dhcps_option_type_from_sunw_kind(k[:kind]),
-            [value].flatten)
+          k[:code],
+          ip_address,
+          subnet_address,
+          dhcps_option_type_from_sunw_kind(k[:kind]),
+          [value].flatten)
       end
     end
 
@@ -182,11 +182,11 @@ module Proxy::DHCP::NativeMS
 
     def build_reservation(client, options)
       to_return = Proxy::DHCP::Reservation.new(
-          client[:client_name],
-          client[:client_ip_address],
-          client[:client_hardware_address].downcase,
-          client_subnet(client[:client_ip_address], client[:subnet_mask]),
-          {:hostname => client[:client_name], :deleteable => true}.merge!(options))
+        client[:client_name],
+        client[:client_ip_address],
+        client[:client_hardware_address].downcase,
+        client_subnet(client[:client_ip_address], client[:subnet_mask]),
+        {:hostname => client[:client_name], :deleteable => true}.merge!(options))
 
       logger.debug to_return.inspect
 

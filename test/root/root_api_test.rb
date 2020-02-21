@@ -26,9 +26,9 @@ class RootApiTest < Test::Unit::TestCase
 
   def test_features
     ::Proxy::Plugins.any_instance.expects(:loaded).returns(
-        [{:name => :foreman_proxy, :version => "0.0.1", :class => TestPlugin0, :state => :running},
-         {:name => :test2, :version => "0.0.1", :class => TestPlugin2, :state => :running},
-         {:name => :test2, :version => "0.0.1", :class => TestPlugin3, :state => :disabled}])
+      [{:name => :foreman_proxy, :version => "0.0.1", :class => TestPlugin0, :state => :running},
+       {:name => :test2, :version => "0.0.1", :class => TestPlugin2, :state => :running},
+       {:name => :test2, :version => "0.0.1", :class => TestPlugin3, :state => :disabled}])
     get "/features"
     assert_equal ['test2'], JSON.parse(last_response.body)
   end

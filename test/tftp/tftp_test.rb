@@ -64,9 +64,9 @@ class TftpTest < Test::Unit::TestCase
     tftp_connect_timeout = "40"
     tftp_dns_timeout = "14300"
     Proxy::TFTP::Plugin.load_test_settings(
-        :tftp_read_timeout => tftp_read_timeout,
-        :tftp_connect_timeout => tftp_connect_timeout,
-        :tftp_dns_timeout => tftp_dns_timeout
+      :tftp_read_timeout => tftp_read_timeout,
+      :tftp_connect_timeout => tftp_connect_timeout,
+      :tftp_dns_timeout => tftp_dns_timeout
     )
 
     ::Proxy::HttpDownload.expects(:new).returns(stub('tftp', :start => true)).

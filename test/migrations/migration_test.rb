@@ -24,7 +24,7 @@ class MigrationTest < Test::Unit::TestCase
 
   def test_migrations_setup_with_monolithic_config
     migrator = ::Proxy::Migrator.new(
-        "./dummy", "./dummy", "./config/settings.yml", "./dummy", ::Proxy::Migrations.new("./dummy", []))
+      "./dummy", "./dummy", "./config/settings.yml", "./dummy", ::Proxy::Migrations.new("./dummy", []))
     FileUtils.expects(:cp).with("./config/settings.yml", "./migrations_dir").returns(true)
     File.expects(:exist?).with("./dummy").returns(false)
     migrator.copy_original_configuration("./migrations_dir")
@@ -32,7 +32,7 @@ class MigrationTest < Test::Unit::TestCase
 
   def test_migrations_setup_with_modularized_config
     migrator = ::Proxy::Migrator.new(
-        "./dummy", "./dummy", "./config/settings.yml", "./settings.d", ::Proxy::Migrations.new("./dummy", []))
+      "./dummy", "./dummy", "./config/settings.yml", "./settings.d", ::Proxy::Migrations.new("./dummy", []))
     FileUtils.expects(:cp).with("./config/settings.yml", "./migrations_dir").returns(true)
     File.expects(:exist?).with("./settings.d").returns(true)
     FileUtils.expects(:cp_r).with("./settings.d/.", "./migrations_dir/settings.d")
@@ -41,8 +41,8 @@ class MigrationTest < Test::Unit::TestCase
 
   def test_migrations_fail_without_migrations_dir
     migrator = ::Proxy::Migrator.new(
-        "./work_dir", "./migrations_dir", "./config/dummy-settings.yml", "./modules_config_dir",
-        ::Proxy::Migrations.new("./dummy", []))
+      "./work_dir", "./migrations_dir", "./config/dummy-settings.yml", "./modules_config_dir",
+      ::Proxy::Migrations.new("./dummy", []))
 
     assert_raise RuntimeError do
       migrator.verify_paths
@@ -51,8 +51,8 @@ class MigrationTest < Test::Unit::TestCase
 
   def test_migrations_fail_without_original_configuration
     migrator = ::Proxy::Migrator.new(
-        "./work_dir", "./migrations_dir", "./config/dummy-settings.yml", "./modules_config_dir",
-        ::Proxy::Migrations.new("./dummy", []))
+      "./work_dir", "./migrations_dir", "./config/dummy-settings.yml", "./modules_config_dir",
+      ::Proxy::Migrations.new("./dummy", []))
     File.expects(:directory?).with("./migrations_dir").returns(true)
     assert_raise RuntimeError do
       migrator.verify_paths
@@ -61,8 +61,8 @@ class MigrationTest < Test::Unit::TestCase
 
   def test_copy_original_configuration
     migrator = ::Proxy::Migrator.new(
-        "./work_dir", "./migrations_dir", "./config/dummy-settings.yml", "./modules_config_dir",
-        ::Proxy::Migrations.new("./dummy", []))
+      "./work_dir", "./migrations_dir", "./config/dummy-settings.yml", "./modules_config_dir",
+      ::Proxy::Migrations.new("./dummy", []))
 
     FileUtils.expects(:cp).with("./config/dummy-settings.yml", "./destination_path")
     File.expects(:exist?).with("./modules_config_dir").returns(true)
@@ -73,8 +73,8 @@ class MigrationTest < Test::Unit::TestCase
 
   def test_copy_previous_migration_results
     migrator = ::Proxy::Migrator.new(
-        "./work_dir", "./migrations_dir", "./config/dummy-settings.yml", "./modules_config_dir",
-        ::Proxy::Migrations.new("./dummy", []))
+      "./work_dir", "./migrations_dir", "./config/dummy-settings.yml", "./modules_config_dir",
+      ::Proxy::Migrations.new("./dummy", []))
 
     FileUtils.expects(:cp_r).with("./previous_migration_results/.", "./next_migration_src")
 
@@ -94,8 +94,8 @@ class MigrationTest < Test::Unit::TestCase
 
   def test_execute_a_migration
     migrator = ::Proxy::Migrator.new(
-        "./work_dir", "./migrations_dir", "./config/dummy-settings.yml", "./modules_config_dir",
-        ::Proxy::Migrations.new("./dummy", []))
+      "./work_dir", "./migrations_dir", "./config/dummy-settings.yml", "./modules_config_dir",
+      ::Proxy::Migrations.new("./dummy", []))
 
     migration = @migration.migrations.first.new("./work_dir")
     @migration.migrations.first.any_instance.expects(:create_migration_dirs)
