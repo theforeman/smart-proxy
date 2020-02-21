@@ -13,7 +13,7 @@ module ::Proxy::PluginValidators
 
     def evaluate_predicate(settings)
       return true if @predicate.nil?
-      return @predicate.call(settings)
+      @predicate.call(settings)
     end
 
     def evaluate_predicate_and_validate!(settings)

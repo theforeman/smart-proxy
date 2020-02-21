@@ -150,7 +150,7 @@ module Proxy::DHCP::CommonISC
         when 'routers'
           [:routers, values.flatten.map {|r| strip_quotes(r)}]
         when 'domain-name-servers'
-          return [:domain_name_servers, values.flatten.map {|r| strip_quotes(r)}]
+          [:domain_name_servers, values.flatten.map {|r| strip_quotes(r)}]
         when 'next-server', 'server.next-server'
           without_quotes = strip_quotes(values.flatten.first)
           return [:nextServer, without_quotes] if without_quotes.match(Resolv::IPv4::Regex)

@@ -83,7 +83,7 @@ module Proxy::HttpRequest
           http.key  = OpenSSL::PKey::RSA.new(File.read(private_key), nil)
         end
       end
-      return http
+      http
     end
   end
 end

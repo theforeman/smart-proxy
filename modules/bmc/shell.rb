@@ -11,7 +11,7 @@ module Proxy
       end
 
       def self.installed?(args)
-        return true # We can always shell out
+        true # We can always shell out
       end
 
       # Must be on
@@ -65,7 +65,7 @@ module Proxy
         end
 
         # let's return true and finish the request
-        return true
+        true
       end
     end
   end
