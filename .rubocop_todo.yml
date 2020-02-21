@@ -533,13 +533,6 @@ Style/SignalException:
 Style/SpecialGlobalVars:
   Enabled: false
 
-# Offense count: 6
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: single_quotes, double_quotes
-Style/StringLiteralsInInterpolation:
-  Enabled: false
-
 # Offense count: 50
 # Cop supports --auto-correct.
 # Configuration parameters: MinSize.

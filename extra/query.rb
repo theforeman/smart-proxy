@@ -85,7 +85,7 @@ if url !~ /^https:\/\/.*:4567/
   exit(-1)
 end
 
-puts "#{$0} --verb #{verb} --key #{key} --cert #{cert} --ca #{ca} #{json ? "--json" : ""} --verbose #{url}" if verbose
+puts "#{$0} --verb #{verb} --key #{key} --cert #{cert} --ca #{ca} #{json ? '--json' : ''} --verbose #{url}" if verbose
 
 c = RestClient::Resource.new(
   url,

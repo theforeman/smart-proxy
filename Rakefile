@@ -46,7 +46,7 @@ task :migrate_settings do
       working_dir, migrations_dir_path, config_src_path, modules_config_src_path,
       ::Proxy::Migrations.new(migrations_state_file_path).load_past_migrations!).migrate
 
-    FileUtils.mv(File.join(app_dir, "config"), File.join(app_dir, "config_#{Time.now.strftime("%Y%m%d%H%M%S")}"))
+    FileUtils.mv(File.join(app_dir, "config"), File.join(app_dir, "config_#{Time.now.strftime('%Y%m%d%H%M%S')}"))
     FileUtils.mv(File.join(working_dir, "result"), File.join(app_dir, "config"))
   end
 end
