@@ -6,9 +6,7 @@ class ::Proxy::LogsPlugin < ::Proxy::Plugin
   default_settings :enabled => true
 
   after_activation do
-    begin
-      buffer = Proxy::LogBuffer::Buffer.instance
+    buffer = Proxy::LogBuffer::Buffer.instance
       logger.debug "Log buffer API initialized, available capacity: #{buffer}"
-    end
   end
 end

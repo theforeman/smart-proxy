@@ -73,15 +73,13 @@ module Proxy::PuppetCa
     end
 
     delete "/:certname" do
-      begin
-        content_type :json
-        certname = params[:certname]
-        puppetca_impl.clean(certname)
-      rescue ::Proxy::PuppetCa::NotPresent => e
-        log_halt 404, e
-      rescue => e
-        log_halt 406, e, "Failed to remove certificate(s) for #{certname}"
-      end
+      content_type :json
+      certname = params[:certname]
+      puppetca_impl.clean(certname)
+    rescue ::Proxy::PuppetCa::NotPresent => e
+      log_halt 404, e
+    rescue => e
+      log_halt 406, e, "Failed to remove certificate(s) for #{certname}"
     end
   end
 end

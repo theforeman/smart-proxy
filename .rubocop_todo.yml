@@ -454,11 +454,6 @@ Style/RaiseArgs:
 Style/RandomWithOffset:
   Enabled: false
 
-# Offense count: 27
-# Cop supports --auto-correct.
-Style/RedundantBegin:
-  Enabled: false
-
 # Offense count: 9
 # Cop supports --auto-correct.
 Style/RedundantSelf:

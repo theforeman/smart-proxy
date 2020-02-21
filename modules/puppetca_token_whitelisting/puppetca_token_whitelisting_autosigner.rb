@@ -43,12 +43,10 @@ module ::Proxy::PuppetCa::TokenWhitelisting
     # Invalidate a token based on the certname
     def disable certname
       storage.remove_if do |token|
-        begin
-          decoded = JWT.decode(token, smartproxy_cert.public_key, true, algorithm: JWT_ALGORITHM)
-          decoded.first['certname'] == certname
-        rescue JWT::ExpiredSignature
-          true
-        end
+        decoded = JWT.decode(token, smartproxy_cert.public_key, true, algorithm: JWT_ALGORITHM)
+        decoded.first['certname'] == certname
+      rescue JWT::ExpiredSignature
+        true
       end
       nil
     end
@@ -65,12 +63,10 @@ module ::Proxy::PuppetCa::TokenWhitelisting
     # List the hosts that are currently valid
     def autosign_list
       storage.read.collect do |token|
-        begin
-          decoded = JWT.decode(token, smartproxy_cert.public_key, true, algorithm: JWT_ALGORITHM)
-          decoded.first['certname']
-        rescue JWT::ExpiredSignature
-          nil
-        end
+        decoded = JWT.decode(token, smartproxy_cert.public_key, true, algorithm: JWT_ALGORITHM)
+        decoded.first['certname']
+      rescue JWT::ExpiredSignature
+        nil
       end.compact
     end
 
