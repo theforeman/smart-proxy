@@ -30,9 +30,7 @@ class ::Proxy::Plugins
     @loaded ||= []
   end
 
-  def loaded=(an_array)
-    @loaded = an_array
-  end
+  attr_writer :loaded
 
   def update(updated_plugins)
     updated_plugins.each do |updated|
