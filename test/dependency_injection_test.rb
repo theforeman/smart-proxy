@@ -2,11 +2,15 @@ require 'test_helper'
 
 class TestDependencyOne
   attr_reader :arg
-  def initialize(arg = nil); @arg = arg; end
+  def initialize(arg = nil)
+    @arg = arg
+  end
 end
 class TestDependencyTwo
   attr_reader :arg
-  def initialize(arg = nil); @arg = arg; end
+  def initialize(arg = nil)
+    @arg = arg
+  end
 end
 
 class TestContainer < Proxy::DependencyInjection::Container; end
