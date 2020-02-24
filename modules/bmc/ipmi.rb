@@ -74,7 +74,7 @@ module Proxy
         if args[:options].instance_of?(Hash)
           options = args[:options]
         else
-          options = {}     # catches nil and empty string cases
+          options = {} # catches nil and empty string cases
         end
         Rubyipmi.connect(args[:username], args[:password], args[:host], args[:bmc_provider], options)
       end

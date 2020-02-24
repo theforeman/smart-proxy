@@ -36,7 +36,7 @@ module Proxy::DHCP::CommonISC
       omcmd "set name = \"#{record.name}\""
       omcmd "set ip-address = #{record.ip}"
       omcmd "set hardware-address = #{record.mac}"
-      omcmd "set hardware-type = 1"         # This is ethernet
+      omcmd "set hardware-type = 1" # This is ethernet
 
       options = record.options
       # TODO: Extract this block into a generic dhcp options helper
@@ -81,7 +81,7 @@ module Proxy::DHCP::CommonISC
       report msg, status
       nil
     ensure
-      @om = nil  # we cannot serialize an IO object, even if closed.
+      @om = nil # we cannot serialize an IO object, even if closed.
     end
 
     def format_omshell_output(output)

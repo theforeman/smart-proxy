@@ -14,7 +14,7 @@ class PuppetApiV3EnvironmentsRetrieverTest < Test::Unit::TestCase
 
   def setup
     @api = PuppetApiV3EnvironmentsRetrieverTest::EnvironmentApiForTesting.new
-    @retriever =  Proxy::PuppetApi::V3EnvironmentsRetriever.new(nil, nil, nil, nil, @api)
+    @retriever = Proxy::PuppetApi::V3EnvironmentsRetriever.new(nil, nil, nil, nil, @api)
   end
 
   def test_api_response_parsing

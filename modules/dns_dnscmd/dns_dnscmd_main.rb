@@ -43,7 +43,7 @@ module Proxy::Dns::Dnscmd
       begin
         timeout(tsecs) do
           logger.debug "executing: #{command}"
-          std_in, std_out, std_err  = Open3.popen3(command)
+          std_in, std_out, std_err = Open3.popen3(command)
           response  = std_out.readlines
           response += std_err.readlines
         end
@@ -63,7 +63,7 @@ module Proxy::Dns::Dnscmd
         logger.error "Command dnscmd failed:\n" + response.join("\n")
         msg.sub!(/Removed/, "remove")
         msg.sub!(/Added/, "add")
-        msg  = "Failed to #{msg}"
+        msg = "Failed to #{msg}"
         raise Proxy::Dns::Error.new(msg) unless response.grep(/DNS_ERROR_NAME_DOES_NOT_EXIST/).any? && msg == "Failed to EnumRecords"
       else
         logger.debug msg unless error_only

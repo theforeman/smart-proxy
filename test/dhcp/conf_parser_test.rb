@@ -9,7 +9,7 @@ class Proxy::DHCP::CommonISC::ConfigurationParserTest < Test::Unit::TestCase
 
   def test_mac_address_parser
     assert_equal "1:1:1:1:1:1", Proxy::DHCP::CommonISC::ConfigurationParser::MAC_ADDRESS.parse!('1:1:1:1:1:1')
-    assert_equal "01:01:01:01:01:01",  Proxy::DHCP::CommonISC::ConfigurationParser::MAC_ADDRESS.parse!('01:01:01:01:01:01')
+    assert_equal "01:01:01:01:01:01", Proxy::DHCP::CommonISC::ConfigurationParser::MAC_ADDRESS.parse!('01:01:01:01:01:01')
     assert_equal "f1:a1:b1:c1:d1:e1", Proxy::DHCP::CommonISC::ConfigurationParser::MAC_ADDRESS.parse!('f1:a1:b1:c1:d1:e1')
   end
 
