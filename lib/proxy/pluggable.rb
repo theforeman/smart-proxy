@@ -202,6 +202,6 @@ module Proxy::Pluggable
   end
 
   def cleanup_version(version)
-    version.chomp('-develop').sub(/\-RC\d+$/, '')
+    version.chomp('-develop').sub(/\-RC\d+$/i, '')
   end
 end
