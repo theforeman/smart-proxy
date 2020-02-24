@@ -309,7 +309,7 @@ module ::Proxy::DefaultSettingsLoader
   def merge_settings(provider_settings, main_plugin_settings)
     main_plugin_settings.delete(:enabled)
     # all modules have 'enabled' setting, we ignore it when looking for duplicate setting names
-    if !(overlap = main_plugin_settings.keys - (main_plugin_settings.keys - provider_settings.keys)).empty?
+    unless (overlap = main_plugin_settings.keys - (main_plugin_settings.keys - provider_settings.keys)).empty?
       raise Exception, "Provider '#{plugin.plugin_name}' settings conflict with the main plugin's settings: #{overlap}"
     end
     provider_settings.merge(main_plugin_settings)

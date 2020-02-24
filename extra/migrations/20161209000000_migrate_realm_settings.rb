@@ -11,7 +11,7 @@ class MigrateRealmSettings < ::Proxy::Migration
 
   def migrate
     realm_config = path(src_dir, "settings.d", "realm.yml")
-    if !File.exist?(realm_config)
+    unless File.exist?(realm_config)
       duplicate_original_configuration
       return
     end

@@ -95,11 +95,11 @@ module Proxy::DHCP::NativeMS
         foreman_end_addr_ip = IPAddr.new(to_address)
         dhcp_start_addr_ip = IPAddr.new(dhcp_start_addr)
         dhcp_end_addr_ip = IPAddr.new(dhcp_end_addr)
-        if not (dhcp_start_addr_ip..dhcp_end_addr_ip).cover? foreman_start_addr_ip
+        unless (dhcp_start_addr_ip..dhcp_end_addr_ip).cover? foreman_start_addr_ip
           logger.warn "Start of IP range #{from_address} is out of DHCP range (#{dhcp_start_addr}-#{dhcp_end_addr})"
           return nil
         end
-        if not (dhcp_start_addr_ip..dhcp_end_addr_ip).cover? foreman_end_addr_ip
+        unless (dhcp_start_addr_ip..dhcp_end_addr_ip).cover? foreman_end_addr_ip
           logger.warn "End of IP range #{to_address} is out of DHCP range (#{dhcp_start_addr}-#{dhcp_end_addr})"
           return nil
         end
