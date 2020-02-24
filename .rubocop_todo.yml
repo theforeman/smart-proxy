@@ -292,13 +292,6 @@ Style/EvalWithLocation:
 Style/ExpandPathArguments:
   Enabled: false
 
-# Offense count: 3
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: each, for
-Style/For:
-  Enabled: false
-
 # Offense count: 18
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle.

@@ -46,7 +46,7 @@ opts = GetoptLong.new([ '--verbose', '-v', GetoptLong::NO_ARGUMENT ],
 json = false
 verb = :get
 key = cert = ca = verbose = nil
-for opt, arg in opts
+opts.each do |opt, arg|
   case opt
     when '--help'
       RDoc::usage
