@@ -22,7 +22,7 @@ class MigratePuppetSettings < ::Proxy::Migration
 
   def migrate
     puppet_config = path(src_dir, "settings.d", "puppet.yml")
-    if !File.exist?(puppet_config)
+    unless File.exist?(puppet_config)
       duplicate_original_configuration
       return
     end
@@ -65,7 +65,7 @@ class MigratePuppetSettings < ::Proxy::Migration
 
     if migrated.has_key?(:puppet_proxy_mcollective)
       puppet_user = migrated[:puppet_proxy_mcollective].delete(:puppet_user)
-      if !(migrated[:puppet_proxy_mcollective].has_key?(:user) || puppet_user.nil?)
+      unless (migrated[:puppet_proxy_mcollective].has_key?(:user) || puppet_user.nil?)
         migrated[:puppet_proxy_mcollective][:user] = puppet_user
       end
     end

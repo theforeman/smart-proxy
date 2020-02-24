@@ -3,7 +3,7 @@ require 'yaml'
 class MigrateDnsSettings < ::Proxy::Migration
   def migrate
     dns_config = path(src_dir, "settings.d", "dns.yml")
-    if !File.exist?(dns_config)
+    unless File.exist?(dns_config)
       duplicate_original_configuration
       return
     end

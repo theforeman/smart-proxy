@@ -22,7 +22,7 @@ class MigrateDhcpSettings < ::Proxy::Migration
 
   def migrate
     dhcp_config = path(src_dir, "settings.d", "dhcp.yml")
-    if !File.exist?(dhcp_config)
+    unless File.exist?(dhcp_config)
       duplicate_original_configuration
       return
     end
