@@ -346,16 +346,6 @@ Style/MixinUsage:
 Style/MultilineBlockChain:
   Enabled: false
 
-# Offense count: 3
-# Cop supports --auto-correct.
-Style/MultilineIfThen:
-  Enabled: false
-
-# Offense count: 7
-# Cop supports --auto-correct.
-Style/MultilineWhenThen:
-  Enabled: false
-
 # Offense count: 35
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle.

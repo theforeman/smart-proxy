@@ -24,7 +24,7 @@ module Proxy::DHCP::Libvirt
         next if e.attributes["family"] == "ipv6"
         gateway = e.attributes["address"]
 
-        if e.attributes["netmask"].nil? then
+        if e.attributes["netmask"].nil?
           # converts a prefix/cidr notation to octets
           netmask = IPAddr.new(gateway).mask(e.attributes["prefix"]).to_mask
         else
