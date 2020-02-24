@@ -6,33 +6,22 @@ inherit_from: .rubocop_todo.yml
 AllCops:
   TargetRubyVersion: 2.5
 
-# Don't prefer is_a? over kind_of?
-Style/ClassCheck:
+Bundler/OrderedGems:
   Enabled: false
 
-# Don't enforce certain methods, e.g. detect over find
-Style/CollectionMethods:
+Layout/AlignHash:
   Enabled: false
 
-# Don't enforce documentation
-Style/Documentation:
+Layout/AlignParameters:
   Enabled: false
 
-# Both double and single quotes are OK
-Style/StringLiterals:
+Layout/DotPosition:
   Enabled: false
 
-# Don't enforce frozen string literals
-Style/FrozenStringLiteralComment:
-  Enabled: false
-
-Metrics:
-  Enabled: false
+Layout/IndentFirstArgument:
+  EnforcedStyle: consistent
 
 Lint/AmbiguousRegexpLiteral:
-  Enabled: false
-
-Security/Eval:
   Enabled: false
 
 Lint/RescueException:
@@ -44,8 +33,7 @@ Lint/UnusedBlockArgument:
 Lint/UnusedMethodArgument:
   Enabled: false
 
-# enable both hash-rocket and ruby19 hashmap syntax
-Style/HashSyntax:
+Metrics:
   Enabled: false
 
 Performance/Casecmp:
@@ -57,63 +45,52 @@ Performance/RedundantMatch:
 Performance/RedundantMerge:
   Enabled: true
 
-#Allow both ['a', 'b'], %w[a b] and %w(a b) style arrays
-Style/WordArray:
+Performance/RegexpMatch:
   Enabled: false
 
-Style/AndOr:
-  EnforcedStyle: conditionals
-
-Style/TernaryParentheses:
-  EnforcedStyle: require_parentheses_when_complex
-
-Style/InverseMethods:
-  Enabled: false
-
-Layout/IndentFirstArgument:
-  EnforcedStyle: consistent
-
-Bundler/OrderedGems:
+Security/Eval:
   Enabled: false
 
 Style/Alias:
   EnforcedStyle: prefer_alias_method
 
-Layout/DotPosition:
+Style/AndOr:
+  EnforcedStyle: conditionals
+
+# Don't prefer is_a? over kind_of?
+Style/ClassCheck:
   Enabled: false
 
-Style/IfUnlessModifier:
+# Don't enforce certain methods, e.g. detect over find
+Style/CollectionMethods:
   Enabled: false
 
 Style/ConditionalAssignment:
   Enabled: false
 
+# Don't enforce documentation
+Style/Documentation:
+  Enabled: false
+
 Style/EmptyMethod:
   EnforcedStyle: expanded
 
-Style/ParenthesesAroundCondition:
+# Don't enforce frozen string literals
+Style/FrozenStringLiteralComment:
   Enabled: false
 
-Layout/AlignHash:
+# Support both, Ruby 1.9 hashmap and hash-rocket syntax
+Style/HashSyntax:
   Enabled: false
 
-Layout/AlignParameters:
+Style/IfUnlessModifier:
+  Enabled: false
+
+Style/InverseMethods:
   Enabled: false
 
 # disabled until we can configure "+" as concat sign
 Style/LineEndConcatenation:
-  Enabled: false
-
-Style/ParallelAssignment:
-  Enabled: false
-
-Style/TrailingCommaInArrayLiteral:
-  EnforcedStyleForMultiline: comma
-
-Style/TrailingCommaInHashLiteral:
-  EnforcedStyleForMultiline: comma
-
-Performance/RegexpMatch:
   Enabled: false
 
 Style/MultipleComparison:
@@ -122,5 +99,28 @@ Style/MultipleComparison:
 Style/NumericPredicate:
   Enabled: false
 
+Style/ParallelAssignment:
+  Enabled: false
+
+Style/ParenthesesAroundCondition:
+  Enabled: false
+
 Style/PreferredHashMethods:
+  Enabled: false
+
+# Both double and single quotes are OK
+Style/StringLiterals:
+  Enabled: false
+
+Style/TernaryParentheses:
+  EnforcedStyle: require_parentheses_when_complex
+
+Style/TrailingCommaInArrayLiteral:
+  EnforcedStyleForMultiline: comma
+
+Style/TrailingCommaInHashLiteral:
+  EnforcedStyleForMultiline: comma
+
+#Allow both ['a', 'b'], %w[a b] and %w(a b) style arrays
+Style/WordArray:
   Enabled: false
