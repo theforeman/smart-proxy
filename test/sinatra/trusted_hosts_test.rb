@@ -42,7 +42,7 @@ class TrustedHostsTest < Test::Unit::TestCase
     Resolv.any_instance.expects(:getname).with('10.0.0.1').returns('noreverse.example.org')
     # would be nice, but does not work
     # see: http://pbrisbin.com/posts/beware_never_expectations/
-    #Resolv.any_instance.expects(:getaddresses).with('noreverse.example.org').never()
+    # Resolv.any_instance.expects(:getaddresses).with('noreverse.example.org').never()
     get '/test', nil, 'REMOTE_ADDR' => '10.0.0.1'
     assert last_response.ok?
   end

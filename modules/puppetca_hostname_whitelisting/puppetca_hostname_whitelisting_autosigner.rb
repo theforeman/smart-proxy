@@ -7,7 +7,7 @@ module ::Proxy::PuppetCa::HostnameWhitelisting
       Proxy::PuppetCa::HostnameWhitelisting::Plugin.settings.autosignfile
     end
 
-    #remove certname from autosign if exists
+    # remove certname from autosign if exists
     def disable certname
       raise "No such file #{autosign_file}" unless File.exist?(autosign_file)
 

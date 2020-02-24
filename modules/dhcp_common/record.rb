@@ -10,9 +10,9 @@ module Proxy::DHCP
     include Proxy::Validations
 
     def initialize(ip_address, mac_address, subnet, options = {})
-      @subnet  = validate_subnet subnet #options[:subnet]
-      @ip      = validate_ip ip_address #options[:ip]
-      @mac     = validate_mac mac_address #options[:mac]
+      @subnet  = validate_subnet subnet # options[:subnet]
+      @ip      = validate_ip ip_address # options[:ip]
+      @mac     = validate_mac mac_address # options[:mac]
       @options = options
     end
 
@@ -30,7 +30,7 @@ module Proxy::DHCP
       nil
     end
 
-    #TODO move this away from here, as this suppose to be a generic interface
+    # TODO move this away from here, as this suppose to be a generic interface
     def deleteable?
       !!@options[:deleteable]
     end

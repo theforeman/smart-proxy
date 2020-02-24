@@ -7,7 +7,7 @@ module Proxy
         include Rsec::Helpers
         extend Rsec::Helpers
 
-        FAR_FUTURE = Time.at(0x7fffffff).utc #max time value on 32-bit systems
+        FAR_FUTURE = Time.at(0x7fffffff).utc # max time value on 32-bit systems
 
         class Base
           attr_reader :parent, :dhcp_options, :node_attributes
@@ -316,7 +316,7 @@ module Proxy
 
         def lease_time_stamp
           Rsec::Fail.reset
-          db_time = /\d\s+[\d\/]+\s+[\d:]+/.r {|t| Time.parse(t + " UTC")} #db-time is UTC
+          db_time = /\d\s+[\d\/]+\s+[\d:]+/.r {|t| Time.parse(t + " UTC")} # db-time is UTC
           local_time = seq_(word('epoch'), prim(:unsigned_int64)) {|_, t| Time.at(t).utc} # since epoch
           never = word('never') {|_| FAR_FUTURE}
 

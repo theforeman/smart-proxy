@@ -62,7 +62,7 @@ class Proxy::PuppetApi::V3EnvironmentClassesApiClassesRetriever
 
   def get_classes(environment)
     future = async_get_classes(environment)
-    cache_used = @m.synchronize { !!@etag_cache[environment] } #etags are only available when classes cache is enabled
+    cache_used = @m.synchronize { !!@etag_cache[environment] } # etags are only available when classes cache is enabled
     client_timeout = cache_used ? DEFAULT_CLIENT_TIMEOUT : api_timeout
     logger.warn("Puppet server classes cache is disabled, classes retrieval can be slow.") unless cache_used
 

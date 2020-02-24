@@ -168,7 +168,7 @@ class ::Proxy::PluginInitializer
 
     plugins.update(current_state_of_modules(plugins.loaded, grouped_with_providers))
 
-    #resolve provider names to classes
+    # resolve provider names to classes
     grouped_with_providers.each {|group| group.resolve_providers(plugins.loaded)}
 
     # validate prerequisite versions and availability

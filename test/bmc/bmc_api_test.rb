@@ -5,7 +5,7 @@ require 'bmc/bmc_api'
 
 ENV['RACK_ENV'] = 'test'
 
-#Note:
+# Note:
 # When Mocking GET requests the stubbing api ignores passing information in the body so its not possible to do something like
 #     get "/#{host}/chassis/power/on", body, "CONTENT_TYPE" => "application/json"
 # instead you must testing something like:

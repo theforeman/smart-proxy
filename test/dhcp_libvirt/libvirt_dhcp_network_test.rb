@@ -42,7 +42,7 @@ class LibvirtDHCPNetworkTest < Test::Unit::TestCase
       "name" => "test.example.com",
       "ip" => "192.168.122.10",
       "mac" => "00:11:bb:cc:dd:ee")
-    #record = Proxy::DHCP::Reservation.new(:name => "test.example.com", :ip => "192.168.122.10", :mac => "00:11:bb:cc:dd:ee", :subnet => subnet)
+    # record = Proxy::DHCP::Reservation.new(:name => "test.example.com", :ip => "192.168.122.10", :mac => "00:11:bb:cc:dd:ee", :subnet => subnet)
     xml = "<host mac=\"#{record.mac}\" ip=\"#{record.ip}\" name=\"#{record.name}\"/>"
     @network.expects(:update).with(::Libvirt::Network::UPDATE_COMMAND_DELETE, ::Libvirt::Network::NETWORK_SECTION_IP_DHCP_HOST, -1, xml, @flags).returns(true)
     assert_equal true, @subject.del_dhcp_record(record)
