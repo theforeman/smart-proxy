@@ -9,4 +9,3 @@ module ::Proxy::PuppetCa::HostnameWhitelisting
     end
   end
 end
-
