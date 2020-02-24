@@ -29,9 +29,9 @@ module Proxy::Dns
 
     def create_a_record(fqdn, ip)
       case a_record_conflicts(fqdn, ip) # returns -1, 0, 1
-        when 1 then
+        when 1
           raise(Proxy::Dns::Collision, "'#{fqdn} 'is already in use")
-        when 0 then
+        when 0
           nil
         else
           do_create(fqdn, ip, "A")
@@ -40,9 +40,9 @@ module Proxy::Dns
 
     def create_aaaa_record(fqdn, ip)
       case aaaa_record_conflicts(fqdn, ip) # returns -1, 0, 1
-        when 1 then
+        when 1
           raise(Proxy::Dns::Collision, "'#{fqdn} 'is already in use")
-        when 0 then
+        when 0
           nil
         else
           do_create(fqdn, ip, "AAAA")
@@ -51,9 +51,9 @@ module Proxy::Dns
 
     def create_cname_record(fqdn, target)
       case cname_record_conflicts(fqdn, target) # returns -1, 0, 1
-        when 1 then
+        when 1
           raise(Proxy::Dns::Collision, "'#{fqdn} 'is already in use")
-        when 0 then
+        when 0
           nil
         else
           do_create(fqdn, target, "CNAME")
@@ -62,7 +62,7 @@ module Proxy::Dns
 
     def create_ptr_record(fqdn, ptr)
       case ptr_record_conflicts(fqdn, ptr) # returns -1, 0, 1
-        when 1 then
+        when 1
           raise(Proxy::Dns::Collision, "'#{ptr}' is already in use")
         when 0
           nil
