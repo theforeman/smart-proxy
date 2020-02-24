@@ -323,7 +323,7 @@ module ::Proxy::DefaultSettingsLoader
 
   def log_provider_settings(settings)
     default_settings = plugin.plugin_default_settings
-    sorted_keys = settings.keys.map(&:to_s).sort.map(&:to_sym) # ruby 1.8.7 doesn't support sorting of symbols
+    sorted_keys = settings.keys.sort
     to_log = sorted_keys.map { |k| "'%s': %s%s" % [k, settings[k], (default_settings.include?(k) && default_settings[k] == settings[k]) ? " (default)" : ""] }.join(", ")
     logger.debug "'%s' settings: %s" % [plugin.plugin_name, to_log]
   end

@@ -1,6 +1,4 @@
 require 'ipaddr'
-require 'dhcp_common/monkey_patches' unless IPAddr.new.respond_to?('to_range')
-require 'dhcp_common/monkey_patch_subnet' unless Array.new.respond_to?('rotate')
 require 'proxy/validations'
 require 'tmpdir'
 require 'dhcp_common/pingable'
