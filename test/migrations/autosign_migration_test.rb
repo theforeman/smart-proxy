@@ -13,4 +13,3 @@ class ProxyAutosignMigrationTest < Test::Unit::TestCase
     assert_equal [:puppetca, :autosignfile, '/etc/puppet/autosign.conf'], @migration.remap_parameter(:puppetdir, '/etc/puppet')
   end
 end
-

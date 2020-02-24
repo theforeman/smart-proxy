@@ -75,4 +75,3 @@ class ProxyPuppetMigrationTest < Test::Unit::TestCase
                  @migration.migrate_puppet_configuration(:enabled => true, :puppet_url => "http://localhost"))
   end
 end
-

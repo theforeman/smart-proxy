@@ -50,4 +50,3 @@ rescue => e
   puts "There was a problem registering the service: " + e.message
   puts 'Check log file for details'
 end
-

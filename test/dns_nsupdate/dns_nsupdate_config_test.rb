@@ -57,4 +57,3 @@ class DnsNsupdateGSSWiringTest < Test::Unit::TestCase
     assert_equal 'principal', provider.tsig_principal
   end
 end
-

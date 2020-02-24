@@ -11,4 +11,3 @@ module ::Proxy::PuppetCa::TokenWhitelisting
     end
   end
 end
-

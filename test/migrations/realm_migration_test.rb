@@ -23,4 +23,3 @@ class ProxyRealmMigrationTest < Test::Unit::TestCase
     assert_equal({:realm => {:use_provider => 'realm_freeipa'}}, @migration.migrate_realm_configuration({}))
   end
 end
-
