@@ -398,7 +398,7 @@ module Proxy
           seq_(
             subnet_keyword, IPV4_ADDRESS, netmask_keyword, IPV4_ADDRESS,
             LFT_BRACKET, SPACE.join(range | option | host | lazy {group} | pool | COMMENT | ignored_declaration | ignored_block).odd,
-            RGT_BRACKET ).cached do |_, subnet_address, _, subnet_mask, _, statements, _|
+            RGT_BRACKET).cached do |_, subnet_address, _, subnet_mask, _, statements, _|
             IpV4SubnetNode[subnet_address, subnet_mask, statements]
           end
         end

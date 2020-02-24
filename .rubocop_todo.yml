@@ -128,13 +128,6 @@ Layout/SpaceInsideBlockBraces:
 Layout/SpaceInsideHashLiteralBraces:
   Enabled: false
 
-# Offense count: 1
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: space, no_space
-Layout/SpaceInsideParens:
-  Enabled: false
-
 # Offense count: 3
 Lint/AmbiguousBlockAssociation:
   Enabled: false
