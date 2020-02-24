@@ -23,29 +23,29 @@ class IpaConfigParserTest < Test::Unit::TestCase
   end
 
   def test_should_raise_error_if_xmlrpc_uri_is_not_defined
-    config = <<EOL
-[global]
-basedn = dc=demo1,dc=freeipa,dc=org
-realm = DEMO1.FREEIPA.ORG
-domain = demo1.freeipa.org
-server = ipa.demo1.freeipa.org
-host = lucid-nonsense
-enable_ra = True
-EOL
+    config = <<~EOL
+      [global]
+      basedn = dc=demo1,dc=freeipa,dc=org
+      realm = DEMO1.FREEIPA.ORG
+      domain = demo1.freeipa.org
+      server = ipa.demo1.freeipa.org
+      host = lucid-nonsense
+      enable_ra = True
+    EOL
     parser = Proxy::FreeIPARealm::IpaConfigParser.new('')
     assert_raises(Exception) { parser.do_parse(StringIO.new(config)) }
   end
 
   def test_should_raise_error_if_realm_is_not_defined
-    config = <<EOL
-[global]
-basedn = dc=demo1,dc=freeipa,dc=org
-domain = demo1.freeipa.org
-server = ipa.demo1.freeipa.org
-host = lucid-nonsense
-xmlrpc_uri = https://ipa.demo1.freeipa.org/ipa/xml
-enable_ra = True
-EOL
+    config = <<~EOL
+      [global]
+      basedn = dc=demo1,dc=freeipa,dc=org
+      domain = demo1.freeipa.org
+      server = ipa.demo1.freeipa.org
+      host = lucid-nonsense
+      xmlrpc_uri = https://ipa.demo1.freeipa.org/ipa/xml
+      enable_ra = True
+    EOL
     parser = Proxy::FreeIPARealm::IpaConfigParser.new('')
     assert_raises(Exception) { parser.do_parse(StringIO.new(config)) }
   end
