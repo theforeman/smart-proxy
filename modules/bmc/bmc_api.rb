@@ -139,13 +139,13 @@ module Proxy::BMC
       # return hint on valid options
       # removing bootdevice until its supported in rubyipmi
       if params[:function].nil?
-        #return {:actions => ["bootdevice", "bootdevices"]}.to_json
+        # return {:actions => ["bootdevice", "bootdevices"]}.to_json
         return { :functions => ["bootdevices"] }.to_json
       end
       bmc_setup
       begin
         case params[:function]
-          #when "bootdevice"
+          # when "bootdevice"
           #  @bmc.chassis.config.bootdevice.to_json
           when "bootdevices"
             { :devices => @bmc.bootdevices }.to_json
