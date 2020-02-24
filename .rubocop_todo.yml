@@ -13,11 +13,6 @@
 Layout/CaseIndentation:
   Enabled: false
 
-# Offense count: 9
-# Cop supports --auto-correct.
-Layout/ClosingParenthesisIndentation:
-  Enabled: false
-
 # Offense count: 123
 # Cop supports --auto-correct.
 Layout/EmptyLineAfterGuardClause:
