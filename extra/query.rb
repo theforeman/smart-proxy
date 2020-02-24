@@ -42,7 +42,7 @@ opts = GetoptLong.new([ '--verbose', '-v', GetoptLong::NO_ARGUMENT ],
                       [ '--ca',            GetoptLong::REQUIRED_ARGUMENT ],
                       [ '--verb',          GetoptLong::REQUIRED_ARGUMENT ],
                       [ '--json',          GetoptLong::NO_ARGUMENT ]
-    )
+                     )
 json = false
 verb = :get
 key = cert = ca = verbose = nil
@@ -93,7 +93,7 @@ c = RestClient::Resource.new(
   :ssl_client_cert  =>  OpenSSL::X509::Certificate.new(File.read(cert)),
   :ssl_client_key   =>  OpenSSL::PKey::RSA.new(File.read(key)),
   :ssl_ca_file      =>  ca
-  )
+)
 
 begin
   json_args = {}
