@@ -8,69 +8,69 @@ require 'dhcp_common/isc/configuration_parser'
 require 'dhcp_common/isc/subnet_service_initialization'
 
 class DhcpIscSubnetServiceInitializationTest < Test::Unit::TestCase
-  DHCPD_CONFIG =<<END
-# This is a comment.
+  DHCPD_CONFIG =<<~END
+    # This is a comment.
 
-omapi-port 7911;
-default-lease-time 43200;
-max-lease-time 86400;
-ddns-update-style none;
-option domain-name "some.example.com";
-option domain-name-servers 192.168.121.101;
-option ntp-servers none;
-allow booting;
-allow bootp;
-option fqdn.no-client-update on;
-option fqdn.rcode2 255;
-option pxegrub code 150 = text ;
+    omapi-port 7911;
+    default-lease-time 43200;
+    max-lease-time 86400;
+    ddns-update-style none;
+    option domain-name "some.example.com";
+    option domain-name-servers 192.168.121.101;
+    option ntp-servers none;
+    allow booting;
+    allow bootp;
+    option fqdn.no-client-update on;
+    option fqdn.rcode2 255;
+    option pxegrub code 150 = text ;
 
-option voip-tftp-server code 150 = { ip-address };
+    option voip-tftp-server code 150 = { ip-address };
 
-subnet 192.168.122.0 netmask 255.255.255.0 {
-  option interface-mtu 9000;
-  option voip-tftp-server 1.2.3.4;
-  option routers 192.168.122.250; # This is an inline comment
-  next-server 192.168.122.251;
-}
-
-subnet 192.168.123.0 netmask 255.255.255.192 {
-  option subnet-mask 255.255.255.192;
-  option routers 192.168.123.1;
-  option domain-name-servers 192.168.123.1;
-  option domain-name example.com;
-  range 192.168.123.2 192.168.123.62;
-}
-
-subnet 192.168.124.0 netmask 255.255.255.0 {
-  pool
-  {
-    range 192.168.124.200 192.168.124.254;
-  }
-  option domain-name foo.example.com;
-  option routers 192.168.124.1, 192.168.124.2;
-  option domain-name-servers 192.168.123.1, 192.168.122.250;
-}
-
-subnet 192.168.1.0 netmask 255.255.255.128 {
-  class "pxeclients" {
-    if option pxe-system-type = 00:02 {
-      filename "xyz";
+    subnet 192.168.122.0 netmask 255.255.255.0 {
+      option interface-mtu 9000;
+      option voip-tftp-server 1.2.3.4;
+      option routers 192.168.122.250; # This is an inline comment
+      next-server 192.168.122.251;
     }
-  }
-  # random stuff
-  host hostinsidesubnet {
-    server-name "hostinsidesubnet";
-    hardware ethernet 00:18:dd:01:9e:2e;
-    fixed-address 10.253.2.127;
-  }
-}
 
-host test.example.com {
-  hardware ethernet 00:11:bb:cc:dd:ee;
-  fixed-address 192.168.122.1;
-  supersede server.next-server = ac:17:23:1d;
-}
-END
+    subnet 192.168.123.0 netmask 255.255.255.192 {
+      option subnet-mask 255.255.255.192;
+      option routers 192.168.123.1;
+      option domain-name-servers 192.168.123.1;
+      option domain-name example.com;
+      range 192.168.123.2 192.168.123.62;
+    }
+
+    subnet 192.168.124.0 netmask 255.255.255.0 {
+      pool
+      {
+        range 192.168.124.200 192.168.124.254;
+      }
+      option domain-name foo.example.com;
+      option routers 192.168.124.1, 192.168.124.2;
+      option domain-name-servers 192.168.123.1, 192.168.122.250;
+    }
+
+    subnet 192.168.1.0 netmask 255.255.255.128 {
+      class "pxeclients" {
+        if option pxe-system-type = 00:02 {
+          filename "xyz";
+        }
+      }
+      # random stuff
+      host hostinsidesubnet {
+        server-name "hostinsidesubnet";
+        hardware ethernet 00:18:dd:01:9e:2e;
+        fixed-address 10.253.2.127;
+      }
+    }
+
+    host test.example.com {
+      hardware ethernet 00:11:bb:cc:dd:ee;
+      fixed-address 192.168.122.1;
+      supersede server.next-server = ac:17:23:1d;
+    }
+  END
 
   def setup
     @subnet_service = Proxy::DHCP::SubnetService.initialized_instance

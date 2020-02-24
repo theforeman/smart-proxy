@@ -29,16 +29,16 @@ module PuppetApiv3EnvironmentClassesApiRetrieverTests
 
   def test_returns_cached_classes_if_puppet_responds_with_not_modified
     Proxy::PuppetApi::EnvironmentClassesApiv3.any_instance.expects(:list_classes).returns([Proxy::PuppetApi::EnvironmentClassesApiv3::NOT_MODIFIED, 42])
-    expected_classes =<<EOL
-{
-  "files": [
-    {
-      "classes": [{"name": "dns::config", "params": []}],
-      "path": "/etc/puppetlabs/code/environments/home/modules/dns/manifests/config.pp"
-    }],
-  "name": "test_environment"
-}
-EOL
+    expected_classes =<<~EOL
+      {
+        "files": [
+          {
+            "classes": [{"name": "dns::config", "params": []}],
+            "path": "/etc/puppetlabs/code/environments/home/modules/dns/manifests/config.pp"
+          }],
+        "name": "test_environment"
+      }
+    EOL
     retriever = EnvironmentClassesApiRetrieverForTesting.new(nil, nil, nil, nil, nil)
     retriever.classes_cache['test_environment'] = JSON.parse(expected_classes)
     assert_equal JSON.parse(expected_classes), retriever.get_classes('test_environment')
@@ -88,24 +88,24 @@ module PuppetApiv3EnvironmentClassesApiParsingTests
     @retriever = Proxy::PuppetApi::V3EnvironmentClassesApiClassesRetriever.new(nil, nil, nil, nil, nil)
   end
 
-  ENVIRONMENT_CLASSES_RESPONSE =<<EOL
-{
-  "files": [
+  ENVIRONMENT_CLASSES_RESPONSE =<<~EOL
     {
-      "classes": [{"name": "dns::config", "params": []}],
-      "path": "/manifests/config.pp"
-    },
-    {
-      "classes": [{"name": "dns::install", "params": []}],
-      "path": "/manifests/install.pp"
-    },
-    {
-      "error": "Syntax error at '=>' at /manifests/witherror.pp:20:19",
-      "path": "/manifests/witherror.pp"
-    }],
-  "name": "test_environment"
-}
-EOL
+      "files": [
+        {
+          "classes": [{"name": "dns::config", "params": []}],
+          "path": "/manifests/config.pp"
+        },
+        {
+          "classes": [{"name": "dns::install", "params": []}],
+          "path": "/manifests/install.pp"
+        },
+        {
+          "error": "Syntax error at '=>' at /manifests/witherror.pp:20:19",
+          "path": "/manifests/witherror.pp"
+        }],
+      "name": "test_environment"
+    }
+  EOL
   def test_legacy_parser_with_environment_classes_response
     expected_classes = [Proxy::Puppet::PuppetClass.new("dns::config", {}), Proxy::Puppet::PuppetClass.new("dns::install", {})]
     Proxy::PuppetApi::EnvironmentClassesApiv3.any_instance.expects(:list_classes).returns([JSON.load(ENVIRONMENT_CLASSES_RESPONSE), 42])
@@ -121,18 +121,18 @@ EOL
     assert_equal expected_reponse, @retriever.classes_and_errors_in_environment('test_environment')
   end
 
-  ENVIRONMENT_CLASSES_RESPONSE_WITH_EXPRESSION_PARAMETERS =<<EOL
-{
-  "files": [{"classes": [{"name": "dns",
-                          "params": [
-                                      {"default_source": "$::dns::params::namedconf_path", "name": "namedconf_path"},
-                                      {"default_source": "$::dns::params::dnsdir", "name": "dnsdir"}
-                                    ]}],
-             "path": "/manifests/init.pp"
-           }],
-  "name": "test_environment"
-}
-EOL
+  ENVIRONMENT_CLASSES_RESPONSE_WITH_EXPRESSION_PARAMETERS =<<~EOL
+    {
+      "files": [{"classes": [{"name": "dns",
+                              "params": [
+                                          {"default_source": "$::dns::params::namedconf_path", "name": "namedconf_path"},
+                                          {"default_source": "$::dns::params::dnsdir", "name": "dnsdir"}
+                                        ]}],
+                 "path": "/manifests/init.pp"
+               }],
+      "name": "test_environment"
+    }
+  EOL
   def test_legacy_parser_with_environment_classes_response_with_variable_expression_parameteres
     expected_classes = [Proxy::Puppet::PuppetClass.new("dns", 'namedconf_path' => '${::dns::params::namedconf_path}', 'dnsdir' => '${::dns::params::dnsdir}')]
     Proxy::PuppetApi::EnvironmentClassesApiv3.any_instance.expects(:list_classes).returns([JSON.load(ENVIRONMENT_CLASSES_RESPONSE_WITH_EXPRESSION_PARAMETERS), 42])
@@ -148,26 +148,26 @@ EOL
     assert_equal expected_response, @retriever.classes_and_errors_in_environment('test_environment')
   end
 
-  ENVIRONMENT_CLASSES_RESPONSE_WITH_DEFAULT_LITERALS =<<EOL
-{
-  "files": [{"classes": [{"name": "testing",
-                          "params": [
-                                      {"default_literal": "literal default", "default_source": "literal default", "name": "string_with_literal_default", "type": "String"},
-                                      {
-                                        "default_literal": {
-                                          "one": "foo",
-                                          "two": "hello"
-                                        },
-                                       "default_source": "{'one' => 'foo', 'two' => 'hello'}",
-                                        "name": "a_hash",
-                                        "type": "Hash"
-                                      }
-                          ]}],
-             "path": "init.pp"
-           }],
-  "name": "test_environment"
-}
-EOL
+  ENVIRONMENT_CLASSES_RESPONSE_WITH_DEFAULT_LITERALS =<<~EOL
+    {
+      "files": [{"classes": [{"name": "testing",
+                              "params": [
+                                          {"default_literal": "literal default", "default_source": "literal default", "name": "string_with_literal_default", "type": "String"},
+                                          {
+                                            "default_literal": {
+                                              "one": "foo",
+                                              "two": "hello"
+                                            },
+                                           "default_source": "{'one' => 'foo', 'two' => 'hello'}",
+                                            "name": "a_hash",
+                                            "type": "Hash"
+                                          }
+                              ]}],
+                 "path": "init.pp"
+               }],
+      "name": "test_environment"
+    }
+  EOL
   def test_legacy_parser_with_puppet_environment_classes_response_with_default_literals
     expected_classes = [Proxy::Puppet::PuppetClass.new("testing", 'string_with_literal_default' => 'literal default', 'a_hash' => {'one' => 'foo', 'two' => 'hello'})]
     Proxy::PuppetApi::EnvironmentClassesApiv3.any_instance.expects(:list_classes).returns([JSON.load(ENVIRONMENT_CLASSES_RESPONSE_WITH_DEFAULT_LITERALS), 42])

@@ -37,13 +37,6 @@ Layout/IndentFirstArrayElement:
 Layout/IndentFirstHashElement:
   Enabled: false
 
-# Offense count: 18
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: squiggly, active_support, powerpack, unindent
-Layout/IndentHeredoc:
-  Enabled: false
-
 # Offense count: 11
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle.

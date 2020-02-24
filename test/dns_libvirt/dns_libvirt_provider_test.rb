@@ -5,23 +5,23 @@ require 'dns_libvirt/dns_libvirt_main'
 
 class DnsLibvirtProviderTest < Test::Unit::TestCase
   def setup
-    fixture = <<XMLFIXTURE
-<network>
-  <name>default</name>
-  <domain name='local.lan'/>
-  <dns>
-    <host ip='192.168.122.1'>
-      <hostname>some.example.com</hostname>
-    </host>
-  </dns>
-  <ip address='192.168.122.0' netmask='255.255.255.0'>
-    <dhcp>
-      <range start='192.168.122.1' end='192.168.122.250'/>
-      <host mac='52:54:00:e2:62:08' name='some.example.com' ip='192.168.122.1'/>
-    </dhcp>
-  </ip>
-</network>
-XMLFIXTURE
+    fixture = <<~XMLFIXTURE
+      <network>
+        <name>default</name>
+        <domain name='local.lan'/>
+        <dns>
+          <host ip='192.168.122.1'>
+            <hostname>some.example.com</hostname>
+          </host>
+        </dns>
+        <ip address='192.168.122.0' netmask='255.255.255.0'>
+          <dhcp>
+            <range start='192.168.122.1' end='192.168.122.250'/>
+            <host mac='52:54:00:e2:62:08' name='some.example.com' ip='192.168.122.1'/>
+          </dhcp>
+        </ip>
+      </network>
+    XMLFIXTURE
     @libvirt_network = mock()
     @libvirt_network.stubs(:dump_xml).returns(fixture)
     @subject = Proxy::Dns::Libvirt::Record.new('default', @libvirt_network)

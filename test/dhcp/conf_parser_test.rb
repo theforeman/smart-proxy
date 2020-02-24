@@ -27,11 +27,11 @@ class Proxy::DHCP::CommonISC::ConfigurationParserTest < Test::Unit::TestCase
                   Proxy::DHCP::CommonISC::ConfigurationParser.new.hardware.parse!('hardware token-ring 1:1:1:1:1:1;')
   end
 
-  MULTILINE_FQDN_LIST =<<EOFFQDNLIST
-ns1.isc.org,
-  ns1.isc.org,
-   ns1.isc.org
-EOFFQDNLIST
+  MULTILINE_FQDN_LIST =<<~EOFFQDNLIST
+    ns1.isc.org,
+      ns1.isc.org,
+       ns1.isc.org
+  EOFFQDNLIST
   def test_fqdn_list_with_various_spacing
     assert_equal ['ns1.isc.org', 'ns2.isc.org'], Proxy::DHCP::CommonISC::ConfigurationParser::FQDN_LIST.parse!('ns1.isc.org, ns2.isc.org')
     assert_equal ['ns1.isc.org', 'ns2.isc.org'], Proxy::DHCP::CommonISC::ConfigurationParser::FQDN_LIST.parse!('ns1.isc.org,   ns2.isc.org')
@@ -39,11 +39,11 @@ EOFFQDNLIST
     assert_equal ['ns1.isc.org', 'ns1.isc.org', 'ns1.isc.org'], Proxy::DHCP::CommonISC::ConfigurationParser::FQDN_LIST.parse!(MULTILINE_FQDN_LIST)
   end
 
-  MULTILINE_IP_LIST =<<EOFIPLIST
-204.254.239.1,
- 204.254.239.2,
-  204.254.239.3
-EOFIPLIST
+  MULTILINE_IP_LIST =<<~EOFIPLIST
+    204.254.239.1,
+     204.254.239.2,
+      204.254.239.3
+  EOFIPLIST
   def test_ipv4_address_list_with_various_spacing
     assert_equal ['204.254.239.1', '204.254.239.2'], Proxy::DHCP::CommonISC::ConfigurationParser::IPV4_ADDRESS_LIST.parse!('204.254.239.1, 204.254.239.2')
     assert_equal ['204.254.239.1', '204.254.239.2'], Proxy::DHCP::CommonISC::ConfigurationParser::IPV4_ADDRESS_LIST.parse!('204.254.239.1,  204.254.239.2')
@@ -169,23 +169,23 @@ EOFSUBNETWITHOPTIONS
                  Proxy::DHCP::CommonISC::ConfigurationParser.new.conf.parse!("group testing {adaptive-lease-time-threshold 50;}")
   end
 
-  MULTILINE_GROUP =<<EOFMULTILINEGROUP
-group ilom {
-  default-lease-time 3600;
-  option domain-name "isc.org";
-  option routers 204.254.239.1, 204.254.239.2, 204.254.239.3;
-  host nested-host { hardware ethernet 11:22:33:a9:61:09; fixed-address 192.168.1.200; }
-  subnet 192.168.2.0 netmask 255.255.255.0 {
-    option domain-name "nested.subnet.test";
-  }
-  group nested-group {
-    option domain-name "nested.group.test";
-  }
-  shared-network nested-shared-network {
-    option domain-name "nested.shared.network.test";
-  }
-}
-EOFMULTILINEGROUP
+  MULTILINE_GROUP =<<~EOFMULTILINEGROUP
+    group ilom {
+      default-lease-time 3600;
+      option domain-name "isc.org";
+      option routers 204.254.239.1, 204.254.239.2, 204.254.239.3;
+      host nested-host { hardware ethernet 11:22:33:a9:61:09; fixed-address 192.168.1.200; }
+      subnet 192.168.2.0 netmask 255.255.255.0 {
+        option domain-name "nested.subnet.test";
+      }
+      group nested-group {
+        option domain-name "nested.group.test";
+      }
+      shared-network nested-shared-network {
+        option domain-name "nested.shared.network.test";
+      }
+    }
+  EOFMULTILINEGROUP
   def test_group_parser
     assert_equal [Proxy::DHCP::CommonISC::ConfigurationParser::GroupNode['ilom', [
       Proxy::DHCP::CommonISC::ConfigurationParser::IgnoredDeclaration[['default-lease-time', '3600']],
