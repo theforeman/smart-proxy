@@ -1,5 +1,4 @@
 require 'proxy/log_buffer/buffer'
-require 'thread'
 
 module Proxy::LogBuffer
   class TraceDecorator

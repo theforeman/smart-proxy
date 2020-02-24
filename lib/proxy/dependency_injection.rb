@@ -1,5 +1,3 @@
-require 'thread'
-
 module Proxy::DependencyInjection
   class InstanceVariableWrapper
     def initialize(a_class_or_lambda)
