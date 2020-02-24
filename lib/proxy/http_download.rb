@@ -23,7 +23,7 @@ module Proxy
       if lock.nil?
         return false
       else
-        super {  Proxy::FileLock.unlock(lock) }
+        super { Proxy::FileLock.unlock(lock) }
       end
     end
   end

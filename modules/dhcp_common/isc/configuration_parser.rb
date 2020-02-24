@@ -246,7 +246,7 @@ module Proxy
           llt = seq_(word('llt') | word('LLT'), SPACE.join(anything).odd._?)
           ll = seq_(word('ll') | word('LL'), SPACE.join(anything).odd._?)
           en = seq_(word('en') | word('EN'), prim(:int32), literal)
-          seq_(keyword,  literal | HEX | en | llt | ll | prim(:int32), EOSTMT) {|_, duid, _| KeyValueNode[:server_duid, duid.respond_to?(:flatten) ? duid.flatten : duid]}
+          seq_(keyword, literal | HEX | en | llt | ll | prim(:int32), EOSTMT) {|_, duid, _| KeyValueNode[:server_duid, duid.respond_to?(:flatten) ? duid.flatten : duid]}
         end
 
         def filename

@@ -24,7 +24,7 @@ class DhcpLibvirtProviderTest < Test::Unit::TestCase
   end
 
   def test_should_remove_record
-    record =  Proxy::DHCP::Reservation.new("test.example.com", "192.168.122.10", "00:11:bb:cc:dd:ee", @subnet)
+    record = Proxy::DHCP::Reservation.new("test.example.com", "192.168.122.10", "00:11:bb:cc:dd:ee", @subnet)
     @service.add_subnet(@subnet)
     @service.add_host("192.168.122.0", record)
     @subject.libvirt_network.expects(:del_dhcp_record).with(record)

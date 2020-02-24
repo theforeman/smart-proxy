@@ -34,7 +34,7 @@ module ::Proxy::PuppetCa::PuppetcaPuppetCert
       # note that this ignores certificates which were revoked multiple times, displaying only the last
       # revocation state
       # additionally, we don't merge revocation info if the host has a pending certificate request
-      hash.merge(ca_inventory) {|key, h1, h2| h1[:state] == "pending" ?  h1 : h1.merge(h2)}
+      hash.merge(ca_inventory) {|key, h1, h2| h1[:state] == "pending" ? h1 : h1.merge(h2)}
     end
 
     def pending

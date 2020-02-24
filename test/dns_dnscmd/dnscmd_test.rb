@@ -41,14 +41,14 @@ class DnsCmdTest < Test::Unit::TestCase
   end
 
   def test_remove_address_records_with_longest_zone_match
-    Proxy::Dns::Dnscmd::Record.any_instance.expects(:enum_records).with('bar.domain.local', 'host.foo.bar.domain.local',  'A').returns(['1.1.1.1','2.2.2.2'])
+    Proxy::Dns::Dnscmd::Record.any_instance.expects(:enum_records).with('bar.domain.local', 'host.foo.bar.domain.local', 'A').returns(['1.1.1.1','2.2.2.2'])
     Proxy::Dns::Dnscmd::Record.any_instance.expects(:remove_specific_record_from_zone).with('bar.domain.local', 'host.foo.bar.domain.local', '1.1.1.1', 'A').returns(true)
     Proxy::Dns::Dnscmd::Record.any_instance.expects(:remove_specific_record_from_zone).with('bar.domain.local', 'host.foo.bar.domain.local', '2.2.2.2', 'A').returns(true)
     assert_nil @server.do_remove('host.foo.bar.domain.local', 'A')
   end
 
   def test_remove_ptr_records
-    Proxy::Dns::Dnscmd::Record.any_instance.expects(:enum_records).with('33.168.192.in-addr.arpa', '33.33.168.192.in-addr.arpa',  'PTR').returns(['host.domain.local'])
+    Proxy::Dns::Dnscmd::Record.any_instance.expects(:enum_records).with('33.168.192.in-addr.arpa', '33.33.168.192.in-addr.arpa', 'PTR').returns(['host.domain.local'])
     Proxy::Dns::Dnscmd::Record.any_instance.expects(:remove_specific_record_from_zone).with('33.168.192.in-addr.arpa', '33.33.168.192.in-addr.arpa', 'host.domain.local', 'PTR').returns(true)
     assert_nil @server.do_remove('33.33.168.192.in-addr.arpa', 'PTR')
   end
@@ -64,7 +64,7 @@ class DnsCmdTest < Test::Unit::TestCase
   end
 
   def test_remove_cname_records
-    Proxy::Dns::Dnscmd::Record.any_instance.expects(:enum_records).with('bar.domain.local', 'alias.foo.bar.domain.local',  'CNAME').returns(['host.domain.local'])
+    Proxy::Dns::Dnscmd::Record.any_instance.expects(:enum_records).with('bar.domain.local', 'alias.foo.bar.domain.local', 'CNAME').returns(['host.domain.local'])
     Proxy::Dns::Dnscmd::Record.any_instance.expects(:remove_specific_record_from_zone).with('bar.domain.local', 'alias.foo.bar.domain.local', 'host.domain.local', 'CNAME').returns(true)
     assert_nil @server.do_remove('alias.foo.bar.domain.local', 'CNAME')
   end

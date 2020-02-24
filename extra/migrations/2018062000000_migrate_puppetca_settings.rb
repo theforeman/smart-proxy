@@ -5,11 +5,11 @@ class MigratePuppetCaSettings < ::Proxy::Migration
     copy_original_configuration_except(path('settings.d', 'puppetca.yml'),
                                        path('settings.d', 'puppetca_hostname_whitelisting.yml.example'))
 
-    module_settings   = YAML.load_file(path(src_dir, 'settings.d', 'puppetca.yml'))
+    module_settings = YAML.load_file(path(src_dir, 'settings.d', 'puppetca.yml'))
     if File.exist?(path(src_dir, 'settings.d', 'puppetca_hostname_whitelisting.yml'))
       provider_settings = YAML.load_file(path(src_dir, 'settings.d', 'puppetca_hostname_whitelisting.yml'))
     else
-      provider_settings =  {}
+      provider_settings = {}
     end
 
     write_yaml(path(dst_dir, 'settings.d', 'puppetca_hostname_whitelisting.yml'),

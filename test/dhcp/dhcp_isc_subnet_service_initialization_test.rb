@@ -73,7 +73,7 @@ host test.example.com {
 END
 
   def setup
-    @subnet_service =  Proxy::DHCP::SubnetService.initialized_instance
+    @subnet_service = Proxy::DHCP::SubnetService.initialized_instance
     @parser = ::Proxy::DHCP::CommonISC::ConfigurationParser.new
     @initialization = ::Proxy::DHCP::CommonISC::IscSubnetServiceInitialization.new(@subnet_service, @parser)
   end
@@ -85,7 +85,7 @@ END
 
   def test_managed_subnets_network_addresses
     @initialization.load_configuration_file(DHCPD_CONFIG)
-    subnets =  @subnet_service.all_subnets
+    subnets = @subnet_service.all_subnets
     assert_equal "192.168.122.0", subnets[0].network
     assert_equal "192.168.123.0", subnets[1].network
     assert_equal "192.168.124.0", subnets[2].network
@@ -94,13 +94,13 @@ END
 
   def test_interface_mtu_option
     @initialization.load_configuration_file(DHCPD_CONFIG)
-    subnets =  @subnet_service.all_subnets
+    subnets = @subnet_service.all_subnets
     assert_equal 9000, subnets[0].options[:interface_mtu]
   end
 
   def test_managed_subnets_netmask
     @initialization.load_configuration_file(DHCPD_CONFIG)
-    subnets =  @subnet_service.all_subnets
+    subnets = @subnet_service.all_subnets
     assert_equal "255.255.255.0", subnets[0].netmask
     assert_equal "255.255.255.192", subnets[1].netmask
     assert_equal "255.255.255.0", subnets[2].netmask
@@ -109,7 +109,7 @@ END
 
   def test_managed_subnets_router_addresses
     @initialization.load_configuration_file(DHCPD_CONFIG)
-    subnets =  @subnet_service.all_subnets
+    subnets = @subnet_service.all_subnets
     assert_equal ["192.168.122.250"], subnets[0].options[:routers]
     assert_equal nil, subnets[0].options[:routers][1]
     assert_equal ["192.168.123.1"], subnets[1].options[:routers]
@@ -118,7 +118,7 @@ END
 
   def test_managed_subnets_domain_name_servers
     @initialization.load_configuration_file(DHCPD_CONFIG)
-    subnets =  @subnet_service.all_subnets
+    subnets = @subnet_service.all_subnets
     assert_equal nil, subnets[0].options[:domain_name_servers]
     assert_equal ["192.168.123.1"], subnets[1].options[:domain_name_servers]
     assert_equal ["192.168.123.1", "192.168.122.250"], subnets[2].options[:domain_name_servers]
@@ -126,7 +126,7 @@ END
 
   def test_managed_subnets_range
     @initialization.load_configuration_file(DHCPD_CONFIG)
-    subnets =  @subnet_service.all_subnets
+    subnets = @subnet_service.all_subnets
     assert_equal nil, subnets[0].options[:range]
     assert_equal ["192.168.123.2", "192.168.123.62"], subnets[1].options[:range]
     assert_equal nil, subnets[2].options[:range]

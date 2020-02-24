@@ -53,7 +53,7 @@ class MigrateMonolithicConfig < ::Proxy::Migration
   end
 
   def migrate_monolithic_config(data)
-    output     = {}
+    output = {}
     modules.each {|m| output[m] = {} }
 
     # chef's enabler got called something non-standard...

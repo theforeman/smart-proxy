@@ -44,7 +44,7 @@ class DhcpApiTest < Test::Unit::TestCase
                                                   "192.168.122.10",
                                                   "10:10:10:10:10:10",
                                                   @subnet,
-                                                  :hostname   => "ten.example.com")]
+                                                  :hostname => "ten.example.com")]
 
     @leases = [
       Proxy::DHCP::Lease.new(nil, "192.168.122.2", "00:aa:bb:cc:dd:ee", @subnet, date_format("Sat Jul 12 10:08:29 UTC 2014"), nil, "active"),

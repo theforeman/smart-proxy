@@ -46,7 +46,7 @@ res.open_timeout = SETTINGS[:timeout]
 res.read_timeout = SETTINGS[:timeout]
 req              = Net::HTTP::Post.new(uri.request_uri)
 req.add_field('Accept', 'application/json,version=2')
-req.body         = csr
+req.body = csr
 begin
   res.start do |http|
     response = http.request(req)
