@@ -3,7 +3,6 @@ require 'proxy/sd_notify'
 require 'proxy/settings'
 require 'proxy/signal_handler'
 require 'proxy/log_buffer/trace_decorator'
-require 'thread'
 
 module Proxy
   class Launcher

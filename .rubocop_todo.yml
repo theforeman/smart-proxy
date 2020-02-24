@@ -157,11 +157,6 @@ Lint/ScriptPermission:
 Lint/StringConversionInInterpolation:
   Enabled: false
 
-# Offense count: 4
-# Cop supports --auto-correct.
-Lint/UnneededRequireStatement:
-  Enabled: false
-
 # Offense count: 2
 Naming/ConstantName:
   Enabled: false
