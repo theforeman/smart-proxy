@@ -244,11 +244,6 @@ Style/CommandLiteral:
 Style/CommentAnnotation:
   Enabled: false
 
-# Offense count: 1
-# Cop supports --auto-correct.
-Style/Dir:
-  Enabled: false
-
 # Offense count: 10
 Style/DoubleNegation:
   Enabled: false
