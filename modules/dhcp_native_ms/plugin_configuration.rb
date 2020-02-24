@@ -14,7 +14,6 @@ module ::Proxy::DHCP
           Proxy::DHCP::NativeMS::Provider.new(container_instance.get_dependency(:dhcps_api),
                                               settings[:subnets], settings[:disable_ddns], container_instance.get_dependency(:free_ips))
         end)
-
       end
     end
   end
