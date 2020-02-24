@@ -59,7 +59,7 @@ module Proxy::DHCP::NativeMS
     end
 
     def set_option_values(ip_address, subnet_address, option_values)
-      for key, value in option_values
+      option_values.each do |key, value|
         k = Standard[key] || Standard[key.to_sym]
         next if k.nil?
         dhcpsapi.set_reserved_option_value(
@@ -248,8 +248,8 @@ module Proxy::DHCP::NativeMS
 
     def install_vendor_class(vendor_class)
       dhcpsapi.create_class(vendor_class, "Vendor class for #{vendor_class}", true, "SUNW.#{vendor_class}")
-      for option in [:root_server_ip, :root_server_hostname, :root_path_name, :install_server_ip, :install_server_name,
-                     :install_path, :sysid_server_path, :jumpstart_server_path]
+      [:root_server_ip, :root_server_hostname, :root_path_name, :install_server_ip, :install_server_name,
+       :install_path, :sysid_server_path, :jumpstart_server_path].each do |option|
         dhcpsapi.create_option(SUNW[option][:code], option.to_s, "", dhcps_option_type_from_sunw_kind(SUNW[option][:kind]), false, vendor_class)
       end
       vendor_class
