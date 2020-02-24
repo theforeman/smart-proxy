@@ -2,7 +2,6 @@ require 'net/http'
 require 'net/https'
 require 'uri'
 require 'cgi'
-require 'hash-patch'
 
 module Proxy::HttpRequest
   class ForemanRequestFactory
