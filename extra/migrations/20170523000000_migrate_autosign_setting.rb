@@ -29,7 +29,7 @@ class MigrateAutosignSetting < ::Proxy::Migration
   end
 
   def migrate_autosign_configuration(to_migrate)
-    migrated = Hash.new { |h,k| h[k] = Hash.new }
+    migrated = Hash.new { |h, k| h[k] = Hash.new }
     to_migrate.each do |option, value|
       module_name, parameter_name, parameter_value = remap_parameter(option, value)
       migrated[module_name][parameter_name] = parameter_value
@@ -40,7 +40,7 @@ class MigrateAutosignSetting < ::Proxy::Migration
   def write_to_files(output)
     output.keys.each do |m|
       next if output[m].empty? || m == :unknown
-      File.open(path(dst_dir, "settings.d", "#{m}.yml"),'w') do |f|
+      File.open(path(dst_dir, "settings.d", "#{m}.yml"), 'w') do |f|
         f.write(strip_ruby_symbol_encoding(output[m].to_yaml))
       end
     end

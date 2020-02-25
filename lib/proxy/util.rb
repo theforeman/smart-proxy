@@ -20,7 +20,7 @@ module Proxy::Util
       logger.debug "Starting task: #{@command}"
       @task = Thread.new(@command) do |cmd|
         status = nil
-        Open3::popen3(cmd) do |stdin,stdout,stderr,thr|
+        Open3::popen3(cmd) do |stdin, stdout, stderr, thr|
           # PIDs are not available under Ruby 1.8
           pid = thr.nil? ? '(unknown)' : thr.pid
           stdout.each do |line|

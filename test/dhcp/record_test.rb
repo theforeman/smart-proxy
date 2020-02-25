@@ -8,7 +8,7 @@ require 'dhcp_common/record/lease'
 
 class Proxy::DHCPRecordTest < Test::Unit::TestCase
   def setup
-    @subnet = Proxy::DHCP::Subnet.new("192.168.0.0","255.255.255.0")
+    @subnet = Proxy::DHCP::Subnet.new("192.168.0.0", "255.255.255.0")
     @ip = "123.321.123.321"
     @mac = "aa:bb:CC:dd:ee:ff"
     @record = Proxy::DHCP::Record.new(@ip, @mac, @subnet)
@@ -44,8 +44,8 @@ class Proxy::DHCPRecordTest < Test::Unit::TestCase
   end
 
   def test_equality
-    assert_equal Proxy::DHCP::Record.new(@ip, @mac, Proxy::DHCP::Subnet.new("192.168.0.0","255.255.255.0"), :option1 => 'one'),
-                 Proxy::DHCP::Record.new(@ip, @mac, Proxy::DHCP::Subnet.new("192.168.0.0","255.255.255.0"), :option1 => 'one')
+    assert_equal Proxy::DHCP::Record.new(@ip, @mac, Proxy::DHCP::Subnet.new("192.168.0.0", "255.255.255.0"), :option1 => 'one'),
+                 Proxy::DHCP::Record.new(@ip, @mac, Proxy::DHCP::Subnet.new("192.168.0.0", "255.255.255.0"), :option1 => 'one')
     assert_not_equal Proxy::DHCP::Record.new(@ip, @mac, @subnet, :option1 => 'one'),
                      Proxy::DHCP::Record.new('1.1.1.1', @mac, @subnet, :option1 => 'one')
     assert_not_equal Proxy::DHCP::Record.new(@ip, @mac, @subnet, :option1 => 'one'),
@@ -53,7 +53,7 @@ class Proxy::DHCPRecordTest < Test::Unit::TestCase
     assert_not_equal Proxy::DHCP::Record.new(@ip, @mac, @subnet, :option1 => 'one'),
                      Proxy::DHCP::Record.new(@ip, @mac, @subnet, :option2 => 'two')
     assert_not_equal Proxy::DHCP::Record.new(@ip, @mac, @subnet, :option1 => 'one'),
-                     Proxy::DHCP::Record.new(@ip, @mac, ::Proxy::DHCP::Subnet.new("192.168.0.0","255.255.255.128"), :option1 => 'one')
+                     Proxy::DHCP::Record.new(@ip, @mac, ::Proxy::DHCP::Subnet.new("192.168.0.0", "255.255.255.128"), :option1 => 'one')
   end
 
   def test_reservation_equality
@@ -68,7 +68,7 @@ class Proxy::DHCPRecordTest < Test::Unit::TestCase
     assert_not_equal Proxy::DHCP::Reservation.new('test', @ip, @mac, @subnet, :option1 => 'one'),
                      Proxy::DHCP::Reservation.new('test', @ip, '00:01:02:03:04:05', @subnet, :option1 => 'one')
     assert_not_equal Proxy::DHCP::Reservation.new('test', @ip, @mac, @subnet, :option1 => 'one'),
-                     Proxy::DHCP::Reservation.new('test', @ip, @mac, ::Proxy::DHCP::Subnet.new("192.168.0.0","255.255.255.128"), :option1 => 'one')
+                     Proxy::DHCP::Reservation.new('test', @ip, @mac, ::Proxy::DHCP::Subnet.new("192.168.0.0", "255.255.255.128"), :option1 => 'one')
     assert_not_equal Proxy::DHCP::Reservation.new('test', @ip, @mac, @subnet, :option1 => 'one'),
                      Proxy::DHCP::Reservation.new('test', @ip, @mac, @subnet, :option2 => 'one')
   end
@@ -84,8 +84,8 @@ class Proxy::DHCPRecordTest < Test::Unit::TestCase
     start_time = Time.now
     end_time = Time.now + 10
 
-    assert_equal Proxy::DHCP::Lease.new('lease', @ip, @mac, Proxy::DHCP::Subnet.new("192.168.0.0","255.255.255.0"), start_time, end_time, 'active', :option1 => 'one'),
-                 Proxy::DHCP::Lease.new('lease', @ip, @mac, Proxy::DHCP::Subnet.new("192.168.0.0","255.255.255.0"), start_time, end_time, 'active', :option1 => 'one')
+    assert_equal Proxy::DHCP::Lease.new('lease', @ip, @mac, Proxy::DHCP::Subnet.new("192.168.0.0", "255.255.255.0"), start_time, end_time, 'active', :option1 => 'one'),
+                 Proxy::DHCP::Lease.new('lease', @ip, @mac, Proxy::DHCP::Subnet.new("192.168.0.0", "255.255.255.0"), start_time, end_time, 'active', :option1 => 'one')
     assert_not_equal Proxy::DHCP::Lease.new('lease', @ip, @mac, @subnet, start_time, end_time, 'active', :option1 => 'one'), Object.new
     assert_not_equal Proxy::DHCP::Lease.new('lease', @ip, @mac, @subnet, start_time, end_time, 'active', :option1 => 'one'),
                      Proxy::DHCP::Lease.new(nil, @ip, @mac, @subnet, start_time, end_time, 'active', :option1 => 'one')
@@ -94,7 +94,7 @@ class Proxy::DHCPRecordTest < Test::Unit::TestCase
     assert_not_equal Proxy::DHCP::Lease.new(nil, @ip, @mac, @subnet, start_time, end_time, 'active', :option1 => 'one'),
                      Proxy::DHCP::Lease.new(nil, @ip, '00:01:02:03:04:05', @subnet, start_time, end_time, 'active', :option1 => 'one')
     assert_not_equal Proxy::DHCP::Lease.new(nil, @ip, @mac, @subnet, start_time, end_time, 'active', :option1 => 'one'),
-                     Proxy::DHCP::Lease.new(nil, @ip, @mac, ::Proxy::DHCP::Subnet.new("192.168.0.0","255.255.255.128"), start_time, end_time, 'active', :option1 => 'one')
+                     Proxy::DHCP::Lease.new(nil, @ip, @mac, ::Proxy::DHCP::Subnet.new("192.168.0.0", "255.255.255.128"), start_time, end_time, 'active', :option1 => 'one')
     assert_not_equal Proxy::DHCP::Lease.new(nil, @ip, @mac, @subnet, start_time, end_time, 'active', :option1 => 'one'),
                      Proxy::DHCP::Lease.new(nil, @ip, @mac, @subnet, start_time + 5, end_time, 'active', :option1 => 'one')
     assert_not_equal Proxy::DHCP::Lease.new(nil, @ip, @mac, @subnet, start_time, end_time, 'active', :option1 => 'one'),

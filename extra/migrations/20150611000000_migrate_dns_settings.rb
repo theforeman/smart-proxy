@@ -27,7 +27,7 @@ class MigrateDnsSettings < ::Proxy::Migration
   end
 
   def migrate_dns_configuration(data)
-    output = Hash.new { |h,k| h[k] = Hash.new }
+    output = Hash.new { |h, k| h[k] = Hash.new }
 
     data.each do |option, value|
       if known_dns_options.include? option
@@ -61,11 +61,11 @@ class MigrateDnsSettings < ::Proxy::Migration
   def write_to_files(output, unknown)
     output.keys.each do |m|
       next if output[m] == {}
-      File.open(path(dst_dir, "settings.d", "#{m}.yml"),'w') do |f|
+      File.open(path(dst_dir, "settings.d", "#{m}.yml"), 'w') do |f|
         f.write(output[m].to_yaml)
         if m == :dns && unknown != {}
           f.write "\n# Unparsed options, please review\n"
-          f.write(unknown.to_yaml.gsub(/^---/,''))
+          f.write(unknown.to_yaml.gsub(/^---/, ''))
         end
       end
     end

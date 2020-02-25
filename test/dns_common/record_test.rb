@@ -137,7 +137,7 @@ class DnsRecordTest < Test::Unit::TestCase
   end
 
   def test_create_srv_record
-    Proxy::Dns::Record.any_instance.expects(:do_create).with('_sip._tcp.example.com.','10 60 5060 bigbox.example.com.', 'SRV')
+    Proxy::Dns::Record.any_instance.expects(:do_create).with('_sip._tcp.example.com.', '10 60 5060 bigbox.example.com.', 'SRV')
 
     assert_nil Proxy::Dns::Record.new.create_srv_record('_sip._tcp.example.com.', '10 60 5060 bigbox.example.com.')
   end

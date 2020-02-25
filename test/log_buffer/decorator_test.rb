@@ -46,7 +46,7 @@ class DecoratorTest < Test::Unit::TestCase
 
   def test_should_not_ignore_infos
     1.step(5) { |i| @decorator.info(i) }
-    assert_equal ['1','2','3','4','5'], @buffer.to_a.collect(&:message)
+    assert_equal ['1', '2', '3', '4', '5'], @buffer.to_a.collect(&:message)
   end
 
   def test_should_ignore_debugs
@@ -57,7 +57,7 @@ class DecoratorTest < Test::Unit::TestCase
   def test_should_not_ignore_debugs
     @logger.level = DEBUG
     1.step(5) { |i| @decorator.debug(i) }
-    assert_equal ['1','2','3','4','5'], @buffer.to_a.collect(&:message)
+    assert_equal ['1', '2', '3', '4', '5'], @buffer.to_a.collect(&:message)
   end
 
   def test_should_keep_request_id_in_buffer_when_available

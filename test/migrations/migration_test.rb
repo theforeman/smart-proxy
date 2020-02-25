@@ -1,5 +1,5 @@
 require 'test_helper'
-require File.join(File.dirname(__FILE__),'../../extra/migrate_settings')
+require File.join(File.dirname(__FILE__), '../../extra/migrate_settings')
 
 class MigrationTest < Test::Unit::TestCase
   def setup
