@@ -230,7 +230,7 @@ module Proxy::DHCP::NativeMS
         if standard_option_names.key?(current[:option_id])
           all[n = standard_option_names[current[:option_id]]] = Standard[n][:is_list] ? current_values : current_values.first
         else
-          all[current[:option_id]] = current_values.size > 1 ? current_values : current_values.first
+          all[current[:option_id]] = (current_values.size > 1) ? current_values : current_values.first
         end
         all
       end
@@ -240,7 +240,7 @@ module Proxy::DHCP::NativeMS
       return {} if vendor.nil?
       to_return = option_values.inject({}) do |all, current|
         current_values = current[:value].map {|v| v[:element]}
-        all[sunw_option(current[:option_id]) || current[:option_id]] = (current_values.size > 1 ? current_values : current_values.first)
+        all[sunw_option(current[:option_id]) || current[:option_id]] = ((current_values.size > 1) ? current_values : current_values.first)
         all
       end
       to_return.empty? ? to_return : to_return.merge(:vendor => vendor)

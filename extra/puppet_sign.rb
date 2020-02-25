@@ -29,8 +29,8 @@ unless PUPPETCA[:enabled]
   log('PuppetCA smart-proxy module is not enabled!')
   exit 1
 end
-protocol         = PUPPETCA[:enabled] == true ? 'https' : PUPPETCA[:enabled]
-port             = protocol == 'https' ? SETTINGS[:https_port] : SETTINGS[:http_port]
+protocol         = (PUPPETCA[:enabled] == true) ? 'https' : PUPPETCA[:enabled]
+port             = (protocol == 'https') ? SETTINGS[:https_port] : SETTINGS[:http_port]
 fqdn             = Socket.gethostbyname(Socket.gethostname).first
 # e.g. POST https://hostname.localdomain.com:8443/puppet/ca/validate
 uri              = URI.parse("#{protocol}://#{fqdn}:#{port}/puppet/ca/validate")

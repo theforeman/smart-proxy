@@ -50,7 +50,7 @@ module Proxy::Dns
       if params[:type]
         type = params[:type]
       else
-        type = name =~ /\.(in-addr|ip6)\.arpa$/ ? "PTR" : "A"
+        type = (name =~ /\.(in-addr|ip6)\.arpa$/) ? "PTR" : "A"
       end
 
       begin

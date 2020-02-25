@@ -53,7 +53,7 @@ module ::Proxy::PuppetCa::TokenWhitelisting
 
     # Create a new token for a certname
     def autosign certname, ttl
-      ttl = ttl.to_i > 0 ? ttl.to_i : token_ttl
+      ttl = (ttl.to_i > 0) ? ttl.to_i : token_ttl
       payload = { certname: certname, exp: Time.now.to_i + ttl * 60 }
       token = JWT.encode payload, smartproxy_cert, JWT_ALGORITHM
       storage.add token

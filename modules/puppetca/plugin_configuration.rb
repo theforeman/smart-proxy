@@ -10,7 +10,7 @@ module ::Proxy::PuppetCa
 
       use_provider = settings[:use_provider]
       use_provider = [use_provider].compact unless use_provider.is_a?(Array)
-      use_provider << (Gem::Version.new(settings[:puppet_version].to_s) >= Gem::Version.new('6.0') ? :puppetca_http_api : :puppetca_puppet_cert)
+      use_provider << ((Gem::Version.new(settings[:puppet_version].to_s) >= Gem::Version.new('6.0')) ? :puppetca_http_api : :puppetca_puppet_cert)
       settings[:use_provider] = use_provider
 
       settings

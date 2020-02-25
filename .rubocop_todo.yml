@@ -409,13 +409,6 @@ Style/SignalException:
 Style/SymbolArray:
   EnforcedStyle: brackets
 
-# Offense count: 15
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, AllowSafeAssignment.
-# SupportedStyles: require_parentheses, require_no_parentheses, require_parentheses_when_complex
-Style/TernaryParentheses:
-  Enabled: false
-
 # Offense count: 9
 # Cop supports --auto-correct.
 # Configuration parameters: AllowNamedUnderscoreVariables.
