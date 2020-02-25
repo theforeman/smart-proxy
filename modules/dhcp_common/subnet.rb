@@ -85,8 +85,8 @@ module Proxy::DHCP
       from_address_as_i = from_address.nil? ? 0 : ::Proxy::DHCP.ipv4_to_i(from_address)
       to_address_as_i = to_address.nil? ? 0xffffffff : ::Proxy::DHCP.ipv4_to_i(to_address)
 
-      range_start_address = from_address_as_i < subnet_start_address ? subnet_start_address : from_address_as_i
-      range_end_address = to_address_as_i > subnet_end_address ? subnet_end_address : to_address_as_i
+      range_start_address = (from_address_as_i < subnet_start_address) ? subnet_start_address : from_address_as_i
+      range_end_address = (to_address_as_i > subnet_end_address) ? subnet_end_address : to_address_as_i
 
       [::Proxy::DHCP.i_to_ipv4(range_start_address), ::Proxy::DHCP.i_to_ipv4(range_end_address)]
     end

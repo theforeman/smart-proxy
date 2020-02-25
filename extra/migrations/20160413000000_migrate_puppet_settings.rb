@@ -45,7 +45,7 @@ class MigratePuppetSettings < ::Proxy::Migration
 
   def old_provider_name_to_new(aname)
     if ['puppetrun', 'mcollective', 'puppetssh', 'salt', 'customrun'].include?(aname)
-      aname == 'puppetssh' ? 'puppet_proxy_ssh' : 'puppet_proxy_' + aname
+      (aname == 'puppetssh') ? 'puppet_proxy_ssh' : 'puppet_proxy_' + aname
     else
       aname
     end
