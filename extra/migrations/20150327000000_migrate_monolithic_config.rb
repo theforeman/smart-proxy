@@ -77,7 +77,7 @@ class MigrateMonolithicConfig < ::Proxy::Migration
         data.delete(option)
       else
         modules.each do |mod|
-          next unless option.to_s =~ /^#{mod.to_s}/
+          next unless option.to_s =~ /^#{mod}/
           output[mod][option] = value
           data.delete(option)
         end
