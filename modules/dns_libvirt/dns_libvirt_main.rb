@@ -20,7 +20,7 @@ module Proxy::Dns::Libvirt
       logger.error msg, e
       raise Proxy::Dns::Error, msg
     end
-    alias :create_aaaa_record :create_a_record
+    alias_method :create_aaaa_record, :create_a_record
 
     def create_ptr_record(fqdn, ip)
       # libvirt does not support PTR
@@ -33,7 +33,7 @@ module Proxy::Dns::Libvirt
       logger.error msg, e
       raise Proxy::Dns::Error, msg
     end
-    alias :remove_aaaa_record :remove_a_record
+    alias_method :remove_aaaa_record, :remove_a_record
 
     def remove_ptr_record(ip)
       # libvirt does not support PTR
