@@ -15,7 +15,7 @@ class SSLClientVerificationIntegrationTest < Test::Unit::TestCase
       def http_rackup
         'run SSLClientVerificationIntegrationTest::TestAPIWithSSLClientAuth'
       end
-      alias https_rackup http_rackup
+      alias_method :https_rackup, :http_rackup
     end
   end
 

@@ -197,13 +197,6 @@ Security/YAMLLoad:
 Style/AccessModifierDeclarations:
   Enabled: false
 
-# Offense count: 3
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: prefer_alias, prefer_alias_method
-Style/Alias:
-  Enabled: false
-
 # Offense count: 173
 # Cop supports --auto-correct.
 # Configuration parameters: AutoCorrect, EnforcedStyle.
