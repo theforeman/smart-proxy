@@ -1,8 +1,8 @@
 require 'test_helper'
 
-require File.join(File.dirname(__FILE__),'../../extra/migrate_settings')
+require File.join(File.dirname(__FILE__), '../../extra/migrate_settings')
 ::Proxy::Migration.inject_migrations_instance(::Proxy::Migrations.new("dummy"))
-require File.join(File.dirname(__FILE__),'../../extra/migrations/20170523000000_migrate_autosign_setting.rb')
+require File.join(File.dirname(__FILE__), '../../extra/migrations/20170523000000_migrate_autosign_setting.rb')
 
 class ProxyAutosignMigrationTest < Test::Unit::TestCase
   def setup

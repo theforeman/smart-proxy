@@ -1,8 +1,8 @@
 require 'test_helper'
 
-require File.join(File.dirname(__FILE__),'../../extra/migrate_settings')
+require File.join(File.dirname(__FILE__), '../../extra/migrate_settings')
 ::Proxy::Migration.inject_migrations_instance(::Proxy::Migrations.new("dummy"))
-require File.join(File.dirname(__FILE__),'../../extra/migrations/20160413000000_migrate_puppet_settings.rb')
+require File.join(File.dirname(__FILE__), '../../extra/migrations/20160413000000_migrate_puppet_settings.rb')
 
 class ProxyPuppetMigrationTest < Test::Unit::TestCase
   def setup

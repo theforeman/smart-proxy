@@ -41,7 +41,7 @@ class DnsCmdTest < Test::Unit::TestCase
   end
 
   def test_remove_address_records_with_longest_zone_match
-    Proxy::Dns::Dnscmd::Record.any_instance.expects(:enum_records).with('bar.domain.local', 'host.foo.bar.domain.local', 'A').returns(['1.1.1.1','2.2.2.2'])
+    Proxy::Dns::Dnscmd::Record.any_instance.expects(:enum_records).with('bar.domain.local', 'host.foo.bar.domain.local', 'A').returns(['1.1.1.1', '2.2.2.2'])
     Proxy::Dns::Dnscmd::Record.any_instance.expects(:remove_specific_record_from_zone).with('bar.domain.local', 'host.foo.bar.domain.local', '1.1.1.1', 'A').returns(true)
     Proxy::Dns::Dnscmd::Record.any_instance.expects(:remove_specific_record_from_zone).with('bar.domain.local', 'host.foo.bar.domain.local', '2.2.2.2', 'A').returns(true)
     assert_nil @server.do_remove('host.foo.bar.domain.local', 'A')
@@ -131,7 +131,7 @@ Command completed successfully.
 
 '.split("\n")
     Proxy::Dns::Dnscmd::Record.any_instance.expects(:execute).with('/EnumRecords domain.local host.domain.local. /Type A', 'EnumRecords', true).returns(to_parse)
-    assert_equal ['192.168.33.33','192.168.33.34'], Proxy::Dns::Dnscmd::Record.new('server', 999).enum_records('domain.local', 'host.domain.local', 'A')
+    assert_equal ['192.168.33.33', '192.168.33.34'], Proxy::Dns::Dnscmd::Record.new('server', 999).enum_records('domain.local', 'host.domain.local', 'A')
   end
 
   def test_enum_aaaa_records
@@ -145,7 +145,7 @@ Command completed successfully.
 
 '.split("\n")
     Proxy::Dns::Dnscmd::Record.any_instance.expects(:execute).with('/EnumRecords domain.local host.domain.local. /Type AAAA', 'EnumRecords', true).returns(to_parse)
-    assert_equal ['2001:db8:85a3::8a2e:370:7335','2001:db8:85a3::8a2e:370:7334'], Proxy::Dns::Dnscmd::Record.new('server', 999).enum_records('domain.local', 'host.domain.local', 'AAAA')
+    assert_equal ['2001:db8:85a3::8a2e:370:7335', '2001:db8:85a3::8a2e:370:7334'], Proxy::Dns::Dnscmd::Record.new('server', 999).enum_records('domain.local', 'host.domain.local', 'AAAA')
   end
 
   def test_enum_cname_records
@@ -185,7 +185,7 @@ Command completed successfully.
 
 '.split("\n")
     Proxy::Dns::Dnscmd::Record.any_instance.expects(:execute).with('/EnumRecords 33.168.192.in-addr.arpa 33.33.168.192.in-addr.arpa. /Type PTR', 'EnumRecords', true).returns(to_parse)
-    assert_equal ['host.domain.local.','host2.domain.local.'], Proxy::Dns::Dnscmd::Record.new('server', 999).enum_records('33.168.192.in-addr.arpa', '33.33.168.192.in-addr.arpa', 'PTR')
+    assert_equal ['host.domain.local.', 'host2.domain.local.'], Proxy::Dns::Dnscmd::Record.new('server', 999).enum_records('33.168.192.in-addr.arpa', '33.33.168.192.in-addr.arpa', 'PTR')
   end
 
   def test_enum_ptr_records_when_none

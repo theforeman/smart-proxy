@@ -92,8 +92,8 @@ module ::Proxy
 
     def underscore(src)
       src = src.gsub(/::/, '/')
-      src = src.gsub(/([A-Z]+)([A-Z][a-z])/,'\1_\2')
-      src = src.gsub(/([a-z\d])([A-Z])/,'\1_\2')
+      src = src.gsub(/([A-Z]+)([A-Z][a-z])/, '\1_\2')
+      src = src.gsub(/([a-z\d])([A-Z])/, '\1_\2')
       src = src.tr("-", "_")
       src.downcase
     end

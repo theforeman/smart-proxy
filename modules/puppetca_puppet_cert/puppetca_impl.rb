@@ -38,7 +38,7 @@ module ::Proxy::PuppetCa::PuppetcaPuppetCert
     end
 
     def pending
-      all.delete_if {|k,v| v[:state] != "pending"}
+      all.delete_if {|k, v| v[:state] != "pending"}
     end
 
     # helper to find puppetca and sudo binaries
@@ -103,9 +103,9 @@ module ::Proxy::PuppetCa::PuppetcaPuppetCert
     end
 
     def ca_inventory
-      inventory = Pathname.new(ssldir).join("ca","inventory.txt")
+      inventory = Pathname.new(ssldir).join("ca", "inventory.txt")
       raise "Unable to find CA inventory file at #{inventory}" unless File.exist?(inventory)
-      crl_path = Pathname.new(ssldir).join("ca","ca_crl.pem")
+      crl_path = Pathname.new(ssldir).join("ca", "ca_crl.pem")
       raise "Unable to find CRL" unless File.exist?(crl_path)
       compute_ca_inventory(File.read(inventory), File.read(crl_path))
     end

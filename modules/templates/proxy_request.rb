@@ -17,7 +17,7 @@ module Proxy::Templates
     end
 
     def extract_request_headers(env)
-      Hash[env.select{|k,v| k =~ /^HTTP_/ && k !~ /^HTTP_(VERSION|HOST)$/}.map{|k,v| [k[5..-1],v]}]
+      Hash[env.select{|k, v| k =~ /^HTTP_/ && k !~ /^HTTP_(VERSION|HOST)$/}.map{|k, v| [k[5..-1], v]}]
     rescue Exception => e
       logger.warn "Unable to extract request headers: #{e}"
       {}

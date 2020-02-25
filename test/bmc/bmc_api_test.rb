@@ -47,7 +47,7 @@ class BmcApiTest < Test::Unit::TestCase
     auth = mock()
     auth.expects(:provided?).returns(true)
     auth.expects(:basic?).returns(true)
-    auth.expects(:credentials).returns('username','password')
+    auth.expects(:credentials).returns('username', 'password')
     Proxy::BMC::Api.any_instance.stubs(:auth).returns(auth)
     test_args = { 'bmc_provider' => 'freeipmi' }
     get "/#{host}/lan/gateway", test_args
@@ -102,7 +102,7 @@ class BmcApiTest < Test::Unit::TestCase
     Proxy::BMC::IPMI.stubs(:installed?).with('freeipmi').returns(false)
     api = Proxy::BMC::Api.new!
     api.logger.expects(:warn).with("freeipmi specified but it is not installed").at_least(1)
-    api.expects(:log_halt).with(400,"No BMC providers are installed, please install at least freeipmi or ipmitool").at_least(1)
+    api.expects(:log_halt).with(400, "No BMC providers are installed, please install at least freeipmi or ipmitool").at_least(1)
     api.find_ipmi_provider('freeipmi')
   end
 
@@ -133,7 +133,7 @@ class BmcApiTest < Test::Unit::TestCase
     Proxy::BMC::Plugin.load_test_settings(:bmc_default_provider => 'freeipmi')
     api.stubs(:params).returns('bmc_provider' => 'shell', :host => :host)
     result = api.bmc_setup
-    assert_kind_of(Proxy::BMC::Shell,result)
+    assert_kind_of(Proxy::BMC::Shell, result)
   end
 
   def test_api_uses_options_hash_from_body
@@ -143,7 +143,7 @@ class BmcApiTest < Test::Unit::TestCase
     Proxy::BMC::IPMI.any_instance.expects(:connect).with(:host => 'host', :username => 'user', :password => 'pass',
                                                          :bmc_provider => 'freeipmi',
                                                          :options=>{"driver"=>"lan20", "privilege"=>"OPERATOR"})
-    body = {'bmc_provider' => 'freeipmi', :options => {"driver"=>"lan20",'privilege' => 'OPERATOR'}}.to_json
+    body = {'bmc_provider' => 'freeipmi', :options => {"driver"=>"lan20", 'privilege' => 'OPERATOR'}}.to_json
     put "/#{host}/chassis/power/on", body, "CONTENT_TYPE" => "application/json"
     assert last_response.ok?, "Last response was not ok: #{last_response.body}"
     data = JSON.parse(last_response.body)
@@ -154,7 +154,7 @@ class BmcApiTest < Test::Unit::TestCase
     Rubyipmi.stubs(:is_provider_installed?).returns(true)
     Proxy::BMC::Plugin.load_test_settings(:bmc_default_provider => 'freeipmi')
     Proxy::BMC::IPMI.any_instance.stubs(:poweron).returns(true)
-    Proxy::BMC::IPMI.any_instance.expects(:connect).with(:host => 'host',:username => 'user', :password => 'pass',
+    Proxy::BMC::IPMI.any_instance.expects(:connect).with(:host => 'host', :username => 'user', :password => 'pass',
                                                          :bmc_provider => 'freeipmi',
                                                          :options=>nil)
     body = {'bmc_provider' => 'freeipmi', :options => nil}.to_json
@@ -218,7 +218,7 @@ class BmcApiTest < Test::Unit::TestCase
     get "/providers", args
     assert last_response.ok?, "Last response was not ok: #{last_response.body}"
     data = JSON.parse(last_response.body)
-    expected = ['freeipmi','ipmitool', 'ssh', 'shell']
+    expected = ['freeipmi', 'ipmitool', 'ssh', 'shell']
     assert_equal(expected, data["providers"])
   end
 
@@ -227,7 +227,7 @@ class BmcApiTest < Test::Unit::TestCase
     get "/providers/installed", args
     assert last_response.ok?, "Last response was not ok: #{last_response.body}"
     data = JSON.parse(last_response.body)
-    expected = ['freeipmi','ipmitool', 'ssh', 'shell']
+    expected = ['freeipmi', 'ipmitool', 'ssh', 'shell']
     assert_equal(expected, data["installed_providers"])
   end
 

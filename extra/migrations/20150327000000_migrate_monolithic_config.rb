@@ -96,15 +96,15 @@ class MigrateMonolithicConfig < ::Proxy::Migration
     [output, data]
   end
 
-  def write_to_files(output,unknown)
+  def write_to_files(output, unknown)
     modules.each do |m|
       next if output[m] == {}
       filepath = (m == :settings) ? File.join(dst_dir, "settings.yml") : path(dst_dir, "settings.d", "#{m}.yml")
-      File.open(filepath,'w') do |f|
+      File.open(filepath, 'w') do |f|
         f.write(output[m].to_yaml)
         if m == :settings && unknown != {}
           f.write "\n# Unparsed options, please review\n"
-          f.write(unknown.to_yaml.gsub(/^---/,''))
+          f.write(unknown.to_yaml.gsub(/^---/, ''))
         end
       end
     end

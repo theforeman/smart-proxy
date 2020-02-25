@@ -1,11 +1,11 @@
 require 'test_helper'
-require File.join(File.dirname(__FILE__),'../../extra/migrate_settings')
+require File.join(File.dirname(__FILE__), '../../extra/migrate_settings')
 ::Proxy::Migration.inject_migrations_instance(::Proxy::Migrations.new("dummy"))
-require File.join(File.dirname(__FILE__),'../../extra/migrations/20160411000000_migrate_libvirt_settings')
+require File.join(File.dirname(__FILE__), '../../extra/migrations/20160411000000_migrate_libvirt_settings')
 
 class ProxyLibvirtMigrationTest < Test::Unit::TestCase
   def setup
-    @old_config = YAML.load_file(File.join(File.dirname(__FILE__),'./migration_settings.yml'))
+    @old_config = YAML.load_file(File.join(File.dirname(__FILE__), './migration_settings.yml'))
     @migration = MigrateVirshToLibvirtConfig.new("/tmp")
   end
 
