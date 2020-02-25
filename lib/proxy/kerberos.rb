@@ -1,7 +1,7 @@
 require 'rkerberos'
 
 module Proxy::Kerberos
-  def init_krb5_ccache keytab, principal
+  def init_krb5_ccache(keytab, principal)
     krb5 = Kerberos::Krb5.new
     ccache = Kerberos::Krb5::CredentialsCache.new
 

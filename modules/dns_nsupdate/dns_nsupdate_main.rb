@@ -61,7 +61,7 @@ module Proxy::Dns::Nsupdate
       @om.close unless @om.nil? || @om.closed?
     end
 
-    def nsupdate cmd
+    def nsupdate(cmd)
       logger.debug "nsupdate: executed - #{cmd}"
       @om.puts cmd
     end

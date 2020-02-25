@@ -187,7 +187,7 @@ module Proxy::DHCP::CommonISC
       a_str
     end
 
-    def hex2ip hex
+    def hex2ip(hex)
       hex.split(":").map{|h| h.to_i(16).to_s}.join(".")
     end
   end

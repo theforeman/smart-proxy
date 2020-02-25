@@ -41,7 +41,7 @@ module ::Proxy::PuppetCa::TokenWhitelisting
     end
 
     # Invalidate a token based on the certname
-    def disable certname
+    def disable(certname)
       storage.remove_if do |token|
         decoded = JWT.decode(token, smartproxy_cert.public_key, true, algorithm: JWT_ALGORITHM)
         decoded.first['certname'] == certname
@@ -52,7 +52,7 @@ module ::Proxy::PuppetCa::TokenWhitelisting
     end
 
     # Create a new token for a certname
-    def autosign certname, ttl
+    def autosign(certname, ttl)
       ttl = (ttl.to_i > 0) ? ttl.to_i : token_ttl
       payload = { certname: certname, exp: Time.now.to_i + ttl * 60 }
       token = JWT.encode payload, smartproxy_cert, JWT_ALGORITHM
@@ -72,7 +72,7 @@ module ::Proxy::PuppetCa::TokenWhitelisting
 
     # Check whether a csr is valid and should be signed
     # by checking its token if it exists
-    def validate_csr csr
+    def validate_csr(csr)
       if csr.nil?
         logger.warn "Request did not include a CSR."
         return false
@@ -95,7 +95,7 @@ module ::Proxy::PuppetCa::TokenWhitelisting
       validate_token token
     end
 
-    def validate_token token
+    def validate_token(token)
       # token didnt expire?
       begin
         JWT.decode(token, smartproxy_cert.public_key, true, algorithm: JWT_ALGORITHM)

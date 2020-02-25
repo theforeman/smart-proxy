@@ -7,7 +7,7 @@ module Proxy::TFTP
   class Server
     include Proxy::Log
     # Creates TFTP pxeconfig file
-    def set mac, config
+    def set(mac, config)
       raise "Invalid parameters received" if mac.nil? || config.nil?
       pxeconfig_file(mac).each do |file|
         write_file file, config
@@ -16,7 +16,7 @@ module Proxy::TFTP
     end
 
     # Removes pxeconfig files
-    def del mac
+    def del(mac)
       pxeconfig_file(mac).each do |file|
         delete_file file
       end
@@ -24,13 +24,13 @@ module Proxy::TFTP
     end
 
     # Gets the contents of one of pxeconfig files
-    def get mac
+    def get(mac)
       file = pxeconfig_file(mac).first
       read_file(file)
     end
 
     # Creates a default menu file
-    def create_default config
+    def create_default(config)
       raise "Default config not supplied" if config.nil?
       pxe_default.each do |file|
         write_file file, config
@@ -74,7 +74,7 @@ module Proxy::TFTP
       ["#{pxeconfig_dir}/default"]
     end
 
-    def pxeconfig_file mac
+    def pxeconfig_file(mac)
       ["#{pxeconfig_dir}/01-"+mac.tr(':', "-").downcase]
     end
   end
@@ -89,7 +89,7 @@ module Proxy::TFTP
       ["#{pxeconfig_dir}/menu.lst", "#{pxeconfig_dir}/efidefault"]
     end
 
-    def pxeconfig_file mac
+    def pxeconfig_file(mac)
       ["#{pxeconfig_dir}/menu.lst.01"+mac.delete(':').upcase, "#{pxeconfig_dir}/01-"+mac.tr(':', '-').upcase]
     end
   end
@@ -103,7 +103,7 @@ module Proxy::TFTP
       ["#{pxeconfig_dir}/grub.cfg"]
     end
 
-    def pxeconfig_file mac
+    def pxeconfig_file(mac)
       ["#{pxeconfig_dir}/grub.cfg-01-"+mac.tr(':', '-').downcase, "#{pxeconfig_dir}/grub.cfg-#{mac.downcase}"]
     end
   end
@@ -117,7 +117,7 @@ module Proxy::TFTP
       [pxeconfig_dir]
     end
 
-    def pxeconfig_file mac
+    def pxeconfig_file(mac)
       ["#{pxeconfig_dir}/"+mac.delete(':').upcase, "#{pxeconfig_dir}/"+mac.delete(':').upcase+".cfg"]
     end
   end
@@ -131,7 +131,7 @@ module Proxy::TFTP
       [pxeconfig_dir]
     end
 
-    def pxeconfig_file mac
+    def pxeconfig_file(mac)
       ["#{pxeconfig_dir}/"+mac.delete(':').upcase]
     end
   end
@@ -145,12 +145,12 @@ module Proxy::TFTP
       ["#{pxeconfig_dir}/default.ipxe"]
     end
 
-    def pxeconfig_file mac
+    def pxeconfig_file(mac)
       ["#{pxeconfig_dir}/01-"+mac.tr(':', "-").downcase+".ipxe"]
     end
   end
 
-  def self.fetch_boot_file dst, src
+  def self.fetch_boot_file(dst, src)
     filename    = boot_filename(dst, src)
     destination = Pathname.new(File.expand_path(filename, Proxy::TFTP::Plugin.settings.tftproot)).cleanpath
     tftproot    = Pathname.new(Proxy::TFTP::Plugin.settings.tftproot).cleanpath

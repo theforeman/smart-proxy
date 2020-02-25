@@ -14,7 +14,7 @@ module Proxy::DHCP
       "#{name} (#{ip} / #{mac})"
     end
 
-    def method_missing arg
+    def method_missing(arg)
       options[arg]
     end
 

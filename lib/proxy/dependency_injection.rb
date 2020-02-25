@@ -67,7 +67,7 @@ module Proxy::DependencyInjection
   end
 
   module Accessors
-    def inject_attr reference, local_var
+    def inject_attr(reference, local_var)
       container = container_instance
       define_method(local_var.to_sym) do
         if instance_variable_get("@#{local_var}").nil?

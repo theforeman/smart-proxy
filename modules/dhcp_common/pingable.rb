@@ -2,7 +2,7 @@ require 'timeout'
 require 'socket'
 
 module Proxy::DHCP::Pingable
-  def tcp_pingable? ip
+  def tcp_pingable?(ip)
     # This code is from net-ping, and stripped down for use here
     # We don't need all the ldap dependencies net-ping brings in
 
@@ -39,7 +39,7 @@ module Proxy::DHCP::Pingable
     true
   end
 
-  def icmp_pingable? ip
+  def icmp_pingable?(ip)
     # Always shell to ping, instead of using net-ping
     if RUBY_PLATFORM =~ /mingw/
       # Windows uses different options for ping and does not have /dev/null

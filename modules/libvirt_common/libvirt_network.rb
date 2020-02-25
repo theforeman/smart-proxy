@@ -25,7 +25,7 @@ module Proxy
       connection.lookup_network_by_name(@network)
     end
 
-    def network_update command, section, xml
+    def network_update(command, section, xml)
       flags = ::Libvirt::Network::NETWORK_UPDATE_AFFECT_LIVE | ::Libvirt::Network::NETWORK_UPDATE_AFFECT_CONFIG
       logger.debug "Libvirt update: #{xml}"
       find_network.update command, section, -1, xml, flags

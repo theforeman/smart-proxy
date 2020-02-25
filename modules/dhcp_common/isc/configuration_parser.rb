@@ -169,7 +169,7 @@ module Proxy
         # rubocop:enable Style/StructInheritance
 
         class Literal < Rsec::Binary
-          def _parse ctx
+          def _parse(ctx)
             buffer = StringIO.new
             bs = false
             end_of_string = false
@@ -197,7 +197,7 @@ module Proxy
           end
         end
 
-        def literal &p
+        def literal(&p)
           Literal.new.map p
         end
 

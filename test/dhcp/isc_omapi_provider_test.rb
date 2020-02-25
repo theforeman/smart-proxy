@@ -12,7 +12,7 @@ class IscOmapiProviderTest < Test::Unit::TestCase
       @input_commands = []
     end
 
-    def puts str
+    def puts(str)
       @input_commands << str
     end
   end

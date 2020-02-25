@@ -1,6 +1,6 @@
 module Proxy::Puppet
   class PuppetClass
-    def initialize name, params = {}
+    def initialize(name, params = {})
       @klass  = name || raise("Must provide puppet class name")
       @params = params
     end
