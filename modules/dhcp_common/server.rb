@@ -34,7 +34,7 @@ module Proxy::DHCP
     end
 
     # Abstracted Subnet options loader method
-    def load_subnet_options subnet
+    def load_subnet_options(subnet)
       logger.debug "Loading Subnet options for #{subnet}"
     end
 
@@ -126,7 +126,7 @@ module Proxy::DHCP
     # like a HashWithIndifferentAccess to symbol and string keys.
     # Delete keys with string names before adding them back with symbol names,
     # otherwise there will be duplicate information.
-    def add_record options = {}
+    def add_record(options = {})
       related_macs = options.delete("related_macs") || []
       logger.debug "Ignoring duplicates for macs: #{related_macs.inspect}" unless related_macs.empty?
 
@@ -190,7 +190,7 @@ module Proxy::DHCP
       [name || hostname, ip, mac, subnet, options.merge!(:hostname => hostname || name)]
     end
 
-    def vendor_options_included? options
+    def vendor_options_included?(options)
       !options.keys.grep(/^</).empty?
     end
 

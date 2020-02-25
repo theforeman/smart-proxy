@@ -143,7 +143,7 @@ module Proxy::Dns
       raise Proxy::Dns::NotFound.new("Cannot find DNS entry for #{value}")
     end
 
-    def ptr_to_ip ptr
+    def ptr_to_ip(ptr)
       if ptr =~ /\.in-addr\.arpa$/
         ptr.split('.')[0..-3].reverse.join('.')
       elsif ptr =~ /\.ip6\.arpa$/
@@ -171,7 +171,7 @@ module Proxy::Dns
       record_conflicts_name(name, Resolv::DNS::Resource::IN::PTR, content)
     end
 
-    def to_ipaddress ip
+    def to_ipaddress(ip)
       logger.warn('Deprecated: Proxy::Dns::Record#to_ipaddress is deprecated and will be removed in 1.24')
       IPAddr.new(ip) rescue false
     end

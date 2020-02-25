@@ -24,7 +24,7 @@ module Proxy::DHCP
       "#{ip} / #{mac}"
     end
 
-    def [] opt
+    def [](opt)
       options[opt.to_sym]
     rescue
       nil

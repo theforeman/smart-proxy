@@ -8,7 +8,7 @@ module ::Proxy::PuppetCa::HostnameWhitelisting
     end
 
     # remove certname from autosign if exists
-    def disable certname
+    def disable(certname)
       raise "No such file #{autosign_file}" unless File.exist?(autosign_file)
 
       found = false
@@ -33,7 +33,7 @@ module ::Proxy::PuppetCa::HostnameWhitelisting
 
     # add certname to puppet autosign file
     # parameter is certname to use
-    def autosign certname, ttl
+    def autosign(certname, ttl)
       FileUtils.touch(autosign_file) unless File.exist?(autosign_file)
 
       open(autosign_file, File::RDWR) do |autosign|

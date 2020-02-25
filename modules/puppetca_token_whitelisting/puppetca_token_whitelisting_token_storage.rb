@@ -3,7 +3,7 @@ module ::Proxy::PuppetCa::TokenWhitelisting
     include ::Proxy::Log
     include ::Proxy::Util
 
-    def initialize tokens_file
+    def initialize(tokens_file)
       @tokens_file = tokens_file
       ensure_file
     end
@@ -19,17 +19,17 @@ module ::Proxy::PuppetCa::TokenWhitelisting
       YAML.safe_load File.read @tokens_file
     end
 
-    def write content
+    def write(content)
       lock do
         unsafe_write content
       end
     end
 
-    def unsafe_write content
+    def unsafe_write(content)
       File.write @tokens_file, content.to_yaml
     end
 
-    def lock &block
+    def lock(&block)
       File.open(@tokens_file, "r+") do |f|
         f.flock File::LOCK_EX
         yield
@@ -38,15 +38,15 @@ module ::Proxy::PuppetCa::TokenWhitelisting
       end
     end
 
-    def add entry
+    def add(entry)
       write read.push entry
     end
 
-    def remove entry
+    def remove(entry)
       write read.delete_if { |data| data == entry }
     end
 
-    def remove_if &block
+    def remove_if(&block)
       lock do
         unsafe_write read.delete_if { |token| yield(token) }
       end

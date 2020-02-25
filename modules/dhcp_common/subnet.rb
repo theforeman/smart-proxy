@@ -15,7 +15,7 @@ module Proxy::DHCP
     include Proxy::Validations
     include Proxy::DHCP::Pingable
 
-    def initialize network, netmask, options = {}
+    def initialize(network, netmask, options = {})
       @network = validate_ip network
       @netmask = validate_ip netmask
       @ipaddr = IPAddr.new(to_s)
@@ -31,7 +31,7 @@ module Proxy::DHCP
       @m = Monitor.new
     end
 
-    def include? ip
+    def include?(ip)
       if ip.is_a?(IPAddr)
         ipaddr = ip
       else
@@ -91,7 +91,7 @@ module Proxy::DHCP
       [::Proxy::DHCP.i_to_ipv4(range_start_address), ::Proxy::DHCP.i_to_ipv4(range_end_address)]
     end
 
-    def <=> other
+    def <=>(other)
       network <=> other.network
     end
 

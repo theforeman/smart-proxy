@@ -47,11 +47,11 @@ module Proxy::FreeIPARealm
       ipa
     end
 
-    def check_realm realm
+    def check_realm(realm)
       raise Exception.new "Unknown realm #{realm}" unless realm.casecmp(ipa_config.realm).zero?
     end
 
-    def find hostname
+    def find(hostname)
       ipa_call("host_show", [hostname])
     rescue XMLRPC::FaultException => e
       if e.message =~ /not found/
@@ -61,7 +61,7 @@ module Proxy::FreeIPARealm
       end
     end
 
-    def create realm, hostname, params
+    def create(realm, hostname, params)
       check_realm realm
 
       # Send params to FreeIPA, may want to send more than one in the future
@@ -105,7 +105,7 @@ module Proxy::FreeIPARealm
       ipa_call('host_add', [hostname], options)
     end
 
-    def delete realm, hostname
+    def delete(realm, hostname)
       check_realm realm
       begin
         result = ipa_call("host_del", [hostname], "updatedns" => remove_dns)

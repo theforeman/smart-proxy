@@ -33,7 +33,7 @@ module Proxy::Dns::Dnscmd
       nil
     end
 
-    def execute cmd, msg=nil, error_only=false
+    def execute(cmd, msg=nil, error_only=false)
       tsecs = 5
       response = nil
       interpreter = Proxy::SETTINGS.x86_64 ? 'c:\windows\sysnative\cmd.exe' : 'c:\windows\system32\cmd.exe'
@@ -58,7 +58,7 @@ module Proxy::Dns::Dnscmd
       response
     end
 
-    def report msg, response, error_only
+    def report(msg, response, error_only)
       if response.grep(/completed successfully/).empty?
         logger.error "Command dnscmd failed:\n" + response.join("\n")
         msg.sub!(/Removed/, "remove")

@@ -11,24 +11,24 @@ module Proxy::TFTP
     VARIANTS = ["Syslinux", "Pxelinux", "Pxegrub", "Pxegrub2", "Ztp", "Poap", "Ipxe"].freeze
 
     helpers do
-      def instantiate variant, mac=nil
+      def instantiate(variant, mac=nil)
         # Filenames must end in a hex representation of a mac address but only if mac is not empty
         log_halt 403, "Invalid MAC address: #{mac}"                  unless valid_mac?(mac) || mac.nil?
         log_halt 403, "Unrecognized pxeboot config type: #{variant}" unless VARIANTS.include?(variant.capitalize)
         Object.const_get("Proxy").const_get('TFTP').const_get(variant.capitalize).new
       end
 
-      def create variant, mac
+      def create(variant, mac)
         tftp = instantiate variant, mac
         log_halt(400, "TFTP: Failed to create pxe config file: ") {tftp.set(mac, (params[:pxeconfig] || params[:syslinux_config]))}
       end
 
-      def delete variant, mac
+      def delete(variant, mac)
         tftp = instantiate variant, mac
         log_halt(400, "TFTP: Failed to delete pxe config file: ") {tftp.del(mac)}
       end
 
-      def create_default variant
+      def create_default(variant)
         tftp = instantiate variant
         log_halt(400, "TFTP: Failed to create PXE default file: ") { tftp.create_default params[:menu]}
       end

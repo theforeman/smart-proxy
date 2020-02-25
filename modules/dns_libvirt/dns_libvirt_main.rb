@@ -39,7 +39,7 @@ module Proxy::Dns::Libvirt
       # libvirt does not support PTR
     end
 
-    def find_ip_for_host host
+    def find_ip_for_host(host)
       begin
         doc = REXML::Document.new xml = libvirt_network.dump_xml
         doc.elements.each("network/dns/host/hostname") do |e|

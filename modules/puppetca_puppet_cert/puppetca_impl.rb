@@ -7,11 +7,11 @@ module ::Proxy::PuppetCa::PuppetcaPuppetCert
     include ::Proxy::Log
     include ::Proxy::Util
 
-    def sign certname
+    def sign(certname)
       puppetca("sign", certname)
     end
 
-    def clean certname
+    def clean(certname)
       puppetca("clean", certname)
     end
 
@@ -90,7 +90,7 @@ module ::Proxy::PuppetCa::PuppetcaPuppetCert
     end
 
     # parse the puppetca --list output
-    def certificate str
+    def certificate(str)
       case str
         when /(\+|\-)\s+["]{0,1}(.*\w)["]{0,1}\s+\((\S+)\)/
           state = ($1 == "-") ? "revoked" : "valid"
@@ -135,7 +135,7 @@ module ::Proxy::PuppetCa::PuppetcaPuppetCert
       Set.new(OpenSSL::X509::CRL.new(crl_cert_contents).revoked.collect {|r| r.serial.to_i})
     end
 
-    def puppetca mode, certname
+    def puppetca(mode, certname)
       raise "Invalid mode #{mode}" unless mode =~ /^(clean|sign)$/
       find_puppetca
       certname.downcase!
