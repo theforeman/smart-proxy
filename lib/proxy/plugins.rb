@@ -56,7 +56,7 @@ class ::Proxy::Plugins
   #
 
   def enabled_plugins
-    loaded.select {|p| p[:state] == :running && p[:class].ancestors.include?(::Proxy::Plugin)}.map{|p| p[:class]}
+    loaded.select {|p| p[:state] == :running && p[:class].ancestors.include?(::Proxy::Plugin)}.map {|p| p[:class]}
   end
 
   def plugin_enabled?(plugin_name)

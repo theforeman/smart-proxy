@@ -11,7 +11,7 @@ module Proxy::HttpRequest
     end
 
     def query_string(input={})
-      input.compact.map{|k, v| "#{CGI.escape(k.to_s)}=#{CGI.escape(v)}"}.join("&")
+      input.compact.map {|k, v| "#{CGI.escape(k.to_s)}=#{CGI.escape(v)}"}.join("&")
     end
 
     def create_get(path, query={}, headers={})

@@ -40,7 +40,7 @@ class Proxy::Puppet::Api < ::Sinatra::Base
   get "/environments/:environment/classes" do
     content_type :json
     begin
-      class_retriever.classes_in_environment(params[:environment]).map{|k| {k.to_s => { :name => k.name, :module => k.module, :params => k.params} } }.to_json
+      class_retriever.classes_in_environment(params[:environment]).map {|k| {k.to_s => { :name => k.name, :module => k.module, :params => k.params} } }.to_json
     rescue Proxy::Puppet::EnvironmentNotFound
       log_halt 404, "Could not find environment '#{params[:environment]}'"
     rescue Proxy::Puppet::TimeoutError => e
