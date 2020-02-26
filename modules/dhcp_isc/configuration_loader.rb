@@ -19,13 +19,13 @@ module Proxy::DHCP::ISC
                                          container.get_dependency(:memory_store), container.get_dependency(:memory_store),
                                          container.get_dependency(:memory_store), container.get_dependency(:memory_store))
       end)
-      container.dependency :parser, -> {::Proxy::DHCP::CommonISC::ConfigurationParser.new}
-      container.dependency :service_initialization, -> {::Proxy::DHCP::CommonISC::IscSubnetServiceInitialization.new(container.get_dependency(:subnet_service), container.get_dependency(:parser))}
+      container.dependency :parser, -> { ::Proxy::DHCP::CommonISC::ConfigurationParser.new }
+      container.dependency :service_initialization, -> { ::Proxy::DHCP::CommonISC::IscSubnetServiceInitialization.new(container.get_dependency(:subnet_service), container.get_dependency(:parser)) }
       container.dependency :state_changes_observer, (lambda do
         ::Proxy::DHCP::ISC::IscStateChangesObserver.new(settings[:config], settings[:leases], container.get_dependency(:subnet_service), container.get_dependency(:service_initialization))
       end)
 
-      container.singleton_dependency :free_ips, -> {::Proxy::DHCP::FreeIps.new(settings[:blacklist_duration_minutes]) }
+      container.singleton_dependency :free_ips, -> { ::Proxy::DHCP::FreeIps.new(settings[:blacklist_duration_minutes]) }
 
       if settings[:leases_file_observer] == :inotify_leases_file_observer
         require 'dhcp_isc/inotify_leases_file_observer'

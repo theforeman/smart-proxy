@@ -26,7 +26,7 @@ module ::Proxy
 
     def new_migrations
       # don't want to deal with namespaced constant resolution/loading
-      migrations.select {|m| !past_migrations.include?(m.name) }
+      migrations.select { |m| !past_migrations.include?(m.name) }
     end
 
     def persist_migrations_state(migrations, result_dir_path)
@@ -179,7 +179,7 @@ module ::Proxy
     end
 
     def persist_migrations_state(migrations, path)
-      @migrations.persist_migrations_state(migrations.map {|m| m.class.name}, path)
+      @migrations.persist_migrations_state(migrations.map { |m| m.class.name }, path)
     rescue Exception => e
       p "Couldn't save migration state: #{e}"
     end

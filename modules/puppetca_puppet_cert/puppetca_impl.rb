@@ -34,11 +34,11 @@ module ::Proxy::PuppetCa::PuppetcaPuppetCert
       # note that this ignores certificates which were revoked multiple times, displaying only the last
       # revocation state
       # additionally, we don't merge revocation info if the host has a pending certificate request
-      hash.merge(ca_inventory) {|key, h1, h2| (h1[:state] == "pending") ? h1 : h1.merge(h2)}
+      hash.merge(ca_inventory) { |key, h1, h2| (h1[:state] == "pending") ? h1 : h1.merge(h2) }
     end
 
     def pending
-      all.delete_if {|k, v| v[:state] != "pending"}
+      all.delete_if { |k, v| v[:state] != "pending" }
     end
 
     # helper to find puppetca and sudo binaries
@@ -132,7 +132,7 @@ module ::Proxy::PuppetCa::PuppetcaPuppetCert
     end
 
     def revoked_serials(crl_cert_contents)
-      Set.new(OpenSSL::X509::CRL.new(crl_cert_contents).revoked.collect {|r| r.serial.to_i})
+      Set.new(OpenSSL::X509::CRL.new(crl_cert_contents).revoked.collect { |r| r.serial.to_i })
     end
 
     def puppetca(mode, certname)

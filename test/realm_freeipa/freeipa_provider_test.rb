@@ -52,7 +52,7 @@ class FreeIPATest < Test::Unit::TestCase
   end
 
   def test_delete_with_unrecognized_realm_raises_exception
-    assert_raises(Exception) { @provider.delete('unknown_realm', 'a_host')}
+    assert_raises(Exception) { @provider.delete('unknown_realm', 'a_host') }
   end
 
   def test_delete_respects_remove_dns_parameter
@@ -93,7 +93,7 @@ class FreeIPATest < Test::Unit::TestCase
   end
 
   def test_create_with_unrecognized_realm_raises_exception
-    assert_raises(Exception) { @provider.create('unknown_realm', 'a_host', {})}
+    assert_raises(Exception) { @provider.create('unknown_realm', 'a_host', {}) }
   end
 
   def test_modify_reports_lack_of_changes

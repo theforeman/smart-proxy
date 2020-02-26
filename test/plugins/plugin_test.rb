@@ -79,7 +79,7 @@ class PluginTest < Test::Unit::TestCase
   end
 
   class TestProgrammableSettingsWithBlockPlugin < ::Proxy::Plugin
-    load_programmable_settings {|container, settings| "noop" }
+    load_programmable_settings { |container, settings| "noop" }
   end
   def test_programmable_settings_can_use_a_block
     assert TestProgrammableSettingsWithBlockPlugin.programmable_settings.respond_to?(:load_programmable_settings)
@@ -106,7 +106,7 @@ class PluginTest < Test::Unit::TestCase
   end
 
   class TestDiWiringsWithBlockPlugin < ::Proxy::Plugin
-    load_dependency_injection_wirings {|container, settings| "noop"}
+    load_dependency_injection_wirings { |container, settings| "noop" }
   end
   def test_di_wirings_can_use_a_block
     assert TestDiWiringsWithBlockPlugin.respond_to?(:load_dependency_injection_wirings)

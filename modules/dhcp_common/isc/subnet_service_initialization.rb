@@ -19,7 +19,7 @@ module Proxy::DHCP::CommonISC
     end
 
     def update_subnet_service_with_subnet_records(service, subnets_to_add)
-      subnets_to_add.each {|record| service.add_subnet(to_subnet(record))}
+      subnets_to_add.each { |record| service.add_subnet(to_subnet(record)) }
     end
 
     def update_subnet_service_with_dhcp_records(service, records_to_add)
@@ -148,9 +148,9 @@ module Proxy::DHCP::CommonISC
     def process_dhcpd_option(name, values)
       case name
         when 'routers'
-          [:routers, values.flatten.map {|r| strip_quotes(r)}]
+          [:routers, values.flatten.map { |r| strip_quotes(r) }]
         when 'domain-name-servers'
-          [:domain_name_servers, values.flatten.map {|r| strip_quotes(r)}]
+          [:domain_name_servers, values.flatten.map { |r| strip_quotes(r) }]
         when 'next-server', 'server.next-server'
           without_quotes = strip_quotes(values.flatten.first)
           return [:nextServer, without_quotes] if without_quotes.match(Resolv::IPv4::Regex)
@@ -176,7 +176,7 @@ module Proxy::DHCP::CommonISC
         when 'SUNW.JumpStart-server'
           [:jumpstart_server_path, strip_quotes(values.flatten.first)]
         else
-          [name.tr('.', '_').tr('-', '_').to_sym, values.map {|vv| vv.map {|v| strip_quotes(v)}}]
+          [name.tr('.', '_').tr('-', '_').to_sym, values.map { |vv| vv.map { |v| strip_quotes(v) } }]
         # TODO: check if adding a new reservation with omshell for a free lease still
         # generates a conflict
       end
@@ -188,7 +188,7 @@ module Proxy::DHCP::CommonISC
     end
 
     def hex2ip(hex)
-      hex.split(":").map {|h| h.to_i(16).to_s}.join(".")
+      hex.split(":").map { |h| h.to_i(16).to_s }.join(".")
     end
   end
 end

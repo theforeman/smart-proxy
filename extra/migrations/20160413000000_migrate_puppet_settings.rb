@@ -40,7 +40,7 @@ class MigratePuppetSettings < ::Proxy::Migration
     module_names = module_names_to_parameter[0..-2]
 
     avalue = old_provider_name_to_new(avalue) if parameter_name == :use_provider
-    module_names.map {|module_name| [module_name, parameter_name, avalue]}
+    module_names.map { |module_name| [module_name, parameter_name, avalue] }
   end
 
   def old_provider_name_to_new(aname)
@@ -54,7 +54,7 @@ class MigratePuppetSettings < ::Proxy::Migration
   def migrate_puppet_configuration(to_migrate)
     migrated = Hash.new { |h, k| h[k] = Hash.new }
     to_migrate.each do |option, value|
-      remap_parameter(option, value).each {|module_name, parameter_name, parameter_value| migrated[module_name][parameter_name] = parameter_value}
+      remap_parameter(option, value).each { |module_name, parameter_name, parameter_value| migrated[module_name][parameter_name] = parameter_value }
     end
 
     # deal with puppet_user setting, which used to be global, but has been moved (and renamed) to puppetrun and mcollective modules

@@ -20,22 +20,22 @@ module Proxy::TFTP
 
       def create(variant, mac)
         tftp = instantiate variant, mac
-        log_halt(400, "TFTP: Failed to create pxe config file: ") {tftp.set(mac, (params[:pxeconfig] || params[:syslinux_config]))}
+        log_halt(400, "TFTP: Failed to create pxe config file: ") { tftp.set(mac, (params[:pxeconfig] || params[:syslinux_config])) }
       end
 
       def delete(variant, mac)
         tftp = instantiate variant, mac
-        log_halt(400, "TFTP: Failed to delete pxe config file: ") {tftp.del(mac)}
+        log_halt(400, "TFTP: Failed to delete pxe config file: ") { tftp.del(mac) }
       end
 
       def create_default(variant)
         tftp = instantiate variant
-        log_halt(400, "TFTP: Failed to create PXE default file: ") { tftp.create_default params[:menu]}
+        log_halt(400, "TFTP: Failed to create PXE default file: ") { tftp.create_default params[:menu] }
       end
     end
 
     post "/fetch_boot_file" do
-      log_halt(400, "TFTP: Failed to fetch boot file: ") {Proxy::TFTP.fetch_boot_file(params[:prefix], params[:path])}
+      log_halt(400, "TFTP: Failed to fetch boot file: ") { Proxy::TFTP.fetch_boot_file(params[:prefix], params[:path]) }
     end
 
     post "/:variant/create_default" do |variant|
@@ -44,7 +44,7 @@ module Proxy::TFTP
 
     get "/:variant/:mac" do |variant, mac|
       tftp = instantiate variant, mac
-      log_halt(404, "TFTP: Failed to retrieve pxe config file: ") {tftp.get(mac)}
+      log_halt(404, "TFTP: Failed to retrieve pxe config file: ") { tftp.get(mac) }
     end
 
     post "/:variant/:mac" do |variant, mac|

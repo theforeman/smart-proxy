@@ -34,7 +34,7 @@ class ::Proxy::Plugins
 
   def update(updated_plugins)
     updated_plugins.each do |updated|
-      loaded.delete_if {|p| p[:name] == updated[:name]}
+      loaded.delete_if { |p| p[:name] == updated[:name] }
       loaded << updated
     end
   end
@@ -56,11 +56,11 @@ class ::Proxy::Plugins
   #
 
   def enabled_plugins
-    loaded.select {|p| p[:state] == :running && p[:class].ancestors.include?(::Proxy::Plugin)}.map {|p| p[:class]}
+    loaded.select { |p| p[:state] == :running && p[:class].ancestors.include?(::Proxy::Plugin) }.map { |p| p[:class] }
   end
 
   def plugin_enabled?(plugin_name)
-    plugin = loaded.find {|p| p[:name] == plugin_name.to_sym}
+    plugin = loaded.find { |p| p[:name] == plugin_name.to_sym }
     plugin.nil? ? false : plugin[:state] == :running
   end
 
@@ -70,7 +70,7 @@ class ::Proxy::Plugins
 
   def disable_plugin(plugin_name)
     logger.warn("::Proxy::Plugins.disable_plugin has been deprecated and will be removed from future versions of smart-proxy. Use Proxy::Pluggable#loading_failed instead.")
-    plugin = loaded.find {|p| p[:name] == plugin_name.to_sym}
+    plugin = loaded.find { |p| p[:name] == plugin_name.to_sym }
     plugin[:class].fail
   end
 
@@ -80,7 +80,7 @@ class ::Proxy::Plugins
   end
 
   def find_provider(provider_name)
-    provider = loaded.find {|p| p[:name] == provider_name.to_sym}
+    provider = loaded.find { |p| p[:name] == provider_name.to_sym }
     raise ::Proxy::PluginProviderNotFound, "Provider '#{provider_name}' could not be found" if provider.nil? || !provider[:class].ancestors.include?(::Proxy::Provider)
     provider[:class]
   end

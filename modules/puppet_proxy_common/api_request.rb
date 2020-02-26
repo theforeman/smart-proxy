@@ -20,7 +20,7 @@ module Proxy::Puppet
       path = [uri.path.chomp("/"), path.start_with?("/") ? path.slice(1..-1) : path].join('/')
       req = Net::HTTP::Get.new(path)
       req.add_field('Accept', 'application/json')
-      additional_headers.each_key {|k| req[k] = additional_headers[k]}
+      additional_headers.each_key { |k| req[k] = additional_headers[k] }
       http.request(req)
     end
 
@@ -33,7 +33,7 @@ module Proxy::Puppet
       req.body = data.to_json
       req.add_field('Accept', 'application/json')
       req.add_field('Content-type', 'application/json')
-      additional_headers.each_key {|k| req[k] = additional_headers[k]}
+      additional_headers.each_key { |k| req[k] = additional_headers[k] }
       http.request(req)
     end
 
@@ -44,7 +44,7 @@ module Proxy::Puppet
       path = [uri.path.chomp("/"), path.start_with?("/") ? path.slice(1..-1) : path].join('/')
       req = Net::HTTP::Delete.new(path)
       req.add_field('Accept', 'application/json')
-      additional_headers.each_key {|k| req[k] = additional_headers[k]}
+      additional_headers.each_key { |k| req[k] = additional_headers[k] }
       http.request(req)
     end
 

@@ -13,11 +13,11 @@ module TftpGenericServerSuite
   end
 
   def pxe_config_files
-    @pxe_config_files.collect {|f| File.join(@rootdir, f)}
+    @pxe_config_files.collect { |f| File.join(@rootdir, f) }
   end
 
   def pxe_default_files
-    @pxe_default_files.collect {|f| File.join(@rootdir, f)}
+    @pxe_default_files.collect { |f| File.join(@rootdir, f) }
   end
 
   def test_set

@@ -7,8 +7,8 @@ module ::Proxy::Dns::Libvirt
     end
 
     def load_dependency_injection_wirings(container_instance, settings)
-      container_instance.dependency :libvirt_network, -> {::Proxy::Dns::Libvirt::LibvirtDNSNetwork.new(settings[:url], settings[:network]) }
-      container_instance.dependency :dns_provider, -> {::Proxy::Dns::Libvirt::Record.new(settings[:network], container_instance.get_dependency(:libvirt_network)) }
+      container_instance.dependency :libvirt_network, -> { ::Proxy::Dns::Libvirt::LibvirtDNSNetwork.new(settings[:url], settings[:network]) }
+      container_instance.dependency :dns_provider, -> { ::Proxy::Dns::Libvirt::Record.new(settings[:network], container_instance.get_dependency(:libvirt_network)) }
     end
   end
 end

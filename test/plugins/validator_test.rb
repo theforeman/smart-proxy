@@ -24,13 +24,13 @@ class BaseValidatorTest < Test::Unit::TestCase
   end
 
   def test_validate_is_called_if_predicate_evaluates_to_true
-    validator = TestValidator.new(TestPlugin, 'setting_a', nil, ->(settings) { settings[:should_validate] == true})
+    validator = TestValidator.new(TestPlugin, 'setting_a', nil, ->(settings) { settings[:should_validate] == true })
     validator.evaluate_predicate_and_validate!(:should_validate => true)
     assert validator.validate_called
   end
 
   def test_validate_is_not_called_if_predicate_evaluates_to_false
-    validator = TestValidator.new(TestPlugin, 'setting_a', nil, ->(settings) { settings[:should_validate] == true})
+    validator = TestValidator.new(TestPlugin, 'setting_a', nil, ->(settings) { settings[:should_validate] == true })
     validator.evaluate_predicate_and_validate!(:should_validate => false)
     assert !validator.validate_called
   end

@@ -23,7 +23,7 @@ module Proxy::DHCP
     end
 
     def to_json(*opts)
-      Hash[[:name, :ip, :mac, :subnet, :type].map {|s| [s, send(s)]}].merge(options).to_json(*opts)
+      Hash[[:name, :ip, :mac, :subnet, :type].map { |s| [s, send(s)] }].merge(options).to_json(*opts)
     end
   end
 end
