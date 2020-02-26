@@ -85,7 +85,7 @@ module Proxy::DHCP::CommonISC
     end
 
     def format_omshell_output(output)
-      output.map{|x| "omshell= #{x.chomp}"}.join("\n")
+      output.map {|x| "omshell= #{x.chomp}"}.join("\n")
     end
 
     def report(msg, response="")
@@ -209,7 +209,7 @@ module Proxy::DHCP::CommonISC
     end
 
     def ip2hex(ip)
-      ip.to_s.split(".").map{|i| "%02x" % i }.join(":")
+      ip.to_s.split(".").map {|i| "%02x" % i }.join(":")
     end
   end
 end

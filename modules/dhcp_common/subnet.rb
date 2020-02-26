@@ -21,7 +21,7 @@ module Proxy::DHCP
       @ipaddr = IPAddr.new(to_s)
       @options = {}
 
-      @options[:routers] = options[:routers].each{|ip| validate_ip ip } if options[:routers]
+      @options[:routers] = options[:routers].each {|ip| validate_ip ip } if options[:routers]
       @options[:domain_name] = options[:domain_name] if options[:domain_name]
       @options[:domain_name_servers] = options[:domain_name_servers] if options[:domain_name_servers]
       @options[:ntp_servers] = options[:ntp_servers] if options[:ntp_servers]

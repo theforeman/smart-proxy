@@ -7,7 +7,7 @@ class PluginInitializerTest < Test::Unit::TestCase
   class TestPlugin4 < Proxy::Provider; plugin :plugin_4, "1.0"; default_settings :enabled => true; end
   class TestPlugin5 < Proxy::Plugin; plugin :plugin_5, "1.0"; default_settings :enabled => false; end
 
-  CAP_PROC = proc{}
+  CAP_PROC = proc {}
   CAP_LAMBDA = -> { }
   class TestPlugin6 < Proxy::Plugin
     plugin :plugin_6, "1.0"
