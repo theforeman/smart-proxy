@@ -87,9 +87,9 @@ class Proxy::DhcpApi < ::Sinatra::Base
     server.add_record(params)
   rescue Proxy::DHCP::Collision => e
     log_halt 409, e
-  rescue Proxy::DHCP::AlreadyExists # rubocop:disable Lint/HandleExceptions
+  rescue Proxy::DHCP::AlreadyExists # rubocop:disable Lint/SuppressedException
   # no need to do anything
-  rescue => e # rubocop:enable Lint/HandleExceptions
+  rescue => e # rubocop:enable Lint/SuppressedException
     log_halt 400, e
   end
 
@@ -112,9 +112,9 @@ class Proxy::DhcpApi < ::Sinatra::Base
   delete "/:network/ip/:ip_address" do
     server.del_records_by_ip(params[:network], params[:ip_address])
     nil
-  rescue ::Proxy::DHCP::SubnetNotFound # rubocop:disable Lint/HandleExceptions
+  rescue ::Proxy::DHCP::SubnetNotFound # rubocop:disable Lint/SuppressedException
   # no need to do anything
-  rescue Exception => e # rubocop:enable Lint/HandleExceptions
+  rescue Exception => e # rubocop:enable Lint/SuppressedException
     log_halt 400, e
   end
 
@@ -122,9 +122,9 @@ class Proxy::DhcpApi < ::Sinatra::Base
   delete "/:network/mac/:mac_address" do
     server.del_record_by_mac(params[:network], params[:mac_address].nil? ? nil : params[:mac_address].downcase)
     nil
-  rescue ::Proxy::DHCP::SubnetNotFound # rubocop:disable Lint/HandleExceptions
+  rescue ::Proxy::DHCP::SubnetNotFound # rubocop:disable Lint/SuppressedException
   # no need to do anything
-  rescue Exception => e # rubocop:enable Lint/HandleExceptions
+  rescue Exception => e # rubocop:enable Lint/SuppressedException
     log_halt 400, e
   end
 end

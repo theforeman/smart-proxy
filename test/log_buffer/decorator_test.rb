@@ -33,7 +33,7 @@ class DecoratorTest < Test::Unit::TestCase
     @decorator = ::Proxy::LogBuffer::Decorator.new(@logger, @buffer)
     @logger.expects(:add).with(FATAL, "message")
     @decorator.fatal("message")
-  rescue LoadError # rubocop:disable Lint/HandleExceptions
+  rescue LoadError # rubocop:disable Lint/SuppressedException
     # skip the test - syslog isn't available on this platform
   end
 

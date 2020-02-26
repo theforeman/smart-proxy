@@ -21,7 +21,7 @@ module Proxy
     def start
       lock = Proxy::FileLock.try_locking(@dst)
       if lock.nil?
-        return false
+        false
       else
         super { Proxy::FileLock.unlock(lock) }
       end
