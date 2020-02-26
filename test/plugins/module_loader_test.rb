@@ -13,7 +13,7 @@ class ModuleLoaderTest < Test::Unit::TestCase
   end
 
   def test_merge_settings_should_fail_when_duplicate_settings_detected
-    assert_raises(Exception) { @loader.merge_settings({:duplicate => "first"}, :duplicate => "second")}
+    assert_raises(Exception) { @loader.merge_settings({:duplicate => "first"}, :duplicate => "second") }
   end
 
   def test_merge_settings_should_ignore_enabled
@@ -77,7 +77,7 @@ class ModuleLoaderTest < Test::Unit::TestCase
   end
   class TestPluginWithCustomValidators < ::Proxy::Plugin
     load_validators :testing => TestValidator
-    validate :setting, :testing => {:arg1 => "arg1", :arg2 => "arg2"}, :if => ->(settings) { settings[:evaluate]}
+    validate :setting, :testing => {:arg1 => "arg1", :arg2 => "arg2"}, :if => ->(settings) { settings[:evaluate] }
   end
   def test_validate_runtime_config_executes_custom_validators
     loader = ::Proxy::DefaultModuleLoader.new(TestPluginWithCustomValidators, nil)
@@ -91,7 +91,7 @@ class ModuleLoaderTest < Test::Unit::TestCase
   end
   def test_validate_runtime_config_raises_exception_on_unknown_validator
     loader = ::Proxy::DefaultModuleLoader.new(AnotherTestPluginWithCustomValidators, nil)
-    assert_raises(Exception) { loader.validate_settings(AnotherTestPluginWithCustomValidators, :setting => "value")}
+    assert_raises(Exception) { loader.validate_settings(AnotherTestPluginWithCustomValidators, :setting => "value") }
   end
 
   class TestDIWirings

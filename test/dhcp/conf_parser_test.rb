@@ -510,23 +510,23 @@ OFMULTILNE_LEASE
   def test_include
     included = Proxy::DHCP::CommonISC::ConfigurationParser.new.conf.parse!('include "test/fixtures/dhcp/dhcp_subnets.conf";').flatten
     assert_equal ['192.168.122.0', '192.168.123.0', '192.168.124.0', '192.168.1.0'],
-                 included.select {|node| node.class == Proxy::DHCP::CommonISC::ConfigurationParser::IpV4SubnetNode}.map(&:subnet_address)
+                 included.select { |node| node.class == Proxy::DHCP::CommonISC::ConfigurationParser::IpV4SubnetNode }.map(&:subnet_address)
     assert_equal ['test.example.com'],
-                 included.select {|node| node.class == Proxy::DHCP::CommonISC::ConfigurationParser::HostNode}.map(&:fqdn)
+                 included.select { |node| node.class == Proxy::DHCP::CommonISC::ConfigurationParser::HostNode }.map(&:fqdn)
   end
 
   def test_include_relative_case1
     included = Proxy::DHCP::CommonISC::ConfigurationParser.new.subnets_hosts_and_leases(File.read('test/fixtures/dhcp/dhcp_include_relative_testcase1.conf'),
                                                                                         'test/fixtures/dhcp/dhcp_include_relative_testcase1.conf').flatten
     assert_equal ['test.example.com'],
-                 included.select {|node| node.class == Proxy::DHCP::CommonISC::ConfigurationParser::Host}.map(&:name)
+                 included.select { |node| node.class == Proxy::DHCP::CommonISC::ConfigurationParser::Host }.map(&:name)
   end
 
   def test_include_relative_case2
     included = Proxy::DHCP::CommonISC::ConfigurationParser.new.subnets_hosts_and_leases(File.read('test/fixtures/dhcp/dhcp_include_relative_testcase2.conf'),
                                                                                         'test/fixtures/dhcp/dhcp_include_relative_testcase2.conf').flatten
     assert_equal ['test.example.com'],
-                 included.select {|node| node.class == Proxy::DHCP::CommonISC::ConfigurationParser::Host}.map(&:name)
+                 included.select { |node| node.class == Proxy::DHCP::CommonISC::ConfigurationParser::Host }.map(&:name)
   end
 
   def test_include_in_shared_network
@@ -534,8 +534,8 @@ OFMULTILNE_LEASE
       Proxy::DHCP::CommonISC::ConfigurationParser.new.conf.parse!('shared-network "testing" {include "test/fixtures/dhcp/dhcp_subnets.conf";}')
     assert_equal 1, included.size
     assert_equal ['192.168.122.0', '192.168.123.0', '192.168.124.0', '192.168.1.0'],
-                 included.first.options_and_settings.flatten.select {|node| node.class == Proxy::DHCP::CommonISC::ConfigurationParser::IpV4SubnetNode}.map(&:subnet_address)
+                 included.first.options_and_settings.flatten.select { |node| node.class == Proxy::DHCP::CommonISC::ConfigurationParser::IpV4SubnetNode }.map(&:subnet_address)
     assert_equal ['test.example.com'],
-                 included.first.options_and_settings.flatten.select {|node| node.class == Proxy::DHCP::CommonISC::ConfigurationParser::HostNode}.map(&:fqdn)
+                 included.first.options_and_settings.flatten.select { |node| node.class == Proxy::DHCP::CommonISC::ConfigurationParser::HostNode }.map(&:fqdn)
   end
 end

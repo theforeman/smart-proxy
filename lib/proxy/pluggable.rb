@@ -56,7 +56,7 @@ module Proxy::Pluggable
     validator_name = validator_params.keys.first
     validator_args = validator_params[validator_name]
 
-    settings.each {|setting| validations << {:name => validator_name, :predicate => predicate, :args => validator_args, :setting => setting} }
+    settings.each { |setting| validations << {:name => validator_name, :predicate => predicate, :args => validator_args, :setting => setting} }
   end
 
   def override_module_loader_class(a_class_or_a_class_name)

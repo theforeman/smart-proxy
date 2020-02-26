@@ -142,9 +142,9 @@ module Proxy::DHCP
       to_return = Proxy::DHCP::Reservation.new(name, ip_address, mac_address, subnet, options)
 
       # try to figure out if we already have this record
-      similar_records = find_similar_records(subnet.network, ip_address, mac_address).reject {|record| related_macs.include?(record.mac)}
+      similar_records = find_similar_records(subnet.network, ip_address, mac_address).reject { |record| related_macs.include?(record.mac) }
 
-      if similar_records.any? {|record| record == to_return}
+      if similar_records.any? { |record| record == to_return }
         # we already got this record, no need to do anything
         logger.debug "We already got the same DHCP record - skipping"
         raise Proxy::DHCP::AlreadyExists
@@ -185,7 +185,7 @@ module Proxy::DHCP
       subnet = options.delete("network")
 
       # convert string keys to symbols
-      options = options.inject({}) {|all, current| all[current[0].to_sym] = current[1]; all}
+      options = options.inject({}) { |all, current| all[current[0].to_sym] = current[1]; all }
 
       [name || hostname, ip, mac, subnet, options.merge!(:hostname => hostname || name)]
     end

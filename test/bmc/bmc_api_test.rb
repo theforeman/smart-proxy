@@ -250,7 +250,7 @@ class BmcApiTest < Test::Unit::TestCase
     Proxy::BMC::IPMI.logger = Proxy::LogBuffer::Decorator.instance
     Proxy::BMC::IPMI.logger.error "TEST ERROR"
     found = false
-    Proxy::LogBuffer::Buffer.instance.iterate_descending {|x| found = true if x.message == "TEST ERROR" }
+    Proxy::LogBuffer::Buffer.instance.iterate_descending { |x| found = true if x.message == "TEST ERROR" }
     assert found
   end
 

@@ -25,7 +25,7 @@ class DhcpLibvirtProductionDIWiringsTest < Test::Unit::TestCase
   def test_initialized_subnet_service_initialization
     expected_subnet_service = Object.new
     Proxy::DHCP::Libvirt::SubnetServiceInitializer.any_instance.expects(:initialized_subnet_service).
-      with() {|v| v.instance_of?(Proxy::DHCP::SubnetService)}.
+      with() { |v| v.instance_of?(Proxy::DHCP::SubnetService) }.
       returns(expected_subnet_service)
     assert_equal expected_subnet_service, @container.get_dependency(:initialized_subnet_service)
   end

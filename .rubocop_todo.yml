@@ -87,14 +87,6 @@ Layout/SpaceAroundOperators:
 Layout/SpaceInsideArrayLiteralBrackets:
   Enabled: false
 
-# Offense count: 326
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, EnforcedStyleForEmptyBraces, SpaceBeforeBlockParameters.
-# SupportedStyles: space, no_space
-# SupportedStylesForEmptyBraces: space, no_space
-Layout/SpaceInsideBlockBraces:
-  Enabled: false
-
 # Offense count: 419
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle, EnforcedStyleForEmptyBraces.

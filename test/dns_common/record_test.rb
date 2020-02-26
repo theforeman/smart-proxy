@@ -251,6 +251,6 @@ class DnsRecordTest < Test::Unit::TestCase
   end
 
   def ips(*ips)
-    ips.map {|ip| (ip =~ Resolv::IPv4::Regex) ? Resolv::DNS::Resource::IN::A.new(ip) : Resolv::DNS::Resource::IN::AAAA.new(ip) }
+    ips.map { |ip| (ip =~ Resolv::IPv4::Regex) ? Resolv::DNS::Resource::IN::A.new(ip) : Resolv::DNS::Resource::IN::AAAA.new(ip) }
   end
 end

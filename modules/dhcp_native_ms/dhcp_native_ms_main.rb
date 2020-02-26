@@ -80,8 +80,8 @@ module Proxy::DHCP::NativeMS
         logger.warn "The specified subnet #{subnet_address} does not exist on the DHCP server"
         return nil
       end
-      dhcp_start_addr = dhcp_range.map {|r| r[:element][:start_address]}.first
-      dhcp_end_addr = dhcp_range.map {|r| r[:element][:end_address]}.first
+      dhcp_start_addr = dhcp_range.map { |r| r[:element][:start_address] }.first
+      dhcp_end_addr = dhcp_range.map { |r| r[:element][:end_address] }.first
       if dhcp_start_addr.nil? || dhcp_end_addr.nil?
         logger.warn "Unable to find IP range on the DHCP server for subnet #{subnet_address}"
         return nil
@@ -117,7 +117,7 @@ module Proxy::DHCP::NativeMS
     def find_vendor(vendor)
       classes = list_vendor_class_names
       shortened_vendor_name = vendor.gsub(/^sun-/i, '')
-      classes.find {|cls| cls.include?(shortened_vendor_name)}
+      classes.find { |cls| cls.include?(shortened_vendor_name) }
     end
 
     def find_record(subnet_address, ip_or_mac_address)
@@ -153,7 +153,7 @@ module Proxy::DHCP::NativeMS
     def build_reservation_or_lease(client, subnet_address)
       reservation_subnet_elements_ips = Set.new(dhcpsapi
                                                     .list_subnet_elements(subnet_address, DhcpsApi::DHCP_SUBNET_ELEMENT_TYPE::DhcpReservedIps)
-                                                    .map {|r| r[:element][:reserved_ip_address]})
+                                                    .map { |r| r[:element][:reserved_ip_address] })
       if reservation_subnet_elements_ips.include?(client[:client_ip_address])
         standard_option_values = standard_option_values(dhcpsapi.list_reserved_option_values(client[:client_ip_address], subnet_address))
         build_reservation(client, standard_option_values)
@@ -166,7 +166,7 @@ module Proxy::DHCP::NativeMS
     def subnets
       subnets = dhcpsapi.list_subnets
 
-      subnets.select {|subnet| managed_subnet?("#{subnet[:subnet_address]}/#{subnet[:subnet_mask]}")}.map do |subnet|
+      subnets.select { |subnet| managed_subnet?("#{subnet[:subnet_address]}/#{subnet[:subnet_mask]}") }.map do |subnet|
         standard_option_values = standard_option_values(dhcpsapi.list_subnet_option_values(subnet[:subnet_address]))
         Proxy::DHCP::Subnet.new(subnet[:subnet_address], subnet[:subnet_mask], standard_option_values)
       end
@@ -175,9 +175,9 @@ module Proxy::DHCP::NativeMS
     def all_hosts(subnet_address)
       reservation_subnet_elements_ips = Set.new(dhcpsapi
                                                     .list_subnet_elements(subnet_address, DhcpsApi::DHCP_SUBNET_ELEMENT_TYPE::DhcpReservedIps)
-                                                    .map {|r| r[:element][:reserved_ip_address]})
+                                                    .map { |r| r[:element][:reserved_ip_address] })
       clients = dhcpsapi.list_clients_2008(subnet_address)
-      clients.select {|client| reservation_subnet_elements_ips.include?(client[:client_ip_address])}.map {|client| build_reservation(client, {})}.compact
+      clients.select { |client| reservation_subnet_elements_ips.include?(client[:client_ip_address]) }.map { |client| build_reservation(client, {}) }.compact
     end
 
     def build_reservation(client, options)
@@ -203,9 +203,9 @@ module Proxy::DHCP::NativeMS
     def all_leases(subnet_address)
       reservation_subnet_elements_ips = Set.new(dhcpsapi
                                                     .list_subnet_elements(subnet_address, DhcpsApi::DHCP_SUBNET_ELEMENT_TYPE::DhcpReservedIps)
-                                                    .map {|r| r[:element][:reserved_ip_address]})
+                                                    .map { |r| r[:element][:reserved_ip_address] })
       clients = dhcpsapi.list_clients_2008(subnet_address)
-      clients.select {|client| !reservation_subnet_elements_ips.include?(client[:client_ip_address])}.map {|client| build_lease(client, {})}.compact
+      clients.select { |client| !reservation_subnet_elements_ips.include?(client[:client_ip_address]) }.map { |client| build_lease(client, {}) }.compact
     end
 
     def build_lease(client, options)
@@ -226,7 +226,7 @@ module Proxy::DHCP::NativeMS
 
     def standard_option_values(option_values)
       option_values.inject({}) do |all, current|
-        current_values = current[:value].map {|v| v[:element]}
+        current_values = current[:value].map { |v| v[:element] }
         if standard_option_names.key?(current[:option_id])
           all[n = standard_option_names[current[:option_id]]] = Standard[n][:is_list] ? current_values : current_values.first
         else
@@ -239,7 +239,7 @@ module Proxy::DHCP::NativeMS
     def vendor_option_values(option_values, vendor)
       return {} if vendor.nil?
       to_return = option_values.inject({}) do |all, current|
-        current_values = current[:value].map {|v| v[:element]}
+        current_values = current[:value].map { |v| v[:element] }
         all[sunw_option(current[:option_id]) || current[:option_id]] = ((current_values.size > 1) ? current_values : current_values.first)
         all
       end
@@ -267,7 +267,7 @@ module Proxy::DHCP::NativeMS
     end
 
     def list_vendor_class_names
-      dhcpsapi.list_classes.select {|cls| cls[:is_vendor]}.map {|cls| cls[:class_name]}
+      dhcpsapi.list_classes.select { |cls| cls[:is_vendor] }.map { |cls| cls[:class_name] }
     end
 
     def list_non_standard_vendor_class_names

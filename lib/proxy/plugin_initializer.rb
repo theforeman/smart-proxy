@@ -51,13 +51,13 @@ class ::Proxy::PluginGroup
     return unless @plugin.uses_provider?
 
     used_providers = [@plugin.settings.use_provider].flatten.map(&:to_sym)
-    providers = all_plugins_and_providers.select {|p| used_providers.include?(p[:name].to_sym)}
+    providers = all_plugins_and_providers.select { |p| used_providers.include?(p[:name].to_sym) }
 
-    not_available = used_providers - providers.map {|p| p[:name].to_sym}
+    not_available = used_providers - providers.map { |p| p[:name].to_sym }
 
     if not_available.empty?
       logger.debug "Providers #{printable_module_names(used_providers)} are going to be configured for '#{@plugin.plugin_name}'"
-      return @providers = providers.map {|p| p[:class]}
+      return @providers = providers.map { |p| p[:class] }
     end
 
     fail_group_with_message("Disabling all modules in the group #{printable_module_names(member_names)}: following providers are not available #{printable_module_names(not_available)}")
@@ -72,7 +72,7 @@ class ::Proxy::PluginGroup
   end
 
   def printable_module_names(names)
-    printable = names.map {|name| "'#{name}'"}.join(", ")
+    printable = names.map { |name| "'#{name}'" }.join(", ")
     "[#{printable}]"
   end
 
@@ -106,7 +106,7 @@ class ::Proxy::PluginGroup
 
   def configure
     return if inactive?
-    members.each {|p| p.module_loader_class.new(p, di_container).configure_plugin }
+    members.each { |p| p.module_loader_class.new(p, di_container).configure_plugin }
     @state = :running
   rescue Exception => e
     stop_services
@@ -127,12 +127,12 @@ class ::Proxy::PluginGroup
 
   def stop_services
     members.each do |member|
-      member.services.map {|label| di_container.get_dependency(label)}.each {|service| service.stop if service.respond_to?(:stop)}
+      member.services.map { |label| di_container.get_dependency(label) }.each { |service| service.stop if service.respond_to?(:stop) }
     end
   end
 
   def validate_dependencies_or_fail(enabled_providers_and_plugins)
-    members.each {|p| validate_dependencies!(p, p.dependencies, enabled_providers_and_plugins)}
+    members.each { |p| validate_dependencies!(p, p.dependencies, enabled_providers_and_plugins) }
   rescue Exception => e
     stop_services
     fail_group(e)
@@ -157,9 +157,9 @@ class ::Proxy::PluginInitializer
   end
 
   def initialize_plugins
-    loaded_plugins = plugins.loaded.select {|plugin| plugin[:class].ancestors.include?(::Proxy::Plugin)}
+    loaded_plugins = plugins.loaded.select { |plugin| plugin[:class].ancestors.include?(::Proxy::Plugin) }
 
-    grouped_with_providers = loaded_plugins.map {|p| ::Proxy::PluginGroup.new(p[:class], [], Proxy::DependencyInjection::Container.new)}
+    grouped_with_providers = loaded_plugins.map { |p| ::Proxy::PluginGroup.new(p[:class], [], Proxy::DependencyInjection::Container.new) }
 
     plugins.update(current_state_of_modules(plugins.loaded, grouped_with_providers))
 
@@ -169,7 +169,7 @@ class ::Proxy::PluginInitializer
     plugins.update(current_state_of_modules(plugins.loaded, grouped_with_providers))
 
     # resolve provider names to classes
-    grouped_with_providers.each {|group| group.resolve_providers(plugins.loaded)}
+    grouped_with_providers.each { |group| group.resolve_providers(plugins.loaded) }
 
     # validate prerequisite versions and availability
     all_enabled = all_enabled_plugins_and_providers(grouped_with_providers)
@@ -200,7 +200,7 @@ class ::Proxy::PluginInitializer
     to_update = all_plugins.dup
     all_groups.each do |group|
       # note that providers do not use http_enabled and https_enabled
-      updated = to_update.find {|loaded_plugin| loaded_plugin[:name] == group.plugin.plugin_name}
+      updated = to_update.find { |loaded_plugin| loaded_plugin[:name] == group.plugin.plugin_name }
       updated[:di_container] = group.di_container
       updated[:state] = group.state
       updated[:http_enabled] = group.http_enabled?
@@ -208,7 +208,7 @@ class ::Proxy::PluginInitializer
       updated[:capabilities] = group.capabilities
       updated[:settings] = group.exposed_settings
       group.providers.each do |group_member|
-        updated = to_update.find {|loaded_plugin| loaded_plugin[:name] == group_member.plugin_name}
+        updated = to_update.find { |loaded_plugin| loaded_plugin[:name] == group_member.plugin_name }
         updated[:di_container] = group.di_container
         updated[:state] = group.state
       end
@@ -218,7 +218,7 @@ class ::Proxy::PluginInitializer
 
   def all_enabled_plugins_and_providers(all_groups)
     all_groups.inject({}) do |all, group|
-      group.members.each {|p| all[p.plugin_name] = p} unless group.inactive?
+      group.members.each { |p| all[p.plugin_name] = p } unless group.inactive?
       all
     end
   end
@@ -261,11 +261,11 @@ end
 
 module ::Proxy::DefaultSettingsLoader
   def load_plugin_settings
-    load_settings({}) {|s| log_used_settings(s)}
+    load_settings({}) { |s| log_used_settings(s) }
   end
 
   def load_provider_settings(main_plugin_settings)
-    load_settings(main_plugin_settings) {|s| log_provider_settings(s)}
+    load_settings(main_plugin_settings) { |s| log_provider_settings(s) }
   end
 
   def load_settings(main_plugin_settings)
@@ -325,7 +325,7 @@ module ::Proxy::DefaultSettingsLoader
   def log_provider_settings(settings)
     default_settings = plugin.plugin_default_settings
     sorted_keys = settings.keys.map(&:to_s).sort.map(&:to_sym) # ruby 1.8.7 doesn't support sorting of symbols
-    to_log = sorted_keys.map {|k| "'%s': %s%s" % [k, settings[k], (default_settings.include?(k) && default_settings[k] == settings[k]) ? " (default)" : ""] }.join(", ")
+    to_log = sorted_keys.map { |k| "'%s': %s%s" % [k, settings[k], (default_settings.include?(k) && default_settings[k] == settings[k]) ? " (default)" : ""] }.join(", ")
     logger.debug "'%s' settings: %s" % [plugin.plugin_name, to_log]
   end
 
@@ -339,7 +339,7 @@ module ::Proxy::DefaultSettingsLoader
   end
 
   def validate_settings(plugin, config)
-    result = execute_validators(plugin.plugin_default_settings.keys.map {|k| {:name => :presence, :setting => k}}, config)
+    result = execute_validators(plugin.plugin_default_settings.keys.map { |k| {:name => :presence, :setting => k} }, config)
     result + execute_validators(plugin.validations, config)
   end
 

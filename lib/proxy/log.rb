@@ -87,7 +87,7 @@ module Proxy
       status = 500
       env['rack.logger'] = logger
       logger.info { "Started #{env['REQUEST_METHOD']} #{env['REQUEST_PATH']} #{env['QUERY_STRING']}" }
-      logger.trace { 'Headers: ' + env.select {|k, v| k.start_with? 'HTTP_'}.inspect }
+      logger.trace { 'Headers: ' + env.select { |k, v| k.start_with? 'HTTP_' }.inspect }
       logger.trace do
         if env['rack.input'] && !(body = env['rack.input'].read).empty?
           env['rack.input'].rewind

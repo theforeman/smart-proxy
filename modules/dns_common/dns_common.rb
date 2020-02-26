@@ -147,7 +147,7 @@ module Proxy::Dns
       if ptr =~ /\.in-addr\.arpa$/
         ptr.split('.')[0..-3].reverse.join('.')
       elsif ptr =~ /\.ip6\.arpa$/
-        ptr.split('.')[0..-3].reverse.each_slice(4).inject([]) {|address, word| address << word.join}.join(":")
+        ptr.split('.')[0..-3].reverse.each_slice(4).inject([]) { |address, word| address << word.join }.join(":")
       else
         raise Proxy::Dns::Error.new("Not a PTR address: '#{ptr}'")
       end
@@ -187,14 +187,14 @@ module Proxy::Dns
 
       resources = resolver.getresources(fqdn, type)
       return -1 if resources.empty?
-      return 0 if resources.any? {|r| IPAddr.new(r.address.to_s) == ip_addr }
+      return 0 if resources.any? { |r| IPAddr.new(r.address.to_s) == ip_addr }
       1
     end
 
     def record_conflicts_name(fqdn, type, content)
       resources = resolver.getresources(fqdn, type)
       return -1 if resources.empty?
-      return 0 if resources.any? {|r| r.name.to_s.casecmp(content) == 0 }
+      return 0 if resources.any? { |r| r.name.to_s.casecmp(content) == 0 }
       1
     end
   end

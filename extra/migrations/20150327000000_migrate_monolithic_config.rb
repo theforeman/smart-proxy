@@ -54,7 +54,7 @@ class MigrateMonolithicConfig < ::Proxy::Migration
 
   def migrate_monolithic_config(data)
     output = {}
-    modules.each {|m| output[m] = {} }
+    modules.each { |m| output[m] = {} }
 
     # chef's enabler got called something non-standard...
     data[:chef] = data.delete(:chefproxy) unless data[:chefproxy].nil?

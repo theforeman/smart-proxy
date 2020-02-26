@@ -287,7 +287,7 @@ class DhcpApiTest < Test::Unit::TestCase
       "mac"      => "10:10:10:10:10:10",
       "network"  => "192.168.122.0",
     }
-    @server.expects(:add_record).with {|params| record.all? {|k_v| params[k_v[0]] == k_v[1]} }
+    @server.expects(:add_record).with { |params| record.all? { |k_v| params[k_v[0]] == k_v[1] } }
 
     post "/192.168.122.0", record
 
@@ -295,7 +295,7 @@ class DhcpApiTest < Test::Unit::TestCase
   end
 
   def test_sparc_host_creation
-    @server.expects(:add_record).with() {|params| sparc_attrs.all? {|k_v| params[k_v[0]] == k_v[1]} }
+    @server.expects(:add_record).with() { |params| sparc_attrs.all? { |k_v| params[k_v[0]] == k_v[1] } }
 
     post '/192.168.122.0', sparc_attrs
     assert last_response.ok?, "Last response was not ok: #{last_response.body}"

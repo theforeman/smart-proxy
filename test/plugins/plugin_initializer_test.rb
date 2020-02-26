@@ -8,7 +8,7 @@ class PluginInitializerTest < Test::Unit::TestCase
   class TestPlugin5 < Proxy::Plugin; plugin :plugin_5, "1.0"; default_settings :enabled => false; end
 
   CAP_PROC = proc {}
-  CAP_LAMBDA = -> { }
+  CAP_LAMBDA = -> {}
   class TestPlugin6 < Proxy::Plugin
     plugin :plugin_6, "1.0"
     capability(CAP_LAMBDA)
@@ -31,16 +31,16 @@ class PluginInitializerTest < Test::Unit::TestCase
     initializer.initialize_plugins
 
     # plugin and its provider should share di_container
-    provider_and_plugin = plugins.loaded.select {|p| p[:name] == :plugin_3 || p[:name] == :plugin_4 }
+    provider_and_plugin = plugins.loaded.select { |p| p[:name] == :plugin_3 || p[:name] == :plugin_4 }
     assert_equal 2, provider_and_plugin.size
     assert provider_and_plugin[0][:di_container] == provider_and_plugin[1][:di_container]
 
     # modules in 'uninitialized' state don't have di_containers, all others do
-    all_but_uninitialized = plugins.loaded.select {|p| p[:name] != :plugin_5}
-    assert all_but_uninitialized.all? {|p| p.has_key?(:di_container)}
+    all_but_uninitialized = plugins.loaded.select { |p| p[:name] != :plugin_5 }
+    assert all_but_uninitialized.all? { |p| p.has_key?(:di_container) }
 
     # filter out :di_container, can't use equality test with it
-    loaded = plugins.loaded.map {|p| [:name, :version, :class, :state, :http_enabled, :capabilities, :settings, :https_enabled].inject({}) {|a, c| a[c] = p[c]; a}}
+    loaded = plugins.loaded.map { |p| [:name, :version, :class, :state, :http_enabled, :capabilities, :settings, :https_enabled].inject({}) { |a, c| a[c] = p[c]; a } }
     assert_equal(
       [{:name => :plugin_1, :version => '1.0', :class => TestPlugin1, :state => :running, :http_enabled => true, :https_enabled => true,
         :settings => {}, :capabilities => []},

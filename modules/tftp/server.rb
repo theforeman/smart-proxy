@@ -51,7 +51,7 @@ module Proxy::TFTP
 
     def write_file(file, contents)
       FileUtils.mkdir_p(File.dirname(file))
-      File.open(file, 'w') {|f| f.write(contents)}
+      File.open(file, 'w') { |f| f.write(contents) }
       logger.debug "TFTP: #{file} created successfully"
     end
 

@@ -14,14 +14,14 @@ class Proxy::DHCPFreeIpsTest < Test::Unit::TestCase
 
   def test_random_index
     indices = Set.new
-    @free_ips.random_index(6) {|i| indices << i}
+    @free_ips.random_index(6) { |i| indices << i }
     assert_equal 6, indices.size
     assert_equal Set.new([0, 1, 2, 3, 4, 5]), indices
   end
 
   def test_random_index_for_array_of_size_one
     indices = Set.new
-    @free_ips.random_index(1) {|i| indices << i}
+    @free_ips.random_index(1) { |i| indices << i }
     assert_equal Set.new([0]), indices
   end
 

@@ -8,7 +8,7 @@ module Proxy::LogBuffer
   LogRecord = Struct.new(:timestamp, :level, :message, :backtrace, :request_id) do
     def to_h
       h = {}
-      self.class.members.each {|m| h[m.to_sym] = self[m]}
+      self.class.members.each { |m| h[m.to_sym] = self[m] }
       h[:level] = case h[:level]
                   when ::Logger::Severity::INFO
                     :INFO
