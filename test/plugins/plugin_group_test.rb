@@ -45,8 +45,17 @@ class PluginGroupTest < Test::Unit::TestCase
     assert !group.https_enabled?
   end
 
-  class TestPlugin3 < Proxy::Plugin; plugin :test3, "1.0"; uses_provider; default_settings :enabled => true; end
-  class TestPlugin4 < Proxy::Provider; plugin :test4, "1.0"; default_settings :enabled => true; end
+  class TestPlugin3 < Proxy::Plugin
+    plugin :test3, "1.0"
+    uses_provider
+    default_settings :enabled => true
+  end
+
+  class TestPlugin4 < Proxy::Provider
+    plugin :test4, "1.0"
+    default_settings :enabled => true
+  end
+
   def test_resolve_providers
     TestPlugin3.settings = OpenStruct.new(:use_provider => :test4, :enabled => true)
     loaded = [{ :name => :test3, :version => "1.0", :class => TestPlugin3, :state => :uninitialized },
@@ -59,8 +68,15 @@ class PluginGroupTest < Test::Unit::TestCase
     assert_equal([TestPlugin4, TestPlugin3], group.members)
   end
 
-  class TestPlugin5 < Proxy::Plugin; plugin :test5, '1.0'; end
-  class TestPlugin6 < Proxy::Plugin; plugin :test6, "1.0"; uses_provider; end
+  class TestPlugin5 < Proxy::Plugin
+    plugin :test5, '1.0'
+  end
+
+  class TestPlugin6 < Proxy::Plugin
+    plugin :test6, "1.0"
+    uses_provider
+  end
+
   def test_resolve_providers_should_fail_when_one_is_missing
     TestPlugin6.settings = OpenStruct.new(:use_provider => :non_existent, :enabled => true)
     loaded = [{ :name => :test5, :version => "1.0", :class => TestPlugin5, :state => :uninitialized },
@@ -73,10 +89,24 @@ class PluginGroupTest < Test::Unit::TestCase
   end
 
   # version number follows core (non-release) standard with -develop, which has special handling
-  class TestPlugin7 < Proxy::Plugin; plugin :test7, '1.5-develop'; end
-  class TestPlugin8 < Proxy::Plugin; plugin :test8, '1.10.0-RC1'; end
-  class TestPlugin9 < Proxy::Plugin; plugin :test9, '1.0'; requires :test7, '~> 1.5.0'; end
-  class TestPlugin10 < Proxy::Plugin; plugin :test10, '1.0'; requires :test8, '~> 1.10.0'; end
+  class TestPlugin7 < Proxy::Plugin
+    plugin :test7, '1.5-develop'
+  end
+
+  class TestPlugin8 < Proxy::Plugin
+    plugin :test8, '1.10.0-RC1'
+  end
+
+  class TestPlugin9 < Proxy::Plugin
+    plugin :test9, '1.0'
+    requires :test7, '~> 1.5.0'
+  end
+
+  class TestPlugin10 < Proxy::Plugin
+    plugin :test10, '1.0'
+    requires :test8, '~> 1.10.0'
+  end
+
   def test_validate_dependencies
     enabled = { :test7 => TestPlugin7, :test8 => TestPlugin8, :test9 => TestPlugin9, :test10 => TestPlugin10 }
 
@@ -89,16 +119,34 @@ class PluginGroupTest < Test::Unit::TestCase
     assert !group2.inactive?
   end
 
-  class TestPlugin11 < Proxy::Plugin; plugin :test11, "1.0"; uses_provider; default_settings :enabled => true, :use_provider => :test12; end
-  class TestPlugin12 < Proxy::Provider; plugin :test12, "1.0"; requires :test13, '~> 1.0'; default_settings :enabled => true; end
-  class TestPlugin13 < Proxy::Plugin; plugin :test13, '1.0'; default_settings :enabled => true; end
+  class TestPlugin11 < Proxy::Plugin
+    plugin :test11, "1.0"
+    uses_provider
+    default_settings :enabled => true, :use_provider => :test12
+  end
+
+  class TestPlugin12 < Proxy::Provider
+    plugin :test12, "1.0"
+    requires :test13, '~> 1.0'
+    default_settings :enabled => true
+  end
+
+  class TestPlugin13 < Proxy::Plugin
+    plugin :test13, '1.0'
+    default_settings :enabled => true
+  end
+
   def test_validate_provider_dependencies
     group = ::Proxy::PluginGroup.new(TestPlugin11)
     group.validate_dependencies_or_fail(:test11 => TestPlugin11, :test12 => TestPlugin12, :test13 => TestPlugin13)
     assert !group.inactive?
   end
 
-  class TestPlugin14 < Proxy::Plugin; plugin :test14, '1.0'; requires :test_non_existent, '1.0'; end
+  class TestPlugin14 < Proxy::Plugin
+    plugin :test14, '1.0'
+    requires :test_non_existent, '1.0'
+  end
+
   def test_validate_dependencies_with_missing_dependency
     group = ::Proxy::PluginGroup.new(TestPlugin14)
     group.validate_dependencies_or_fail(:test14 => TestPlugin14)

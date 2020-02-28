@@ -30,7 +30,7 @@ module Proxy::LogBuffer
       @logger.trace(msg_or_progname, exception_or_backtrace, &block)
     end
 
-    def method_missing(symbol, *args);
+    def method_missing(symbol, *args)
       @logger.send(symbol, *args)
     end
   end
