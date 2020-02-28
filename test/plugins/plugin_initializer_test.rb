@@ -40,7 +40,7 @@ class PluginInitializerTest < Test::Unit::TestCase
     assert all_but_uninitialized.all? { |p| p.has_key?(:di_container) }
 
     # filter out :di_container, can't use equality test with it
-    loaded = plugins.loaded.map { |p| [:name, :version, :class, :state, :http_enabled, :capabilities, :settings, :https_enabled].inject({}) { |a, c| a[c] = p[c]; a } }
+    loaded = plugins.loaded.map { |p| [:name, :version, :class, :state, :http_enabled, :capabilities, :settings, :https_enabled].each_with_object({}) { |c, a| a[c] = p[c] } }
     assert_equal(
       [{:name => :plugin_1, :version => '1.0', :class => TestPlugin1, :state => :running, :http_enabled => true, :https_enabled => true,
         :settings => {}, :capabilities => []},

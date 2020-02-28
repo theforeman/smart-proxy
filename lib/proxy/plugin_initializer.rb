@@ -217,9 +217,8 @@ class ::Proxy::PluginInitializer
   end
 
   def all_enabled_plugins_and_providers(all_groups)
-    all_groups.inject({}) do |all, group|
+    all_groups.each_with_object({}) do |group, all|
       group.members.each { |p| all[p.plugin_name] = p } unless group.inactive?
-      all
     end
   end
 end

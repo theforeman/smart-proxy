@@ -63,16 +63,14 @@ module Proxy::DHCP::CommonISC
       network = parsed_subnet.subnet_address
       netmask = parsed_subnet.subnet_mask
 
-      attributes_only = parsed_subnet.node_attributes.inject({}) do |all, current|
+      attributes_only = parsed_subnet.node_attributes.each_with_object({}) do |current, all|
         key, value = process_dhcpd_attributes(current[0], current[1])
         all[key] = value
-        all
       end
 
-      options_and_attributes = parsed_subnet.dhcp_options.inject(attributes_only) do |all, current|
+      options_and_attributes = parsed_subnet.dhcp_options.each_with_object(attributes_only) do |current, all|
         key, values = process_dhcpd_option(current[0], current[1])
         all[key] = values
-        all
       end
 
       Proxy::DHCP::Subnet.new(network, netmask, options_and_attributes)
@@ -87,10 +85,9 @@ module Proxy::DHCP::CommonISC
       subnet = subnet_service.find_subnet(ip_address)
       return nil if subnet.nil?
 
-      attributes_only = parsed_host.node_attributes.inject({}) do |all, current|
+      attributes_only = parsed_host.node_attributes.each_with_object({}) do |current, all|
         key, value = process_dhcpd_attributes(current[0], current[1])
         all[key] = value
-        all
       end
 
       default_attributes = {
@@ -98,10 +95,9 @@ module Proxy::DHCP::CommonISC
         :deleteable => false,
       }
 
-      options_and_attributes = parsed_host.dhcp_options.inject(default_attributes.merge(attributes_only)) do |all, current|
+      options_and_attributes = parsed_host.dhcp_options.each_with_object(default_attributes.merge(attributes_only)) do |current, all|
         key, values = process_dhcpd_option(current[0], current[1])
         all[key] = values
-        all
       end
 
       Proxy::DHCP::Reservation.new(name, ip_address, mac_address, subnet, options_and_attributes)
@@ -117,16 +113,14 @@ module Proxy::DHCP::CommonISC
 
       return nil if mac_address.nil? || mac_address.empty? || subnet.nil?
 
-      attributes_only = parsed_lease.node_attributes.inject({}) do |all, current|
+      attributes_only = parsed_lease.node_attributes.each_with_object({}) do |current, all|
         key, value = process_dhcpd_attributes(current[0], current[1])
         all[key] = value
-        all
       end
 
-      options_and_attributes = parsed_lease.dhcp_options.inject(attributes_only) do |all, current|
+      options_and_attributes = parsed_lease.dhcp_options.each_with_object(attributes_only) do |current, all|
         key, values = process_dhcpd_option(current[0], current[1])
         all[key] = values
-        all
       end
 
       Proxy::DHCP::Lease.new(nil, ip_address, mac_address, subnet, starts, ends, state, options_and_attributes)
