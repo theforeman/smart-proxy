@@ -1,11 +1,31 @@
 require 'test_helper'
 
 class PluginInitializerTest < Test::Unit::TestCase
-  class TestPlugin1 < Proxy::Plugin; plugin :plugin_1, "1.0"; default_settings :enabled => true; end
-  class TestPlugin2 < Proxy::Plugin; plugin :plugin_2, "1.0"; default_settings :enabled => true; end
-  class TestPlugin3 < Proxy::Plugin; plugin :plugin_3, "1.0"; uses_provider; default_settings :enabled => true, :use_provider => :plugin_4; end
-  class TestPlugin4 < Proxy::Provider; plugin :plugin_4, "1.0"; default_settings :enabled => true; end
-  class TestPlugin5 < Proxy::Plugin; plugin :plugin_5, "1.0"; default_settings :enabled => false; end
+  class TestPlugin1 < Proxy::Plugin
+    plugin :plugin_1, "1.0"
+    default_settings :enabled => true
+  end
+
+  class TestPlugin2 < Proxy::Plugin
+    plugin :plugin_2, "1.0"
+    default_settings :enabled => true
+  end
+
+  class TestPlugin3 < Proxy::Plugin
+    plugin :plugin_3, "1.0"
+    uses_provider
+    default_settings :enabled => true, :use_provider => :plugin_4
+  end
+
+  class TestPlugin4 < Proxy::Provider
+    plugin :plugin_4, "1.0"
+    default_settings :enabled => true
+  end
+
+  class TestPlugin5 < Proxy::Plugin
+    plugin :plugin_5, "1.0"
+    default_settings :enabled => false
+  end
 
   CAP_PROC = proc {}
   CAP_LAMBDA = -> {}

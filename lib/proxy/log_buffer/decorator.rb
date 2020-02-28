@@ -116,7 +116,7 @@ module Proxy::LogBuffer
       end
     end
 
-    def method_missing(symbol, *args);
+    def method_missing(symbol, *args)
       @logger.send(symbol, *args)
     end
   end
