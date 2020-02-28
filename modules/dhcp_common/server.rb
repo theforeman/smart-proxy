@@ -185,7 +185,7 @@ module Proxy::DHCP
       subnet = options.delete("network")
 
       # convert string keys to symbols
-      options = options.inject({}) { |all, current| all[current[0].to_sym] = current[1]; all }
+      options = options.each_with_object({}) { |current, all| all[current[0].to_sym] = current[1] }
 
       [name || hostname, ip, mac, subnet, options.merge!(:hostname => hostname || name)]
     end

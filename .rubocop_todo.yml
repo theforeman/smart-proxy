@@ -216,11 +216,6 @@ Style/CommentAnnotation:
 Style/DoubleNegation:
   Enabled: false
 
-# Offense count: 17
-# Cop supports --auto-correct.
-Style/EachWithObject:
-  Enabled: false
-
 # Offense count: 6
 # Cop supports --auto-correct.
 Style/EmptyLiteral:

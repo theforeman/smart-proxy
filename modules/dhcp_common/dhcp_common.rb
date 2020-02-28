@@ -34,9 +34,8 @@ module Proxy::DHCP
   end
 
   def self.i_to_ipv4(ipv4_as_i)
-    octets = [3, 2, 1, 0].inject([]) do |all, i|
+    octets = [3, 2, 1, 0].each_with_object([]) do |i, all|
       all.push((ipv4_as_i >> i*8) & 0xff)
-      all
     end
     octets.join(".")
   end

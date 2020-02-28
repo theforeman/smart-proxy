@@ -225,23 +225,21 @@ module Proxy::DHCP::NativeMS
     end
 
     def standard_option_values(option_values)
-      option_values.inject({}) do |all, current|
+      option_values.each_with_object({}) do |current, all|
         current_values = current[:value].map { |v| v[:element] }
         if standard_option_names.key?(current[:option_id])
           all[n = standard_option_names[current[:option_id]]] = Standard[n][:is_list] ? current_values : current_values.first
         else
           all[current[:option_id]] = (current_values.size > 1) ? current_values : current_values.first
         end
-        all
       end
     end
 
     def vendor_option_values(option_values, vendor)
       return {} if vendor.nil?
-      to_return = option_values.inject({}) do |all, current|
+      to_return = option_values.each_with_object({}) do |current, all|
         current_values = current[:value].map { |v| v[:element] }
         all[sunw_option(current[:option_id]) || current[:option_id]] = ((current_values.size > 1) ? current_values : current_values.first)
-        all
       end
       to_return.empty? ? to_return : to_return.merge(:vendor => vendor)
     end
@@ -279,7 +277,7 @@ module Proxy::DHCP::NativeMS
     end
 
     def generate_standard_options_by_id
-      Standard.inject({}) { |all, current| all[current[1][:code]] = current[0]; all }
+      Standard.each_with_object({}) { |current, all| all[current[1][:code]] = current[0] }
     end
 
     def sunw_option(option_id)
@@ -288,7 +286,7 @@ module Proxy::DHCP::NativeMS
     end
 
     def generate_sunw_options_by_id
-      SUNW.inject({}) { |all, current| all[current[1][:code]] = current[0]; all }
+      SUNW.each_with_object({}) { |current, all| all[current[1][:code]] = current[0] }
     end
 
     def vendor_options_supported?

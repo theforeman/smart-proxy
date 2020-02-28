@@ -13,11 +13,10 @@ class Proxy::RootV2Api < Sinatra::Base
 
     attributes = [:http_enabled, :https_enabled, :settings, :state]
 
-    plugins = enabled_plugins.inject({}) do |hash, plugin|
+    plugins = enabled_plugins.each_with_object({}) do |plugin, hash|
       result = Hash[attributes.map { |attribute| [attribute, plugin[attribute]] }]
       result[:capabilities] = process_capabilities(plugin[:state], plugin[:capabilities])
       hash[plugin[:name]] = result
-      hash
     end
 
     plugins.to_json

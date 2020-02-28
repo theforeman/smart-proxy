@@ -50,10 +50,9 @@ class Proxy::PuppetApi::V3EnvironmentClassesApiClassesRetriever
   def legacy_classes_format(response)
     response['files'].map do |current|
       (current['classes'] || []).map do |manifest| # current['classes'] is nil for 'error' entities
-        parameters = manifest['params'].inject({}) do |all, parameter|
+        parameters = manifest['params'].each_with_object({}) do |parameter, all|
           parameter_value = parameter['default_literal'] || parameter['default_source']
           all[parameter['name']] = (parameter_value.is_a?(String) && parameter_value.start_with?('$')) ? "${#{parameter_value.slice(1..-1)}}" : parameter_value
-          all
         end
         ::Proxy::Puppet::PuppetClass.new(manifest['name'], parameters)
       end
