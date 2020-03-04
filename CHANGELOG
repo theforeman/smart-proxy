@@ -1,3 +1,9 @@
+2020-03-04	Tomer Brisker <tbrisker@gmail.com>
+	* Release 2.0.0-rc2
+
+2020-02-25	Ondřej Ezr <oezr@redhat.com>
+	* Fixes #29137 - Case insensitive version cleanup
+
 2020-02-18	Tomer Brisker <tbrisker@gmail.com>
 	* Release 2.0.0-rc1
 
