@@ -1,3 +1,12 @@
+2020-03-12	Tomer Brisker <tbrisker@gmail.com>
+	* Release 1.23.2
+
+2019-12-13	Michael Moll <kvedulv@kvedulv.de>
+	* Refs #28482 - pin rsec
+
+2019-12-08	Michael Moll <kvedulv@kvedulv.de>
+	* Refs #28426 - pin mocha
+
 2019-11-04	Tomer Brisker <tbrisker@gmail.com>
 	* Release 1.23.1
 
