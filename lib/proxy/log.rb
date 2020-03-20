@@ -83,7 +83,7 @@ module Proxy
     end
 
     def call(env)
-      before = time_monotonic
+      before = Process.clock_gettime(Process::CLOCK_MONOTONIC)
       status = 500
       env['rack.logger'] = logger
       logger.info { "Started #{env['REQUEST_METHOD']} #{env['REQUEST_PATH']} #{env['QUERY_STRING']}" }
@@ -106,7 +106,7 @@ module Proxy
       raise e
     ensure
       logger.info do
-        after = time_monotonic
+        after = Process.clock_gettime(Process::CLOCK_MONOTONIC)
         duration = (after - before) * 1000
         "Finished #{env['REQUEST_METHOD']} #{env['REQUEST_PATH']} with #{status} (#{duration.round(2)} ms)"
       end
