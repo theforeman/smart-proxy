@@ -35,7 +35,6 @@ require 'rack'
 require 'sinatra'
 require 'sinatra/authorization'
 require 'sinatra/default_not_found_page'
-require 'webrick-patch'
 
 module Proxy
   SETTINGS = Settings.initialize_global_settings
