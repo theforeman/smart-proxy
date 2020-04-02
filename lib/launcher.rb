@@ -4,6 +4,10 @@ require 'proxy/settings'
 require 'proxy/signal_handler'
 require 'proxy/log_buffer/trace_decorator'
 
+CIPHERS = ['ECDHE-RSA-AES128-GCM-SHA256', 'ECDHE-RSA-AES256-GCM-SHA384',
+           'AES128-GCM-SHA256', 'AES256-GCM-SHA384', 'AES128-SHA256',
+           'AES256-SHA256', 'AES128-SHA', 'AES256-SHA'].freeze
+
 module Proxy
   class Launcher
     include ::Proxy::Log
@@ -98,6 +102,7 @@ module Proxy
         :SSLCertificate => load_ssl_certificate(settings.ssl_certificate),
         :SSLCACertificateFile => settings.ssl_ca_file,
         :SSLOptions => ssl_options,
+        :SSLCiphers => CIPHERS - Proxy::SETTINGS.ssl_disabled_ciphers,
         :daemonize => false,
       }
     end
