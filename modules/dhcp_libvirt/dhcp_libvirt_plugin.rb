@@ -4,6 +4,7 @@ module ::Proxy::DHCP::Libvirt
 
     requires :dhcp, ::Proxy::VERSION
     default_settings :url => "qemu:///system", :network => 'default'
+    validate :url, :url => true
 
     load_classes ::Proxy::DHCP::Libvirt::PluginConfiguration
     load_dependency_injection_wirings ::Proxy::DHCP::Libvirt::PluginConfiguration

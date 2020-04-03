@@ -1,5 +1,3 @@
-require 'puppet_proxy_common/custom_validators'
-
 module ::Proxy
   module PuppetCa
     module PuppetcaHttpApi
@@ -8,7 +6,6 @@ module ::Proxy
 
         default_settings :puppet_ssl_ca => '/etc/puppetlabs/puppet/ssl/certs/ca.pem'
 
-        load_validators :url => ::Proxy::Puppet::Validators::UrlValidator
         requires :puppetca, ::Proxy::VERSION
 
         validate :puppet_url, :url => true
