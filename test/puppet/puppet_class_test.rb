@@ -1,5 +1,5 @@
 require 'test_helper'
-require 'puppet_proxy_common/puppet_class'
+require 'puppet_proxy/puppet_class'
 
 class PuppetClassTest < Test::Unit::TestCase
   def test_should_parse_modulename_correctly

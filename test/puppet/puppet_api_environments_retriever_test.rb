@@ -1,10 +1,9 @@
 require 'test_helper'
-require 'puppet_proxy_common/environment'
-require 'puppet_proxy_common/environments_retriever_base'
-require 'puppet_proxy_common/errors'
-require 'puppet_proxy_puppet_api/v3_environments_retriever'
+require 'puppet_proxy/environment'
+require 'puppet_proxy/errors'
+require 'puppet_proxy/v3_environments_retriever'
 
-class PuppetApiV3EnvironmentsRetrieverTest < Test::Unit::TestCase
+class PuppetV3EnvironmentsRetrieverTest < Test::Unit::TestCase
   class EnvironmentApiForTesting
     attr_accessor :find_environments_response
     def find_environments
@@ -13,8 +12,8 @@ class PuppetApiV3EnvironmentsRetrieverTest < Test::Unit::TestCase
   end
 
   def setup
-    @api = PuppetApiV3EnvironmentsRetrieverTest::EnvironmentApiForTesting.new
-    @retriever = Proxy::PuppetApi::V3EnvironmentsRetriever.new(nil, nil, nil, nil, @api)
+    @api = PuppetV3EnvironmentsRetrieverTest::EnvironmentApiForTesting.new
+    @retriever = Proxy::Puppet::V3EnvironmentsRetriever.new(@api)
   end
 
   def test_api_response_parsing
