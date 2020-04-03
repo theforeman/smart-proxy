@@ -7,7 +7,6 @@ module ::Proxy::PuppetApi
     end
 
     def load_classes
-      require 'puppet_proxy_common/custom_validators'
       require 'puppet_proxy_common/errors'
       require 'puppet_proxy_common/environments_retriever_base'
       require 'puppet_proxy_common/environment'

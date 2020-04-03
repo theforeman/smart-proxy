@@ -4,7 +4,6 @@ module Proxy::PuppetApi
 
     plugin :puppet_proxy_puppet_api, ::Proxy::VERSION
 
-    load_validators :url => ::Proxy::Puppet::Validators::UrlValidator
     load_programmable_settings ::Proxy::PuppetApi::PluginConfiguration
     load_classes ::Proxy::PuppetApi::PluginConfiguration
     load_dependency_injection_wirings ::Proxy::PuppetApi::PluginConfiguration
