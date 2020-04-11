@@ -13,37 +13,6 @@
 Layout/CaseIndentation:
   Enabled: false
 
-# Offense count: 123
-# Cop supports --auto-correct.
-Layout/EmptyLineAfterGuardClause:
-  Enabled: false
-
-# Offense count: 7
-# Cop supports --auto-correct.
-Layout/EmptyLinesAroundArguments:
-  Enabled: false
-
-# Offense count: 2
-# Cop supports --auto-correct.
-# Configuration parameters: IndentationWidth.
-# SupportedStyles: special_inside_parentheses, consistent, align_brackets
-Layout/FirstArrayElementIndentation:
-  EnforcedStyle: consistent
-
-# Offense count: 12
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, IndentationWidth.
-# SupportedStyles: special_inside_parentheses, consistent, align_braces
-Layout/FirstHashElementIndentation:
-  Enabled: false
-
-# Offense count: 11
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: symmetrical, new_line, same_line
-Layout/MultilineArrayBraceLayout:
-  Enabled: false
-
 # Offense count: 2
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle.
@@ -63,28 +32,6 @@ Layout/MultilineMethodCallBraceLayout:
 # Configuration parameters: EnforcedStyle, IndentationWidth.
 # SupportedStyles: aligned, indented
 Layout/MultilineOperationIndentation:
-  Enabled: false
-
-# Offense count: 45
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: space, no_space
-Layout/SpaceAroundEqualsInParameterDefault:
-  Enabled: false
-
-# Offense count: 136
-# Cop supports --auto-correct.
-# Configuration parameters: AllowForAlignment, EnforcedStyleForExponentOperator.
-# SupportedStylesForExponentOperator: space, no_space
-Layout/SpaceAroundOperators:
-  Enabled: false
-
-# Offense count: 20
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, EnforcedStyleForEmptyBrackets.
-# SupportedStyles: space, no_space, compact
-# SupportedStylesForEmptyBrackets: space, no_space
-Layout/SpaceInsideArrayLiteralBrackets:
   Enabled: false
 
 # Offense count: 419
@@ -193,18 +140,6 @@ Style/ClassAndModuleChildren:
 Style/ClassVars:
   Enabled: false
 
-# Offense count: 6
-# Cop supports --auto-correct.
-Style/ColonMethodCall:
-  Enabled: false
-
-# Offense count: 1
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, AllowInnerBackticks.
-# SupportedStyles: backticks, percent_x, mixed
-Style/CommandLiteral:
-  Enabled: false
-
 # Offense count: 1
 # Cop supports --auto-correct.
 # Configuration parameters: Keywords.
@@ -216,25 +151,8 @@ Style/CommentAnnotation:
 Style/DoubleNegation:
   Enabled: false
 
-# Offense count: 6
-# Cop supports --auto-correct.
-Style/EmptyLiteral:
-  Enabled: false
-
-# Offense count: 6
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: compact, expanded
-Style/EmptyMethod:
-  Enabled: false
-
 # Offense count: 1
 Style/EvalWithLocation:
-  Enabled: false
-
-# Offense count: 34
-# Cop supports --auto-correct.
-Style/ExpandPathArguments:
   Enabled: false
 
 # Offense count: 18
@@ -335,11 +253,6 @@ Style/RandomWithOffset:
 Style/RedundantPercentQ:
   Enabled: false
 
-# Offense count: 9
-# Cop supports --auto-correct.
-Style/RedundantSelf:
-  Enabled: false
-
 # Offense count: 6
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle, AllowInnerSlashes.
@@ -365,13 +278,6 @@ Style/RescueStandardError:
 # SupportedStyles: only_raise, only_fail, semantic
 Style/SignalException:
   Enabled: false
-
-# Offense count: 50
-# Cop supports --auto-correct.
-# Configuration parameters: MinSize.
-# SupportedStyles: percent, brackets
-Style/SymbolArray:
-  EnforcedStyle: brackets
 
 # Offense count: 9
 # Cop supports --auto-correct.

@@ -21,7 +21,7 @@ module ::Proxy::PuppetCa::HostnameWhitelisting
         end
       end.uniq.compact
       if found
-        open(autosign_file, File::TRUNC|File::RDWR) do |autosign|
+        open(autosign_file, File::TRUNC | File::RDWR) do |autosign|
           autosign.write entries.join
         end
         logger.debug "Removed #{certname} from autosign"

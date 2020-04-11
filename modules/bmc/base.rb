@@ -6,7 +6,7 @@ module Proxy
         @host = connect(args)
       end
 
-      def poweroff(soft=false)
+      def poweroff(soft = false)
         raise NotImplementedError.new
       end
 
@@ -54,7 +54,7 @@ module Proxy
         raise NotImplementedError.new
       end
 
-      def bootdevice=(args={ :device => nil, :reboot => false, :persistent => false })
+      def bootdevice=(args = { :device => nil, :reboot => false, :persistent => false })
         raise NotImplementedError.new
       end
 
@@ -66,19 +66,19 @@ module Proxy
         raise NotImplementedError.new
       end
 
-      def bootpxe(reboot=false, persistent=false)
+      def bootpxe(reboot = false, persistent = false)
         raise NotImplementedError.new
       end
 
-      def bootdisk(reboot=false, persistent=false)
+      def bootdisk(reboot = false, persistent = false)
         raise NotImplementedError.new
       end
 
-      def bootbios(reboot=false, persistent=false)
+      def bootbios(reboot = false, persistent = false)
         raise NotImplementedError.new
       end
 
-      def bootcdrom(reboot=false, persistent=false)
+      def bootcdrom(reboot = false, persistent = false)
         raise NotImplementedError.new
       end
 

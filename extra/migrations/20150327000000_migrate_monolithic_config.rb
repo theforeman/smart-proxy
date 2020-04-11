@@ -21,34 +21,34 @@ class MigrateMonolithicConfig < ::Proxy::Migration
   end
 
   def modules
-    [ :settings, :tftp, :dns, :dhcp, :puppet, :puppetca, :bmc, :chef, :realm ]
+    [:settings, :tftp, :dns, :dhcp, :puppet, :puppetca, :bmc, :chef, :realm]
   end
 
   def known_options
     {
-        :daemon             => :settings,
-        :daemon_pid         => :settings,
-        :log_file           => :settings,
-        :log_level          => :settings,
-        :port               => :settings,
-        :ssl_ca_file        => :settings,
-        :ssl_certificate    => :settings,
-        :ssl_private_key    => :settings,
-        :trusted_hosts      => :settings,
-        :virsh_network      => :settings,
-        :foreman_url        => :settings,
-        :settings_directory => :settings,
-        :http_port          => :settings,
-        :https_port         => :settings,
-        :use_cache          => :settings,
-        :cache_location     => :settings,
-        :puppetca_use_sudo  => :puppetca,
-        :puppetdir          => :puppetca,
-        :ssldir             => :puppetca,
-        :sudo_command       => :puppetca,
-        :customrun_args     => :puppet,
-        :customrun_cmd      => :puppet,
-        :freeipa_remove_dns => :realm,
+      :daemon             => :settings,
+      :daemon_pid         => :settings,
+      :log_file           => :settings,
+      :log_level          => :settings,
+      :port               => :settings,
+      :ssl_ca_file        => :settings,
+      :ssl_certificate    => :settings,
+      :ssl_private_key    => :settings,
+      :trusted_hosts      => :settings,
+      :virsh_network      => :settings,
+      :foreman_url        => :settings,
+      :settings_directory => :settings,
+      :http_port          => :settings,
+      :https_port         => :settings,
+      :use_cache          => :settings,
+      :cache_location     => :settings,
+      :puppetca_use_sudo  => :puppetca,
+      :puppetdir          => :puppetca,
+      :ssldir             => :puppetca,
+      :sudo_command       => :puppetca,
+      :customrun_args     => :puppet,
+      :customrun_cmd      => :puppet,
+      :freeipa_remove_dns => :realm,
     }
   end
 

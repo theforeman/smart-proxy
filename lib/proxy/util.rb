@@ -20,7 +20,7 @@ module Proxy::Util
       logger.debug "Starting task: #{@command}"
       @task = Thread.new(@command) do |cmd|
         status = nil
-        Open3::popen3(cmd) do |stdin, stdout, stderr, thr|
+        Open3.popen3(cmd) do |stdin, stdout, stderr, thr|
           stdout.each do |line|
             logger.debug "[#{thr.pid}] #{line}"
           end

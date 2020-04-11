@@ -79,16 +79,16 @@ module Proxy
         ''
       end
 
-      def bootpxe(reboot=false, persistent=false)
+      def bootpxe(reboot = false, persistent = false)
       end
 
-      def bootdisk(reboot=false, persistent=false)
+      def bootdisk(reboot = false, persistent = false)
       end
 
-      def bootbios(reboot=false, persistent=false)
+      def bootbios(reboot = false, persistent = false)
       end
 
-      def bootcdrom(reboot=false, persistent=false)
+      def bootcdrom(reboot = false, persistent = false)
       end
     end
   end

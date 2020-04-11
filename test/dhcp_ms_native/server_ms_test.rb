@@ -47,24 +47,38 @@ class DHCPServerMicrosoftTest < Test::Unit::TestCase
 
   def test_should_return_all_hosts
     @dhcpsapi.expects(:list_subnet_elements).with(@network, anything).returns([{:element => {:reserved_ip_address => '192.168.42.10'}}])
-    @dhcpsapi.expects(:list_clients_2008).with(@network).returns([
-      {:client_ip_address => '192.168.42.10', :subnet_mask => @netmask, :client_hardware_address => '00:01:02:03:04:05', :client_name => 'test', :client_lease_expires => nil},
-      {:client_ip_address => '192.168.42.11', :subnet_mask => @netmask, :client_hardware_address => '00:01:02:03:04:06', :client_name => 'test-2', :client_lease_expires => Time.now + 120}])
+    @dhcpsapi.expects(:list_clients_2008).with(@network).returns(
+      [
+        {:client_ip_address => '192.168.42.10', :subnet_mask => @netmask, :client_hardware_address => '00:01:02:03:04:05', :client_name => 'test', :client_lease_expires => nil},
+        {:client_ip_address => '192.168.42.11', :subnet_mask => @netmask, :client_hardware_address => '00:01:02:03:04:06', :client_name => 'test-2', :client_lease_expires => Time.now + 120},
+      ]
+    )
 
     hosts = @server.all_hosts(@network)
 
     assert_equal 1, hosts.size
-    assert_equal ::Proxy::DHCP::Reservation.new('test', '192.168.42.10', '00:01:02:03:04:05', ::Proxy::DHCP::Subnet.new(@network, @netmask),
-                                                :hostname => 'test',
-                                                :deleteable => true), hosts.first
+    assert_equal(
+      ::Proxy::DHCP::Reservation.new(
+        'test',
+        '192.168.42.10',
+        '00:01:02:03:04:05',
+        ::Proxy::DHCP::Subnet.new(@network, @netmask),
+        :hostname => 'test',
+        :deleteable => true
+      ),
+      hosts.first
+    )
   end
 
   def test_should_return_all_leases
     lease_expires = Time.now + 120
     @dhcpsapi.expects(:list_subnet_elements).with(@network, anything).returns([{:element => {:reserved_ip_address => '192.168.42.10'}}])
-    @dhcpsapi.expects(:list_clients_2008).with(@network).returns([
-      {:client_ip_address => '192.168.42.10', :subnet_mask => @netmask, :client_hardware_address => '00:01:02:03:04:05', :client_name => 'test', :client_lease_expires => nil},
-      {:client_ip_address => '192.168.42.11', :subnet_mask => @netmask, :client_hardware_address => '00:01:02:03:04:06', :client_name => 'test-2', :client_lease_expires => lease_expires}])
+    @dhcpsapi.expects(:list_clients_2008).with(@network).returns(
+      [
+        {:client_ip_address => '192.168.42.10', :subnet_mask => @netmask, :client_hardware_address => '00:01:02:03:04:05', :client_name => 'test', :client_lease_expires => nil},
+        {:client_ip_address => '192.168.42.11', :subnet_mask => @netmask, :client_hardware_address => '00:01:02:03:04:06', :client_name => 'test-2', :client_lease_expires => lease_expires},
+      ]
+    )
 
     leases = @server.all_leases(@network)
 

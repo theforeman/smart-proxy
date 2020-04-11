@@ -5,9 +5,11 @@ require 'puppetca_http_api/puppetca_impl'
 
 class PuppetCaHttpImplTest < Test::Unit::TestCase
   class FakeCaApiV1Request
-    def sign(certname); end
+    def sign(certname)
+    end
 
-    def clean(certname); end
+    def clean(certname)
+    end
 
     def search(key = 'foreman')
       [

@@ -7,7 +7,7 @@ require 'dhcp_common/free_ips'
 
 class Proxy::DHCPFreeIpsTest < Test::Unit::TestCase
   def setup
-    @blacklist_interval = 30*60
+    @blacklist_interval = 30 * 60
     @free_ips = Proxy::DHCP::FreeIps.new(@blacklist_interval)
     @subnet = Proxy::DHCP::Subnet.new("192.168.1.0", "255.255.255.0")
   end
@@ -32,7 +32,7 @@ class Proxy::DHCPFreeIpsTest < Test::Unit::TestCase
   def test_find_free_ip
     @free_ips.stubs(:icmp_pingable?).returns(false)
     @free_ips.stubs(:tcp_pingable?).returns(false)
-    r = Proxy::DHCP::Reservation.new('test', "192.168.1.1", "aa:bb:cc:dd:ee:ff", @subnet, :hostname =>'test')
+    r = Proxy::DHCP::Reservation.new('test', "192.168.1.1", "aa:bb:cc:dd:ee:ff", @subnet, :hostname => 'test')
 
     assert_equal "192.168.1.2", @free_ips.find_free_ip("192.168.1.1", "192.168.1.2", [r])
   end
@@ -55,7 +55,7 @@ class Proxy::DHCPFreeIpsTest < Test::Unit::TestCase
     @free_ips.stubs(:icmp_pingable?).returns(false)
     @free_ips.stubs(:tcp_pingable?).returns(false)
     @free_ips.expects(:time_now).returns(time_now = Time.now.to_i)
-    r = Proxy::DHCP::Reservation.new('test', "192.168.1.1", "aa:bb:cc:dd:ee:ff", @subnet, :hostname =>'test')
+    r = Proxy::DHCP::Reservation.new('test', "192.168.1.1", "aa:bb:cc:dd:ee:ff", @subnet, :hostname => 'test')
 
     assert @free_ips.allocated_ips.empty?
     assert @free_ips.allocation_timestamps.empty?
@@ -69,14 +69,14 @@ class Proxy::DHCPFreeIpsTest < Test::Unit::TestCase
   def test_find_free_ip_should_use_icmp_ping
     @free_ips.expects(:icmp_pingable?).returns(false)
     @free_ips.stubs(:tcp_pingable?).returns(false)
-    r = Proxy::DHCP::Reservation.new('test', "192.168.1.1", "aa:bb:cc:dd:ee:ff", @subnet, :hostname =>'test')
+    r = Proxy::DHCP::Reservation.new('test', "192.168.1.1", "aa:bb:cc:dd:ee:ff", @subnet, :hostname => 'test')
     @free_ips.find_free_ip("192.168.1.1", "192.168.1.2", [r])
   end
 
   def test_find_free_ip_should_use_tcp_ping
     @free_ips.expects(:tcp_pingable?).returns(false)
     @free_ips.stubs(:icmp_pingable?).returns(false)
-    r = Proxy::DHCP::Reservation.new('test', "192.168.1.1", "aa:bb:cc:dd:ee:ff", @subnet, :hostname =>'test')
+    r = Proxy::DHCP::Reservation.new('test', "192.168.1.1", "aa:bb:cc:dd:ee:ff", @subnet, :hostname => 'test')
     @free_ips.find_free_ip("192.168.1.1", "192.168.1.2", [r])
   end
 
@@ -84,7 +84,7 @@ class Proxy::DHCPFreeIpsTest < Test::Unit::TestCase
     @free_ips.expects(:tcp_pingable?).returns(true)
     @free_ips.stubs(:icmp_pingable?).returns(false)
     @free_ips.expects(:time_now).returns(time_now = Time.now.to_i)
-    r = Proxy::DHCP::Reservation.new('test', "192.168.1.1", "aa:bb:cc:dd:ee:ff", @subnet, :hostname =>'test')
+    r = Proxy::DHCP::Reservation.new('test', "192.168.1.1", "aa:bb:cc:dd:ee:ff", @subnet, :hostname => 'test')
 
     assert @free_ips.allocated_ips.empty?
     assert @free_ips.allocation_timestamps.empty?
@@ -99,7 +99,7 @@ class Proxy::DHCPFreeIpsTest < Test::Unit::TestCase
     @free_ips.stubs(:icmp_pingable?).returns(false)
     @free_ips.stubs(:tcp_pingable?).returns(false)
     @free_ips.expects(:time_now).returns(Time.now.to_i)
-    r = Proxy::DHCP::Reservation.new('test', "192.168.1.1", "aa:bb:cc:dd:ee:ff", @subnet, :hostname =>'test')
+    r = Proxy::DHCP::Reservation.new('test', "192.168.1.1", "aa:bb:cc:dd:ee:ff", @subnet, :hostname => 'test')
 
     @free_ips.find_free_ip("192.168.1.1", "192.168.1.2", [r])
 

@@ -105,8 +105,6 @@ Enumerated zone list:
  domain.local                   Primary    AD-Domain       Secure
  domain.com                     Secondary    File
  TrustAnchors                   Primary    AD-Forest
-
-
 Command completed successfully.'.split("\n")
     Proxy::Dns::Dnscmd::Record.any_instance.expects(:execute).with('/EnumZones', nil, true).returns(to_parse)
     assert_equal [
@@ -127,8 +125,6 @@ Returned records:
 		 3600 A 192.168.33.34
 
 Command completed successfully.
-
-
 '.split("\n")
     Proxy::Dns::Dnscmd::Record.any_instance.expects(:execute).with('/EnumRecords domain.local host.domain.local. /Type A', 'EnumRecords', true).returns(to_parse)
     assert_equal ['192.168.33.33', '192.168.33.34'], Proxy::Dns::Dnscmd::Record.new('server', 999).enum_records('domain.local', 'host.domain.local', 'A')
@@ -141,8 +137,6 @@ Returned records:
 		 3600 AAAA	2001:db8:85a3::8a2e:370:7334
 
 Command completed successfully.
-
-
 '.split("\n")
     Proxy::Dns::Dnscmd::Record.any_instance.expects(:execute).with('/EnumRecords domain.local host.domain.local. /Type AAAA', 'EnumRecords', true).returns(to_parse)
     assert_equal ['2001:db8:85a3::8a2e:370:7335', '2001:db8:85a3::8a2e:370:7334'], Proxy::Dns::Dnscmd::Record.new('server', 999).enum_records('domain.local', 'host.domain.local', 'AAAA')
@@ -154,8 +148,6 @@ Returned records:
 @ 3600 CNAME	alias.example.com.
 
 Command completed successfully.
-
-
 '.split("\n")
     Proxy::Dns::Dnscmd::Record.any_instance.expects(:execute).with('/EnumRecords example.com alias.example.com. /Type CNAME', 'EnumRecords', true).returns(to_parse)
     assert_equal ['alias.example.com.'], Proxy::Dns::Dnscmd::Record.new('server', 999).enum_records('example.com', 'alias.example.com', 'CNAME')
@@ -167,8 +159,6 @@ Returned records:
 @ 3600 PTR	host.domain.local.
 
 Command completed successfully.
-
-
 '.split("\n")
     Proxy::Dns::Dnscmd::Record.any_instance.expects(:execute).with('/EnumRecords 33.168.192.in-addr.arpa 33.33.168.192.in-addr.arpa. /Type PTR', 'EnumRecords', true).returns(to_parse)
     assert_equal ['host.domain.local.'], Proxy::Dns::Dnscmd::Record.new('server', 999).enum_records('33.168.192.in-addr.arpa', '33.33.168.192.in-addr.arpa', 'PTR')
@@ -181,8 +171,6 @@ Returned records:
 		 3600 PTR	host2.domain.local.
 
 Command completed successfully.
-
-
 '.split("\n")
     Proxy::Dns::Dnscmd::Record.any_instance.expects(:execute).with('/EnumRecords 33.168.192.in-addr.arpa 33.33.168.192.in-addr.arpa. /Type PTR', 'EnumRecords', true).returns(to_parse)
     assert_equal ['host.domain.local.', 'host2.domain.local.'], Proxy::Dns::Dnscmd::Record.new('server', 999).enum_records('33.168.192.in-addr.arpa', '33.33.168.192.in-addr.arpa', 'PTR')
@@ -193,8 +181,6 @@ Command completed successfully.
 DNS Server failed to enumerate records for node 33.33.168.192.in-addr.arpa..
     Status = 9714 (0x000025f2)
 Command failed:  DNS_ERROR_NAME_DOES_NOT_EXIST     9714    0x25F2
-
-
 '.split("\n")
     Proxy::Dns::Dnscmd::Record.any_instance.expects(:execute).with('/EnumRecords 33.168.192.in-addr.arpa 33.33.168.192.in-addr.arpa. /Type PTR', 'EnumRecords', true).returns(to_parse)
     assert_equal [], Proxy::Dns::Dnscmd::Record.new('server', 999).enum_records('33.168.192.in-addr.arpa', '33.33.168.192.in-addr.arpa', 'PTR')

@@ -2,15 +2,15 @@ require 'yaml'
 
 class MigrateDhcpSettings < ::Proxy::Migration
   KNOWN_PARAMETERS = {
-      :enabled => [:dhcp, :enabled],
-      :dhcp_vendor => [:dhcp, :use_provider, :old_provider_name_to_new],
-      :dhcp_subnets => [:dhcp, :subnets],
-      :dhcp_config => [:dhcp_isc, :config],
-      :dhcp_leases => [:dhcp_isc, :leases],
-      :dhcp_key_name => [:dhcp_isc, :key_name],
-      :dhcp_key_secret => [:dhcp_isc, :key_secret],
-      :dhcp_omapi_port => [:dhcp_isc, :omapi_port],
-      :dhcp_server => [:dhcp, :server],
+    :enabled         => [:dhcp, :enabled],
+    :dhcp_vendor     => [:dhcp, :use_provider, :old_provider_name_to_new],
+    :dhcp_subnets    => [:dhcp, :subnets],
+    :dhcp_config     => [:dhcp_isc, :config],
+    :dhcp_leases     => [:dhcp_isc, :leases],
+    :dhcp_key_name   => [:dhcp_isc, :key_name],
+    :dhcp_key_secret => [:dhcp_isc, :key_secret],
+    :dhcp_omapi_port => [:dhcp_isc, :omapi_port],
+    :dhcp_server     => [:dhcp, :server],
   }
 
   def remap_parameter(aparameter, avalue)
@@ -42,7 +42,7 @@ class MigrateDhcpSettings < ::Proxy::Migration
   end
 
   def migrate_dhcp_configuration(to_migrate)
-    migrated = Hash.new { |h, k| h[k] = Hash.new }
+    migrated = Hash.new { |h, k| h[k] = {} }
     to_migrate.each do |option, value|
       module_name, parameter_name, parameter_value = remap_parameter(option, value)
       migrated[module_name][parameter_name] = parameter_value

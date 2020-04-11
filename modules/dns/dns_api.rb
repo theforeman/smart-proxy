@@ -96,7 +96,7 @@ module Proxy::Dns
       raise Proxy::Dns::Error.new("Invalid DNS srv name #{name}") unless name =~ /^([a-zA-Z0-9_]([-a-zA-Z0-9_]+)?\.?)+$/
     end
 
-    def validate_dns_name!(name, type=nil)
+    def validate_dns_name!(name, type = nil)
       if type == 'SRV'
         validate_srv_name!(name)
       else

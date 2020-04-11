@@ -2,11 +2,11 @@ require 'yaml'
 
 class MigrateRealmSettings < ::Proxy::Migration
   KNOWN_PARAMETERS = {
-      :enabled => [:realm, :enabled],
-      :realm_provider => [:realm, :use_provider],
-      :realm_keytab => [:realm_freeipa, :keytab_path],
-      :realm_principal => [:realm_freeipa, :principal],
-      :freeipa_remove_dns => [:realm_freeipa, :remove_dns],
+    :enabled            => [:realm, :enabled],
+    :realm_provider     => [:realm, :use_provider],
+    :realm_keytab       => [:realm_freeipa, :keytab_path],
+    :realm_principal    => [:realm_freeipa, :principal],
+    :freeipa_remove_dns => [:realm_freeipa, :remove_dns],
   }
 
   def migrate
@@ -29,7 +29,7 @@ class MigrateRealmSettings < ::Proxy::Migration
   end
 
   def migrate_realm_configuration(to_migrate)
-    migrated = Hash.new { |h, k| h[k] = Hash.new }
+    migrated = Hash.new { |h, k| h[k] = {} }
     to_migrate.each do |option, value|
       module_name, parameter_name, parameter_value = remap_parameter(option, value)
       migrated[module_name][parameter_name] = parameter_value

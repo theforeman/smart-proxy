@@ -35,7 +35,7 @@ module Proxy
 
       # Turn the ipmi device off, if its already off then nothing will happen
       # If soft=true then the ipmi will perform a graceful shutdown
-      def poweroff(soft=false)
+      def poweroff(soft = false)
         if soft
           host.chassis.power.softShutdown
         else
@@ -66,7 +66,7 @@ module Proxy
         host.chassis.config.bootdevice
       end
 
-      def bootdevice=(args={ :device => nil, :reboot => false, :persistent => false })
+      def bootdevice=(args = { :device => nil, :reboot => false, :persistent => false })
         host.chassis.bootdevice(args[:device], args[:reboot], args[:persistent])
       end
 
@@ -115,22 +115,22 @@ module Proxy
       end
 
       # Boot to pxe
-      def bootpxe(reboot=false, persistent=false)
+      def bootpxe(reboot = false, persistent = false)
         host.chassis.bootpxe(reboot, persistent)
       end
 
       # boot to disk
-      def bootdisk(reboot=false, persistent=false)
+      def bootdisk(reboot = false, persistent = false)
         host.chassis.bootdisk(reboot, persistent)
       end
 
       # boot to bios
-      def bootbios(reboot=false, persistent=false)
+      def bootbios(reboot = false, persistent = false)
         host.chassis.bootbios(reboot, persistent)
       end
 
       # boot to cdrom
-      def bootcdrom(reboot=false, persistent=false)
+      def bootcdrom(reboot = false, persistent = false)
         host.chassis.bootcdrom(reboot, persistent)
       end
 
@@ -194,7 +194,7 @@ module Proxy
       end
 
       # BMC reset
-      def reset(type='cold')
+      def reset(type = 'cold')
         host.bmc.reset(type)
       end
 

@@ -1,7 +1,7 @@
 module Proxy
   class BundlerHelper
     def self.require_groups(*groups)
-      if File.exist?(File.expand_path('../../Gemfile.in', __FILE__))
+      if File.exist?(File.expand_path('../Gemfile.in', __dir__))
         # If there is a Gemfile.in file, we will not use Bundler but BundlerExt
         # gem which parses this file and loads all dependencies from the system
         # rathern then trying to download them from rubygems.org. It always
@@ -19,7 +19,7 @@ module Proxy
             exit 1
           end
         end
-        BundlerExt.system_require(File.expand_path('../../Gemfile.in', __FILE__), *groups)
+        BundlerExt.system_require(File.expand_path('../Gemfile.in', __dir__), *groups)
       else
         require 'bundler' unless defined?(Bundler)
         Bundler.require(*groups)

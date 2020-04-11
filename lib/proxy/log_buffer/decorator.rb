@@ -30,7 +30,7 @@ module Proxy::LogBuffer
       return if message == ''
       reopened = false
       @mutex.synchronize do
-        if self.roll_log?
+        if roll_log?
           # decorator is in-memory only, reopen underlaying logging appenders
           ::Logging.reopen
           self.roll_log = false
@@ -54,7 +54,7 @@ module Proxy::LogBuffer
       end
       info("Logging file reopened via USR1 signal") if reopened
       # exceptions are also sent to structured log if available
-      self.exception("Error details for #{message}", exception_or_backtrace) if exception_or_backtrace&.is_a?(Exception)
+      exception("Error details for #{message}", exception_or_backtrace) if exception_or_backtrace&.is_a?(Exception)
     end
 
     def trace?

@@ -3,7 +3,7 @@ require 'realm_freeipa/ipa_config_parser'
 
 class IpaConfigParserTest < Test::Unit::TestCase
   def setup
-    @parser = Proxy::FreeIPARealm::IpaConfigParser.new(File.expand_path("realm.conf", File.expand_path("../", __FILE__)))
+    @parser = Proxy::FreeIPARealm::IpaConfigParser.new(File.expand_path("realm.conf", File.expand_path(__dir__)))
   end
 
   def test_should_return_uri

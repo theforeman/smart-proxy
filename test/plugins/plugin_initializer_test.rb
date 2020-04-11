@@ -74,6 +74,6 @@ class PluginInitializerTest < Test::Unit::TestCase
        {:name => :plugin_5, :version => '1.0', :class => TestPlugin5, :state => :disabled, :http_enabled => false, :https_enabled => false,
           :settings => {}, :capabilities => []},
        {:name => :plugin_6, :version => '1.0', :class => TestPlugin6, :state => :running, :http_enabled => true, :https_enabled => true,
-          :settings=>{:foo=>:bar}, :capabilities => [CAP_LAMBDA, CAP_PROC, 'foo']}], loaded)
+          :settings => {:foo => :bar}, :capabilities => [CAP_LAMBDA, CAP_PROC, 'foo']}], loaded)
   end
 end

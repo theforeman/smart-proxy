@@ -88,7 +88,7 @@ module Proxy::DHCP::CommonISC
       output.map { |x| "omshell= #{x.chomp}" }.join("\n")
     end
 
-    def report(msg, response="")
+    def report(msg, response = "")
       logger.debug(format_omshell_output(response))
       if response.nil? || (!response.empty? && !response.grep(/can't|no more|not connected|Syntax error/).empty?)
         logger.error "Omshell failed: " + (response.nil? ? "Problem launching omshell" : format_omshell_output(response))

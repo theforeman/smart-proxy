@@ -13,7 +13,7 @@ module Proxy
     end
 
     def connection
-      @connection ||= ::Libvirt::open(@url)
+      @connection ||= ::Libvirt.open(@url)
       @connection
     end
 

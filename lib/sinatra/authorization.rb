@@ -32,7 +32,7 @@ module Sinatra
         if trusted_hosts
           logger.debug "verifying remote client #{request.env['REMOTE_ADDR']} against trusted_hosts #{trusted_hosts}"
 
-          if [ 'yes', 'on', 1 ].include? request.env['HTTPS'].to_s
+          if ['yes', 'on', 1].include? request.env['HTTPS'].to_s
             fqdn = https_cert_cn
           else
             fqdn = remote_fqdn(Proxy::SETTINGS.forward_verify)

@@ -8,7 +8,7 @@ module Proxy::Pluggable
   end
 
   def requires(plugin_name, version_spec)
-    self.dependencies << ::Proxy::Dependency.new(plugin_name, cleanup_version(version_spec))
+    dependencies << ::Proxy::Dependency.new(plugin_name, cleanup_version(version_spec))
   end
 
   def bundler_group(name)

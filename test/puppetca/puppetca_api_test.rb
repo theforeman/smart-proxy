@@ -12,9 +12,11 @@ class TestPuppetcaImpl
     {}
   end
 
-  def sign(certname); end
+  def sign(certname)
+  end
 
-  def clean(certname); end
+  def clean(certname)
+  end
 end
 
 module Proxy::PuppetCa

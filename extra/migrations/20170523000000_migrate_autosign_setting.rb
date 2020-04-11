@@ -29,7 +29,7 @@ class MigrateAutosignSetting < ::Proxy::Migration
   end
 
   def migrate_autosign_configuration(to_migrate)
-    migrated = Hash.new { |h, k| h[k] = Hash.new }
+    migrated = Hash.new { |h, k| h[k] = {} }
     to_migrate.each do |option, value|
       module_name, parameter_name, parameter_value = remap_parameter(option, value)
       migrated[module_name][parameter_name] = parameter_value

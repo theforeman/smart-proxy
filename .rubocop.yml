@@ -18,6 +18,9 @@ Layout/ParameterAlignment:
 Layout/DotPosition:
   Enabled: false
 
+Layout/EmptyLineAfterGuardClause:
+  Enabled: false
+
 Layout/FirstArgumentIndentation:
   EnforcedStyle: consistent
 
@@ -114,6 +117,10 @@ Style/PreferredHashMethods:
 # Both double and single quotes are OK
 Style/StringLiterals:
   Enabled: false
+
+Style/SymbolArray:
+  EnforcedStyle: brackets
+  MinSize: 1
 
 Style/TernaryParentheses:
   EnforcedStyle: require_parentheses_when_complex

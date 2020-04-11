@@ -150,7 +150,8 @@ module Proxy
         end
 
         class CommentNode < Struct.new :comment
-          def visit(_, _, _, _); end
+          def visit(_, _, _, _)
+          end
         end
 
         class KeyValueNode < Struct.new :key, :value

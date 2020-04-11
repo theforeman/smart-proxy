@@ -16,18 +16,18 @@ class MigrateDnsSettings < ::Proxy::Migration
 
   def known_dns_options
     {
-        :enabled            => [:dns],
-        :dns_provider       => [:dns],
-        :dns_key            => [:dns_nsupdate],
-        :dns_server         => [:dns_nsupdate, :dns_nsupdate_gss, :dns_dnscmd],
-        :dns_ttl            => [:dns],
-        :dns_tsig_keytab    => [:dns_nsupdate_gss],
-        :dns_tsig_principal => [:dns_nsupdate_gss],
+      :enabled            => [:dns],
+      :dns_provider       => [:dns],
+      :dns_key            => [:dns_nsupdate],
+      :dns_server         => [:dns_nsupdate, :dns_nsupdate_gss, :dns_dnscmd],
+      :dns_ttl            => [:dns],
+      :dns_tsig_keytab    => [:dns_nsupdate_gss],
+      :dns_tsig_principal => [:dns_nsupdate_gss],
     }
   end
 
   def migrate_dns_configuration(data)
-    output = Hash.new { |h, k| h[k] = Hash.new }
+    output = Hash.new { |h, k| h[k] = {} }
 
     data.each do |option, value|
       if known_dns_options.include? option

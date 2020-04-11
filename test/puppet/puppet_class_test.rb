@@ -26,7 +26,7 @@ class PuppetClassTest < Test::Unit::TestCase
 
   def test_json_serialization
     clazz = Proxy::Puppet::PuppetClass.new(
-      "foreman_proxy::install", "namedconf_path"=>"${::dns::params::namedconf_path}", "dnsdir"=>"${::dns::params::dnsdir}")
+      "foreman_proxy::install", "namedconf_path" => "${::dns::params::namedconf_path}", "dnsdir" => "${::dns::params::dnsdir}")
 
     assert clazz.to_json.include?("\"json_class\":\"Proxy::Puppet::PuppetClass\"")
     assert clazz.to_json.include?("\"klass\":\"foreman_proxy::install\"")
