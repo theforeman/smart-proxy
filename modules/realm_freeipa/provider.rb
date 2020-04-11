@@ -33,7 +33,7 @@ module Proxy::FreeIPARealm
       login.use_ssl = true
       login.verify_mode = OpenSSL::SSL::VERIFY_NONE
 
-      request = Net::HTTP::Post.new("/ipa/session/login_kerberos", 'Authorization'=>"Negotiate #{strict_encode64(token)}", 'Referer' => ipa_config.uri)
+      request = Net::HTTP::Post.new("/ipa/session/login_kerberos", 'Authorization' => "Negotiate #{strict_encode64(token)}", 'Referer' => ipa_config.uri)
       response = login.request(request)
       cookie = response['Set-Cookie']
 
@@ -41,7 +41,7 @@ module Proxy::FreeIPARealm
       XMLRPC::Config.module_eval { const_set(:ENABLE_NIL_PARSER, true) }
       ipa = XMLRPC::Client.new2(ipa_config.scheme + "://" + ipa_config.host + "/ipa/session/xml")
       # For some reason ipa insists on having 'Referer' header to be present...
-      ipa.http_header_extra={ 'Referer' => ipa_config.uri, 'Content-Type' => 'text/xml; charset=utf-8' }
+      ipa.http_header_extra = { 'Referer' => ipa_config.uri, 'Content-Type' => 'text/xml; charset=utf-8' }
       ipa.cookie = cookie # set the session cookie
 
       ipa

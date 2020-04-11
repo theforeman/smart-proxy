@@ -8,7 +8,7 @@ require 'dhcp_common/isc/configuration_parser'
 require 'dhcp_common/isc/subnet_service_initialization'
 
 class DhcpIscSubnetServiceInitializationTest < Test::Unit::TestCase
-  DHCPD_CONFIG =<<~END
+  DHCPD_CONFIG = <<~END
     # This is a comment.
 
     omapi-port 7911;

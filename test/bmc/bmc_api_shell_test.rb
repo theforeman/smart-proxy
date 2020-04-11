@@ -15,7 +15,7 @@ class BmcApiShellTest < Test::Unit::TestCase
   def setup
     @host    ||= ENV["ipmihost"] || "host"
     provider ||= ENV["ipmiprovider"] || "shell"
-    @args    = { :bmc_provider => provider }
+    @args = { :bmc_provider => provider }
   end
 
   def test_api_shell_should_powercycle_with_shutdown

@@ -11,12 +11,12 @@ module Proxy::Puppet
 
     # returns module name (excluding of the class name)
     def module
-      klass[0..(klass.index("::")-1)] if has_module?(klass)
+      klass[0..(klass.index("::") - 1)] if has_module?(klass)
     end
 
     # returns class name (excluding of the module name)
     def name
-      has_module?(klass) ? klass[(klass.index("::")+2)..-1] : klass
+      has_module?(klass) ? klass[(klass.index("::") + 2)..-1] : klass
     end
 
     attr_reader :params
@@ -28,9 +28,9 @@ module Proxy::Puppet
 
     def to_json(*a)
       {
-          'json_class' => self.class.name,
-          'klass' => klass,
-          'params' => params,
+        'json_class' => self.class.name,
+        'klass'      => klass,
+        'params'     => params,
       }.to_json(*a)
     end
 

@@ -8,7 +8,7 @@ module Proxy::DHCP::Libvirt
       super(@network, nil, subnet_service, free_ips_service)
     end
 
-    def add_record(options={})
+    def add_record(options = {})
       record = super(options)
       libvirt_network.add_dhcp_record record
       record

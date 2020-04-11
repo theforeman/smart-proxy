@@ -29,7 +29,7 @@ module PuppetApiv3EnvironmentClassesApiRetrieverTests
 
   def test_returns_cached_classes_if_puppet_responds_with_not_modified
     Proxy::PuppetApi::EnvironmentClassesApiv3.any_instance.expects(:list_classes).returns([Proxy::PuppetApi::EnvironmentClassesApiv3::NOT_MODIFIED, 42])
-    expected_classes =<<~EOL
+    expected_classes = <<~EOL
       {
         "files": [
           {
@@ -88,7 +88,7 @@ module PuppetApiv3EnvironmentClassesApiParsingTests
     @retriever = Proxy::PuppetApi::V3EnvironmentClassesApiClassesRetriever.new(nil, nil, nil, nil, nil)
   end
 
-  ENVIRONMENT_CLASSES_RESPONSE =<<~EOL
+  ENVIRONMENT_CLASSES_RESPONSE = <<~EOL
     {
       "files": [
         {
@@ -116,12 +116,13 @@ module PuppetApiv3EnvironmentClassesApiParsingTests
     expected_reponse = [
       {"classes" => [{"name" => "dns::config", "params" => []}], "path" => "/manifests/config.pp"},
       { "classes" => [{"name" => "dns::install", "params" => []}], "path" => "/manifests/install.pp"},
-      {"error" => "Syntax error at '=>' at /manifests/witherror.pp:20:19", "path" => "/manifests/witherror.pp"}]
+      {"error" => "Syntax error at '=>' at /manifests/witherror.pp:20:19", "path" => "/manifests/witherror.pp"},
+    ]
     Proxy::PuppetApi::EnvironmentClassesApiv3.any_instance.expects(:list_classes).returns([JSON.load(ENVIRONMENT_CLASSES_RESPONSE), 42])
     assert_equal expected_reponse, @retriever.classes_and_errors_in_environment('test_environment')
   end
 
-  ENVIRONMENT_CLASSES_RESPONSE_WITH_EXPRESSION_PARAMETERS =<<~EOL
+  ENVIRONMENT_CLASSES_RESPONSE_WITH_EXPRESSION_PARAMETERS = <<~EOL
     {
       "files": [{"classes": [{"name": "dns",
                               "params": [
@@ -140,15 +141,21 @@ module PuppetApiv3EnvironmentClassesApiParsingTests
   end
 
   def test_parser_with_environment_classes_response_with_variable_expression_parameteres
-    expected_response = [
-      {"classes" => [{"name" => "dns", "params" => [
-        {"default_source" => "${::dns::params::namedconf_path}", "name" => "namedconf_path"},
-        {"default_source" => "${::dns::params::dnsdir}", "name" => "dnsdir"}]}], "path" => "/manifests/init.pp"}]
+    expected_response = [{
+      "classes" => [{
+        "name" => "dns",
+        "params" => [
+          {"default_source" => "${::dns::params::namedconf_path}", "name" => "namedconf_path"},
+          {"default_source" => "${::dns::params::dnsdir}", "name" => "dnsdir"},
+        ],
+      }],
+      "path" => "/manifests/init.pp",
+    }]
     Proxy::PuppetApi::EnvironmentClassesApiv3.any_instance.expects(:list_classes).returns([JSON.load(ENVIRONMENT_CLASSES_RESPONSE_WITH_EXPRESSION_PARAMETERS), 42])
     assert_equal expected_response, @retriever.classes_and_errors_in_environment('test_environment')
   end
 
-  ENVIRONMENT_CLASSES_RESPONSE_WITH_DEFAULT_LITERALS =<<~EOL
+  ENVIRONMENT_CLASSES_RESPONSE_WITH_DEFAULT_LITERALS = <<~EOL
     {
       "files": [{"classes": [{"name": "testing",
                               "params": [
@@ -175,14 +182,19 @@ module PuppetApiv3EnvironmentClassesApiParsingTests
   end
 
   def test_parser_with_puppet_environment_classes_response_with_default_literals
-    expected_response = [
-      {"classes" => [{"name" => "testing", "params" => [
-        {"default_literal" => "literal default", "default_source" => "literal default", "name" => "string_with_literal_default", "type" => "String"},
-        {
-          "default_literal" => {"one" => "foo", "two" => "hello"},
-          "default_source" => "{'one' => 'foo', 'two' => 'hello'}",
-          "name" => "a_hash",
-          "type" => "Hash"}]}], "path" => "init.pp"}]
+    expected_response = [{
+      "classes" => [{
+        "name" => "testing", "params" => [
+          {"default_literal" => "literal default", "default_source" => "literal default", "name" => "string_with_literal_default", "type" => "String"},
+          {
+            "default_literal" => {"one" => "foo", "two" => "hello"},
+            "default_source" => "{'one' => 'foo', 'two' => 'hello'}",
+            "name" => "a_hash",
+            "type" => "Hash"},
+        ]
+      }],
+      "path" => "init.pp",
+    }]
 
     Proxy::PuppetApi::EnvironmentClassesApiv3.any_instance.expects(:list_classes).returns([JSON.load(ENVIRONMENT_CLASSES_RESPONSE_WITH_DEFAULT_LITERALS), 42])
     assert_equal expected_response, @retriever.classes_and_errors_in_environment('test_environment')

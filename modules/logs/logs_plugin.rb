@@ -1,6 +1,6 @@
 class ::Proxy::LogsPlugin < ::Proxy::Plugin
-  http_rackup_path File.expand_path("http_config.ru", File.expand_path("../", __FILE__))
-  https_rackup_path File.expand_path("http_config.ru", File.expand_path("../", __FILE__))
+  http_rackup_path File.expand_path("http_config.ru", File.expand_path(__dir__))
+  https_rackup_path File.expand_path("http_config.ru", File.expand_path(__dir__))
 
   plugin :logs, ::Proxy::VERSION
   default_settings :enabled => true

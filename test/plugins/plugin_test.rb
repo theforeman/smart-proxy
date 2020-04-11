@@ -36,7 +36,10 @@ class PluginTest < Test::Unit::TestCase
     assert_equal ::Proxy::DefaultModuleLoader, TestPluginWithoutAfterActivationBlock.module_loader_class
   end
 
-  class TestLoadClasses; def load_classes; end; end
+  class TestLoadClasses
+    def load_classes
+    end
+  end
   class TestLoadClassesViaClassPlugin < ::Proxy::Plugin
     load_classes TestLoadClasses
   end

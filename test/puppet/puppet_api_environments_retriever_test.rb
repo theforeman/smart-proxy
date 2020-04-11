@@ -18,7 +18,7 @@ class PuppetApiV3EnvironmentsRetrieverTest < Test::Unit::TestCase
   end
 
   def test_api_response_parsing
-    @api.find_environments_response = JSON.load(File.read(File.expand_path('../fixtures/environments_api.json', __FILE__)))
+    @api.find_environments_response = JSON.load(File.read(File.expand_path('fixtures/environments_api.json', __dir__)))
 
     envs = @retriever.all
     assert_equal Set.new(['production', 'example_env', 'development', 'common']), Set.new(envs.map(&:name))

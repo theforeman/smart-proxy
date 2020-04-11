@@ -23,7 +23,7 @@ class BmcApiTest < Test::Unit::TestCase
     pass     ||= ENV["ipmipass"] || "pass"
     @host    ||= ENV["ipmihost"] || "host"
     provider ||= ENV["ipmiprovider"] || "ipmitool"
-    @args    = { 'bmc_provider' => provider, 'blah' => 'test' }
+    @args = { 'bmc_provider' => provider, 'blah' => 'test' }
     authorize user, pass
   end
 
@@ -112,7 +112,7 @@ class BmcApiTest < Test::Unit::TestCase
     Proxy::BMC::IPMI.any_instance.stubs(:poweron).returns(true)
     Proxy::BMC::IPMI.any_instance.expects(:connect).with(:host => 'host', :username => 'user', :password => 'pass',
                                                          :bmc_provider => 'ipmitool',
-                                                         :options=>{"privilege"=>"OPERATOR"})
+                                                         :options => {"privilege" => "OPERATOR"})
     body = {'bmc_provider' => 'ipmitool', :options => {'privilege' => 'OPERATOR'}}.to_json
     put "/#{host}/chassis/power/on", body, "CONTENT_TYPE" => "application/json"
   end
@@ -123,7 +123,7 @@ class BmcApiTest < Test::Unit::TestCase
     Proxy::BMC::IPMI.any_instance.stubs(:poweron).returns(true)
     Proxy::BMC::IPMI.any_instance.expects(:connect).with(:host => 'host', :username => 'user', :password => 'pass',
                                                          :bmc_provider => 'freeipmi',
-                                                         :options=>{"privilege"=>"OPERATOR"})
+                                                         :options => {"privilege" => "OPERATOR"})
     body = {'bmc_provider' => 'freeipmi', :options => {'privilege' => 'OPERATOR'}}.to_json
     put "/#{host}/chassis/power/on", body, "CONTENT_TYPE" => "application/json"
   end
@@ -142,8 +142,8 @@ class BmcApiTest < Test::Unit::TestCase
     Proxy::BMC::IPMI.any_instance.stubs(:poweron).returns(true)
     Proxy::BMC::IPMI.any_instance.expects(:connect).with(:host => 'host', :username => 'user', :password => 'pass',
                                                          :bmc_provider => 'freeipmi',
-                                                         :options=>{"driver"=>"lan20", "privilege"=>"OPERATOR"})
-    body = {'bmc_provider' => 'freeipmi', :options => {"driver"=>"lan20", 'privilege' => 'OPERATOR'}}.to_json
+                                                         :options => {"driver" => "lan20", "privilege" => "OPERATOR"})
+    body = {'bmc_provider' => 'freeipmi', :options => {"driver" => "lan20", 'privilege' => 'OPERATOR'}}.to_json
     put "/#{host}/chassis/power/on", body, "CONTENT_TYPE" => "application/json"
     assert last_response.ok?, "Last response was not ok: #{last_response.body}"
     data = JSON.parse(last_response.body)
@@ -156,7 +156,7 @@ class BmcApiTest < Test::Unit::TestCase
     Proxy::BMC::IPMI.any_instance.stubs(:poweron).returns(true)
     Proxy::BMC::IPMI.any_instance.expects(:connect).with(:host => 'host', :username => 'user', :password => 'pass',
                                                          :bmc_provider => 'freeipmi',
-                                                         :options=>nil)
+                                                         :options => nil)
     body = {'bmc_provider' => 'freeipmi', :options => nil}.to_json
     put "/#{host}/chassis/power/on", body, "CONTENT_TYPE" => "application/json"
     assert last_response.ok?, "Last response was not ok: #{last_response.body}"
@@ -577,7 +577,7 @@ class BmcApiTest < Test::Unit::TestCase
     args = { 'bmc_provider' => 'freeipmi', :options => {:driver => 'lan20', :privilege => 'USER'} }.to_json
     Proxy::BMC::IPMI.any_instance.expects(:connect).with(:username => 'user', :password => 'pass',
                                                          :host => 'host', :bmc_provider => 'freeipmi',
-                                                         :options=>{"driver"=>"lan20", "privilege"=>"USER"})
+                                                         :options => {"driver" => "lan20", "privilege" => "USER"})
     Proxy::BMC::IPMI.any_instance.stubs(:bootbios).returns(true)
     put "/#{@host}/chassis/config/bootdevice/bios", args, "CONTENT_TYPE" => "application/json"
     assert last_response.ok?, "Last response was not ok: #{last_response.body}"

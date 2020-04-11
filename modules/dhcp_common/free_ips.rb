@@ -11,7 +11,7 @@ module Proxy::DHCP
 
     attr_reader :allocated_ips, :allocation_timestamps, :blacklist_interval, :m
 
-    def initialize(blacklist_interval = 30*60)
+    def initialize(blacklist_interval = 30 * 60)
       @blacklist_interval = blacklist_interval
       @allocated_ips = Set.new
       @allocation_timestamps = []

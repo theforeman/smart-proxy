@@ -35,13 +35,13 @@ require 'getoptlong'
 require 'rdoc/usage'
 require 'pathname'
 
-opts = GetoptLong.new([ '--verbose', '-v', GetoptLong::NO_ARGUMENT ],
-                      [ '--help',    '-h', GetoptLong::NO_ARGUMENT ],
-                      [ '--key',           GetoptLong::REQUIRED_ARGUMENT ],
-                      [ '--cert',          GetoptLong::REQUIRED_ARGUMENT ],
-                      [ '--ca',            GetoptLong::REQUIRED_ARGUMENT ],
-                      [ '--verb',          GetoptLong::REQUIRED_ARGUMENT ],
-                      [ '--json',          GetoptLong::NO_ARGUMENT ]
+opts = GetoptLong.new(['--verbose', '-v', GetoptLong::NO_ARGUMENT],
+                      ['--help',    '-h', GetoptLong::NO_ARGUMENT],
+                      ['--key',           GetoptLong::REQUIRED_ARGUMENT],
+                      ['--cert',          GetoptLong::REQUIRED_ARGUMENT],
+                      ['--ca',            GetoptLong::REQUIRED_ARGUMENT],
+                      ['--verb',          GetoptLong::REQUIRED_ARGUMENT],
+                      ['--json',          GetoptLong::NO_ARGUMENT]
                      )
 json = false
 verb = :get
@@ -49,7 +49,7 @@ key = cert = ca = verbose = nil
 opts.each do |opt, arg|
   case opt
     when '--help'
-      RDoc::usage
+      RDoc.usage
     when '--key'
       key = arg
     when '--cert'
@@ -72,8 +72,8 @@ unless key && cert && ca
     cert ||= origin.join "signed.pem"
     ca   ||= origin.join "ca.pem"
   else
-    hostfile = %x{hostname -f}.chomp + ".pem"
-    key  ||= "/var/lib/puppet/ssl/private_keys/" + hostfile
+    hostfile = `hostname -f`.chomp + ".pem"
+    key ||= "/var/lib/puppet/ssl/private_keys/" + hostfile
     cert ||= "/var/lib/puppet/ssl/certs/" + hostfile
     ca   ||= "/var/lib/puppet/ssl/certs/ca.pem"
   end

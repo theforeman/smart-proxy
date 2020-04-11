@@ -65,7 +65,7 @@ class ::Proxy::Plugins
   end
 
   def self.disable_plugin(plugin_name)
-    self.instance.disable_plugin(plugin_name)
+    instance.disable_plugin(plugin_name)
   end
 
   def disable_plugin(plugin_name)

@@ -27,7 +27,7 @@ class Proxy::DHCP::CommonISC::ConfigurationParserTest < Test::Unit::TestCase
                   Proxy::DHCP::CommonISC::ConfigurationParser.new.hardware.parse!('hardware token-ring 1:1:1:1:1:1;')
   end
 
-  MULTILINE_FQDN_LIST =<<~EOFFQDNLIST
+  MULTILINE_FQDN_LIST = <<~EOFFQDNLIST
     ns1.isc.org,
       ns1.isc.org,
        ns1.isc.org
@@ -39,7 +39,7 @@ class Proxy::DHCP::CommonISC::ConfigurationParserTest < Test::Unit::TestCase
     assert_equal ['ns1.isc.org', 'ns1.isc.org', 'ns1.isc.org'], Proxy::DHCP::CommonISC::ConfigurationParser::FQDN_LIST.parse!(MULTILINE_FQDN_LIST)
   end
 
-  MULTILINE_IP_LIST =<<~EOFIPLIST
+  MULTILINE_IP_LIST = <<~EOFIPLIST
     204.254.239.1,
      204.254.239.2,
       204.254.239.3
@@ -114,7 +114,7 @@ class Proxy::DHCP::CommonISC::ConfigurationParserTest < Test::Unit::TestCase
                  Proxy::DHCP::CommonISC::ConfigurationParser.new.conf.parse!("subnet 192.168.1.0 netmask 255.255.255.128 {adaptive-lease-time-threshold 50;}")
   end
 
-  MULTILINE_SUBNET_WITH_OPtIONS =<<EOFSUBNETWITHOPTIONS
+  MULTILINE_SUBNET_WITH_OPtIONS = <<EOFSUBNETWITHOPTIONS
   subnet 192.168.1.0 netmask 255.255.255.128 {
     # a comment
     option subnet-mask 255.255.255.192;
@@ -169,7 +169,7 @@ EOFSUBNETWITHOPTIONS
                  Proxy::DHCP::CommonISC::ConfigurationParser.new.conf.parse!("group testing {adaptive-lease-time-threshold 50;}")
   end
 
-  MULTILINE_GROUP =<<~EOFMULTILINEGROUP
+  MULTILINE_GROUP = <<~EOFMULTILINEGROUP
     group ilom {
       default-lease-time 3600;
       option domain-name "isc.org";
@@ -217,7 +217,7 @@ EOFSUBNETWITHOPTIONS
                  Proxy::DHCP::CommonISC::ConfigurationParser.new.conf.parse!('shared-network "testing" {}')
   end
 
-  MULTILINE_SHARED_NETWORK =<<EOMULTILNE_SHARED_NETWORK
+  MULTILINE_SHARED_NETWORK = <<EOMULTILNE_SHARED_NETWORK
   shared-network testing {
     option domain-name "test";
     option routers 204.254.239.1, 204.254.239.2;
@@ -247,19 +247,36 @@ EOMULTILNE_SHARED_NETWORK
   end
 
   def test_parse_pool
-    assert_equal [Proxy::DHCP::CommonISC::ConfigurationParser::IpV4SubnetNode['192.168.1.0', '255.255.255.128', [
-      Proxy::DHCP::CommonISC::ConfigurationParser::GroupNode['pool', []]]]],
-                 Proxy::DHCP::CommonISC::ConfigurationParser.new.conf.parse!("subnet 192.168.1.0 netmask 255.255.255.128 { pool {}}")
+    assert_equal(
+      [
+        Proxy::DHCP::CommonISC::ConfigurationParser::IpV4SubnetNode[
+          '192.168.1.0', '255.255.255.128',
+          [
+            Proxy::DHCP::CommonISC::ConfigurationParser::GroupNode['pool', []],
+          ]
+        ],
+      ],
+      Proxy::DHCP::CommonISC::ConfigurationParser.new.conf.parse!("subnet 192.168.1.0 netmask 255.255.255.128 { pool {}}")
+    )
   end
 
   def test_parse_pool_with_option
-    assert_equal [Proxy::DHCP::CommonISC::ConfigurationParser::IpV4SubnetNode['192.168.1.0', '255.255.255.128', [
-      Proxy::DHCP::CommonISC::ConfigurationParser::GroupNode['pool', [
-        Proxy::DHCP::CommonISC::ConfigurationParser::OptionNode[false, 'next-server', [['x.x.x.x']]],
-      ]]]]], Proxy::DHCP::CommonISC::ConfigurationParser.new.conf.parse!("subnet 192.168.1.0 netmask 255.255.255.128 { pool { next-server x.x.x.x; }}")
+    assert_equal(
+      [
+        Proxy::DHCP::CommonISC::ConfigurationParser::IpV4SubnetNode[
+          '192.168.1.0', '255.255.255.128',
+          [
+            Proxy::DHCP::CommonISC::ConfigurationParser::GroupNode[
+              'pool', [Proxy::DHCP::CommonISC::ConfigurationParser::OptionNode[false, 'next-server', [['x.x.x.x']]]]
+            ],
+          ]
+        ],
+      ],
+      Proxy::DHCP::CommonISC::ConfigurationParser.new.conf.parse!("subnet 192.168.1.0 netmask 255.255.255.128 { pool { next-server x.x.x.x; }}")
+    )
   end
 
-  MULTILINE_POOL =<<EOMULTILINE_POOL
+  MULTILINE_POOL = <<EOMULTILINE_POOL
     subnet 192.168.1.0 netmask 255.255.255.128 {
       option interface-mtu 9000;
       pool {
@@ -271,15 +288,27 @@ EOMULTILNE_SHARED_NETWORK
     }
 EOMULTILINE_POOL
   def test_parse_multiline_pool
-    assert_equal [Proxy::DHCP::CommonISC::ConfigurationParser::IpV4SubnetNode['192.168.1.0', '255.255.255.128', [
-      Proxy::DHCP::CommonISC::ConfigurationParser::OptionNode[false, 'interface-mtu', [['9000']]],
-      Proxy::DHCP::CommonISC::ConfigurationParser::GroupNode['pool', [
-        Proxy::DHCP::CommonISC::ConfigurationParser::IgnoredDeclaration[['authoritative']],
-        Proxy::DHCP::CommonISC::ConfigurationParser::RangeNode['192.168.1.1', '192.168.1.100', false],
-        Proxy::DHCP::CommonISC::ConfigurationParser::OptionNode[false, 'filename', [['"pxelinux.0"']]],
-        Proxy::DHCP::CommonISC::ConfigurationParser::IgnoredDeclaration[['default-lease-time', '86400']],
-        Proxy::DHCP::CommonISC::ConfigurationParser::CommentNode['# 1 Day'],
-      ]]]]], Proxy::DHCP::CommonISC::ConfigurationParser.new.conf.parse!(MULTILINE_POOL)
+    assert_equal(
+      [
+        Proxy::DHCP::CommonISC::ConfigurationParser::IpV4SubnetNode[
+          '192.168.1.0', '255.255.255.128',
+          [
+            Proxy::DHCP::CommonISC::ConfigurationParser::OptionNode[false, 'interface-mtu', [['9000']]],
+            Proxy::DHCP::CommonISC::ConfigurationParser::GroupNode[
+              'pool',
+              [
+                Proxy::DHCP::CommonISC::ConfigurationParser::IgnoredDeclaration[['authoritative']],
+                Proxy::DHCP::CommonISC::ConfigurationParser::RangeNode['192.168.1.1', '192.168.1.100', false],
+                Proxy::DHCP::CommonISC::ConfigurationParser::OptionNode[false, 'filename', [['"pxelinux.0"']]],
+                Proxy::DHCP::CommonISC::ConfigurationParser::IgnoredDeclaration[['default-lease-time', '86400']],
+                Proxy::DHCP::CommonISC::ConfigurationParser::CommentNode['# 1 Day'],
+              ]
+            ],
+          ]
+        ],
+      ],
+      Proxy::DHCP::CommonISC::ConfigurationParser.new.conf.parse!(MULTILINE_POOL)
+    )
   end
 
   def test_empty_host_parser
@@ -337,7 +366,7 @@ EOMULTILINE_POOL
     ]]], Proxy::DHCP::CommonISC::ConfigurationParser.new.conf.parse!('host testing { unknown {} }')
   end
 
-  MULTILINE_HOST =<<EOMULTILINE_HOST
+  MULTILINE_HOST = <<EOMULTILINE_HOST
     host testing {
       hardware token-ring 01:02:03:04:05:06;
       fixed-address 192.168.1.1;
@@ -356,7 +385,7 @@ EOMULTILINE_HOST
     ]]], Proxy::DHCP::CommonISC::ConfigurationParser.new.conf.parse!(MULTILINE_HOST)
   end
 
-  HOST_WITH_MAC64 =<<EOHOST_WITH_MAC64
+  HOST_WITH_MAC64 = <<EOHOST_WITH_MAC64
     host eui64 {
       hardware ethernet 00:25:96:FF:FE:12:34:56;
       fixed-address 192.168.1.1;
@@ -373,7 +402,7 @@ EOHOST_WITH_MAC64
     ]]], Proxy::DHCP::CommonISC::ConfigurationParser.new.conf.parse!(HOST_WITH_MAC64)
   end
 
-  HOST_WITH_IBMAC =<<EOHOST_WITH_IBMAC
+  HOST_WITH_IBMAC = <<EOHOST_WITH_IBMAC
     host infiniband {
       hardware ethernet 80:00:02:08:fe:80:00:00:00:00:00:00:00:02:aa:bb:cc:dd:ee:ff;
       fixed-address 192.168.1.1;
@@ -440,7 +469,7 @@ EOHOST_WITH_IBMAC
     assert_equal [Proxy::DHCP::CommonISC::ConfigurationParser::LeaseNode['192.168.1.1', []]], Proxy::DHCP::CommonISC::ConfigurationParser.new.conf.parse!('lease 192.168.1.1 { }')
   end
 
-  MULTILINE_LEASE =<<'OFMULTILNE_LEASE'
+  MULTILINE_LEASE = <<'OFMULTILNE_LEASE'
   lease 192.168.10.1 {
     starts 2 2017/05/01 14:20:25;
     ends 2 2017/05/01 16:20:25;

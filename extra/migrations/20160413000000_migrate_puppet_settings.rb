@@ -2,22 +2,22 @@ require 'yaml'
 
 class MigratePuppetSettings < ::Proxy::Migration
   KNOWN_PARAMETERS = {
-      :enabled => [:puppet, :enabled],
-      :puppet_provider => [:puppet, :use_provider],
-      :puppet_user => [:puppet_proxy_puppetrun, :puppet_proxy_mcollective, :puppet_user],
-      :salt_puppetrun_cmd => [:puppet_proxy_salt, :command],
-      :customrun_cmd => [:puppet_proxy_customrun, :command],
-      :customrun_args => [:puppet_proxy_customrun, :command_arguments],
-      :puppet_url => [:puppet_proxy_puppet_api, :puppet_url],
-      :puppet_ssl_ca => [:puppet_proxy_puppet_api, :puppet_ssl_ca],
-      :puppet_ssl_cert => [:puppet_proxy_puppet_api, :puppet_ssl_cert],
-      :puppet_ssl_key => [:puppet_proxy_puppet_api, :puppet_ssl_key],
-      :puppetssh_sudo => [:puppet_proxy_ssh, :use_sudo],
-      :puppetssh_command => [:puppet_proxy_ssh, :command],
-      :puppetssh_wait => [:puppet_proxy_ssh, :wait],
-      :puppetssh_user => [:puppet_proxy_ssh, :user],
-      :puppetssh_keyfile => [:puppet_proxy_ssh, :keyfile],
-      :mcollective_user => [:puppet_proxy_mcollective, :user],
+    :enabled            => [:puppet, :enabled],
+    :puppet_provider    => [:puppet, :use_provider],
+    :puppet_user        => [:puppet_proxy_puppetrun, :puppet_proxy_mcollective, :puppet_user],
+    :salt_puppetrun_cmd => [:puppet_proxy_salt, :command],
+    :customrun_cmd      => [:puppet_proxy_customrun, :command],
+    :customrun_args     => [:puppet_proxy_customrun, :command_arguments],
+    :puppet_url         => [:puppet_proxy_puppet_api, :puppet_url],
+    :puppet_ssl_ca      => [:puppet_proxy_puppet_api, :puppet_ssl_ca],
+    :puppet_ssl_cert    => [:puppet_proxy_puppet_api, :puppet_ssl_cert],
+    :puppet_ssl_key     => [:puppet_proxy_puppet_api, :puppet_ssl_key],
+    :puppetssh_sudo     => [:puppet_proxy_ssh, :use_sudo],
+    :puppetssh_command  => [:puppet_proxy_ssh, :command],
+    :puppetssh_wait     => [:puppet_proxy_ssh, :wait],
+    :puppetssh_user     => [:puppet_proxy_ssh, :user],
+    :puppetssh_keyfile  => [:puppet_proxy_ssh, :keyfile],
+    :mcollective_user   => [:puppet_proxy_mcollective, :user],
   }
 
   def migrate
@@ -52,7 +52,7 @@ class MigratePuppetSettings < ::Proxy::Migration
   end
 
   def migrate_puppet_configuration(to_migrate)
-    migrated = Hash.new { |h, k| h[k] = Hash.new }
+    migrated = Hash.new { |h, k| h[k] = {} }
     to_migrate.each do |option, value|
       remap_parameter(option, value).each { |module_name, parameter_name, parameter_value| migrated[module_name][parameter_name] = parameter_value }
     end

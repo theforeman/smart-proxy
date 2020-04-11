@@ -9,11 +9,11 @@ module Proxy::HttpRequest
       @base_uri = base_uri
     end
 
-    def query_string(input={})
+    def query_string(input = {})
       input.compact.map { |k, v| "#{CGI.escape(k.to_s)}=#{CGI.escape(v)}" }.join("&")
     end
 
-    def create_get(path, query={}, headers={})
+    def create_get(path, query = {}, headers = {})
       uri = uri(path)
       req = Net::HTTP::Get.new("#{uri.path || '/'}?#{query_string(query)}")
       req = add_headers(req, headers)
@@ -24,7 +24,7 @@ module Proxy::HttpRequest
       URI.join(@base_uri.to_s, path)
     end
 
-    def add_headers(req, headers={})
+    def add_headers(req, headers = {})
       req.add_field('Accept', 'application/json,version=2')
       req.content_type = headers["Content-Type"] || 'application/json'
       headers.each do |k, v|
@@ -33,7 +33,7 @@ module Proxy::HttpRequest
       req
     end
 
-    def create_post(path, body, headers={}, query={})
+    def create_post(path, body, headers = {}, query = {})
       uri = uri(path)
       uri.query = query_string(query)
       req = Net::HTTP::Post.new(uri)

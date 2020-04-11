@@ -36,7 +36,7 @@ module Proxy::DHCP
     end
 
     def <=>(other)
-      self.ip <=> other.ip
+      ip <=> other.ip
     end
 
     def eql?(other)

@@ -87,7 +87,7 @@ class MonolithicConfigMigrationTest < Test::Unit::TestCase
   end
 
   def test_output_has_correct_unknown_settings
-    assert_equal @unknown, :foo=>"bar"
+    assert_equal @unknown, :foo => "bar"
   end
 
   def test_migration_correctly_uses_http_when_ssl_disabled

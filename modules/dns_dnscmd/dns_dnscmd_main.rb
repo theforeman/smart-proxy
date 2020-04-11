@@ -33,18 +33,18 @@ module Proxy::Dns::Dnscmd
       nil
     end
 
-    def execute(cmd, msg=nil, error_only=false)
+    def execute(cmd, msg = nil, error_only = false)
       tsecs = 5
       response = nil
       interpreter = Proxy::SETTINGS.x86_64 ? 'c:\windows\sysnative\cmd.exe' : 'c:\windows\system32\cmd.exe'
-      command  = interpreter + ' /c c:\Windows\System32\dnscmd.exe ' + "#{@server} #{cmd}"
+      command = interpreter + ' /c c:\Windows\System32\dnscmd.exe ' + "#{@server} #{cmd}"
 
       std_in = std_out = std_err = nil
       begin
         timeout(tsecs) do
           logger.debug "executing: #{command}"
           std_in, std_out, std_err = Open3.popen3(command)
-          response  = std_out.readlines
+          response = std_out.readlines
           response += std_err.readlines
         end
       rescue Timeout::Error

@@ -27,7 +27,7 @@ class ProxyUtilTest < Test::Unit::TestCase
   end
 
   def test_strict_encode64
-    assert_equal "YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWE=", UtilClass.strict_encode64("a"*50)
+    assert_equal "YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWE=", UtilClass.strict_encode64("a" * 50)
   end
 
   def test_to_bool_true

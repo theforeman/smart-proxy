@@ -46,7 +46,7 @@ module Proxy::IntegrationTestCase
       app = launcher.public_send("#{protocol}_app", port, plugins)
       launcher.webrick_server(app.merge(AccessLog: [Logger.new('/dev/null')]), ['localhost'], port).start
     end
-    Timeout::timeout(2) do
+    Timeout.timeout(2) do
       sleep(0.1) until can_connect?('localhost', @settings.send("#{protocol}_port"))
     end
   end

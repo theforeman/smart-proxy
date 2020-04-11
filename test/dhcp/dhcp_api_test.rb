@@ -24,27 +24,30 @@ class DhcpApiTest < Test::Unit::TestCase
   def setup
     @server = Object.new
 
-    @subnets = [Proxy::DHCP::Subnet.new("192.168.122.0", "255.255.255.0", "routers" => ["192.168.122.250"]),
-                Proxy::DHCP::Subnet.new("192.168.123.0", "255.255.255.192",
-                                        "routers" => ["192.168.123.1"], "domain_name_servers" => ["192.168.123.1"],
-                                        "range" => ["192.168.123.2", "192.168.123.62"]),
-                Proxy::DHCP::Subnet.new("192.168.124.0", "255.255.255.0",
-                                        "routers" => ["192.168.124.1", "192.168.124.2"],
-                                        "domain_name_servers" => ["192.168.123.1", "192.168.122.250"]),
+    @subnets = [
+      Proxy::DHCP::Subnet.new("192.168.122.0", "255.255.255.0", "routers" => ["192.168.122.250"]),
+      Proxy::DHCP::Subnet.new("192.168.123.0", "255.255.255.192",
+                              "routers" => ["192.168.123.1"], "domain_name_servers" => ["192.168.123.1"],
+                              "range" => ["192.168.123.2", "192.168.123.62"]),
+      Proxy::DHCP::Subnet.new("192.168.124.0", "255.255.255.0",
+                              "routers" => ["192.168.124.1", "192.168.124.2"],
+                              "domain_name_servers" => ["192.168.123.1", "192.168.122.250"]),
     ]
 
     @subnet = @subnets.first
 
-    @reservations = [Proxy::DHCP::Reservation.new("test.example.com",
-                                                  "192.168.122.1",
-                                                  "00:11:bb:cc:dd:ee",
-                                                  @subnet,
-                                                  :hostname => "test.example.com"),
-                     Proxy::DHCP::Reservation.new("ten.example.com",
-                                                  "192.168.122.10",
-                                                  "10:10:10:10:10:10",
-                                                  @subnet,
-                                                  :hostname => "ten.example.com")]
+    @reservations = [
+      Proxy::DHCP::Reservation.new("test.example.com",
+                                   "192.168.122.1",
+                                   "00:11:bb:cc:dd:ee",
+                                   @subnet,
+                                   :hostname => "test.example.com"),
+      Proxy::DHCP::Reservation.new("ten.example.com",
+                                   "192.168.122.10",
+                                   "10:10:10:10:10:10",
+                                   @subnet,
+                                   :hostname => "ten.example.com"),
+    ]
 
     @leases = [
       Proxy::DHCP::Lease.new(nil, "192.168.122.2", "00:aa:bb:cc:dd:ee", @subnet, date_format("Sat Jul 12 10:08:29 UTC 2014"), nil, "active"),
@@ -93,7 +96,7 @@ class DhcpApiTest < Test::Unit::TestCase
     get "/192.168.122.0/unused_ip?mac=01:02:03:04:05:06&from=192.168.122.10&to=192.168.122.20"
 
     assert last_response.ok?, "Last response was not ok: #{last_response.status} #{last_response.body}"
-    assert_equal({"ip"=>"192.168.122.11"}, JSON.parse(last_response.body))
+    assert_equal({"ip" => "192.168.122.11"}, JSON.parse(last_response.body))
   end
 
   def test_get_unused_ip_for_nonexistent_network
@@ -115,9 +118,9 @@ class DhcpApiTest < Test::Unit::TestCase
 
     assert last_response.ok?, "Last response was not ok: #{last_response.status} #{last_response.body}"
     expected = {
-      "hostname" =>"test.example.com",
-      "ip"       =>"192.168.122.1",
-      "mac"      =>"00:11:bb:cc:dd:ee",
+      "hostname" => "test.example.com",
+      "ip"       => "192.168.122.1",
+      "mac"      => "00:11:bb:cc:dd:ee",
     }
     assert_equal expected, JSON.parse(last_response.body)
   end
@@ -160,14 +163,14 @@ class DhcpApiTest < Test::Unit::TestCase
     assert last_response.ok?, "Last response was not ok: #{last_response.status} #{last_response.body}"
 
     expected = [{
-      "ends" => nil,
-      "ip" => "192.168.122.2",
-      "mac" => "00:aa:bb:cc:dd:ee",
-      "name" => "lease-00aabbccddee",
+      "ends"   => nil,
+      "ip"     => "192.168.122.2",
+      "mac"    => "00:aa:bb:cc:dd:ee",
+      "name"   => "lease-00aabbccddee",
       "starts" => "2014-07-12 10:08:29 UTC",
-      "state" => "active",
+      "state"  => "active",
       "subnet" => "192.168.122.0/255.255.255.0",
-      "type" => "lease",
+      "type"   => "lease",
     }]
     assert_equal expected, JSON.parse(last_response.body)
   end
@@ -193,11 +196,11 @@ class DhcpApiTest < Test::Unit::TestCase
     expected = {
       "deleteable" => true,
       "type"       => "reservation",
-      "hostname"   =>"test.example.com",
-      "ip"         =>"192.168.122.1",
-      "mac"        =>"00:11:bb:cc:dd:ee",
+      "hostname"   => "test.example.com",
+      "ip"         => "192.168.122.1",
+      "mac"        => "00:11:bb:cc:dd:ee",
       "name"       => 'test.example.com',
-      "subnet"     =>"192.168.122.0/255.255.255.0", # NOTE: 'subnet' attribute isn't being used by foreman, which adds a 'network' attribute instead
+      "subnet"     => "192.168.122.0/255.255.255.0", # NOTE: 'subnet' attribute isn't being used by foreman, which adds a 'network' attribute instead
     }
     assert_equal expected, JSON.parse(last_response.body)
   end
@@ -209,14 +212,14 @@ class DhcpApiTest < Test::Unit::TestCase
 
     assert last_response.ok?, "Last response was not ok: #{last_response.status} #{last_response.body}"
     expected = {
-      "ends"=>nil,
-      "ip"=>"192.168.122.5",
-      "mac"=>"80:00:02:08:fe:80:00:00:00:00:00:00:00:02:aa:bb:cc:dd:ee:ff",
-      "name"=>"lease-80000208fe800000000000000002aabbccddeeff",
-      "starts"=>"2015-07-12 10:08:29 UTC",
-      "state"=>"active",
-      "subnet"=>"192.168.122.0/255.255.255.0",
-      "type"=>"lease",
+      "ends"   => nil,
+      "ip"     => "192.168.122.5",
+      "mac"    => "80:00:02:08:fe:80:00:00:00:00:00:00:00:02:aa:bb:cc:dd:ee:ff",
+      "name"   => "lease-80000208fe800000000000000002aabbccddeeff",
+      "starts" => "2015-07-12 10:08:29 UTC",
+      "state"  => "active",
+      "subnet" => "192.168.122.0/255.255.255.0",
+      "type"   => "lease",
     }
     assert_equal expected, JSON.parse(last_response.body)
   end
@@ -230,11 +233,11 @@ class DhcpApiTest < Test::Unit::TestCase
     expected = {
       "deleteable" => true,
       "type"       => "reservation",
-      "hostname"   =>"test.example.com",
-      "ip"         =>"192.168.122.1",
-      "mac"        =>"00:11:bb:cc:dd:ee",
+      "hostname"   => "test.example.com",
+      "ip"         => "192.168.122.1",
+      "mac"        => "00:11:bb:cc:dd:ee",
       "name"       => 'test.example.com',
-      "subnet"     =>"192.168.122.0/255.255.255.0", # NOTE: 'subnet' attribute isn't being used by foreman, which adds a 'network' attribute instead
+      "subnet"     => "192.168.122.0/255.255.255.0", # NOTE: 'subnet' attribute isn't being used by foreman, which adds a 'network' attribute instead
     }
     assert_equal expected, JSON.parse(last_response.body)
   end
@@ -254,10 +257,10 @@ class DhcpApiTest < Test::Unit::TestCase
   # New record with identical duplicate contents should be a successful no-op
   def test_create_record_with_a_collision
     params = {
-        "hostname" => "test.example.com",
-        "ip"       => "192.168.122.1",
-        "mac"      => "00:11:bb:cc:dd:ee",
-        "network"  => "192.168.122.0",
+      "hostname"   => "test.example.com",
+      "ip"         => "192.168.122.1",
+      "mac"        => "00:11:bb:cc:dd:ee",
+      "network"    => "192.168.122.0",
     }
     @server.expects(:add_record).raises(Proxy::DHCP::Collision)
 
@@ -268,10 +271,10 @@ class DhcpApiTest < Test::Unit::TestCase
 
   def test_create_duplicate_record
     params = {
-        "hostname" => "test.example.com",
-        "ip"       => "192.168.122.1",
-        "mac"      => "00:11:bb:cc:dd:ee",
-        "network"  => "192.168.122.0",
+      "hostname"   => "test.example.com",
+      "ip"        => "192.168.122.1",
+      "mac"       => "00:11:bb:cc:dd:ee",
+      "network"   => "192.168.122.0",
     }
     @server.expects(:add_record).raises(Proxy::DHCP::AlreadyExists)
 

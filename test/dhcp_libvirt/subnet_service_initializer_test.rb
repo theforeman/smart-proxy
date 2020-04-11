@@ -25,10 +25,10 @@ class SubnetServiceInitializerTest < Test::Unit::TestCase
       </network>
     XMLFIXTURE
     @json_leases = [{
-                        "ipaddr" => "192.168.122.22",
-                        "mac" => "52:54:00:13:05:12",
-                        "expirytime" => 1_455_723_598,
-                    }]
+      "ipaddr"     => "192.168.122.22",
+      "mac"        => "52:54:00:13:05:12",
+      "expirytime" => 1_455_723_598,
+    }]
     @libvirt_network = mock()
     @subnet_store = {}
     @service = Proxy::DHCP::SubnetService.new(Proxy::MemoryStore.new, Proxy::MemoryStore.new,

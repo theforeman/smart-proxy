@@ -62,8 +62,8 @@ module Proxy::DHCP
     end
 
     def validate_subnet_range!(from_address, to_address)
-      if (from=validate_ip(from_address)) && (to=validate_ip(to_address))
-        raise Proxy::DHCP::Error, "Range does not belong to provided subnet" unless self.include?(from) && self.include?(to)
+      if (from = validate_ip(from_address)) && (to = validate_ip(to_address))
+        raise Proxy::DHCP::Error, "Range does not belong to provided subnet" unless include?(from) && include?(to)
         from = IPAddr.new(from)
         to   = IPAddr.new(to)
         raise Proxy::DHCP::Error, "#{from} can't be lower IP address than #{to} - change the order?" if from > to

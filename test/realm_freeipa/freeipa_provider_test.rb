@@ -116,13 +116,13 @@ class FreeIPATest < Test::Unit::TestCase
                        1 => malformed_string,
                        :key => malformed_string }
     new_hash = Proxy::FreeIPARealm::Provider.ensure_utf(malformed_hash)
-    assert_equal({ unicode_string => { unicode_string => [ unicode_string, 'test'],
+    assert_equal({ unicode_string => { unicode_string => [unicode_string, 'test'],
                                        'hello' => 'world' },
                    1 => unicode_string,
                    :key => unicode_string }, new_hash)
 
     deserialized_hash = JSON.load(JSON.pretty_generate(new_hash))
-    assert_equal({ unicode_string => { unicode_string => [ unicode_string, 'test'],
+    assert_equal({ unicode_string => { unicode_string => [unicode_string, 'test'],
                                        'hello' => 'world' },
                    '1' => unicode_string,
                    'key' => unicode_string }, deserialized_hash)

@@ -75,7 +75,7 @@ module Proxy::TFTP
     end
 
     def pxeconfig_file(mac)
-      ["#{pxeconfig_dir}/01-"+mac.tr(':', "-").downcase]
+      ["#{pxeconfig_dir}/01-" + mac.tr(':', "-").downcase]
     end
   end
   class Pxelinux < Syslinux; end
@@ -90,7 +90,7 @@ module Proxy::TFTP
     end
 
     def pxeconfig_file(mac)
-      ["#{pxeconfig_dir}/menu.lst.01"+mac.delete(':').upcase, "#{pxeconfig_dir}/01-"+mac.tr(':', '-').upcase]
+      ["#{pxeconfig_dir}/menu.lst.01" + mac.delete(':').upcase, "#{pxeconfig_dir}/01-" + mac.tr(':', '-').upcase]
     end
   end
 
@@ -104,7 +104,7 @@ module Proxy::TFTP
     end
 
     def pxeconfig_file(mac)
-      ["#{pxeconfig_dir}/grub.cfg-01-"+mac.tr(':', '-').downcase, "#{pxeconfig_dir}/grub.cfg-#{mac.downcase}"]
+      ["#{pxeconfig_dir}/grub.cfg-01-" + mac.tr(':', '-').downcase, "#{pxeconfig_dir}/grub.cfg-#{mac.downcase}"]
     end
   end
 
@@ -118,7 +118,7 @@ module Proxy::TFTP
     end
 
     def pxeconfig_file(mac)
-      ["#{pxeconfig_dir}/"+mac.delete(':').upcase, "#{pxeconfig_dir}/"+mac.delete(':').upcase+".cfg"]
+      ["#{pxeconfig_dir}/" + mac.delete(':').upcase, "#{pxeconfig_dir}/" + mac.delete(':').upcase + ".cfg"]
     end
   end
 
@@ -132,7 +132,7 @@ module Proxy::TFTP
     end
 
     def pxeconfig_file(mac)
-      ["#{pxeconfig_dir}/"+mac.delete(':').upcase]
+      ["#{pxeconfig_dir}/" + mac.delete(':').upcase]
     end
   end
 
@@ -146,7 +146,7 @@ module Proxy::TFTP
     end
 
     def pxeconfig_file(mac)
-      ["#{pxeconfig_dir}/01-"+mac.tr(':', "-").downcase+".ipxe"]
+      ["#{pxeconfig_dir}/01-" + mac.tr(':', "-").downcase + ".ipxe"]
     end
   end
 
