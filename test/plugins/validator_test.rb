@@ -133,3 +133,37 @@ class UrlValidatorTest < Test::Unit::TestCase
     assert_match(/expected to contain a url/, error.message)
   end
 end
+
+class BooleanValidatorTest < Test::Unit::TestCase
+  class BooleanValidatorTestPlugin < ::Proxy::Plugin
+    default_settings :a_settting => true
+  end
+
+  def test_required_parameter_with_a_value_passes_validation
+    assert ::Proxy::PluginValidators::Boolean.new(BooleanValidatorTestPlugin, 'a_setting', nil, nil).validate!(:a_setting => true)
+  end
+
+  def test_empty_string_treated_as_missing_value
+    error = assert_raises ::Proxy::Error::ConfigurationError do
+      ::Proxy::PluginValidators::Boolean.new(BooleanValidatorTestPlugin, 'a_setting', nil, nil).validate!(:a_setting => '')
+    end
+
+    assert_match(%r{expected to be true/false}, error.message)
+  end
+
+  def test_required_parameter_without_a_value_fails_validation
+    error = assert_raises ::Proxy::Error::ConfigurationError do
+      ::Proxy::PluginValidators::Boolean.new(BooleanValidatorTestPlugin, 'a_setting', nil, nil).validate!(:a_setting => nil)
+    end
+
+    assert_match(%r{expected to be true/false}, error.message)
+  end
+
+  def test_optional_parameter_without_a_value_fails_validation
+    error = assert_raises ::Proxy::Error::ConfigurationError do
+      ::Proxy::PluginValidators::Boolean.new(BooleanValidatorTestPlugin, 'optional_setting', nil, nil).validate!(:optional_setting => nil)
+    end
+
+    assert_match(%r{expected to be true/false}, error.message)
+  end
+end
