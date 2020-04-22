@@ -4,9 +4,15 @@
 
 # Available providers:
 # - freeipmi / ipmitool - requires the appropriate package installed, and the rubyipmi gem
+# - redfish - requires the redfish_client gem
 # - shell - for local reboot control (requires sudo access to /sbin/shutdown for the proxy user)
 # - ssh - limited remote control (status, reboot, turn off)
 #:bmc_default_provider: freeipmi
+
+# Redfish provider HTTPS certificate verification:
+# - If your BMCs just have the vendor-supplied self-signed certificates, you can set
+#   bmc_redfish_verify_ssl to false. The default is to perform certificate verification.
+#:bmc_redfish_verify_ssl: true
 
 # default user and ssh key for ssh provider
 #:bmc_ssh_user: root

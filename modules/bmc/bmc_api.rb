@@ -1,4 +1,5 @@
 require 'bmc/ipmi'
+require 'bmc/redfish'
 
 module Proxy::BMC
   class Api < ::Sinatra::Base
@@ -360,7 +361,7 @@ module Proxy::BMC
     end
 
     def non_ipmi_providers
-      ['ssh', 'shell']
+      ['redfish', 'ssh', 'shell']
     end
 
     # returns a provider type by validating the given type.  If for some reason the type is invalid
@@ -417,6 +418,18 @@ module Proxy::BMC
             :bmc_provider => provider_type,
           }
           @bmc = Proxy::BMC::IPMI.new(args)
+        when 'redfish'
+          log_halt 401, "unauthorized" unless auth.provided?
+          log_halt 401, "bad_authentication_request, credentials are not in auth.basic format" unless auth.basic?
+          username, password = auth.credentials
+
+          args = {
+            :host     => params[:host],
+            :username => username,
+            :options  => body_parameters['options'],
+            :password => password,
+          }
+          @bmc = Proxy::BMC::Redfish.new(args)
         when "shell"
           require 'bmc/shell'
           @bmc = Proxy::BMC::Shell.new

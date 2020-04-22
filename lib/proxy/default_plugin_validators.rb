@@ -4,6 +4,7 @@ class Proxy::DefaultPluginValidators
       file_readable: ::Proxy::PluginValidators::FileReadable,
       presence: ::Proxy::PluginValidators::Presence,
       url: ::Proxy::PluginValidators::Url,
+      boolean: ::Proxy::PluginValidators::Boolean,
     }
   end
 end

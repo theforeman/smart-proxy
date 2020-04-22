@@ -56,4 +56,12 @@ module ::Proxy::PluginValidators
       raise ::Proxy::Error::ConfigurationError.new("Setting '#{@setting_name}' contains an invalid url")
     end
   end
+
+  class Boolean < Base
+    def validate!(settings)
+      setting_value = settings[@setting_name]
+      raise ::Proxy::Error::ConfigurationError, "Setting '#{@setting_name}' is expected to be true/false" unless setting_value.is_a?(TrueClass) || setting_value.is_a?(FalseClass)
+      true
+    end
+  end
 end

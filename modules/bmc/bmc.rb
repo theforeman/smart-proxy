@@ -4,7 +4,7 @@ module Proxy
   module BMC
     # Just a bunch of stubs
     def installed_providers
-      Proxy::BMC::IPMI.providers_installed + ['shell']
+      Proxy::BMC::IPMI.providers_installed + ['redfish', 'shell']
     end
 
     def installed_ipmi_providers
@@ -12,15 +12,11 @@ module Proxy
     end
 
     def providers
-      Proxy::BMC::IPMI.providers + ['shell']
+      Proxy::BMC::IPMI.providers + ['redfish', 'shell']
     end
 
     def installed?(provider)
-      if provider == 'shell'
-        true
-      else
-        Proxy::BMC::IPMI.installed?(provider)
-      end
+      %w(redfish shell).include?(provider) || Proxy::BMC::IPMI.installed?(provider)
     end
   end
 end
