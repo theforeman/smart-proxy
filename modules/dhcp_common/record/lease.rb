@@ -6,7 +6,7 @@ module Proxy::DHCP
 
     def initialize(name, ip_address, mac_address, subnet, starts, ends, state, options = {})
       @type = "lease"
-      @name = name || "lease-#{mac_address.tr(':-', '')}"
+      @name = name || "lease-#{mac_address&.tr(':-', '')}"
       @starts = starts
       @ends = ends
       @state = state
