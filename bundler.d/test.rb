@@ -4,7 +4,7 @@ group :test do
   gem 'ci_reporter', '>= 1.6.3', "< 2.0.0", :require => false
   gem 'test-unit'
   gem 'benchmark-ips'
-  gem 'ruby-prof'
+  gem 'ruby-prof', '< 1.4'
   gem 'rubocop', '~> 0.80.0'
   gem 'rubocop-performance', '~> 1.5.2'
   gem 'rack-test'
