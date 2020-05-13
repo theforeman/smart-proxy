@@ -5,7 +5,7 @@ group :test do
   gem 'test-unit'
   gem 'public_suffix', '< 3' if RUBY_VERSION < '2.1'
   gem 'benchmark-ips'
-  gem 'ruby-prof'
+  gem 'ruby-prof', '< 1.4'
   gem 'rubocop', '~> 0.50.0'
 
   if RUBY_VERSION < '2.2.2'
