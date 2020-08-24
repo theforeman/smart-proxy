@@ -1,3 +1,0 @@
----
-# Set :command to 'puppet.run agent no-noop' to run in no-noop mode. Default command is puppet.run.
-#:command: puppet.run

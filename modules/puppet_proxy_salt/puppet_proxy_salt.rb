@@ -1,2 +1,0 @@
-require 'puppet_proxy_salt/plugin_configuration'
-require 'puppet_proxy_salt/puppet_proxy_salt_plugin'

@@ -57,14 +57,6 @@ class ApiTestClassesRetriever
   end
 end
 
-class ApiTestPuppetRunner
-  attr_reader :nodes
-
-  def run(nodes)
-    @nodes = nodes
-  end
-end
-
 module Proxy::Puppet
   module DependencyInjection
     include Proxy::DependencyInjection::Accessors
@@ -95,8 +87,6 @@ class PuppetApiTest < Test::Unit::TestCase
 
   def app
     app = Proxy::Puppet::Api.new
-    @test_runner = ApiTestPuppetRunner.new
-    app.helpers.puppet_runner = @test_runner
     app
   end
 
@@ -148,24 +138,6 @@ class PuppetApiTest < Test::Unit::TestCase
 
   def test_puppet_run
     post "/run", :nodes => ['node1', 'node2']
-    assert last_response.ok?, "Last response was not ok: #{last_response.body}"
-    assert_equal ['node1', 'node2'], @test_runner.nodes
-  end
-
-  def test_puppet_run_without_nodes
-    post "/run"
-    assert_equal 400, last_response.status
-  end
-
-  def test_puppet_run_when_puppet_runner_fails
-    ApiTestPuppetRunner.any_instance.expects(:run).returns(nil)
-    post "/run", :nodes => ['node1', 'node2']
-    assert_equal 500, last_response.status
-  end
-
-  def test_puppet_run_when_puppet_runner_raises_exception
-    ApiTestPuppetRunner.any_instance.expects(:run).raises(Exception)
-    post "/run", :nodes => ['node1', 'node2']
-    assert_equal 500, last_response.status
+    assert_equal 501, last_response.status
   end
 end

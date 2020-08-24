@@ -1,2 +1,0 @@
-require 'puppet_proxy_mcollective/plugin_configuration'
-require 'puppet_proxy_mcollective/puppet_proxy_mcollective_plugin'
