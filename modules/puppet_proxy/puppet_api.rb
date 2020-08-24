@@ -7,13 +7,9 @@ class Proxy::Puppet::Api < ::Sinatra::Base
 
   inject_attr :class_retriever_impl, :class_retriever
   inject_attr :environment_retriever_impl, :environment_retriever
-  inject_attr :puppet_runner_impl, :puppet_runner
 
   post "/run" do
-    log_halt 400, "Failed puppet run: No nodes defined" unless params[:nodes]
-    log_halt 500, "Failed puppet run: Check Log files" unless puppet_runner.run([params[:nodes]].flatten)
-  rescue => e
-    log_halt 500, "Failed puppet run: #{e}"
+    log_halt 501, "Puppetrun support has been removed in version 2.3"
   end
 
   get "/environments" do

@@ -1,2 +1,0 @@
-require 'puppet_proxy_ssh/plugin_configuration'
-require 'puppet_proxy_ssh/puppet_proxy_ssh_plugin'
