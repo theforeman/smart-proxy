@@ -21,6 +21,16 @@ class ProxyUtilTest < Test::Unit::TestCase
     assert_equal t.join, 0
   end
 
+  def test_commandtask_as_array_with_exit_0
+    t = Proxy::Util::CommandTask.new(["echo", "test"]).start
+    assert_equal t.join, 0
+  end
+
+  def test_commandtask_with_input_and_exit_0
+    t = Proxy::Util::CommandTask.new('cat', 'hello').start
+    assert_equal t.join, 0
+  end
+
   def test_commandtask_with_exit_1
     t = Proxy::Util::CommandTask.new('false').start
     assert_equal t.join, 1

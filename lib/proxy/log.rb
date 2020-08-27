@@ -93,8 +93,10 @@ module Proxy
           env['rack.input'].rewind
           if env['CONTENT_TYPE'] == 'application/json' && body.size < @max_body_size
             "Body: #{body}"
+          elsif env['CONTENT_TYPE'] == 'text/plain' && body.size < @max_body_size
+            "Body: #{body}"
           else
-            "Body: [unknown content type or body too large - filtered out]"
+            "Body: [filtered out]"
           end
         else
           ''
