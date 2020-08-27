@@ -14,8 +14,13 @@ module Proxy
       dns_timeout ||= DEFAULT_CONNECT_TIMEOUT
       connect_timeout ||= DEFAULT_DNS_TIMEOUT
 
-      super("#{wget} --connect-timeout=#{connect_timeout} --dns-timeout=#{dns_timeout} --read-timeout=#{read_timeout}"\
-            " --tries=3 --no-check-certificate -nv -c \"#{escape_for_shell(src.to_s)}\" -O \"#{escape_for_shell(dst.to_s)}\"")
+      super([wget,
+             "--connect-timeout=#{connect_timeout}",
+             "--dns-timeout=#{dns_timeout}",
+             "--read-timeout=#{read_timeout}",
+             "--tries=3",
+             "--no-check-certificate",
+             "-nv", "-c", src.to_s, "-O", dst.to_s])
     end
 
     def start
