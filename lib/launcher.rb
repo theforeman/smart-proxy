@@ -1,8 +1,8 @@
 require 'proxy/log'
-require 'proxy/sd_notify'
 require 'proxy/settings'
 require 'proxy/signal_handler'
 require 'proxy/log_buffer/trace_decorator'
+require 'sd_notify'
 
 CIPHERS = ['ECDHE-RSA-AES128-GCM-SHA256', 'ECDHE-RSA-AES256-GCM-SHA384',
            'AES128-GCM-SHA256', 'AES256-GCM-SHA384', 'AES128-SHA256',
@@ -212,7 +212,7 @@ module Proxy
 
     def launched(apps)
       logger.info("Smart proxy has launched on #{apps.size} socket(s), waiting for requests")
-      Proxy::SdNotify.new.tap { |sd| sd.ready if sd.active? }
+      SdNotify.ready
     end
   end
 end
