@@ -52,19 +52,7 @@ class LauncherTest < Test::Unit::TestCase
 
   def test_launched_with_sdnotify
     @launcher.logger.expects(:info).with(includes('2 socket(s)'))
-    sd_notify = mock('SdNotify')
-    sd_notify.expects(:active?).returns(true)
-    sd_notify.expects(:ready)
-    Proxy::SdNotify.expects(:new).returns(sd_notify)
-    @launcher.launched([:app1, :app2])
-  end
-
-  def test_launched_with_sdnotify_inactive
-    @launcher.logger.expects(:info).with(includes('2 socket(s)'))
-    sd_notify = mock('SdNotify')
-    sd_notify.expects(:active?).returns(false)
-    sd_notify.expects(:ready).never
-    Proxy::SdNotify.expects(:new).returns(sd_notify)
+    ::SdNotify.expects(:ready)
     @launcher.launched([:app1, :app2])
   end
 end
