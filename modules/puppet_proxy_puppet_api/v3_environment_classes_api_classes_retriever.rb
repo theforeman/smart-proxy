@@ -105,27 +105,3 @@ class Proxy::PuppetApi::V3EnvironmentClassesApiClassesRetriever
     future.execute
   end
 end
-
-class Proxy::PuppetApi::EnvironmentClassesCacheInitializer
-  include ::Proxy::Log
-
-  def initialize(classes_retriever, environments_retriever)
-    @environments = environments_retriever
-    @classes = classes_retriever
-  end
-
-  def start
-    logger.info("Started puppet class cache initialization")
-    Concurrent::Promise.new { @environments.all }
-                       .then do |environments|
-                         environments.map(&:name).map do |environment|
-                           logger.debug("Initializing puppet class cache for '#{environment}' environment")
-                           @classes.async_get_classes(environment)
-                         end
-                       end
-                       .flat_map { |futures| Concurrent::Promise.all?(*futures) }
-                       .then { logger.info("Finished puppet class cache initialization") }
-                       .on_error { logger.warning("Failed to initialize puppet class cache, deferring initialization. Is puppetserver running?") }
-                       .execute
-  end
-end
