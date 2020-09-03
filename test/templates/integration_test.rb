@@ -23,6 +23,6 @@ class TemplatesApiFeaturesTest < Test::Unit::TestCase
     assert_equal('running', mod['state'], Proxy::LogBuffer::Buffer.instance.info[:failed_modules][:templates])
     assert_equal([], mod['capabilities'])
 
-    assert_equal({}, mod['settings'])
+    assert_equal({'template_url' => 'http://smart-proxy.example.com:8000'}, mod['settings'])
   end
 end
