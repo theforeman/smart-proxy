@@ -5,7 +5,8 @@ module Proxy::Templates
 
     plugin :templates, ::Proxy::VERSION
 
-    validate_presence :template_url
+    validate :template_url, url: true
+    expose_setting :template_url
 
     after_activation do
       loading_failed "missing :foreman_url: from configuration." unless Proxy::SETTINGS.foreman_url
