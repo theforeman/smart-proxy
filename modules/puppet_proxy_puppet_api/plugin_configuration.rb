@@ -14,6 +14,7 @@ module ::Proxy::PuppetApi
       require 'puppet_proxy_common/api_request'
       require 'puppet_proxy_puppet_api/v3_api_request'
       require 'puppet_proxy_puppet_api/v3_environments_retriever'
+      require 'puppet_proxy_puppet_api/v3_environment_classes_api_classes_retriever'
     end
 
     def load_dependency_injection_wirings(container_instance, settings)
