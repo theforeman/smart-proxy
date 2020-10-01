@@ -37,6 +37,11 @@ class ::Proxy::Plugin
   class << self
     attr_reader :get_http_rackup_path, :get_https_rackup_path, :get_uses_provider
 
+    def rackup_path(path)
+      http_rackup_path(path)
+      https_rackup_path(path)
+    end
+
     def http_rackup_path(path)
       @get_http_rackup_path = path
     end

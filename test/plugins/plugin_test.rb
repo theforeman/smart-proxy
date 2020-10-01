@@ -7,6 +7,16 @@ class PluginTest < Test::Unit::TestCase
     assert_equal "", TestPlugin2.https_rackup
   end
 
+  class TestPluginSingleRackupPath < Proxy::Plugin
+    plugin :test2, '1.0'
+    rackup_path '/dev/null'
+  end
+
+  def test_combined_rackup_path_returns_http_and_https
+    assert_equal '/dev/null', TestPluginSingleRackupPath.get_http_rackup_path
+    assert_equal '/dev/null', TestPluginSingleRackupPath.get_https_rackup_path
+  end
+
   class TestBundlerGroupPlugin < ::Proxy::Plugin
     plugin :test_bundler_group, '1.0'
     bundler_group :test_group
