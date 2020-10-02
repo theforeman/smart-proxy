@@ -10,9 +10,9 @@ require 'win32/service'
 include Win32
 include RbConfig
 
-executable = Pathname.new(__FILE__).dirname.parent.join("bin", "smart-proxy-win-service")
+executable = Pathname.new(__dir__).parent.join("bin", "smart-proxy-win-service")
 executable = executable.realpath.to_s.tr('/', '\\')
-working_dir = Pathname.new(__FILE__).dirname.parent.realpath
+working_dir = Pathname.new(__dir__).parent.realpath
 ruby = File.join(CONFIG['bindir'], 'ruby').tr('/', '\\')
 cmd  = "#{ruby} -C #{working_dir} \"#{executable}\""
 puts "Installing #{cmd} as a service"

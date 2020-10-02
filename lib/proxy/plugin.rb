@@ -15,7 +15,7 @@ end
 # class ExamplePlugin < ::Proxy::Plugin
 #  plugin :example, "1.2.3"
 #  config_file "example.yml"
-#  http_rackup_path File.expand_path("http_config.ru", File.expand_path("../", __FILE__)) # note no https rackup path, module will not be available over https
+#  http_rackup_path File.expand_path("http_config.ru", __dir__) # note no https rackup path, module will not be available over https
 #  requires :foreman_proxy, ">= 1.5.develop"
 #  requires :another_plugin, "~> 1.3.0"
 #  default_settings :first => 'first', :second => 'second'

@@ -202,7 +202,7 @@ module ::Proxy
 end
 
 def app_dir
-  path("../../", __FILE__)
+  path("../", __dir__)
 end
 
 def path(part_one, part_two = nil)
@@ -248,7 +248,7 @@ def load_main_config_file(main_config_file_path)
 end
 
 def module_configuration_dir(main_config_file)
-  main_config_file[:settings_directory] || Pathname.new(__FILE__).join("..", "..", "config", "settings.d").expand_path.to_s
+  main_config_file[:settings_directory] || Pathname.new(__dir__).join("..", "config", "settings.d").expand_path.to_s
 end
 
 if $PROGRAM_NAME == __FILE__

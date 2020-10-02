@@ -67,7 +67,7 @@ end
 
 unless key && cert && ca
   if RUBY_PLATFORM =~ /mingw/
-    origin = Pathname.new(__FILE__).dirname.parent.join "config"
+    origin = Pathname.new(__dir__).parent.join "config"
     key  ||= origin.join "private.pem"
     cert ||= origin.join "signed.pem"
     ca   ||= origin.join "ca.pem"

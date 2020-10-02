@@ -1,11 +1,11 @@
 require 'test_helper'
-require File.join(File.dirname(__FILE__), '../../extra/migrate_settings')
+require File.join(__dir__, '../../extra/migrate_settings')
 ::Proxy::Migration.inject_migrations_instance(::Proxy::Migrations.new("dummy"))
-require File.join(File.dirname(__FILE__), '../../extra/migrations/20150327000000_migrate_monolithic_config')
+require File.join(__dir__, '../../extra/migrations/20150327000000_migrate_monolithic_config')
 
 class MonolithicConfigMigrationTest < Test::Unit::TestCase
   def setup
-    @old_config = YAML.load_file(File.join(File.dirname(__FILE__), './migration_settings.yml'))
+    @old_config = YAML.load_file(File.join(__dir__, './migration_settings.yml'))
     @output, @unknown = MigrateMonolithicConfig.new("/tmp").migrate_monolithic_config(@old_config)
   end
 

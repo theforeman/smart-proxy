@@ -76,6 +76,6 @@ class CaApiv1RequestTest < Test::Unit::TestCase
   end
 
   def fixture(file)
-    File.open(File.expand_path(File.join(File.dirname(__FILE__), '.', 'fixtures', file)))
+    File.open(File.expand_path(File.join(__dir__, '.', 'fixtures', file)))
   end
 end

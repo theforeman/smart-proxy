@@ -1,4 +1,4 @@
-$LOAD_PATH.unshift(*Dir[File.expand_path("../../lib", __FILE__), File.expand_path("../../modules", __FILE__)])
+$LOAD_PATH.unshift(*Dir[File.expand_path("../lib", __dir__), File.expand_path("../modules", __dir__)])
 
 raise "win-service executable can only be used as a service in windows environment" unless RUBY_PLATFORM =~ /mingw/
 
@@ -9,7 +9,7 @@ require 'smart_proxy_main'
 
 include Win32
 
-LOG_DIR_PATH = File.expand_path("../../log", __FILE__)
+LOG_DIR_PATH = File.expand_path("../log", __dir__)
 Dir.mkdir(LOG_DIR_PATH) unless Dir.exist?(LOG_DIR_PATH)
 
 def log(a_msg)

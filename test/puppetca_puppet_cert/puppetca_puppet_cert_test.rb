@@ -103,7 +103,7 @@ class PuppetCaPuppetCertImplTest < Test::Unit::TestCase
 
   def test_should_list_certs
     @puppet_cert.stubs(:find_puppetca)
-    @puppet_cert.stubs(:ssldir).returns(File.expand_path(File.join(File.dirname(__FILE__), '.', 'fixtures')))
+    @puppet_cert.stubs(:ssldir).returns(File.expand_path(File.join(__dir__, '.', 'fixtures')))
     @puppet_cert.instance_variable_set('@puppetca', '/tmp/puppet cert')
     @puppet_cert.stubs('`').with(' /tmp/puppet cert --list --all').returns(PUPPET_CERT_LIST_OUTPUT)
     Process::Status.any_instance.stubs(:exitstatus).returns(0)
@@ -171,7 +171,7 @@ class PuppetCaPuppetCertImplTest < Test::Unit::TestCase
   private
 
   def stub_puppetca_executables
-    @ssldir = File.expand_path(File.join(File.dirname(__FILE__), '.', 'fixtures'))
+    @ssldir = File.expand_path(File.join(__dir__, '.', 'fixtures'))
     @puppet_cert.stubs(:ssldir).returns(@ssldir)
 
     @puppet_cert.stubs(:which).with('puppetca', anything).returns(nil)

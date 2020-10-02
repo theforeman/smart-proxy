@@ -2,10 +2,10 @@ require 'English'
 require "test/unit"
 require 'fileutils'
 
-$LOAD_PATH << File.join(File.dirname(__FILE__), '..', 'lib')
-$LOAD_PATH << File.join(File.dirname(__FILE__), '..', 'modules')
+$LOAD_PATH << File.join(__dir__, '..', 'lib')
+$LOAD_PATH << File.join(__dir__, '..', 'modules')
 
-logdir = File.join(File.dirname(__FILE__), '..', 'logs')
+logdir = File.join(__dir__, '..', 'logs')
 FileUtils.mkdir_p(logdir) unless File.exist?(logdir)
 
 ENV['RACK_ENV'] = 'test'

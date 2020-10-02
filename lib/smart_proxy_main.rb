@@ -1,4 +1,4 @@
-APP_ROOT = "#{File.dirname(__FILE__)}/.."
+APP_ROOT = "#{__dir__}/.."
 
 require 'smart_proxy'
 require 'launcher'
@@ -38,7 +38,7 @@ require 'sinatra/default_not_found_page'
 
 module Proxy
   SETTINGS = Settings.initialize_global_settings
-  VERSION = File.read(File.join(File.dirname(__FILE__), '../VERSION')).chomp
+  VERSION = File.read(File.join(__dir__, '..', 'VERSION')).chomp
 
   ::Sinatra::Base.set :run, false
   ::Sinatra::Base.set :root, APP_ROOT
