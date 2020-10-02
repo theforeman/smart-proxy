@@ -79,8 +79,16 @@ module Proxy
 
       ::Proxy::PluginInitializer.new(plugins).initialize_plugins
 
-      require 'proxy/launcher/webrick'
-      launcher = ::Launcher::Webrick.new(self)
+      case settings.http_server_type
+      when 'webrick'
+        require 'proxy/launcher/webrick'
+        launcher = ::Launcher::Webrick.new(self)
+      when 'puma'
+        require 'proxy/launcher/puma'
+        launcher = ::Launcher::Puma.new(self)
+      else
+        fail "Unknown http_server_type: #{settings.http_server_type}"
+      end
 
       launcher.launch
     rescue SignalException => e
