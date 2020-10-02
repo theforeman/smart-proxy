@@ -1,7 +1,6 @@
 APP_ROOT = "#{__dir__}/.."
 
 require 'smart_proxy'
-require 'launcher'
 
 require 'fileutils'
 require 'pathname'

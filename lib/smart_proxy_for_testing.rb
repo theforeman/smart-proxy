@@ -21,7 +21,6 @@ require 'proxy/provider_factory'
 require 'proxy/provider'
 require 'proxy/error'
 require 'proxy/request'
-require 'launcher'
 
 require 'sinatra/base'
 require 'sinatra/authorization'
