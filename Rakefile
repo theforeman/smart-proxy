@@ -3,7 +3,7 @@ require 'rake/testtask'
 require 'rdoc/task'
 require 'fileutils'
 require 'tmpdir'
-require File.join(File.dirname(__FILE__), 'extra/migrate_settings')
+require File.join(__dir__, 'extra/migrate_settings')
 
 load 'tasks/jenkins.rake'
 load 'tasks/pkg.rake'
@@ -33,7 +33,7 @@ end
 
 desc 'Migrate configuration settings.'
 task :migrate_settings do
-  app_dir = File.dirname(__FILE__)
+  app_dir = __dir__
   config_src_path = File.join(app_dir, "config", "settings.yml")
   modules_config_src_path = File.join(app_dir, "config", "settings.d")
   migrations_dir_path = File.join(app_dir, "extra", "migrations")

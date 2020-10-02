@@ -1,8 +1,8 @@
 require 'test_helper'
 
-require File.join(File.dirname(__FILE__), '../../extra/migrate_settings')
+require File.join(__dir__, '../../extra/migrate_settings')
 ::Proxy::Migration.inject_migrations_instance(::Proxy::Migrations.new("dummy"))
-require File.join(File.dirname(__FILE__), '../../extra/migrations/20150826000000_migrate_dhcp_settings')
+require File.join(__dir__, '../../extra/migrations/20150826000000_migrate_dhcp_settings')
 
 class ProxyDhcpMigrationTest < Test::Unit::TestCase
   def setup

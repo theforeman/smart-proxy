@@ -1,11 +1,11 @@
 require 'test_helper'
-require File.join(File.dirname(__FILE__), '../../extra/migrate_settings')
+require File.join(__dir__, '../../extra/migrate_settings')
 ::Proxy::Migration.inject_migrations_instance(::Proxy::Migrations.new("dummy"))
-require File.join(File.dirname(__FILE__), '../../extra/migrations/20150611000000_migrate_dns_settings')
+require File.join(__dir__, '../../extra/migrations/20150611000000_migrate_dns_settings')
 
 class ProxyDnsMigrationTest < Test::Unit::TestCase
   def setup
-    @old_config = YAML.load_file(File.join(File.dirname(__FILE__), './migration_dns_settings.yml'))
+    @old_config = YAML.load_file(File.join(__dir__, './migration_dns_settings.yml'))
     @migration = MigrateDnsSettings.new("/tmp")
     @output, @unknown = @migration.migrate_dns_configuration(@old_config.dup)
   end

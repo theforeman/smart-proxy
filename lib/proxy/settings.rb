@@ -5,7 +5,7 @@ require "pathname"
 module Proxy::Settings
   extend ::Proxy::Log
 
-  SETTINGS_PATH = Pathname.new(__FILE__).join("..", "..", "..", "config", "settings.yml")
+  SETTINGS_PATH = Pathname.new(__dir__).join("..", "..", "config", "settings.yml")
 
   def self.initialize_global_settings(settings_path = nil, argv = ARGV)
     global = ::Proxy::Settings::Global.new(YAML.load(File.read(settings_path || SETTINGS_PATH)))

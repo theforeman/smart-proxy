@@ -73,6 +73,6 @@ class SSLClientVerificationIntegrationTest < Test::Unit::TestCase
   end
 
   def fixtures
-    File.expand_path(File.join(File.dirname(__FILE__), '..', 'fixtures', 'ssl'))
+    File.expand_path(File.join(__dir__, '..', 'fixtures', 'ssl'))
   end
 end
