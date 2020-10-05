@@ -80,7 +80,11 @@ module Proxy::Helpers
 
   # reverse lookup an IP address while verifying it via forward resolv
   def remote_fqdn(forward_verify = true)
-    ip = request.env['REMOTE_ADDR']
+    if request.env['HTTP_X_FORWARDED_FOR']
+      ip = request.env['HTTP_X_FORWARDED_FOR'].split(',')[0]
+    else
+      ip = request.env['REMOTE_ADDR']
+    end
     log_halt 403, 'could not get remote address from environment' if ip.empty?
 
     begin
