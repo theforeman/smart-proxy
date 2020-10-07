@@ -30,7 +30,12 @@ module Proxy::Helpers
 
   # read the HTTPS client certificate from the environment and extract its CN
   def https_cert_cn
-    certificate_raw = request.env['SSL_CLIENT_CERT'].to_s
+    if request.env['HTTP_SSL_CLIENT_CERT']
+      certificate_raw = request.env['HTTP_SSL_CLIENT_CERT'].to_s
+      certificate_raw = "-----BEGIN CERTIFICATE-----\n#{certificate_raw}\n-----END CERTIFICATE-----"
+    else
+      certificate_raw = request.env['SSL_CLIENT_CERT'].to_s
+    end
     log_halt 403, 'could not read client cert from environment' if certificate_raw.empty?
 
     begin
@@ -80,11 +85,7 @@ module Proxy::Helpers
 
   # reverse lookup an IP address while verifying it via forward resolv
   def remote_fqdn(forward_verify = true)
-    if request.env['HTTP_X_FORWARDED_FOR']
-      ip = request.env['HTTP_X_FORWARDED_FOR'].split(',')[0]
-    else
-      ip = request.env['REMOTE_ADDR']
-    end
+    ip = request.env['REMOTE_ADDR']
     log_halt 403, 'could not get remote address from environment' if ip.empty?
 
     begin
