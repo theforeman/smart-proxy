@@ -73,6 +73,7 @@ module Proxy
   require 'realm_freeipa/realm_freeipa'
   require 'logs/logs'
   require 'httpboot/httpboot'
+  require 'registration/registration'
 
   def self.version
     {:version => VERSION}
