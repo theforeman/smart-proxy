@@ -8,9 +8,7 @@ module Proxy::Settings
   SETTINGS_PATH = Pathname.new(__dir__).join("..", "..", "config", "settings.yml")
 
   def self.initialize_global_settings(settings_path = nil, argv = ARGV)
-    global = ::Proxy::Settings::Global.new(YAML.load(File.read(settings_path || SETTINGS_PATH)))
-    global.apply_argv(argv)
-    global
+    ::Proxy::Settings::Global.new(YAML.load(File.read(settings_path || SETTINGS_PATH)))
   end
 
   def self.load_plugin_settings(defaults, settings_file, settings_directory = nil)
