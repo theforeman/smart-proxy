@@ -9,8 +9,6 @@
 - foreman.prod.domain
 - foreman.dev.domain
 
-:daemon: true
-:daemon_pid: /var/run/foreman-proxy/foreman-proxy.pid
 :port: 8443
 
 :tftp: true
