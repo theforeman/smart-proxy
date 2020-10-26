@@ -38,9 +38,17 @@ class RegistrationRegisterApiTest < Test::Unit::TestCase
   end
 
   def test_host_register_template_with_args
-    stub_request(:post, "#{@foreman_url}/register?host=test.example.com").to_return(body: 'template')
+    stub_request(:post, "#{@foreman_url}/register").to_return(body: 'template')
 
-    post '/', { host: 'test.example.com' }
+    post '/', { host: { name: 'test.example.com', build: false } }
+    assert last_response.ok?
+    assert_match('template', last_response.body)
+  end
+
+  def test_host_register_template_with_args_using_json
+    stub_request(:post, "#{@foreman_url}/register").to_return(body: 'template')
+
+    post '/', { host: { name: 'test.example.com', build: false } }, { 'CONTENT_TYPE' => 'application/json' }
     assert last_response.ok?
     assert_match('template', last_response.body)
   end
