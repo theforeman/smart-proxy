@@ -26,7 +26,7 @@ module Proxy::HttpRequest
 
     def add_headers(req, headers = {})
       req.add_field('Accept', 'application/json,version=2')
-      req.content_type = headers["Content-Type"] || 'application/json'
+      req.content_type = headers.delete("Content-Type") || 'application/json'
       headers.each do |k, v|
         req.add_field(k, v)
       end
