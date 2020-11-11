@@ -64,16 +64,6 @@ class ::Proxy::Plugins
     plugin.nil? ? false : plugin[:state] == :running
   end
 
-  def self.disable_plugin(plugin_name)
-    instance.disable_plugin(plugin_name)
-  end
-
-  def disable_plugin(plugin_name)
-    logger.warn("::Proxy::Plugins.disable_plugin has been deprecated and will be removed from future versions of smart-proxy. Use Proxy::Pluggable#loading_failed instead.")
-    plugin = loaded.find { |p| p[:name] == plugin_name.to_sym }
-    plugin[:class].fail
-  end
-
   def find_plugin(plugin_name)
     p = loaded.find { |plugin| plugin[:name] == plugin_name.to_sym }
     return p[:class] if p
