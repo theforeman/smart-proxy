@@ -67,7 +67,6 @@ module Proxy
   require 'puppetca_hostname_whitelisting/puppetca_hostname_whitelisting'
   require 'puppetca_token_whitelisting/puppetca_token_whitelisting'
   require 'puppet_proxy/puppet'
-  require 'puppet_proxy_puppet_api/puppet_proxy_puppet_api'
   require 'bmc/bmc'
   require 'realm/realm'
   require 'realm_freeipa/realm_freeipa'

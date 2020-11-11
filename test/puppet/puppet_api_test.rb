@@ -1,11 +1,10 @@
 require 'test_helper'
 require 'json'
-require 'puppet_proxy_common/puppet_class'
-require 'puppet_proxy_common/environment'
-require 'puppet_proxy_common/environments_retriever_base'
-require 'puppet_proxy_common/errors'
+require 'puppet_proxy/puppet_class'
+require 'puppet_proxy/environment'
+require 'puppet_proxy/errors'
 
-class ApiTestEnvironmentsRetriever < ::Proxy::Puppet::EnvironmentsRetrieverBase
+class ApiTestEnvironmentsRetriever < ::Proxy::Puppet::V3EnvironmentsRetriever
   attr_reader :first, :second
 
   def initialize
@@ -15,10 +14,6 @@ class ApiTestEnvironmentsRetriever < ::Proxy::Puppet::EnvironmentsRetrieverBase
 
   def all
     [@first, @second]
-  end
-
-  def get(an_environment)
-    super(an_environment)
   end
 end
 
@@ -73,7 +68,7 @@ require 'puppet_proxy/puppet_api'
 
 ENV['RACK_ENV'] = 'test'
 
-class PuppetApiTest < Test::Unit::TestCase
+class PuppetTest < Test::Unit::TestCase
   include Rack::Test::Methods
 
   def setup

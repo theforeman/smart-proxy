@@ -1,6 +1,6 @@
 require 'concurrent'
 
-class Proxy::PuppetApi::V3EnvironmentClassesApiClassesRetriever
+class Proxy::Puppet::V3EnvironmentClassesApiClassesRetriever
   include ::Proxy::Log
 
   DEFAULT_CLIENT_TIMEOUT = 15
@@ -18,7 +18,7 @@ class Proxy::PuppetApi::V3EnvironmentClassesApiClassesRetriever
     @puppet_url = puppet_url
     @api_timeout = api_timeout
     @m = Monitor.new
-    @puppet_api = api || Proxy::PuppetApi::EnvironmentClassesApiv3
+    @puppet_api = api || Proxy::Puppet::Apiv3
   end
 
   def classes_in_environment(environment)
@@ -84,7 +84,7 @@ class Proxy::PuppetApi::V3EnvironmentClassesApiClassesRetriever
         raise e
       end
 
-      if response == Proxy::PuppetApi::EnvironmentClassesApiv3::NOT_MODIFIED
+      if response == Proxy::Puppet::Apiv3::NOT_MODIFIED
         @m.synchronize do
           @futures_cache.delete(environment)
           logger.debug { "Puppet cache counts: classes %d, etag %d, futures %d" % [@classes_cache.size, @etag_cache.size, @futures_cache.size] }
