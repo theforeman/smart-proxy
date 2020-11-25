@@ -86,3 +86,5 @@
 # each successive interval in the array until a successful response
 # is received. See Ruby Resolv#timeouts documentation for more info.
 #:dns_resolv_timeouts: [5, 8, 13]
+
+#:instance_uuid:
