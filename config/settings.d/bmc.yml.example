@@ -12,7 +12,7 @@
 # Redfish provider HTTPS certificate verification:
 # - If your BMCs just have the vendor-supplied self-signed certificates, you can set
 #   bmc_redfish_verify_ssl to false. The default is to perform certificate verification.
-#:bmc_redfish_verify_ssl: true
+#:redfish_verify_ssl: true
 
 # default user and ssh key for ssh provider
 #:bmc_ssh_user: root
