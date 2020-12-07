@@ -1,5 +1,5 @@
 require 'test_helper'
-require 'launcher'
+require 'proxy/launcher'
 
 class LauncherTest < Test::Unit::TestCase
   def setup
