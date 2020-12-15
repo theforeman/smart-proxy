@@ -15,7 +15,7 @@ Gem::Specification.new do |s|
   s.required_ruby_version = '>= 2.5'
   s.add_dependency 'json'
   s.add_dependency 'logging'
-  s.add_dependency 'rack', '>= 1.3'
+  s.add_dependency 'rack', '~> 1.6'
   s.add_dependency 'sd_notify', '~> 0.1'
   s.add_dependency 'sinatra'
   s.description = <<~EOF

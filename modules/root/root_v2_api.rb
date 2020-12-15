@@ -1,9 +1,6 @@
 class Proxy::RootV2Api < Sinatra::Base
   helpers ::Proxy::Helpers
 
-  authorize_with_trusted_hosts
-  authorize_with_ssl_client
-
   get "/features" do
     enabled_plugins = ::Proxy::Plugins.instance.select do |plugin|
       plugin[:name] != :foreman_proxy && \

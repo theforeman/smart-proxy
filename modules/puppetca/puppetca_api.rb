@@ -5,8 +5,6 @@ module Proxy::PuppetCa
     inject_attr :autosigner, :autosigner
 
     helpers ::Proxy::Helpers
-    authorize_with_trusted_hosts
-    authorize_with_ssl_client
 
     get "/?" do
       content_type :json

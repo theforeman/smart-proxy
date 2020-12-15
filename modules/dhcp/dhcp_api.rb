@@ -2,8 +2,6 @@ class Proxy::DhcpApi < ::Sinatra::Base
   extend Proxy::DHCP::DependencyInjection
 
   helpers ::Proxy::Helpers
-  authorize_with_trusted_hosts
-  authorize_with_ssl_client
   use Rack::MethodOverride
 
   inject_attr :dhcp_provider, :server

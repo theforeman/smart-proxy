@@ -2,9 +2,6 @@ class Proxy::Puppet::Api < ::Sinatra::Base
   extend Proxy::Puppet::DependencyInjection
   helpers ::Proxy::Helpers
 
-  authorize_with_trusted_hosts
-  authorize_with_ssl_client
-
   inject_attr :class_retriever_impl, :class_retriever
   inject_attr :environment_retriever_impl, :environment_retriever
 
