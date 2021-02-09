@@ -12,10 +12,14 @@ class HttpDownloadsTest < Test::Unit::TestCase
     default_dns = Proxy::HttpDownload::DEFAULT_DNS_TIMEOUT
 
     expected = ["/wget",
+                "--no-check-certificate",
                 "--connect-timeout=#{default_connect}",
                 "--dns-timeout=#{default_dns}",
                 "--read-timeout=#{default_read}",
-                "--tries=3", "-nv", "-c", "src", "-O", "dst", "--no-check-certificate"]
+                "--tries=3",
+                "--timestamping",
+                "--no-if-modified-since",
+                "-nv", "src", "-O", "dst"]
     Proxy::HttpDownload.any_instance.stubs(:which).returns('/wget')
     assert_equal expected, Proxy::HttpDownload.new('src', 'dst').command
   end
@@ -29,7 +33,10 @@ class HttpDownloadsTest < Test::Unit::TestCase
                 "--connect-timeout=#{default_connect}",
                 "--dns-timeout=#{default_dns}",
                 "--read-timeout=#{default_read}",
-                "--tries=3", "-nv", "-c", "src", "-O", "dst"]
+                "--tries=3",
+                "--timestamping",
+                "--no-if-modified-since",
+                "-nv", "src", "-O", "dst"]
     Proxy::HttpDownload.any_instance.stubs(:which).returns('/wget')
     assert_equal expected, Proxy::HttpDownload.new('src', 'dst', nil, nil, nil, true).command
   end
@@ -40,10 +47,14 @@ class HttpDownloadsTest < Test::Unit::TestCase
 
     read_timeout = 1000
     expected = ["/wget",
+                "--no-check-certificate",
                 "--connect-timeout=#{default_connect}",
                 "--dns-timeout=#{default_dns}",
                 "--read-timeout=#{read_timeout}",
-                "--tries=3", "-nv", "-c", "src", "-O", "dst", "--no-check-certificate"]
+                "--tries=3",
+                "--timestamping",
+                "--no-if-modified-since",
+                "-nv", "src", "-O", "dst"]
     Proxy::HttpDownload.any_instance.stubs(:which).returns('/wget')
     assert_equal expected, Proxy::HttpDownload.new('src', 'dst', read_timeout, nil, nil).command
   end
@@ -57,7 +68,10 @@ class HttpDownloadsTest < Test::Unit::TestCase
                 "--connect-timeout=#{default_connect}",
                 "--dns-timeout=#{default_dns}",
                 "--read-timeout=#{read_timeout}",
-                "--tries=3", "-nv", "-c", "src", "-O", "dst"]
+                "--tries=3",
+                "--timestamping",
+                "--no-if-modified-since",
+                "-nv", "src", "-O", "dst"]
     Proxy::HttpDownload.any_instance.stubs(:which).returns('/wget')
     assert_equal expected, Proxy::HttpDownload.new('src', 'dst', read_timeout, nil, nil, true).command
   end
@@ -67,10 +81,14 @@ class HttpDownloadsTest < Test::Unit::TestCase
     connect_timeout = 99
     dns_timeout = 27
     expected = ["/wget",
+                "--no-check-certificate",
                 "--connect-timeout=#{connect_timeout}",
                 "--dns-timeout=#{dns_timeout}",
                 "--read-timeout=#{read_timeout}",
-                "--tries=3", "-nv", "-c", "src", "-O", "dst", "--no-check-certificate"]
+                "--tries=3",
+                "--timestamping",
+                "--no-if-modified-since",
+                "-nv", "src", "-O", "dst"]
     Proxy::HttpDownload.any_instance.stubs(:which).returns('/wget')
     assert_equal expected, Proxy::HttpDownload.new('src', 'dst', read_timeout, connect_timeout, dns_timeout).command
   end
@@ -83,7 +101,10 @@ class HttpDownloadsTest < Test::Unit::TestCase
                 "--connect-timeout=#{connect_timeout}",
                 "--dns-timeout=#{dns_timeout}",
                 "--read-timeout=#{read_timeout}",
-                "--tries=3", "-nv", "-c", "src", "-O", "dst"]
+                "--tries=3",
+                "--timestamping",
+                "--no-if-modified-since",
+                "-nv", "src", "-O", "dst"]
     Proxy::HttpDownload.any_instance.stubs(:which).returns('/wget')
     assert_equal expected, Proxy::HttpDownload.new('src', 'dst', read_timeout, connect_timeout, dns_timeout, true).command
   end

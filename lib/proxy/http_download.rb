@@ -14,11 +14,15 @@ module Proxy
       dns_timeout ||= DEFAULT_CONNECT_TIMEOUT
       connect_timeout ||= DEFAULT_DNS_TIMEOUT
 
-      args = [wget, "--connect-timeout=#{connect_timeout}",
+      args = ["--connect-timeout=#{connect_timeout}",
               "--dns-timeout=#{dns_timeout}",
               "--read-timeout=#{read_timeout}",
-              "--tries=3", "-nv", "-c", src.to_s, "-O", dst.to_s]
-      args << "--no-check-certificate" unless verify_server_cert
+              "--tries=3",
+              "--timestamping", # turn on timestamping to prevent redownloads
+              "--no-if-modified-since", # but use HTTP HEAD instead If-Modified-Since
+              "-nv", src.to_s, "-O", dst.to_s]
+      args.unshift("--no-check-certificate") unless verify_server_cert
+      args.unshift(wget)
       super(args)
     end
 
