@@ -114,7 +114,7 @@ class ::Proxy::PluginGroup
   end
 
   def fail_group(an_exception)
-    fail_group_with_message("Disabling all modules in the group #{printable_module_names(member_names)} due to a failure in one of them: #{an_exception}", an_exception.backtrace)
+    fail_group_with_message("Disabling all modules in the group #{printable_module_names(member_names)} due to a failure in one of them: #{an_exception}", an_exception)
   end
 
   def fail_group_with_message(a_message, an_exception = nil)
