@@ -83,6 +83,9 @@ module Proxy::Helpers
     ip = request.env['REMOTE_ADDR']
     log_halt 403, 'could not get remote address from environment' if ip.empty?
 
+    # IPv6 with NIC identifier are not resolved
+    return ip if ip.include?('%')
+
     begin
       dns = resolv
       fqdn = dns.getname(ip)
