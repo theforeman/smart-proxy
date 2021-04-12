@@ -10,13 +10,14 @@ module Proxy::FreeIPARealm
     include Proxy::Util
     include Proxy::Kerberos
 
-    attr_reader :remove_dns, :ipa_config
+    attr_reader :remove_dns, :ipa_config, :verify_ca
 
-    def initialize(ipa_config, keytab_path, principal, remove_dns)
+    def initialize(ipa_config, keytab_path, principal, remove_dns, verify_ca)
       @ipa_config = ipa_config
       @keytab_path = keytab_path
       @principal = principal
       @remove_dns = remove_dns
+      @verify_ca = verify_ca
     end
 
     def ipa
@@ -31,7 +32,11 @@ module Proxy::FreeIPARealm
 
       login = Net::HTTP.new(ipa_config.host, 443)
       login.use_ssl = true
-      login.verify_mode = OpenSSL::SSL::VERIFY_NONE
+      if verify_ca
+        login.verify_mode = OpenSSL::SSL::VERIFY_PEER
+      else
+        login.verify_mode = OpenSSL::SSL::VERIFY_NONE
+      end
 
       request = Net::HTTP::Post.new("/ipa/session/login_kerberos", 'Authorization' => "Negotiate #{strict_encode64(token)}", 'Referer' => ipa_config.uri)
       response = login.request(request)

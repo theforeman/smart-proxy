@@ -1,6 +1,8 @@
 module Proxy::FreeIPARealm
   class Plugin < Proxy::Provider
-    default_settings :ipa_config => '/etc/ipa/default.conf', :remove_dns => true
+    default_settings :ipa_config => '/etc/ipa/default.conf',
+      :remove_dns => true,
+      :verify_ca => true
 
     load_classes ::Proxy::FreeIPARealm::ConfigurationLoader
     load_dependency_injection_wirings ::Proxy::FreeIPARealm::ConfigurationLoader
