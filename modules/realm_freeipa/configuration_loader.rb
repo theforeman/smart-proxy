@@ -8,7 +8,13 @@ module Proxy::FreeIPARealm
     def load_dependency_injection_wirings(container_instance, settings)
       container_instance.dependency :ipa_config, -> { Proxy::FreeIPARealm::IpaConfigParser.new(settings[:ipa_config]) }
       container_instance.dependency :realm_provider_impl,
-                                    -> { ::Proxy::FreeIPARealm::Provider.new(container_instance.get_dependency(:ipa_config), settings[:keytab_path], settings[:principal], settings[:remove_dns]) }
+                                    lambda {
+                                      ::Proxy::FreeIPARealm::Provider.new(container_instance.get_dependency(:ipa_config),
+                                                                          settings[:keytab_path],
+                                                                          settings[:principal],
+                                                                          settings[:remove_dns],
+                                                                          settings[:verify_ca])
+                                    }
     end
   end
 end

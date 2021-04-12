@@ -27,7 +27,7 @@ class FreeIPATest < Test::Unit::TestCase
   def setup
     @realm = 'test_realm'
     @ipa_config = IpaConfigParserForTesting.new('https://localhost', @realm)
-    @provider = Proxy::FreeIPARealm::Provider.new(@ipa_config, 'keytab', 'prinicipal', true)
+    @provider = Proxy::FreeIPARealm::Provider.new(@ipa_config, 'keytab', 'prinicipal', true, true)
   end
 
   def test_find
@@ -56,7 +56,7 @@ class FreeIPATest < Test::Unit::TestCase
   end
 
   def test_delete_respects_remove_dns_parameter
-    provider = Proxy::FreeIPARealm::Provider.new(@ipa_config, 'keytab', 'prinicipal', false)
+    provider = Proxy::FreeIPARealm::Provider.new(@ipa_config, 'keytab', 'prinicipal', false, false)
     provider.expects(:ipa_call).with('host_del', ['a_host'], 'updatedns' => false).returns(true)
     provider.delete(@realm, 'a_host')
   end

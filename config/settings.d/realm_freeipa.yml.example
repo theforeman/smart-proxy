@@ -6,3 +6,6 @@
 :ipa_config: /etc/ipa/default.conf
 # Remove from DNS when deleting the FreeIPA entry
 :remove_dns: true
+
+# verify IPA API HTTPS server certificate
+:verify_ca: true
