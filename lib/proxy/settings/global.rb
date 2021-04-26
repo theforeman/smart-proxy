@@ -19,6 +19,7 @@ module ::Proxy::Settings
       :ssl_disabled_ciphers => [],
       :tls_disabled_versions => [],
       :dns_resolv_timeouts => [5, 8, 13], # Ruby default is [5, 20, 40] which is a bit too much for us
+      :foreman_http_timeout => 60,
     }
 
     HOW_TO_NORMALIZE = {
