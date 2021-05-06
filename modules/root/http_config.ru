@@ -6,5 +6,6 @@ map "/" do
 end
 
 map "/v2" do
+  use Proxy::Middleware::Authorization
   run Proxy::RootV2Api
 end

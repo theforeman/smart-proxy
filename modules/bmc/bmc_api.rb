@@ -4,8 +4,6 @@ require 'bmc/redfish'
 module Proxy::BMC
   class Api < ::Sinatra::Base
     helpers ::Proxy::Helpers
-    authorize_with_trusted_hosts
-    authorize_with_ssl_client
     # All GET requests will only read ipmi data, no changes
     # All PUT requests will update information on the bmc device
 
@@ -449,7 +447,7 @@ module Proxy::BMC
     # also if the user decides to do http://127.0.0.1/bmc/192.168.1.6/test?bmc_provider=freeipmi as well as pass in
     # a json encode body with the parameters, all of these items will be merged together
     def body_parameters
-      @body_parameters ||= parse_json_body.merge(params)
+      @body_parameters ||= parse_json_body(request).merge(params)
     end
 
     def auth

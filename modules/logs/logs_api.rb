@@ -3,8 +3,6 @@ require 'proxy/log_buffer/buffer'
 
 class Proxy::LogsApi < Sinatra::Base
   helpers ::Proxy::Helpers
-  authorize_with_trusted_hosts
-  authorize_with_ssl_client
 
   get "/" do
     content_type :json

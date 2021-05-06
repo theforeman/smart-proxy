@@ -6,8 +6,6 @@ module Proxy::TFTP
     include ::Proxy::Log
     include ::Proxy::Validations
     helpers ::Proxy::Helpers
-    authorize_with_trusted_hosts
-    authorize_with_ssl_client
     VARIANTS = ["Syslinux", "Pxelinux", "Pxegrub", "Pxegrub2", "Ztp", "Poap", "Ipxe"].freeze
 
     helpers do

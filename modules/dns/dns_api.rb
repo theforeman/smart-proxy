@@ -6,8 +6,6 @@ module Proxy::Dns
     inject_attr :dns_provider, :server
 
     helpers ::Proxy::Helpers
-    authorize_with_trusted_hosts
-    authorize_with_ssl_client
 
     post "/?" do
       fqdn = params[:fqdn]

@@ -3,8 +3,6 @@ module Proxy::Realm
     extend Proxy::Realm::DependencyInjection
 
     helpers ::Proxy::Helpers
-    authorize_with_trusted_hosts
-    authorize_with_ssl_client
 
     inject_attr :realm_provider_impl, :realm_provider
 
