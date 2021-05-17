@@ -27,7 +27,6 @@ module Proxy::Templates
 
     def call_template(method, path, env, params, body = '')
       template_url = Proxy::Templates::Plugin.settings.template_url
-      proxy_ip = URI.parse(template_url).host
       opts = params.clone.merge(:url => template_url)
       BLACKLIST_PARAMETERS.each do |blacklisted_parameter|
         opts.delete(blacklisted_parameter)
@@ -36,7 +35,7 @@ module Proxy::Templates
       path = path.map { |x| CGI.escape(x) }.join('/')
       logger.debug "Template: request for #{path} using #{opts.inspect} at #{uri.host}"
       proxy_headers = extract_request_headers(env)
-      proxy_headers["X-Forwarded-For"] = "#{env['REMOTE_ADDR']}, #{proxy_ip}"
+      proxy_headers["X-Forwarded-For"] = env['REMOTE_ADDR']
       proxy_headers["Content-Type"] = params["Content-Type"] if params["Content-Type"]
       if method == :get
         proxy_req = request_factory.create_get(path, opts, proxy_headers)
