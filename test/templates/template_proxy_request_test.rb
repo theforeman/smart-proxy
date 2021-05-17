@@ -54,7 +54,7 @@ class TemplateProxyRequestTest < Test::Unit::TestCase
           'Accept-Encoding' => 'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
           'Content-Type'    => 'application/json',
           'User-Agent'      => 'Ruby',
-          'X-Forwarded-For' => '1.2.3.4, proxy.lan',
+          'X-Forwarded-For' => '1.2.3.4',
         }).
       to_return(status: 200, body: "", headers: {})
     Proxy::Templates::TemplateProxyRequest.new.post('built', @request_env, args, @expected_body)
@@ -81,7 +81,7 @@ class TemplateProxyRequestTest < Test::Unit::TestCase
     @request_env['HTTP_X_RHN_PROVISIONING_MAC_0'] = 'aa:bb:cc:dd:ee:ff'
     args = { :token => "test-token" }
     stub_request(:get, @foreman_url + '/unattended/provision?token=test-token&url=' + @template_url).
-      with(:headers => {'X-Forwarded-For' => '1.2.3.4, proxy.lan', 'X-Rhn-Provisioning-Mac-0' => 'aa:bb:cc:dd:ee:ff'}).
+      with(:headers => {'X-Forwarded-For' => '1.2.3.4', 'X-Rhn-Provisioning-Mac-0' => 'aa:bb:cc:dd:ee:ff'}).
       to_return(:status => [200, 'OK'], :body => @expected_body)
     result = Proxy::Templates::TemplateProxyRequest.new.get('provision', @request_env, args)
     assert_equal(@expected_body, result)
