@@ -33,7 +33,11 @@
 # (default: true)
 #:forward_verify: true
 
+# URL to Foreman instance
 #:foreman_url: http://127.0.0.1:3000
+
+# Open, read, write HTTP(S) timeout (in seconds) for requests to Foreman
+#:foreman_http_timeout: 60
 
 # SSL settings for client authentication against Foreman. If undefined, the values
 # from general SSL options are used instead. Mainly useful when Foreman uses
