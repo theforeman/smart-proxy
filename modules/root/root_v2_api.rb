@@ -25,6 +25,7 @@ class Proxy::RootV2Api < Sinatra::Base
   end
 
   def process_capabilities(state, capabilities)
+    return [] if capabilities.nil?
     capabilities = capabilities.select { |cap| !cap.is_a?(Proc) || state == :running }
     capabilities = capabilities.map do |capability|
       capability.is_a?(Proc) ? capability.call : capability
