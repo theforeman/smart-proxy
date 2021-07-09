@@ -197,6 +197,13 @@ class DhcpIscSubnetServiceInitializationTest < Test::Unit::TestCase
     assert_equal false, @subnet_service.find_host_by_hostname("static.example.com").deleteable?
   end
 
+  def test_host_hardware_type_not_parsed
+    subnet = Proxy::DHCP::Subnet.new("192.168.122.0", "255.255.255.0")
+    @subnet_service.add_subnet(subnet)
+    @initialization.load_leases_file(File.read("./test/fixtures/dhcp/dhcp.leases"))
+    refute @subnet_service.find_host_by_hostname("otherhwtype.example.com")
+  end
+
   def test_parsing_and_loading_leases
     @subnet_service.add_subnet(Proxy::DHCP::Subnet.new("192.168.0.0", "255.255.255.0"))
     @initialization.load_leases_file(%[

@@ -221,3 +221,12 @@ lease 192.168.122.53 {
   binding state free;
   hardware ethernet 00:1d:60:a5:b1:2a;
 }
+
+# host with other hardware type
+host otherhwtype.example.com {
+  dynamic;
+  hardware other 44:1e:a1:73:36:96;
+  fixed-address 192.168.122.95;
+  option host-name "otherhwtype.example.com";
+}
+

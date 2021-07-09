@@ -80,7 +80,8 @@ module Proxy::DHCP::CommonISC
       name = parsed_host.name
       ip_address = parsed_host.node_attributes.delete(:fixed_address)
       mac_address = parsed_host.node_attributes.delete(:hardware_address)
-      return nil if ip_address.nil? || ip_address.empty? || mac_address.nil? || mac_address.empty?
+      hardware_type = parsed_host.node_attributes.delete(:hardware_type) # only ethernet is supported
+      return nil if ip_address.nil? || ip_address.empty? || mac_address.nil? || mac_address.empty? || hardware_type.nil? || hardware_type != 'ethernet'
 
       subnet = subnet_service.find_subnet(ip_address)
       return nil if subnet.nil?
