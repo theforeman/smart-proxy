@@ -14,7 +14,7 @@ Currently Supported modules:
  * BMC - BMC management of devices supported by freeipmi and ipmitool
  * DHCP - ISC DHCP and MS DHCP Servers
  * DNS - Bind and MS DNS Servers
- * Puppet - Any Puppet server from 0.24.x
+ * Puppet - Any Puppet server from 4.8
  * Puppet CA - Manage certificate signing, cleaning and autosign on a Puppet CA server
  * Realm - Manage host registration to a realm (e.g. FreeIPA)
  * TFTP - any UNIX based tftp server
@@ -22,6 +22,7 @@ Currently Supported modules:
  * HTTPBoot - endpoint exposing a (TFTP) directory via HTTP(s) for UEFI HTTP booting
  * Logs - log buffer of proxy logs for easier troubleshooting
  * Templates - unattended Foreman endpoint proxy
+ * Register - register new hosts, allows registration using curl
 
 # Installation
 Read the [Smart Proxy Installation section](https://theforeman.org/manuals/latest/index.html#4.3.1SmartProxyInstallation) of the manual.
