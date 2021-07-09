@@ -25,10 +25,6 @@ module Proxy
       notime_layout = Logging::Layouts.pattern(pattern: ::Proxy::SETTINGS.system_logging_pattern + "\n")
       logger = Logging.logger.root
       if log_file.casecmp('STDOUT').zero?
-        if SETTINGS.daemon
-          puts "Settings log_file=STDOUT and daemon=true cannot be used together"
-          exit(1)
-        end
         logger.add_appenders(Logging.appenders.stdout(logger_name, layout: layout))
       elsif log_file.casecmp('SYSLOG').zero?
         unless syslog_available?

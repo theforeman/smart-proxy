@@ -10,8 +10,6 @@ module ::Proxy::Settings
       :file_logging_pattern => '%d %.8X{request} [%.1l] %m',
       :system_logging_pattern => '%m',
       :log_level => "INFO",
-      :daemon => false,
-      :daemon_pid => "/var/run/foreman-proxy/foreman-proxy.pid",
       :forward_verify => true,
       :bind_host => ["*"],
       :log_buffer => 2000,
@@ -48,11 +46,6 @@ module ::Proxy::Settings
     def normalize_setting(key, value, how_to)
       return value unless how_to.has_key?(key)
       how_to[key].call(value)
-    end
-
-    def apply_argv(args)
-      self.daemon = true if args.include?('--daemonize')
-      self.daemon = false if args.include?('--no-daemonize')
     end
   end
 end

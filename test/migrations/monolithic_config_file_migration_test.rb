@@ -19,8 +19,6 @@ class MonolithicConfigMigrationTest < Test::Unit::TestCase
                  :ssl_certificate => "/var/lib/puppet/ssl/certs/foo.bar.example.com.pem",
                  :ssl_private_key => "/var/lib/puppet/ssl/private_keys/foo.bar.example.com.org.pem",
                  :trusted_hosts   => ["foreman.prod.domain", "foreman.dev.domain"],
-                 :daemon          => true,
-                 :daemon_pid      => "/var/run/foreman-proxy/foreman-proxy.pid",
                  :log_file        => "/var/log/foreman-proxy/proxy.log",
                  :log_level       => "DEBUG",
                  :https_port      => 8443,

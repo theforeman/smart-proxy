@@ -42,12 +42,6 @@
 #:foreman_ssl_cert: ssl/certs/fqdn.pem
 #:foreman_ssl_key: ssl/private_keys/fqdn.pem
 
-# by default smart_proxy runs in the foreground. To enable running as a daemon, uncomment 'daemon' setting
-#:daemon: true
-# Only used when 'daemon' is set to true.
-# Uncomment and modify if you want to change the default pid file '/var/run/foreman-proxy/foreman-proxy.pid'
-#:daemon_pid: /var/run/foreman-proxy/foreman-proxy.pid
-
 # host and ports configuration
 # an array of interfaces to bind ports to (possible values: *, localhost, 0.0.0.0)
 #:bind_host: ['*']

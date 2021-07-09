@@ -6,7 +6,7 @@ After=basic.target network.target
 [Service]
 Type=notify
 User=foreman-proxy
-ExecStart=/usr/share/foreman-proxy/bin/smart-proxy --no-daemonize
+ExecStart=/usr/share/foreman-proxy/bin/smart-proxy
 
 [Install]
 WantedBy=multi-user.target
