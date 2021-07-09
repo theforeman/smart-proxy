@@ -1,7 +1,7 @@
 ---
-# Enable publishing of a given directory under /EFI and /httpboot paths.
-# Directory listing is not possible, symlinks are followed but not outside
-# of the root directory specified in this file.
+# Enable publishing of a given directory under /EFI/BOOT, /EFI and /httpboot
+# paths. Directory listing is not possible, symlinks are followed but not
+# outside of the root directory specified in this file.
 
 # Enables the module, make sure to enable TFTP module as well to allow
 # configuration files deployment.
