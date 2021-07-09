@@ -20,7 +20,9 @@ module Proxy
              "--read-timeout=#{read_timeout}",
              "--tries=3",
              "--no-check-certificate",
-             "-nv", "-c", src.to_s, "-O", dst.to_s])
+             "--timestamping", # turn on timestamping to prevent redownloads
+             "--no-if-modified-since", # but use HTTP HEAD instead If-Modified-Since
+             "-nv", src.to_s, "-O", dst.to_s])
     end
 
     def start

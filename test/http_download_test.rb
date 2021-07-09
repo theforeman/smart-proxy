@@ -15,7 +15,7 @@ class HttpDownloadsTest < Test::Unit::TestCase
                 "--connect-timeout=#{default_connect}",
                 "--dns-timeout=#{default_dns}",
                 "--read-timeout=#{default_read}",
-                "--tries=3", "--no-check-certificate", "-nv", "-c", "src", "-O", "dst"]
+                "--tries=3", "--no-check-certificate", "--timestamping", "--no-if-modified-since", "-nv", "src", "-O", "dst"]
     Proxy::HttpDownload.any_instance.stubs(:which).returns('/wget')
     assert_equal expected, Proxy::HttpDownload.new('src', 'dst').command
   end
@@ -29,7 +29,7 @@ class HttpDownloadsTest < Test::Unit::TestCase
                 "--connect-timeout=#{default_connect}",
                 "--dns-timeout=#{default_dns}",
                 "--read-timeout=#{read_timeout}",
-                "--tries=3", "--no-check-certificate", "-nv", "-c", "src", "-O", "dst"]
+                "--tries=3", "--no-check-certificate", "--timestamping", "--no-if-modified-since", "-nv", "src", "-O", "dst"]
     Proxy::HttpDownload.any_instance.stubs(:which).returns('/wget')
     assert_equal expected, Proxy::HttpDownload.new('src', 'dst', read_timeout, nil, nil).command
   end
@@ -42,7 +42,7 @@ class HttpDownloadsTest < Test::Unit::TestCase
                 "--connect-timeout=#{connect_timeout}",
                 "--dns-timeout=#{dns_timeout}",
                 "--read-timeout=#{read_timeout}",
-                "--tries=3", "--no-check-certificate", "-nv", "-c", "src", "-O", "dst"]
+                "--tries=3", "--no-check-certificate", "--timestamping", "--no-if-modified-since", "-nv", "src", "-O", "dst"]
     Proxy::HttpDownload.any_instance.stubs(:which).returns('/wget')
     assert_equal expected, Proxy::HttpDownload.new('src', 'dst', read_timeout, connect_timeout, dns_timeout).command
   end
