@@ -30,7 +30,12 @@ module Proxy::Helpers
 
   # read the HTTPS client certificate from the environment and extract its CN
   def https_cert_cn
-    certificate_raw = request.env['SSL_CLIENT_CERT'].to_s
+    if request.env['HTTP_SSL_CLIENT_CERT']
+      certificate_raw = request.env['HTTP_SSL_CLIENT_CERT'].to_s
+      certificate_raw = "-----BEGIN CERTIFICATE-----\n#{certificate_raw}\n-----END CERTIFICATE-----"
+    else
+      certificate_raw = request.env['SSL_CLIENT_CERT'].to_s
+    end
     log_halt 403, 'could not read client cert from environment' if certificate_raw.empty?
 
     begin
