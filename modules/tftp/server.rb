@@ -169,7 +169,9 @@ module Proxy::TFTP
                                 destination.to_s,
                                 Proxy::TFTP::Plugin.settings.tftp_read_timeout,
                                 Proxy::TFTP::Plugin.settings.tftp_connect_timeout,
-                                Proxy::TFTP::Plugin.settings.tftp_dns_timeout).start
+                                Proxy::TFTP::Plugin.settings.tftp_dns_timeout,
+                                Proxy::TFTP::Plugin.settings.verify_server_cert).start
+
     when 'nfs'
       logger.debug "NFS as a protocol for installation medium detected."
     else

@@ -17,3 +17,7 @@
 # Defines the default dns timeout in seconds needed to download tftp artifacts
 # like initrd and vmlinuz. Default value 10 seconds
 #:tftp_dns_timeout: 10
+
+# Defines the default certificate action for certificate checking.
+# When false, the argument --no-check-certificate will be used.
+#:verify_server_cert: true
