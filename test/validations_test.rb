@@ -21,11 +21,19 @@ class ProxyValidationsTest < Test::Unit::TestCase
     assert_equal "192.168.1.1", validate_ip("192.168.1.1")
   end
 
+  def test_should_validate_ip4
+    assert_equal "172.16.10.1", validate_ip("172.16.10.1", 4)
+  end
+
+  def test_should_validate_ip6
+    assert_equal "2001:db8::8:800:200c:417a", validate_ip("2001:db8::8:800:200c:417a", 6)
+  end
+
   def test_should_not_return_invalid_ip
-    assert_raise Error do
+    assert_raise InvalidIPAddress do
       validate_ip "192.168.1"
     end
-    assert_raise Error do
+    assert_raise InvalidIPAddress do
       validate_ip "192.168.1.i"
     end
   end
@@ -45,10 +53,10 @@ class ProxyValidationsTest < Test::Unit::TestCase
   end
 
   def test_should_not_return_invalid_mac
-    assert_raise Error do
+    assert_raise InvalidMACAddress do
       validate_mac "aa:bb:cc:00:11:22:33"
     end
-    assert_raise Error do
+    assert_raise InvalidMACAddress do
       validate_mac "aa:bb:cc:00:11:zz"
     end
   end

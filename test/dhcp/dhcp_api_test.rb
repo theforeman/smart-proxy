@@ -23,6 +23,7 @@ class DhcpApiTest < Test::Unit::TestCase
 
   def setup
     @server = Object.new
+    @server.stubs(:validate_supported_address).returns(true)
 
     @subnets = [
       Proxy::DHCP::Subnet.new("192.168.122.0", "255.255.255.0", "routers" => ["192.168.122.250"]),
@@ -71,6 +72,7 @@ class DhcpApiTest < Test::Unit::TestCase
   end
 
   def test_get_network
+    @server.expects(:validate_supported_address).returns(true)
     @server.expects(:all_hosts).with(@subnet.network).returns(@reservations)
     @server.expects(:all_leases).with(@subnet.network).returns(@leases)
 
@@ -87,11 +89,13 @@ class DhcpApiTest < Test::Unit::TestCase
 
   def test_get_network_for_non_existent_network
     @server.expects(:all_hosts).raises(::Proxy::DHCP::SubnetNotFound)
+    @server.expects(:validate_supported_address).returns(true)
     get "/192.168.122.0"
     assert_equal 404, last_response.status
   end
 
   def test_get_network_unused_ip
+    @server.expects(:validate_supported_address).returns(true)
     @server.expects(:unused_ip).with('192.168.122.0', "01:02:03:04:05:06", "192.168.122.10", "192.168.122.20").returns("192.168.122.11")
     get "/192.168.122.0/unused_ip?mac=01:02:03:04:05:06&from=192.168.122.10&to=192.168.122.20"
 
@@ -100,12 +104,14 @@ class DhcpApiTest < Test::Unit::TestCase
   end
 
   def test_get_unused_ip_for_nonexistent_network
+    @server.expects(:validate_supported_address).returns(true)
     @server.expects(:unused_ip).with('192.168.122.0', "01:02:03:04:05:06", "192.168.122.10", "192.168.122.20").raises(::Proxy::DHCP::SubnetNotFound)
     get "/192.168.122.0/unused_ip?mac=01:02:03:04:05:06&from=192.168.122.10&to=192.168.122.20"
     assert_equal 404, last_response.status
   end
 
   def test_get_unused_when_not_inmplemented
+    @server.expects(:validate_supported_address).returns(true)
     @server.expects(:unused_ip).raises(::Proxy::DHCP::NotImplemented)
     get "/192.168.122.0/unused_ip?mac=01:02:03:04:05:06&from=192.168.122.10&to=192.168.122.20"
     assert_equal 501, last_response.status
@@ -139,6 +145,7 @@ class DhcpApiTest < Test::Unit::TestCase
 
   def test_get_reservation_record_by_ip
     @server.expects(:find_records_by_ip).with("192.168.122.0", "192.168.122.1").returns([@reservations.first])
+    @server.expects(:validate_supported_address).returns(true)
 
     get "/192.168.122.0/ip/192.168.122.1"
 
@@ -156,6 +163,7 @@ class DhcpApiTest < Test::Unit::TestCase
   end
 
   def test_get_lease_record_by_ip
+    @server.expects(:validate_supported_address).returns(true)
     @server.expects(:find_records_by_ip).with("192.168.122.0", "192.168.122.1").returns([@leases.first])
 
     get "/192.168.122.0/ip/192.168.122.1"
@@ -177,18 +185,21 @@ class DhcpApiTest < Test::Unit::TestCase
 
   def test_get_record_by_ip_for_nonexistent_ip
     @server.expects(:find_records_by_ip).with("192.168.122.0", "192.168.122.1").returns([])
+    @server.expects(:validate_supported_address).returns(true)
     get "/192.168.122.0/ip/192.168.122.1"
     assert_equal 404, last_response.status
   end
 
   def test_get_record_by_ip_for_nonexistent_network
     @server.expects(:find_records_by_ip).with("192.168.122.0", "192.168.122.1").raises(::Proxy::DHCP::SubnetNotFound)
+    @server.expects(:validate_supported_address).returns(true)
     get "/192.168.122.0/ip/192.168.122.1"
     assert_equal 404, last_response.status
   end
 
   def test_get_record_by_mac
     @server.expects(:find_record_by_mac).with("192.168.122.0", "00:11:bb:cc:dd:ee").returns(@reservations.first)
+    @server.expects(:validate_supported_address).returns(true)
 
     get "/192.168.122.0/mac/00:11:bb:cc:dd:ee"
 
@@ -207,6 +218,7 @@ class DhcpApiTest < Test::Unit::TestCase
 
   def test_get_record_by_mac_64
     @server.expects(:find_record_by_mac).with("192.168.122.0", "80:00:02:08:fe:80:00:00:00:00:00:00:00:02:aa:bb:cc:dd:ee:ff").returns(@leases.last)
+    @server.expects(:validate_supported_address).returns(true)
 
     get "/192.168.122.0/mac/80:00:02:08:fe:80:00:00:00:00:00:00:00:02:aa:bb:cc:dd:ee:ff"
 
@@ -226,6 +238,7 @@ class DhcpApiTest < Test::Unit::TestCase
 
   def test_get_record_by_mac_uppercase
     @server.expects(:find_record_by_mac).with("192.168.122.0", "00:11:bb:cc:dd:ee").returns(@reservations.first)
+    @server.expects(:validate_supported_address).returns(true)
 
     get "/192.168.122.0/mac/00:11:BB:CC:DD:EE"
 
@@ -244,12 +257,14 @@ class DhcpApiTest < Test::Unit::TestCase
 
   def test_get_record_by_mac_for_nonexistent_mac
     @server.expects(:find_record_by_mac).with("192.168.122.0", "00:11:bb:cc:dd:ee").returns(nil)
+    @server.expects(:validate_supported_address).returns(true)
     get "/192.168.122.0/mac/00:11:bb:cc:dd:ee"
     assert_equal 404, last_response.status
   end
 
   def test_get_record_by_mac_for_nonexistent_network
     @server.expects(:find_record_by_mac).with("192.168.122.0", "00:11:bb:cc:dd:ee").raises(::Proxy::DHCP::SubnetNotFound)
+    @server.expects(:validate_supported_address).returns(true)
     get "/192.168.122.0/mac/00:11:bb:cc:dd:ee"
     assert_equal 404, last_response.status
   end
@@ -262,6 +277,7 @@ class DhcpApiTest < Test::Unit::TestCase
       "mac"        => "00:11:bb:cc:dd:ee",
       "network"    => "192.168.122.0",
     }
+    @server.expects(:validate_supported_address).returns(true)
     @server.expects(:add_record).raises(Proxy::DHCP::Collision)
 
     post "/192.168.122.0", params
@@ -276,6 +292,7 @@ class DhcpApiTest < Test::Unit::TestCase
       "mac"       => "00:11:bb:cc:dd:ee",
       "network"   => "192.168.122.0",
     }
+    @server.expects(:validate_supported_address).returns(true)
     @server.expects(:add_record).raises(Proxy::DHCP::AlreadyExists)
 
     post "/192.168.122.0", params
@@ -290,6 +307,7 @@ class DhcpApiTest < Test::Unit::TestCase
       "mac"      => "10:10:10:10:10:10",
       "network"  => "192.168.122.0",
     }
+    @server.expects(:validate_supported_address).returns(true)
     @server.expects(:add_record).with { |params| record.all? { |k_v| params[k_v[0]] == k_v[1] } }
 
     post "/192.168.122.0", record
@@ -298,6 +316,7 @@ class DhcpApiTest < Test::Unit::TestCase
   end
 
   def test_sparc_host_creation
+    @server.expects(:validate_supported_address).returns(true)
     @server.expects(:add_record).with() { |params| sparc_attrs.all? { |k_v| params[k_v[0]] == k_v[1] } }
 
     post '/192.168.122.0', sparc_attrs
@@ -316,6 +335,7 @@ class DhcpApiTest < Test::Unit::TestCase
 
   def test_delete_records_by_ip
     @server.expects(:del_records_by_ip).with("192.168.122.0", "192.168.122.1")
+    @server.expects(:validate_supported_address).returns(true)
     delete "/192.168.122.0/ip/192.168.122.1"
     assert_equal 200, last_response.status
     assert_empty last_response.body
@@ -323,6 +343,7 @@ class DhcpApiTest < Test::Unit::TestCase
 
   def test_delete_records_by_ip_for_nonexistent_subnet
     @server.expects(:del_records_by_ip).with("192.168.122.0", "192.168.122.1").raises(::Proxy::DHCP::SubnetNotFound)
+    @server.expects(:validate_supported_address).returns(true)
     delete "/192.168.122.0/ip/192.168.122.1"
     assert_equal 200, last_response.status
     assert_empty last_response.body
@@ -330,6 +351,7 @@ class DhcpApiTest < Test::Unit::TestCase
 
   def test_delete_records_by_mac
     @server.expects(:del_record_by_mac).with("192.168.122.0", "00:11:bb:cc:dd:ee")
+    @server.expects(:validate_supported_address).returns(true)
     delete "/192.168.122.0/mac/00:11:bb:cc:dd:ee"
     assert_equal 200, last_response.status
     assert_empty last_response.body
@@ -337,6 +359,7 @@ class DhcpApiTest < Test::Unit::TestCase
 
   def test_delete_records_by_mac_uppercase
     @server.expects(:del_record_by_mac).with("192.168.122.0", "00:11:bb:cc:dd:ee")
+    @server.expects(:validate_supported_address).returns(true)
     delete "/192.168.122.0/mac/00:11:BB:CC:DD:EE"
     assert_equal 200, last_response.status
     assert_empty last_response.body
@@ -344,6 +367,8 @@ class DhcpApiTest < Test::Unit::TestCase
 
   def test_delete_records_by_mac_for_nonexistent_subnet
     @server.expects(:del_record_by_mac).with("192.168.122.0", "00:11:bb:cc:dd:ee").raises(::Proxy::DHCP::SubnetNotFound)
+    @server.expects(:validate_supported_address).returns(true)
+
     delete "/192.168.122.0/mac/00:11:bb:cc:dd:ee"
     assert_equal 200, last_response.status
     assert_empty last_response.body

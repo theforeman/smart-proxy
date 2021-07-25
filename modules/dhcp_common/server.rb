@@ -29,6 +29,10 @@ module Proxy::DHCP
                          end
     end
 
+    def validate_supported_address(ip)
+      validate_ip(ip)
+    end
+
     def subnets
       service.all_subnets
     end
@@ -132,7 +136,6 @@ module Proxy::DHCP
 
       name, ip_address, mac_address, subnet_address, options = clean_up_add_record_parameters(options)
 
-      validate_ip(ip_address)
       validate_mac(mac_address)
       raise(Proxy::DHCP::Error, "Must provide hostname") unless name
 

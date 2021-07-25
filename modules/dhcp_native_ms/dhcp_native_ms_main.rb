@@ -13,6 +13,12 @@ module Proxy::DHCP::NativeMS
       @free_ips = free_ips_service
     end
 
+    def validate_supported_address(*args)
+      args.each do |ip|
+        validate_ip(ip, 4)
+      end
+    end
+
     def del_record(record)
       logger.debug "Deleting '#{record}'"
       if record.is_a?(::Proxy::DHCP::Reservation)
@@ -25,8 +31,6 @@ module Proxy::DHCP::NativeMS
     def add_record(options)
       name, ip_address, mac_address, subnet_address, options = clean_up_add_record_parameters(options)
 
-      validate_ip(ip_address)
-      validate_mac(mac_address)
       subnet = retrieve_subnet_from_server(subnet_address)
 
       create_reservation(ip_address, subnet.netmask, mac_address, name)
