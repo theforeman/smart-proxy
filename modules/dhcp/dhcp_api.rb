@@ -1,5 +1,8 @@
+require "proxy/validations"
+
 class Proxy::DhcpApi < ::Sinatra::Base
   extend Proxy::DHCP::DependencyInjection
+  include Proxy::Validations
 
   helpers ::Proxy::Helpers
   authorize_with_trusted_hosts
@@ -16,6 +19,7 @@ class Proxy::DhcpApi < ::Sinatra::Base
   end
 
   get "/:network" do
+    server.validate_supported_address(params[:network])
     content_type :json
     {:reservations => server.all_hosts(params[:network]), :leases => server.all_leases(params[:network])}.to_json
   rescue ::Proxy::DHCP::SubnetNotFound
@@ -25,6 +29,9 @@ class Proxy::DhcpApi < ::Sinatra::Base
   end
 
   get "/:network/unused_ip" do
+    server.validate_supported_address(params[:network])
+    server.validate_supported_address(params[:from], params[:to]) if params[:from] && params[:to]
+    validate_mac(params[:mac]) if params[:mac]
     content_type :json
     {:ip => server.unused_ip(params[:network], params[:mac], params[:from], params[:to])}.to_json
   rescue ::Proxy::DHCP::SubnetNotFound
@@ -53,8 +60,8 @@ class Proxy::DhcpApi < ::Sinatra::Base
 
   # returns an array of records for an ip address
   get "/:network/ip/:ip_address" do
+    server.validate_supported_address(params[:network], params[:ip_address])
     content_type :json
-
     records = server.find_records_by_ip(params[:network], params[:ip_address])
     log_halt 404, "No DHCP records for IP #{params[:network]}/#{params[:ip_address]} found" if records.empty?
     records.to_json
@@ -67,8 +74,10 @@ class Proxy::DhcpApi < ::Sinatra::Base
   # returns a record for a mac address
   get "/:network/mac/:mac_address" do
     param_network = params[:network]
-    param_mac = params[:mac_address].downcase unless params[:mac_address].nil?
+    param_mac = params[:mac_address].downcase if params[:mac_address]
     begin
+      server.validate_supported_address(params[:network])
+      validate_mac(param_mac) if param_mac
       content_type :json
       record = server.find_record_by_mac(param_network, param_mac)
       log_halt 404, "No DHCP record for MAC #{param_network}/#{param_mac} found" unless record
@@ -82,6 +91,7 @@ class Proxy::DhcpApi < ::Sinatra::Base
 
   # create a new record in a network
   post "/:network" do
+    server.validate_supported_address(params[:network])
     content_type :json
     # NOTE: sinatra overwrites params[:network] (required by add_record call) with the :network url parameter
     server.add_record(params)
@@ -110,6 +120,7 @@ class Proxy::DhcpApi < ::Sinatra::Base
 
   # deletes all records for an ip address from a network
   delete "/:network/ip/:ip_address" do
+    server.validate_supported_address(params[:network], params[:ip_address])
     server.del_records_by_ip(params[:network], params[:ip_address])
     nil
   rescue ::Proxy::DHCP::SubnetNotFound # rubocop:disable Lint/SuppressedException
@@ -120,6 +131,8 @@ class Proxy::DhcpApi < ::Sinatra::Base
 
   # delete a record for a mac address from a network
   delete "/:network/mac/:mac_address" do
+    server.validate_supported_address(params[:network])
+    validate_mac(params[:mac_address])
     server.del_record_by_mac(params[:network], params[:mac_address].nil? ? nil : params[:mac_address].downcase)
     nil
   rescue ::Proxy::DHCP::SubnetNotFound # rubocop:disable Lint/SuppressedException

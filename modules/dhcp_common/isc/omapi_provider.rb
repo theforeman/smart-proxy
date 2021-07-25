@@ -14,6 +14,12 @@ module Proxy::DHCP::CommonISC
       @omapi_port = omapi_port
     end
 
+    def validate_supported_address(*args)
+      args.each do |ip|
+        validate_ip(ip, 4)
+      end
+    end
+
     def del_record(record)
       validate_record record
       raise InvalidRecord, "#{record} is static - unable to delete" unless record.deleteable?

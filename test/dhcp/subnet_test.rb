@@ -14,22 +14,22 @@ class Proxy::DHCPSubnetTest < Test::Unit::TestCase
   end
 
   def test_should_not_save_invalid_network_addresses
-    assert_raise Proxy::Validations::Error do
+    assert_raise Proxy::Validations::InvalidIPAddress do
       Proxy::DHCP::Subnet.new("1..1.1", @netmask)
     end
   end
 
   def test_should_not_save_invalid_router_addresses
-    assert_raise Proxy::Validations::Error do
+    assert_raise Proxy::Validations::InvalidIPAddress do
       Proxy::DHCP::Subnet.new(@network, @netmask, :routers => ["192.168..1"])
     end
   end
 
   def test_should_not_save_invalid_range
-    assert_raise Proxy::Validations::Error do
+    assert_raise Proxy::Validations::InvalidIPAddress do
       Proxy::DHCP::Subnet.new(@network, @netmask, :range => ["192.168.0..", "192.168.0.50"])
     end
-    assert_raise Proxy::Validations::Error do
+    assert_raise Proxy::Validations::InvalidIPAddress do
       Proxy::DHCP::Subnet.new(@network, @netmask, :range => ["192.168.0.3", "192.168.0.."])
     end
     assert_raise Proxy::DHCP::Error do
@@ -45,7 +45,7 @@ class Proxy::DHCPSubnetTest < Test::Unit::TestCase
 
   def test_should_not_save_invalid_netmask
     netmask = "XYZxxVVcc123"
-    assert_raise Proxy::Validations::Error do
+    assert_raise Proxy::Validations::InvalidIPAddress do
       Proxy::DHCP::Subnet.new(@network, netmask)
     end
   end

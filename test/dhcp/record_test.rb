@@ -9,7 +9,7 @@ require 'dhcp_common/record/lease'
 class Proxy::DHCPRecordTest < Test::Unit::TestCase
   def setup
     @subnet = Proxy::DHCP::Subnet.new("192.168.0.0", "255.255.255.0")
-    @ip = "123.321.123.321"
+    @ip = "123.255.123.255"
     @mac = "aa:bb:CC:dd:ee:ff"
     @record = Proxy::DHCP::Record.new(@ip, @mac, @subnet)
   end
@@ -26,7 +26,7 @@ class Proxy::DHCPRecordTest < Test::Unit::TestCase
 
   def test_should_not_save_invalid_ip_addresses
     ip = "1..1.1"
-    assert_raise(Proxy::Validations::Error) { Proxy::DHCP::Record.new(ip, @mac, @subnet) }
+    assert_raise(Proxy::Validations::InvalidIPAddress) { Proxy::DHCP::Record.new(ip, @mac, @subnet) }
   end
 
   def test_mac_should_be_saved_lower_case
@@ -36,11 +36,11 @@ class Proxy::DHCPRecordTest < Test::Unit::TestCase
   end
 
   def test_should_not_save_invalid_mac
-    assert_raise(Proxy::Validations::Error) { Proxy::DHCP::Record.new(@ip, "XYZxxVVcc123", @subnet) }
+    assert_raise(Proxy::Validations::InvalidMACAddress) { Proxy::DHCP::Record.new(@ip, "XYZxxVVcc123", @subnet) }
   end
 
   def test_should_not_save_invalid_subnets
-    assert_raise(Proxy::Validations::Error) { Proxy::DHCP::Record.new(@ip, @mac, nil) }
+    assert_raise(Proxy::Validations::InvalidSubnet) { Proxy::DHCP::Record.new(@ip, @mac, nil) }
   end
 
   def test_equality

@@ -17,3 +17,5 @@ pkg/
 test/tmp/*
 /tmp/
 /vendor
+/1
+config/settings.d/host_report.yml.example
