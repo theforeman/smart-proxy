@@ -1,6 +1,3 @@
-[![Build Status](https://ci.theforeman.org/buildStatus/icon?job=test_proxy_develop)](https://ci.theforeman.org/job/test_proxy_develop/)
-[![Support IRC channel](https://kiwiirc.com/buttons/irc.freenode.net/theforeman.png)](https://kiwiirc.com/client/irc.freenode.net/?#theforeman)
-
 [Smart Proxy](https://projects.theforeman.org/projects/smart-proxy/wiki) is a free open source project that provides restful API to subsystems such as DNS, DHCP, etc, for higher level orchestration tools such as [Foreman](https://github.com/theforeman/foreman).
 
 * Issues: [Redmine](https://projects.theforeman.org/projects/smart-proxy/issues)
