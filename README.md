@@ -2,7 +2,7 @@
 
 * Issues: [Redmine](https://projects.theforeman.org/projects/smart-proxy/issues)
 * Wiki: [Foreman wiki](https://projects.theforeman.org/projects/smart-proxy/wiki)
-* Community and support: We have a [forum](https://community.theforeman.org) and use [Freenode](irc.freenode.net) IRC channels
+* Community and support: We have a [forum](https://community.theforeman.org) and use [Libera](https://libera.chat) IRC channels
     * #theforeman for general support
     * #theforeman-dev for development chat
 
