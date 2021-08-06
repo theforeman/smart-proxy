@@ -13,15 +13,13 @@ module Proxy::Dns::Dnscmd
       zone = match_zone(name, enum_zones)
       msg = "Added #{type} entry #{name} => #{value}"
       value = "#{value}." if type == "PTR"
-      cmd = "/RecordAdd #{zone} #{name}. #{type} #{value}"
-      execute(cmd, msg)
+      execute("/RecordAdd", zone, "#{name}.", type, value, msg: msg, error_only: false)
       nil
     end
 
     def remove_specific_record_from_zone(zone_name, node_name, record, type)
       msg = "Removed #{record} #{type} record #{node_name} from #{zone_name}"
-      cmd = "/RecordDelete #{zone_name} #{node_name}. #{type} #{record} /f"
-      execute(cmd, msg)
+      execute("/RecordDelete", zone_name, "#{node_name}.", type, record, "/f", msg: msg, error_only: false)
       nil
     end
 
@@ -33,19 +31,17 @@ module Proxy::Dns::Dnscmd
       nil
     end
 
-    def execute(cmd, msg = nil, error_only = false)
+    def execute(*args, **keyword_args)
       tsecs = 5
       response = nil
-      interpreter = Proxy::SETTINGS.x86_64 ? 'c:\windows\sysnative\cmd.exe' : 'c:\windows\system32\cmd.exe'
-      command = interpreter + ' /c c:\Windows\System32\dnscmd.exe ' + "#{@server} #{cmd}"
-
       std_in = std_out = std_err = nil
+      real_cmd = ['c:\Windows\System32\dnscmd.exe', @server] + args
       begin
         timeout(tsecs) do
-          logger.debug "executing: #{command}"
-          std_in, std_out, std_err = Open3.popen3(command)
-          response = std_out.readlines
-          response += std_err.readlines
+          logger.debug { "executing: #{real_cmd}" }
+          std_in, std_out, std_err = popen3(*real_cmd)
+          response = [std_out&.readlines, std_err&.readlines].flatten.compact
+          response = nil if response == []
         end
       rescue Timeout::Error
         raise Proxy::Dns::Error.new("dnscmd did not respond within #{tsecs} seconds")
@@ -54,11 +50,16 @@ module Proxy::Dns::Dnscmd
         std_out&.close
         std_err&.close
       end
-      report msg, response, error_only
+      report keyword_args[:msg], response, keyword_args[:error_only || false]
       response
     end
 
     def report(msg, response, error_only)
+      if response.nil?
+        logger.warn "Response from popen3 was nil."
+        return
+      end
+
       if response.grep(/completed successfully/).empty?
         logger.error "Command dnscmd failed:\n" + response.join("\n")
         msg.sub!(/Removed/, "remove")
@@ -121,6 +122,12 @@ module Proxy::Dns::Dnscmd
       end
       logger.debug "Enumerated #{records.size} #{type} records for zone=#{zone_name} node=#{node_name} records=#{records}"
       records
+    end
+
+    private
+
+    def popen3(*args)
+      Open3.popen3(*args)
     end
   end
 end

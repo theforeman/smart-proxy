@@ -21,22 +21,22 @@ class DnsCmdTest < Test::Unit::TestCase
   end
 
   def test_create_a_record_with_longest_zone_match
-    Proxy::Dns::Dnscmd::Record.any_instance.expects(:execute).with('/RecordAdd bar.domain.local host.foo.bar.domain.local. A 192.168.33.33', anything).returns(true)
+    @server.expects(:popen3).with('c:\Windows\System32\dnscmd.exe', nil, '/RecordAdd', 'bar.domain.local', 'host.foo.bar.domain.local.', 'A', '192.168.33.33').once.returns([nil, nil, nil])
     assert_nil @server.do_create('host.foo.bar.domain.local', '192.168.33.33', 'A')
   end
 
   def test_create_aaaa_record_with_longest_zone_match
-    Proxy::Dns::Dnscmd::Record.any_instance.expects(:execute).with('/RecordAdd bar.domain.local host.foo.bar.domain.local. AAAA 2001:db8:deef::1', anything).returns(true)
+    @server.expects(:popen3).with('c:\Windows\System32\dnscmd.exe', nil, '/RecordAdd', 'bar.domain.local', 'host.foo.bar.domain.local.', 'AAAA', '2001:db8:deef::1').once.returns([nil, nil, nil])
     assert_nil @server.do_create('host.foo.bar.domain.local', '2001:db8:deef::1', 'AAAA')
   end
 
   def test_create_ptr_record
-    Proxy::Dns::Dnscmd::Record.any_instance.expects(:execute).with('/RecordAdd 33.168.192.in-addr.arpa 33.33.168.192.in-addr.arpa. PTR host.foo.bar.domain.local.', anything).returns(true)
+    @server.expects(:popen3).with('c:\Windows\System32\dnscmd.exe', nil, '/RecordAdd', '33.168.192.in-addr.arpa', '33.33.168.192.in-addr.arpa.', 'PTR', 'host.foo.bar.domain.local.').once.returns([nil, nil, nil])
     assert_nil @server.do_create('33.33.168.192.in-addr.arpa', 'host.foo.bar.domain.local', 'PTR')
   end
 
   def test_create_cname_record
-    Proxy::Dns::Dnscmd::Record.any_instance.expects(:execute).with('/RecordAdd bar.domain.local alias.foo.bar.domain.local. CNAME host.foo.bar.domain.local', anything).returns(true)
+    @server.expects(:popen3).with('c:\Windows\System32\dnscmd.exe', nil, '/RecordAdd', 'bar.domain.local', 'alias.foo.bar.domain.local.', 'CNAME', 'host.foo.bar.domain.local').once.returns([nil, nil, nil])
     assert_nil @server.do_create('alias.foo.bar.domain.local', 'host.foo.bar.domain.local', 'CNAME')
   end
 
@@ -54,12 +54,12 @@ class DnsCmdTest < Test::Unit::TestCase
   end
 
   def test_remove_specific_a_record_from_zone
-    Proxy::Dns::Dnscmd::Record.any_instance.expects(:execute).with('/RecordDelete domain.local host.domain.local. A 192.168.33.33 /f', anything).returns(true)
+    Proxy::Dns::Dnscmd::Record.any_instance.expects(:execute).with('/RecordDelete', 'domain.local', 'host.domain.local.', 'A', '192.168.33.33', '/f', anything).returns(true)
     assert_nil @server.remove_specific_record_from_zone('domain.local', 'host.domain.local', '192.168.33.33', 'A')
   end
 
   def test_remove_specific_ptr_record_from_zone
-    Proxy::Dns::Dnscmd::Record.any_instance.expects(:execute).with('/RecordDelete 33.168.192.in-addr.arpa 33.33.168.192.in-addr.arpa. PTR host.domain.local /f', anything).returns(true)
+    Proxy::Dns::Dnscmd::Record.any_instance.expects(:execute).with('/RecordDelete', '33.168.192.in-addr.arpa', '33.33.168.192.in-addr.arpa.', 'PTR', 'host.domain.local', '/f', anything).returns(true)
     assert_nil @server.remove_specific_record_from_zone('33.168.192.in-addr.arpa', '33.33.168.192.in-addr.arpa', 'host.domain.local', 'PTR')
   end
 
