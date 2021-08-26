@@ -26,6 +26,10 @@ require 'launcher'
 require 'sinatra/base'
 require 'sinatra/authorization'
 
+APP_ROOT = File.absolute_path(File.expand_path("#{__dir__}/.."))
+DATA_ROOT = File.absolute_path(File.expand_path("#{__dir__}/../tmp/data"))
+FileUtils.mkdir_p(DATA_ROOT) unless Dir.exist?(DATA_ROOT)
+
 Proxy::SETTINGS = ::Proxy::Settings::Global.new(:log_file => './logs/test.log', :log_level => 'DEBUG')
 Proxy::VERSION = File.read(File.join(__dir__, '..', 'VERSION')).chomp
 

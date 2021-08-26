@@ -1,4 +1,9 @@
-APP_ROOT = "#{__dir__}/.."
+APP_ROOT = File.absolute_path(File.expand_path("#{__dir__}/.."))
+if Dir.exist?('/var/lib/foreman-proxy')
+  DATA_ROOT = '/var/lib/foreman-proxy'
+else
+  DATA_ROOT = File.absolute_path(File.expand_path("#{__dir__}/../data"))
+end
 
 require 'smart_proxy'
 require 'launcher'

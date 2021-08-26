@@ -1,0 +1,6 @@
+This directory is reserved for data in development mode. To access it, use
+DATA_DIR constant. Plugins should create subdirectories within the directory.
+
+The constant is set to /var/lib/foreman-proxy, if such directory exists.
+Otherwise this directory is used. When running tests, DATA_DIR is set to
+../tmp/data.

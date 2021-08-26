@@ -17,3 +17,4 @@ pkg/
 test/tmp/*
 /tmp/
 /vendor
+/data/*
