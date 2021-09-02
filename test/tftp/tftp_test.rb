@@ -57,38 +57,18 @@ class TftpTest < Test::Unit::TestCase
     end
   end
 
-  def test_choose_protocol_and_fetch_wget_with_timeouts
+  def test_choose_protocol_and_fetch_wget_with_timeout
     src = "https://proxy.test"
     dst = "/destination"
-    tftp_read_timeout = "1000"
     tftp_connect_timeout = "40"
-    tftp_dns_timeout = "14300"
     verify_server_cert = false
     Proxy::TFTP::Plugin.load_test_settings(
-      :tftp_read_timeout => tftp_read_timeout,
       :tftp_connect_timeout => tftp_connect_timeout,
-      :tftp_dns_timeout => tftp_dns_timeout,
       :verify_server_cert => verify_server_cert
     )
 
     ::Proxy::HttpDownload.expects(:new).returns(stub('tftp', :start => true)).
-      with(src, dst, tftp_read_timeout, tftp_connect_timeout, tftp_dns_timeout, verify_server_cert)
-
-    Proxy::TFTP.choose_protocol_and_fetch src, dst
-  end
-
-  def test_choose_protocol_and_fetch_wget_with_read_timeout
-    src = "https://proxy.test"
-    dst = "/destination"
-    tftp_read_timeout = "1000"
-    verify_server_cert = true
-    tftp_connect_timeout = Proxy::TFTP::Plugin.settings.tftp_connect_timeout
-    tftp_dns_timeout = Proxy::TFTP::Plugin.settings.tftp_dns_timeout
-
-    Proxy::TFTP::Plugin.load_test_settings(:tftp_read_timeout => tftp_read_timeout)
-
-    ::Proxy::HttpDownload.expects(:new).returns(stub('tftp', :start => true)).
-      with(src, dst, tftp_read_timeout, tftp_connect_timeout, tftp_dns_timeout, verify_server_cert)
+      with(src, dst, nil, tftp_connect_timeout, nil, verify_server_cert)
 
     Proxy::TFTP.choose_protocol_and_fetch src, dst
   end

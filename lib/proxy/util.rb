@@ -23,7 +23,8 @@ module Proxy::Util
       @task = Thread.new(@command, @input) do |cmd, input|
         status = nil
         Open3.popen3(*cmd) do |stdin, stdout, stderr, thr|
-          logger.info "[#{thr.pid}] Started task #{cmd}"
+          cmdline_string = Shellwords.escape(cmd.is_a?(Array) ? cmd.join(' ') : cmd)
+          logger.info "[#{thr.pid}] Started task #{cmdline_string}"
           stdin.write(input) if input
           stdin.close
           stdout.each do |line|
