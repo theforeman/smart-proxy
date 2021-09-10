@@ -77,6 +77,8 @@ module Proxy
       ssl_options |= OpenSSL::SSL::OP_NO_SSLv3 if defined?(OpenSSL::SSL::OP_NO_SSLv3)
       ssl_options |= OpenSSL::SSL::OP_NO_TLSv1 if defined?(OpenSSL::SSL::OP_NO_TLSv1)
       ssl_options |= OpenSSL::SSL::OP_NO_TLSv1_1 if defined?(OpenSSL::SSL::OP_NO_TLSv1_1)
+      # Disable client initiated renegotiation
+      ssl_options |= OpenSSL::SSL::OP_NO_RENEGOTIATION if defined?(OpenSSL::SSL::OP_NO_RENEGOTIATION)
 
       Proxy::SETTINGS.tls_disabled_versions&.each do |version|
         constant = OpenSSL::SSL.const_get("OP_NO_TLSv#{version.to_s.tr('.', '_')}") rescue nil
