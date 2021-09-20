@@ -19,6 +19,7 @@ module Proxy
             exit 1
           end
         end
+        Bundler.ui = Bundler::UI::Silent.new
         BundlerExt.system_require(File.expand_path('../Gemfile.in', __dir__), *groups)
       else
         require 'bundler' unless defined?(Bundler)
