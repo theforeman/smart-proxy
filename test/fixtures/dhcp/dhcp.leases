@@ -204,20 +204,38 @@ host static.example.com {
   fixed-address 192.168.122.80;
 }
 
-# Prevent deletion of a reserved record via expired lease
+# Prevent override of a reserved record via free lease by IP
 host quux.example.org {
   dynamic;
   hardware ethernet 52:54:00:31:a3:97;
   fixed-address 192.168.122.53;
-        supersede server.filename = "pxelinux.0";
-        supersede server.next-server = ac:14:0a:01;
-        supersede host-name = "quux.example.org";
+  supersede server.filename = "pxelinux.0";
+  supersede server.next-server = ac:14:0a:01;
+  supersede host-name = "quux.example.org";
 }
 lease 192.168.122.53 {
   starts 0 2010/04/06 15:01:31;
-  ends 0 2010/04/06 16:00:09;
-  tstp 0 2010/04/06 16:00:09;
+  ends 0 2050/04/06 16:00:09;
+  tstp 0 2050/04/06 16:00:09;
   cltt 0 2010/04/06 15:01:31;
   binding state free;
   hardware ethernet 00:1d:60:a5:b1:2a;
+}
+
+# Prevent override of a reserved record via free lease by MAC
+host quax.example.org {
+  dynamic;
+  hardware ethernet 52:54:00:31:a3:98;
+  fixed-address 192.168.122.53;
+  supersede server.filename = "pxelinux.0";
+  supersede server.next-server = ac:14:0a:01;
+  supersede host-name = "quax.example.org";
+}
+lease 192.168.122.55 {
+  starts 0 2010/04/06 15:01:31;
+  ends 0 2050/04/06 16:00:09;
+  tstp 0 2050/04/06 16:00:09;
+  cltt 0 2010/04/06 15:01:31;
+  binding state free;
+  hardware ethernet 52:54:00:31:a3:98;
 }

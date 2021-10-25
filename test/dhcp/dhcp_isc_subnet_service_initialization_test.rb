@@ -138,7 +138,7 @@ class DhcpIscSubnetServiceInitializationTest < Test::Unit::TestCase
     @initialization.load_leases_file(File.read("./test/fixtures/dhcp/dhcp.leases"))
     parsed = @subnet_service.all_hosts + @subnet_service.all_leases
 
-    assert_equal 12, parsed.size
+    assert_equal 13, parsed.size
     assert_equal 'bravo.example.com', @subnet_service.find_host_by_hostname("bravo2.example.com").hostname
   end
 
@@ -195,6 +195,24 @@ class DhcpIscSubnetServiceInitializationTest < Test::Unit::TestCase
     @subnet_service.add_subnet(subnet)
     @initialization.load_leases_file(File.read("./test/fixtures/dhcp/dhcp.leases"))
     assert_equal false, @subnet_service.find_host_by_hostname("static.example.com").deleteable?
+  end
+
+  def test_prevent_override_by_ip
+    subnet = Proxy::DHCP::Subnet.new("192.168.122.0", "255.255.255.0")
+    @subnet_service.add_subnet(subnet)
+    @initialization.load_leases_file(File.read("./test/fixtures/dhcp/dhcp.leases"))
+    refute @subnet_service.find_lease_by_mac("192.168.122.0", "00:1d:60:a5:b1:2a")
+    refute @subnet_service.find_lease_by_ip("192.168.122.0", "192.168.122.53")
+    assert_equal "quux.example.org", @subnet_service.find_host_by_hostname("quux.example.org")&.name
+  end
+
+  def test_prevent_override_by_mac
+    subnet = Proxy::DHCP::Subnet.new("192.168.122.0", "255.255.255.0")
+    @subnet_service.add_subnet(subnet)
+    @initialization.load_leases_file(File.read("./test/fixtures/dhcp/dhcp.leases"))
+    refute @subnet_service.find_lease_by_mac("192.168.122.0", "00:1d:60:a5:b1:98")
+    refute @subnet_service.find_lease_by_ip("192.168.122.0", "192.168.122.55")
+    assert_equal "quax.example.org", @subnet_service.find_host_by_hostname("quax.example.org")&.name
   end
 
   def test_parsing_and_loading_leases
