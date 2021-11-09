@@ -6,66 +6,6 @@ class DnsRecordTest < Test::Unit::TestCase
     @record = Proxy::Dns::Record.new
   end
 
-  def test_get_name_with_sideeffect_for_ipv4
-    @record.expects(:get_resource_as_string!).with('2.0.13.127.in-addr.arpa', Resolv::DNS::Resource::IN::PTR, :name).returns('not_existing.example.com')
-    assert 'not_existing.example.com', @record.get_name!('2.0.13.127.in-addr.arpa')
-  end
-
-  def test_get_name_with_sideeffect_for_ipv6
-    @record.expects(:get_resource_as_string!).with('1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.f.e.e.d.8.b.d.0.1.0.0.2.ip6.arpa', Resolv::DNS::Resource::IN::PTR, :name).returns('not_existing.example.com')
-    assert 'not_existing.example.com', @record.get_name!('1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.f.e.e.d.8.b.d.0.1.0.0.2.ip6.arpa')
-  end
-
-  def test_get_name_for_ipv4
-    @record.expects(:get_resource_as_string).with('2.0.13.127.in-addr.arpa', Resolv::DNS::Resource::IN::PTR, :name).returns('not_existing.example.com')
-    assert 'not_existing.example.com', @record.get_name('2.0.13.127.in-addr.arpa')
-  end
-
-  def test_get_name_for_ipv6
-    @record.expects(:get_resource_as_string).with('1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.f.e.e.d.8.b.d.0.1.0.0.2.ip6.arpa', Resolv::DNS::Resource::IN::PTR, :name).returns('not_existing.example.com')
-    assert 'not_existing.example.com', @record.get_name('1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.f.e.e.d.8.b.d.0.1.0.0.2.ip6.arpa')
-  end
-
-  def test_get_ipv4_address_with_sideeffects
-    @record.expects(:get_resource_as_string!).with('some.host', Resolv::DNS::Resource::IN::A, :address).returns('127.13.0.2')
-    assert '127.13.0.2', @record.get_ipv4_address!('some.host')
-  end
-
-  def test_get_ipv4_address
-    @record.expects(:get_resource_as_string).with('some.host', Resolv::DNS::Resource::IN::A, :address).returns('127.13.0.2')
-    assert '127.13.0.2', @record.get_ipv4_address('some.host')
-  end
-
-  def test_get_ipv6_address_with_sideeffects
-    @record.expects(:get_resource_as_string!).with('some.host', Resolv::DNS::Resource::IN::AAAA, :address).returns('2A00:1450:400C:C04::6A')
-    assert '2A00:1450:400C:C04::6A', @record.get_ipv6_address!('some.host')
-  end
-
-  def test_get_ipv6_address
-    @record.expects(:get_resource_as_string).with('some.host', Resolv::DNS::Resource::IN::AAAA, :address).returns('2A00:1450:400C:C04::6A')
-    assert '2A00:1450:400C:C04::6A', @record.get_ipv6_address('some.host')
-  end
-
-  def test_get_resource_as_string_with_sideeffects
-    Resolv::DNS.any_instance.expects(:getresource).with('some.host', Resolv::DNS::Resource::IN::A).returns(Resolv::DNS::Resource::IN::A.new('127.13.0.2'))
-    assert_equal '127.13.0.2', @record.get_resource_as_string!('some.host', Resolv::DNS::Resource::IN::A, :address)
-  end
-
-  def test_get_resource_as_string_with_sideeffects_raises_exception_when_resource_is_not_found
-    Resolv::DNS.any_instance.expects(:getresource).with('some.host', Resolv::DNS::Resource::IN::A).raises(Resolv::ResolvError)
-    assert_raises(Proxy::Dns::NotFound) { @record.get_resource_as_string!('some.host', Resolv::DNS::Resource::IN::A, :address) }
-  end
-
-  def test_get_resource_as_string
-    Resolv::DNS.any_instance.expects(:getresource).with('some.host', Resolv::DNS::Resource::IN::A).returns(Resolv::DNS::Resource::IN::A.new('127.13.0.2'))
-    assert_equal '127.13.0.2', @record.get_resource_as_string('some.host', Resolv::DNS::Resource::IN::A, :address)
-  end
-
-  def test_get_resource_as_string_wjen_resource_is_not_found
-    Resolv::DNS.any_instance.expects(:getresource).with('some.host', Resolv::DNS::Resource::IN::A).raises(Resolv::ResolvError)
-    assert_false @record.get_resource_as_string('some.host', Resolv::DNS::Resource::IN::A, :address)
-  end
-
   def test_ptr_to_ip_ipv4
     assert_equal('192.168.33.30', Proxy::Dns::Record.new.ptr_to_ip('30.33.168.192.in-addr.arpa'))
   end
@@ -128,12 +68,6 @@ class DnsRecordTest < Test::Unit::TestCase
   def test_aaaa_record_conflicts_is_case_insensetive
     Resolv::DNS.any_instance.expects(:getresources).with('some.host', Resolv::DNS::Resource::IN::AAAA).returns(ips('2001:DB8:DEEF::1'))
     assert_equal 0, Proxy::Dns::Record.new.aaaa_record_conflicts('some.host', '2001:db8:deef::1')
-  end
-
-  def test_validate_ip
-    assert_equal '192.168.33.33', Proxy::Dns::Record.new.to_ipaddress('192.168.33.33').to_s
-    assert_equal '2001:db8:deef::1', Proxy::Dns::Record.new.to_ipaddress('2001:db8:deef::1').to_s
-    assert_equal false, Proxy::Dns::Record.new.to_ipaddress('some.host')
   end
 
   def test_create_srv_record
