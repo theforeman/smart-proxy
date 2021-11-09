@@ -5,11 +5,8 @@ module Proxy
     include Util
     DEFAULT_CONNECT_TIMEOUT = 10
 
-    def initialize(src, dst, read_timeout = nil, connect_timeout = nil, dns_timeout = nil, verify_server_cert = false)
+    def initialize(src, dst, connect_timeout: DEFAULT_CONNECT_TIMEOUT, verify_server_cert: false)
       @dst = dst
-      logger.warn('Deprecated: HttpDownload read_timeout is deprecated and will be removed in 4.0') if read_timeout
-      logger.warn('Deprecated: HttpDownload dns_timeout is deprecated and will be removed in 4.0') if dns_timeout
-      connect_timeout ||= DEFAULT_CONNECT_TIMEOUT
       args = [which('curl')]
 
       # no cert verification if set

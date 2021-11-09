@@ -68,7 +68,7 @@ class TftpTest < Test::Unit::TestCase
     )
 
     ::Proxy::HttpDownload.expects(:new).returns(stub('tftp', :start => true)).
-      with(src, dst, nil, tftp_connect_timeout, nil, verify_server_cert)
+      with(src, dst, connect_timeout: tftp_connect_timeout, verify_server_cert: verify_server_cert)
 
     Proxy::TFTP.choose_protocol_and_fetch src, dst
   end
