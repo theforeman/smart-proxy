@@ -42,22 +42,6 @@ class Proxy::DhcpApi < ::Sinatra::Base
     log_halt 400, e
   end
 
-  # Deprecated, returns a single record
-  get "/:network/:record" do
-    content_type :json
-
-    logger.warn('GET dhcp/:network/:record endpoint has been deprecated and will be removed in future versions. '\
-                'Please use GET dhcp/:network/mac/:mac_address or GET dhcp/:network/ip/:ip_address instead.')
-
-    record = server.find_record(params[:network], params[:record])
-    log_halt 404, "No DHCP record for #{params[:network]}/#{params[:record]} found" unless record
-    {:hostname => (record.hostname rescue record.name), :ip => record.ip, :mac => record.mac }.to_json
-  rescue ::Proxy::DHCP::SubnetNotFound
-    log_halt 404, "Subnet #{params[:network]} could not found"
-  rescue => e
-    log_halt 400, e
-  end
-
   # returns an array of records for an ip address
   get "/:network/ip/:ip_address" do
     server.validate_supported_address(params[:network], params[:ip_address])
@@ -100,21 +84,6 @@ class Proxy::DhcpApi < ::Sinatra::Base
   rescue Proxy::DHCP::AlreadyExists
     # no need to do anything
   rescue => e
-    log_halt 400, e
-  end
-
-  # deprecated, delete a record from a network
-  delete "/:network/:record" do
-    logger.warn('DELETE dhcp/:network/:record endpoint has been deprecated and will be removed in future versions. '\
-                'Please use DELETE dhcp/:network/mac/:mac_address or DELETE dhcp/:network/ip/:ip_address instead.')
-
-    record = server.find_record(params[:network], params[:record])
-    log_halt 404, "No DHCP record for #{params[:network]}/#{params[:record]} found" unless record
-    server.del_record(record)
-    nil
-  rescue ::Proxy::DHCP::SubnetNotFound
-    log_halt 404, "Subnet #{params[:network]} could not found"
-  rescue Exception => e
     log_halt 400, e
   end
 
