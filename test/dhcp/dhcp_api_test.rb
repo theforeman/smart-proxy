@@ -112,32 +112,6 @@ class DhcpApiTest < Test::Unit::TestCase
     assert_equal 501, last_response.status
   end
 
-  def test_get_record
-    @server.expects(:find_record).with("192.168.122.0", "192.168.122.1").returns(@reservations.first)
-
-    get "/192.168.122.0/192.168.122.1"
-
-    assert last_response.ok?, "Last response was not ok: #{last_response.status} #{last_response.body}"
-    expected = {
-      "hostname" => "test.example.com",
-      "ip"       => "192.168.122.1",
-      "mac"      => "00:11:bb:cc:dd:ee",
-    }
-    assert_equal expected, JSON.parse(last_response.body)
-  end
-
-  def test_get_record_for_non_existent_record
-    @server.expects(:find_record).with("192.168.122.0", "192.168.122.1").returns(nil)
-    get "/192.168.122.0/192.168.122.1"
-    assert_equal 404, last_response.status
-  end
-
-  def test_get_record_for_nonexistent_network
-    @server.expects(:find_record).with("192.168.122.0", "192.168.122.1").raises(::Proxy::DHCP::SubnetNotFound)
-    get "/192.168.122.0/192.168.122.1"
-    assert_equal 404, last_response.status
-  end
-
   def test_get_reservation_record_by_ip
     @server.expects(:find_records_by_ip).with("192.168.122.0", "192.168.122.1").returns([@reservations.first])
 
@@ -305,16 +279,6 @@ class DhcpApiTest < Test::Unit::TestCase
     assert last_response.ok?, "Last response was not ok: #{last_response.body}"
   end
 
-  def test_delete_record
-    @server.expects(:find_record).with("192.168.122.0", "192.168.122.1").returns(@reservations.first)
-    @server.expects(:del_record).with(@reservations.first).returns(nil)
-
-    delete "/192.168.122.0/192.168.122.1"
-
-    assert_equal 200, last_response.status
-    assert_empty last_response.body
-  end
-
   def test_delete_records_by_ip
     @server.expects(:del_records_by_ip).with("192.168.122.0", "192.168.122.1")
     delete "/192.168.122.0/ip/192.168.122.1"
@@ -348,11 +312,5 @@ class DhcpApiTest < Test::Unit::TestCase
     delete "/192.168.122.0/mac/00:11:bb:cc:dd:ee"
     assert_equal 200, last_response.status
     assert_empty last_response.body
-  end
-
-  def test_delete_non_existent_record
-    @server.expects(:find_record).with("192.168.122.0", "192.168.122.1").returns(nil)
-    delete "/192.168.122.0/192.168.122.1"
-    assert_equal 404, last_response.status
   end
 end
