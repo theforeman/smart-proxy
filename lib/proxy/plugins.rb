@@ -51,10 +51,6 @@ class ::Proxy::Plugins
     end
   end
 
-  #
-  # below are methods that are going to be removed/deprecated
-  #
-
   def enabled_plugins
     loaded.select { |p| p[:state] == :running && p[:class].ancestors.include?(::Proxy::Plugin) }.map { |p| p[:class] }
   end
