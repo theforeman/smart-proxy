@@ -42,16 +42,17 @@ module Proxy::Pluggable
     raise "#{plugin_name}: 'initialize_after' method has been removed."
   end
 
-  def validate_readable(*settings)
-    validate(*settings.push(:file_readable => true))
+  def validate_readable(*settings, **validator_params)
+    validator_params[:file_readable] = true
+    validate(*settings, **validator_params)
   end
 
-  def validate_presence(*settings)
-    validate(*settings.push(:presence => true))
+  def validate_presence(*settings, **validator_params)
+    validator_params[:presence] = true
+    validate(*settings, **validator_params)
   end
 
-  def validate(*settings)
-    validator_params = settings.pop
+  def validate(*settings, **validator_params)
     predicate = validator_params.delete(:if)
     validator_name = validator_params.keys.first
     validator_args = validator_params[validator_name]

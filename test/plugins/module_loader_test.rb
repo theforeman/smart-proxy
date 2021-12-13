@@ -70,6 +70,21 @@ class ModuleLoaderTest < Test::Unit::TestCase
     assert results.include?(:class => ::Proxy::PluginValidators::Presence, :setting => :default_2, :args => nil, :predicate => nil)
   end
 
+  VALIDATOR_PREDICATE = ->(settings) { false }
+  class TestPluginWithBuiltInValidators < ::Proxy::Plugin
+    default_settings :default_1 => "one", :default_2 => "two"
+    validate_presence :missing_setting, if: VALIDATOR_PREDICATE
+    validate_readable :missing_path, if: VALIDATOR_PREDICATE
+  end
+  def test_presence_validator_called_with_predicate
+    loader = ::Proxy::DefaultModuleLoader.new(TestPluginWithBuiltInValidators, nil)
+    results = loader.validate_settings(TestPluginWithBuiltInValidators, :default_1 => "one", :default_2 => "two")
+    assert_includes results, {:class => ::Proxy::PluginValidators::Presence, :setting => :default_1, :args => nil, :predicate => nil}
+    assert_includes results, {:class => ::Proxy::PluginValidators::Presence, :setting => :default_2, :args => nil, :predicate => nil}
+    assert_includes results, {:class => ::Proxy::PluginValidators::Presence, :setting => :missing_setting, :args => true, :predicate => VALIDATOR_PREDICATE}
+    assert_includes results, {:class => ::Proxy::PluginValidators::FileReadable, :setting => :missing_path, :args => true, :predicate => VALIDATOR_PREDICATE}
+  end
+
   class TestValidator < ::Proxy::PluginValidators::Base
     def validate!(settings)
       true
