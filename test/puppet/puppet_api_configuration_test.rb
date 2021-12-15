@@ -17,7 +17,7 @@ end
 
 class PuppetApiDefaultSettingsTest < Test::Unit::TestCase
   def test_default_settings
-    Proxy::PuppetApi::Plugin.load_test_settings({})
+    Proxy::PuppetApi::Plugin.load_test_settings()
     assert_equal '/var/lib/puppet/ssl/certs/ca.pem', Proxy::PuppetApi::Plugin.settings.puppet_ssl_ca
     assert_equal 30, Proxy::PuppetApi::Plugin.settings.api_timeout
   end

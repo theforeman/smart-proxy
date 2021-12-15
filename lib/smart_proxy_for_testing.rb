@@ -33,7 +33,7 @@ Proxy::VERSION = File.read(File.join(__dir__, '..', 'VERSION')).chomp
 ::Sinatra::Base.register ::Sinatra::Authorization
 
 module ::Proxy::Pluggable
-  def load_test_settings(a_hash)
+  def load_test_settings(a_hash = {})
     @settings = ::Proxy::Settings::Plugin.new(plugin_default_settings, a_hash)
   end
 end

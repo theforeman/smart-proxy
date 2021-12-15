@@ -6,7 +6,7 @@ require 'dns_dnscmd/dns_dnscmd_main'
 
 class DnsCmdConfigTest < Test::Unit::TestCase
   def test_default_configuration
-    ::Proxy::Dns::Dnscmd::Plugin.load_test_settings({})
+    ::Proxy::Dns::Dnscmd::Plugin.load_test_settings()
     assert_equal 'localhost', ::Proxy::Dns::Dnscmd::Plugin.settings.dns_server
   end
 end

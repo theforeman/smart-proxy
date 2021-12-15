@@ -108,7 +108,7 @@ class DHCPServerTest < Test::Unit::TestCase
   end
 
   def test_managed_subnet_should_return_true_when_setting_is_undefined
-    ::Proxy::DhcpPlugin.load_test_settings({})
+    ::Proxy::DhcpPlugin.load_test_settings()
     assert @server.managed_subnet?('192.168.1.0/255.255.255.0')
   end
 

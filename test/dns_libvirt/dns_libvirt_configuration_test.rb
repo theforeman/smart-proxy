@@ -4,7 +4,7 @@ require 'dns_libvirt/dns_libvirt_main'
 
 class DnsLibvirtConfigTest < Test::Unit::TestCase
   def test_default_settings
-    ::Proxy::Dns::Libvirt::Plugin.load_test_settings({})
+    ::Proxy::Dns::Libvirt::Plugin.load_test_settings()
     assert_equal 'default', Proxy::Dns::Libvirt::Plugin.settings.network
   end
 end
