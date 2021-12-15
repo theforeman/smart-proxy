@@ -105,5 +105,16 @@ module Proxy::LogBuffer
         :failed_modules => @failed_modules,
       }
     end
+
+    private
+
+    # Reset the buffer to its initial state. Only intended for testing.
+    def reset
+      @failed_modules.clear
+      @mutex.synchronize do
+        @main_buffer.clear
+        @tail_buffer.clear
+      end
+    end
   end
 end

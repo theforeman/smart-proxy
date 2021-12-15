@@ -70,6 +70,10 @@ end
 class SmartProxyRootApiTestCase < Test::Unit::TestCase
   include Rack::Test::Methods
 
+  def setup
+    Proxy::LogBuffer::Buffer.instance.send(:reset)
+  end
+
   def app
     Proxy::PluginInitializer.new(Proxy::Plugins.instance).initialize_plugins
     Proxy::RootV2Api.new
