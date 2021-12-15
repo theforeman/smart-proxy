@@ -167,3 +167,38 @@ class BooleanValidatorTest < Test::Unit::TestCase
     assert_match(%r{expected to be true/false}, error.message)
   end
 end
+
+class EnumValidatorTest < Test::Unit::TestCase
+  class TestPlugin < ::Proxy::Plugin
+  end
+
+  def validator
+    ::Proxy::PluginValidators::Enum.new(TestPlugin, 'drink', %w[beer whisky], nil)
+  end
+
+  def test_first_valid_value_passes_validation
+    assert validator.validate!(drink: 'beer')
+  end
+
+  def test_second_valid_value_passes_validation
+    assert validator.validate!(drink: 'whisky')
+  end
+
+  def test_an_invalid_value_fails_validation
+    assert_raise_with_message ::Proxy::Error::ConfigurationError, "Parameter 'drink' must be one of beer, whisky" do
+      validator.validate!(drink: 'wine')
+    end
+  end
+
+  def test_empty_string_fails_validation
+    assert_raise_with_message ::Proxy::Error::ConfigurationError, "Parameter 'drink' must be one of beer, whisky" do
+      validator.validate!(drink: '')
+    end
+  end
+
+  def test_nil_fails_validation
+    assert_raise_with_message ::Proxy::Error::ConfigurationError, "Parameter 'drink' must be one of beer, whisky" do
+      validator.validate!(drink: nil)
+    end
+  end
+end
