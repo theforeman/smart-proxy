@@ -13,7 +13,7 @@ class TftpTest < Test::Unit::TestCase
   end
 
   def test_path_to_tftp_directory_without_tftproot_setting
-    Proxy::TFTP::Plugin.load_test_settings({})
+    Proxy::TFTP::Plugin.load_test_settings()
     assert_equal "/var/lib/tftpboot", @tftp.send(:path)
   end
 

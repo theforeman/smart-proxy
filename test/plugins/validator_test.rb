@@ -42,7 +42,7 @@ class FileReadableValidatorTest < Test::Unit::TestCase
   end
 
   def test_file_readable_returns_true_for_optional_undefined_settings
-    FileReadableValidatorTestPlugin.load_test_settings({})
+    FileReadableValidatorTestPlugin.load_test_settings()
     assert ::Proxy::PluginValidators::FileReadable.new(FileReadableValidatorTestPlugin, 'optional_setting', nil, nil).validate!({})
   end
 
