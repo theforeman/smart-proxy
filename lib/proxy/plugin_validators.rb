@@ -64,4 +64,14 @@ module ::Proxy::PluginValidators
       true
     end
   end
+
+  class Enum < Base
+    def validate!(settings)
+      setting_value = settings[@setting_name]
+      unless @params.include?(setting_value)
+        raise ::Proxy::Error::ConfigurationError, "Parameter '#{@setting_name}' must be one of #{@params.join(', ')}"
+      end
+      true
+    end
+  end
 end

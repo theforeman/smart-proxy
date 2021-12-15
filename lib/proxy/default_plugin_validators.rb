@@ -5,6 +5,7 @@ class Proxy::DefaultPluginValidators
       presence: ::Proxy::PluginValidators::Presence,
       url: ::Proxy::PluginValidators::Url,
       boolean: ::Proxy::PluginValidators::Boolean,
+      enum: ::Proxy::PluginValidators::Enum,
     }
   end
 end
