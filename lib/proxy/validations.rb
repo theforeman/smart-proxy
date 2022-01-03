@@ -9,6 +9,8 @@ module Proxy::Validations
   class InvalidIPAddress < Error; end
   class InvalidMACAddress < Error; end
   class InvalidSubnet < Error; end
+  class InvalidCidr < Error; end
+  class IpNotInCidr < Error; end
 
   private
 
@@ -59,6 +61,23 @@ module Proxy::Validations
   def validate_subnet(subnet)
     raise InvalidSubnet, "Invalid Subnet #{subnet}" unless subnet.is_a?(Proxy::DHCP::Subnet)
     subnet
+  end
+
+  def validate_cidr(address, prefix)
+    cidr = "#{address}/#{prefix}"
+    network = IPAddr.new(cidr)
+    if network != IPAddr.new(address)
+      raise InvalidCidr, "Network address #{address} should be #{network} with prefix #{prefix}"
+    end
+    cidr
+  rescue IPAddr::Error => e
+    raise Proxy::Validations::Error, e.to_s
+  end
+
+  def validate_ip_in_cidr(ip, cidr)
+    raise IpNotInCidr, "IP #{ip} is not in #{cidr}" unless IPAddr.new(cidr).include?(IPAddr.new(ip))
+  rescue IPAddr::Error => e
+    raise Proxy::Validations::Error, e.to_s
   end
 
   def validate_server(server)

@@ -1,0 +1,12 @@
+---
+# url is the hostname and path of the phpIPAM instance.
+:url: 'https://phpipam.example.com'
+
+# The phpIPAM user name for authentication. Please note that an API Key also needs to be 
+# setup with the exact same name as the user name configured here. When setting up the API 
+# Key in phpIPAM, "User token" must be used for the "App Security" setting.
+:user: 'ipam_user'
+
+# The password for above user account. Note that this is the password of the user, and not 
+# the API Key itself.
+:password: 'ipam_password'
