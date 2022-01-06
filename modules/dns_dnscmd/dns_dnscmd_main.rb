@@ -50,7 +50,7 @@ module Proxy::Dns::Dnscmd
         std_out&.close
         std_err&.close
       end
-      report keyword_args[:msg], response, keyword_args[:error_only || false]
+      report keyword_args[:msg], response, keyword_args[:error_only] || false
       response
     end
 
@@ -97,7 +97,7 @@ module Proxy::Dns::Dnscmd
 
     def enum_zones
       zones = []
-      response = execute '/EnumZones', nil, true
+      response = execute '/EnumZones', error_only: true
       response.each do |line|
         next unless line =~  / Primary /
         zones << line.sub(/^ +/, '').sub(/ +.*$/, '').chomp("\n")
@@ -108,7 +108,7 @@ module Proxy::Dns::Dnscmd
 
     def enum_records(zone_name, node_name, type)
       records = []
-      response = execute "/EnumRecords #{zone_name} #{node_name}. /Type #{type}", "EnumRecords", true
+      response = execute "/EnumRecords #{zone_name} #{node_name}. /Type #{type}", "EnumRecords", error_only: true
       response.each do |line|
         line.chomp!
         logger.debug "Extracting record from dnscmd output '#{line}'"
