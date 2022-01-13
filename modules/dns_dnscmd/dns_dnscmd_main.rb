@@ -108,7 +108,7 @@ module Proxy::Dns::Dnscmd
 
     def enum_records(zone_name, node_name, type)
       records = []
-      response = execute "/EnumRecords", zone_name, "#{node_name}.", "/Type", type, "EnumRecords", error_only: true
+      response = execute "/EnumRecords", zone_name, "#{node_name}.", "/Type", type, error_only: true
       response.each do |line|
         line.chomp!
         logger.debug "Extracting record from dnscmd output '#{line}'"
