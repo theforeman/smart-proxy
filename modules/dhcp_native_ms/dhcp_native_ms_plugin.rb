@@ -3,6 +3,7 @@ module ::Proxy::DHCP::NativeMS
     plugin :dhcp_native_ms, ::Proxy::VERSION
 
     default_settings :disable_ddns => true, :blacklist_duration_minutes => 30 * 60
+    validate :disable_ddns, boolean: true
 
     requires :dhcp, ::Proxy::VERSION
 

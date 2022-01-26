@@ -3,6 +3,7 @@ class Proxy::DhcpPlugin < ::Proxy::Plugin
 
   uses_provider
   default_settings :use_provider => 'dhcp_isc', :server => '127.0.0.1', :subnets => [], :ping_free_ip => true
+  validate :ping_free_ip, boolean: true
   plugin :dhcp, ::Proxy::VERSION
 
   load_classes ::Proxy::DHCP::ConfigurationLoader
