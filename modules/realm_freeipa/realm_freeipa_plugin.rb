@@ -3,6 +3,7 @@ module Proxy::FreeIPARealm
     default_settings :ipa_config => '/etc/ipa/default.conf',
       :remove_dns => true,
       :verify_ca => true
+    validate :remove_dns, :verify_ca, boolean: true
 
     load_classes ::Proxy::FreeIPARealm::ConfigurationLoader
     load_dependency_injection_wirings ::Proxy::FreeIPARealm::ConfigurationLoader
