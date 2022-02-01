@@ -21,6 +21,24 @@ class DHCPServerTest < Test::Unit::TestCase
     assert_respond_to @server, :subnets
   end
 
+  def test_validate_ip
+    assert_nothing_raised do
+      @server.validate_supported_address("192.168.122.0", "192.168.122.0", "192.168.122.0", "192.168.122.0", "192.168.122.0")
+    end
+  end
+
+  def test_should_raise_exception_for_invalid_ip
+    assert_raises Proxy::Validations::InvalidIPAddress do
+      @server.validate_supported_address("192.168.122.0", "192.168.122.0", "266.168.122.0", "192.168.122.0", "192.168.122.0")
+    end
+  end
+
+  def test_should_raise_exception_for_invalid_ip_single
+    assert_raises Proxy::Validations::InvalidIPAddress do
+      @server.validate_supported_address("266.168.122.0")
+    end
+  end
+
   def test_should_raise_exception_when_record_exists
     assert_raises Proxy::DHCP::AlreadyExists do
       @server.add_record('hostname' => 'test', 'name' => 'test', 'network' => @subnet.network, 'ip' => "192.168.0.11", 'mac' => "aa:bb:cc:dd:ee:ff")
