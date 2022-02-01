@@ -29,8 +29,10 @@ module Proxy::DHCP
                          end
     end
 
-    def validate_supported_address(ip)
-      validate_ip(ip)
+    def validate_supported_address(*args)
+      args.each do |ip|
+        validate_ip(ip)
+      end
     end
 
     def subnets
