@@ -145,4 +145,28 @@ class IscOmapiProviderTest < Test::Unit::TestCase
     ::Proxy::LoggingResolv.any_instance.expects(:getaddress).with("ptr-doesnotexist.example.com").returns("127.0.0.2")
     assert_equal "7f:00:00:02", @dhcp.bootServer("ptr-doesnotexist.example.com")
   end
+
+  def test_validate_ip
+    assert_nothing_raised do
+      @dhcp.validate_supported_address("192.168.122.0", "192.168.122.0", "192.168.122.0", "192.168.122.0", "192.168.122.0")
+    end
+  end
+
+  def test_should_not_validate_ipv6
+    assert_raises Proxy::Validations::InvalidIPAddress do
+      @dhcp.validate_supported_address("192.168.122.0", "192.168.122.0", "2001:db8::8:800:200c:417a", "192.168.122.0", "192.168.122.0")
+    end
+  end
+
+  def test_should_raise_exception_for_invalid_ip
+    assert_raises Proxy::Validations::InvalidIPAddress do
+      @dhcp.validate_supported_address("192.168.122.0", "192.168.122.0", "266.168.122.0", "192.168.122.0", "192.168.122.0")
+    end
+  end
+
+  def test_should_raise_exception_for_invalid_ip_single
+    assert_raises Proxy::Validations::InvalidIPAddress do
+      @dhcp.validate_supported_address("266.168.122.0")
+    end
+  end
 end
