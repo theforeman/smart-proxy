@@ -30,7 +30,8 @@ class Proxy::DhcpApi < ::Sinatra::Base
 
   get "/:network/unused_ip" do
     server.validate_supported_address(params[:network])
-    server.validate_supported_address(params[:from], params[:to]) if params[:from] && params[:to]
+    server.validate_supported_address(params[:from]) if params[:from]
+    server.validate_supported_address(params[:to]) if params[:to]
     validate_mac(params[:mac]) if params[:mac]
     content_type :json
     {:ip => server.unused_ip(params[:network], params[:mac], params[:from], params[:to])}.to_json
