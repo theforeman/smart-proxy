@@ -11,7 +11,7 @@ Currently Supported modules:
  * BMC - BMC management of devices supported by freeipmi and ipmitool
  * DHCP - ISC DHCP and MS DHCP Servers
  * DNS - Bind and MS DNS Servers
- * Puppet - Any Puppet server from 0.24.x
+ * Puppet - Any Puppet server from 4.4, 6+ recommended
  * Puppet CA - Manage certificate signing, cleaning and autosign on a Puppet CA server
  * Realm - Manage host registration to a realm (e.g. FreeIPA)
  * TFTP - any UNIX based tftp server
