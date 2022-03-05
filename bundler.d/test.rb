@@ -1,6 +1,5 @@
 group :test do
   gem 'mocha', '~> 1.10', :require => false
-  gem 'single_test'
   gem 'ci_reporter', '>= 1.6.3', "< 2.0.0", :require => false
   gem 'test-unit'
   gem 'benchmark-ips'
