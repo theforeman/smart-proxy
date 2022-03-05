@@ -39,6 +39,9 @@ Lint/UnusedBlockArgument:
 Lint/UnusedMethodArgument:
   Enabled: false
 
+Lint/SuppressedException:
+  AllowComments: true
+
 Metrics:
   Enabled: false
 

@@ -23,6 +23,6 @@ begin
       exit($CHILD_STATUS.exitstatus)
     end
   end
-rescue LoadError # rubocop:disable Lint/SuppressedException
+rescue LoadError
   # ci/reporter/rake/rspec not present, skipping this definition
 end
