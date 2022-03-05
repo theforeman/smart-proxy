@@ -8,7 +8,6 @@ group :test do
   gem 'rubocop', '~> 0.80.0'
   gem 'rubocop-performance', '~> 1.5.2'
   gem 'rack-test'
-  gem 'rdoc'
   gem 'rake'
   gem 'rubocop-checkstyle_formatter', '~> 0.2'
   gem 'webmock'

@@ -1,6 +1,5 @@
 require 'rake'
 require 'rake/testtask'
-require 'rdoc/task'
 require 'fileutils'
 require 'tmpdir'
 require File.join(__dir__, 'extra/migrate_settings')
@@ -22,13 +21,19 @@ Rake::TestTask.new(:test) do |t|
   t.ruby_opts = ["-W1"]
 end
 
-desc 'Generate documentation for the Foreman Proxy plugin.'
-Rake::RDocTask.new(:rdoc) do |rdoc|
-  rdoc.rdoc_dir = 'rdoc'
-  rdoc.title    = 'Proxy'
-  rdoc.options << '--line-numbers' << '--inline-source'
-  rdoc.rdoc_files.include('README.md')
-  rdoc.rdoc_files.include('lib/**/*.rb')
+begin
+  require 'rdoc/task'
+rescue LoadError
+  # No rdoc
+else
+  desc 'Generate documentation for the Foreman Proxy plugin.'
+  Rake::RDocTask.new(:rdoc) do |rdoc|
+    rdoc.rdoc_dir = 'rdoc'
+    rdoc.title    = 'Proxy'
+    rdoc.options << '--line-numbers' << '--inline-source'
+    rdoc.rdoc_files.include('README.md')
+    rdoc.rdoc_files.include('lib/**/*.rb')
+  end
 end
 
 desc 'Migrate configuration settings.'
