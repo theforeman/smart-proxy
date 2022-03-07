@@ -30,12 +30,22 @@ module Proxy::Validations
     Resolv::IPv6::Regex.match?(ip)
   end
 
-  # validates the ip address
+  # Validates the ip address
+  #
+  # @param ip The data to validate as an IP address
+  # @param version The version of IP, either 4 or 6. Use nil for both.
+  # @raises InvalidIPAddress When the data is not a valid IP address
   def validate_ip(ip, version = nil)
-    valid = false
-    valid = valid_ip4?(ip) if version == 4
-    valid = valid_ip6?(ip) if version == 6
-    valid = valid_ip?(ip) if version.nil?
+    valid = case version
+            when nil
+              valid_ip?(ip)
+            when 4
+              valid_ip4?(ip)
+            when 6
+              valid_ip6?(ip)
+            else
+              false
+            end
     raise InvalidIPAddress, "Invalid IP Address #{ip}" unless valid
     ip
   end
