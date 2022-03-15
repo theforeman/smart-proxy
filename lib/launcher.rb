@@ -66,6 +66,10 @@ module Proxy
         return nil
       end
 
+      unless File.readable?(settings.ssl_ca_file)
+        logger.error "Unable to read #{settings.ssl_ca_file}. Are the values correct in settings.yml and do permissions allow reading?"
+      end
+
       app = Rack::Builder.new do
         plugins.each { |p| instance_eval(p.https_rackup) }
       end
