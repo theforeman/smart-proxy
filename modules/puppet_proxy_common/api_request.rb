@@ -62,7 +62,7 @@ module Proxy::Puppet
 
         if ssl_cert && !ssl_cert.to_s.empty? && ssl_key && !ssl_key.to_s.empty?
           http.cert = OpenSSL::X509::Certificate.new(File.read(ssl_cert))
-          http.key  = OpenSSL::PKey::RSA.new(File.read(ssl_key), nil)
+          http.key  = OpenSSL::PKey.read(File.read(ssl_key), nil)
         end
       end
       http

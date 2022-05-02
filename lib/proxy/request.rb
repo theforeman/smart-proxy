@@ -79,7 +79,7 @@ module Proxy::HttpRequest
 
         if certificate && !certificate.to_s.empty? && private_key && !private_key.to_s.empty?
           http.cert = OpenSSL::X509::Certificate.new(File.read(certificate))
-          http.key  = OpenSSL::PKey::RSA.new(File.read(private_key), nil)
+          http.key  = OpenSSL::PKey.read(File.read(private_key), nil)
         end
       end
       http

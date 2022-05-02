@@ -40,7 +40,7 @@ if protocol == 'https'
   res.ca_file      = SETTINGS[:ssl_ca_file]
   res.verify_mode  = OpenSSL::SSL::VERIFY_PEER
   res.cert         = OpenSSL::X509::Certificate.new(File.read(SETTINGS[:ssl_certificate]))
-  res.key          = OpenSSL::PKey::RSA.new(File.read(SETTINGS[:ssl_private_key]), nil)
+  res.key          = OpenSSL::PKey.read(File.read(SETTINGS[:ssl_private_key]), nil)
 end
 res.open_timeout = SETTINGS[:timeout]
 res.read_timeout = SETTINGS[:timeout]

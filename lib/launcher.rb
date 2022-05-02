@@ -114,7 +114,7 @@ module Proxy
     end
 
     def load_ssl_private_key(path)
-      OpenSSL::PKey::RSA.new(File.read(path))
+      OpenSSL::PKey.read(File.read(path))
     rescue Exception => e
       logger.error "Unable to load private SSL key. Are the values correct in settings.yml and do permissions allow reading?", e
       raise e
