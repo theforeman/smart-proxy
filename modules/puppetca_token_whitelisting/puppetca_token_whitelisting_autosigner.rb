@@ -18,7 +18,7 @@ module ::Proxy::PuppetCa::TokenWhitelisting
     end
 
     def smartproxy_cert
-      @certificate ||= OpenSSL::PKey::RSA.new File.read cert_file
+      @certificate ||= OpenSSL::PKey.read File.read cert_file
     end
 
     def storage

@@ -91,7 +91,7 @@ puts "#{$PROGRAM_NAME} --verb #{verb} --key #{key} --cert #{cert} --ca #{ca} #{j
 c = RestClient::Resource.new(
   url,
   :ssl_client_cert  =>  OpenSSL::X509::Certificate.new(File.read(cert)),
-  :ssl_client_key   =>  OpenSSL::PKey::RSA.new(File.read(key)),
+  :ssl_client_key   =>  OpenSSL::PKey.read(File.read(key)),
   :ssl_ca_file      =>  ca
 )
 
