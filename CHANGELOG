@@ -1,3 +1,9 @@
+2022-05-24	Amit Upadhye <upadhyeammit@gmail.com>
+	* Release 3.2.1
+
+2022-03-28	Adam Ruzicka <a.ruzicka@outlook.com>
+	* Fixes #34624 - Set MALLOC_ARENA_MAX to counter memory bloating
+
 2022-03-15	Amit Upadhye <upadhyeammit@gmail.com>
 	* Release 3.2.0
 
