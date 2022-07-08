@@ -63,7 +63,6 @@ module Proxy
   require 'dhcp_libvirt/dhcp_libvirt'
   require 'puppetca/puppetca'
   require 'puppetca_http_api/puppetca_http_api'
-  require 'puppetca_puppet_cert/puppetca_puppet_cert'
   require 'puppetca_hostname_whitelisting/puppetca_hostname_whitelisting'
   require 'puppetca_token_whitelisting/puppetca_token_whitelisting'
   require 'puppet_proxy/puppet'
