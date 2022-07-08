@@ -37,7 +37,7 @@ module Proxy::Dns::Dnscmd
       std_in = std_out = std_err = nil
       real_cmd = ['c:\Windows\System32\dnscmd.exe', @server] + args
       begin
-        timeout(tsecs) do
+        Timeout.timeout(tsecs) do
           logger.debug { "executing: #{real_cmd}" }
           std_in, std_out, std_err = popen3(*real_cmd)
           response = [std_out&.readlines, std_err&.readlines].flatten.compact
