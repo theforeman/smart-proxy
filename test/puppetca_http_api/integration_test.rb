@@ -19,7 +19,7 @@ class PuppetcaApiFeaturesTest < Test::Unit::TestCase
     ssl_key = Tempfile.new('ssl_key')
 
     begin
-      Proxy::DefaultModuleLoader.any_instance.expects(:load_configuration_file).with('puppetca.yml').returns(enabled: true, puppet_version: '6.0.0')
+      Proxy::DefaultModuleLoader.any_instance.expects(:load_configuration_file).with('puppetca.yml').returns(enabled: true)
       Proxy::DefaultModuleLoader.any_instance.expects(:load_configuration_file).with('puppetca_hostname_whitelisting.yml').returns({})
       Proxy::DefaultModuleLoader.any_instance.expects(:load_configuration_file).with('puppetca_http_api.yml').returns(
         puppet_url: 'https://puppet.example.com:8140',

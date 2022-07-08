@@ -18,7 +18,7 @@ class PuppetApiFeaturesTest < Test::Unit::TestCase
     ssl_key = Tempfile.new('ssl_key')
 
     begin
-      Proxy::DefaultModuleLoader.any_instance.expects(:load_configuration_file).with('puppet.yml').returns(enabled: true, puppet_version: '5.5.8')
+      Proxy::DefaultModuleLoader.any_instance.expects(:load_configuration_file).with('puppet.yml').returns(enabled: true)
       Proxy::DefaultModuleLoader.any_instance.expects(:load_configuration_file).with('puppet_proxy_puppet_api.yml').returns(
         puppet_url: 'https://puppet.example.com:8140',
         puppet_ssl_ca: ssl_ca.path,
