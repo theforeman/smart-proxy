@@ -3,6 +3,7 @@ require 'bmc/ipmi'
 
 class BmcTest < Test::Unit::TestCase
   def setup
+    Rubyipmi.stubs(:is_provider_installed?).with('ipmitool').returns(true)
     @args = { :username => "user", :password => "pass", :bmc_provider => "ipmitool", :host => "host" }
     @bmc  = Proxy::BMC::IPMI.new(@args)
   end
