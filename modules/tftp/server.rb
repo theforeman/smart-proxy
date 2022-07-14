@@ -150,6 +150,64 @@ module Proxy::TFTP
     end
   end
 
+  def self.fetch_system_image(image_dst, url, files, tftp_path)
+    # Build paths, verify parameter do not contain ".." (switch folder), and check existing files
+    image_root = Pathname.new(Proxy::TFTP::Plugin.settings.system_image_root).cleanpath
+    image_path = Pathname.new(File.expand_path(image_dst, image_root)).cleanpath
+    tftproot = Pathname.new(Proxy::TFTP::Plugin.settings.tftproot).cleanpath
+    raise_error_on_prohibited_path(image_root, image_path, image_dst)
+    file_exists = File.exist? image_path
+    extr_file_map = {}
+    files.each do |file|
+      extr_filename = boot_filename(tftp_path, file)
+      extr_file_path = Pathname.new(File.expand_path(extr_filename, tftproot)).cleanpath
+      raise_error_on_prohibited_path(tftproot, extr_file_path, file)
+      file_exists = false unless File.exist? extr_file_path
+      extr_file_map[file] = extr_file_path
+    end
+
+    if file_exists
+      200 # Return 200 if all files exist already
+    else
+      fetch_system_image_worker(url, image_path, extr_file_map)
+      202 # Return 202 if download process was triggered
+    end
+  end
+
+  def self.fetch_system_image_worker(url, image_path, extr_file_map)
+    lock_file = ".#{File.basename(image_path.sub_ext(''))}.lock"
+    # Lock
+    image_path.parent.mkpath
+    lock = Proxy::FileLock.try_locking(File.join(File.dirname(image_path), lock_file))
+    if lock.nil?
+      raise IOError.new, "System image download and extraction is still in progress"
+    end
+
+    Thread.new(lock, url, image_path, extr_file_map) do |t_lock, t_url, t_image_path, t_extr_file_map|
+      # Wait for download completion
+      download_task = choose_protocol_and_fetch(t_url, t_image_path)
+      if download_task.is_a?(FalseClass)
+        logger.error "TFTP image download error: Is another process downloading it already?"
+        Thread.stop
+      end
+      unless download_task.join == 0
+        logger.error "TFTP image download error: Task did not complete"
+        Thread.stop
+      end
+
+      t_extr_file_map.each do |file_in_image, extr_file|
+        # Create destination directory and extract file from iso
+        extr_file.parent.mkpath
+        extract_task = ::Proxy::ArchiveExtract.new(t_image_path, file_in_image, extr_file).start
+        logger.error "TFTP image file extraction error: #{file_in_image} => #{extr_file}" unless extract_task.join == 0
+      end
+    ensure
+      # Unlock
+      Proxy::FileLock.unlock(t_lock)
+      File.unlink(t_lock)
+    end
+  end
+
   def self.fetch_boot_file(dst, src)
     filename    = boot_filename(dst, src)
     destination = Pathname.new(File.expand_path(filename, Proxy::TFTP::Plugin.settings.tftproot)).cleanpath
@@ -179,5 +237,11 @@ module Proxy::TFTP
   def self.boot_filename(dst, src)
     # Do not append a '-' if the dst is a directory path
     dst.end_with?('/') ? dst + src.split("/")[-1] : dst + '-' + src.split("/")[-1]
+  end
+
+  def self.raise_error_on_prohibited_path(base_path, relative_path, error_parameter)
+    if relative_path.expand_path.relative_path_from(base_path).to_s.start_with?('..')
+      raise "File to extract from image contains up-directory: #{error_parameter}"
+    end
   end
 end

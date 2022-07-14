@@ -34,6 +34,18 @@ module Proxy::TFTP
       end
     end
 
+    post "/fetch_system_image" do
+      log_halt(400, "TFTP: Wrong input parameters given.") unless [params[:path], params[:url], params[:files], params[:tftp_path]].all?
+
+      begin
+        Proxy::TFTP.fetch_system_image(params[:path], params[:url], params[:files], params[:tftp_path]) # differentiates between 200 and 202
+      rescue IOError
+        log_halt(423, "TFTP: Image download process is running")
+      rescue => error
+        log_halt(500, "TFTP: Failed to fetch system file: #{error.message}")
+      end
+    end
+
     post "/fetch_boot_file" do
       log_halt(400, "TFTP: Failed to fetch boot file: ") { Proxy::TFTP.fetch_boot_file(params[:prefix], params[:path]) }
     end
