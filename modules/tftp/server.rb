@@ -150,6 +150,21 @@ module Proxy::TFTP
     end
   end
 
+  def self.fetch_boot_image(dst, src)
+
+    # Verify dst is a valid directory
+    dst_file = Pathname.new(dst).cleanpath
+    dst_path = Pathname.new(dst.delete_suffix(".iso"))
+
+    FileUtils.mkdir_p dst_path.parent
+    choose_protocol_and_fetch(src, dst_file).join
+    # extract iso
+    extract_task = ::Proxy::ArchiveExtract.new(dst_file, dst_path).start
+    raise "TFTP image extraction error" unless extract_task.join == 0
+    # adapt extracted file permission
+    FileUtils.chmod_R 0755, dst_path
+  end
+
   def self.fetch_boot_file(dst, src)
     filename    = boot_filename(dst, src)
     destination = Pathname.new(File.expand_path(filename, Proxy::TFTP::Plugin.settings.tftproot)).cleanpath

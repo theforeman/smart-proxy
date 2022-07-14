@@ -5,7 +5,8 @@ require "tftp/server"
 class TftpTest < Test::Unit::TestCase
   def setup
     @tftp = Proxy::TFTP::Server.new
-    Proxy::TFTP::Plugin.load_test_settings(:tftproot => "/some/root")
+    Proxy::TFTP::Plugin.load_test_settings(:tftproot => "/some/root",
+                                           :tftp_image_path => "/another/root")
   end
 
   def test_should_have_a_logger
