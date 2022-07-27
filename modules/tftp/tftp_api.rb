@@ -35,7 +35,7 @@ module Proxy::TFTP
     end
 
     post "/fetch_boot_image" do
-      log_halt(400, "TFTP: Failed to fetch boot file: ") { Proxy::TFTP.fetch_boot_image(params[:path], params[:url]) }
+      log_halt(400, "TFTP: Failed to fetch boot file: ") { Proxy::TFTP.fetch_boot_image(params[:path], params[:url], params[:files]) }
     end
 
     post "/fetch_boot_file" do

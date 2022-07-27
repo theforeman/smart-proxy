@@ -16,6 +16,7 @@ module Proxy::Util
     def initialize(command, input = nil)
       @command = command
       @input = input
+      @output = []
     end
 
     def start(&ensured_block)
@@ -29,6 +30,7 @@ module Proxy::Util
           stdin.close
           stdout.each do |line|
             logger.debug "[#{thr.pid}] #{line}"
+            @output.append(line)
           end
           stderr.each do |line|
             logger.warn "[#{thr.pid}] #{line}"
@@ -46,6 +48,10 @@ module Proxy::Util
     # wait for the task to finish and get the subprocess return code
     def join
       @task.value
+    end
+
+    def output
+      @output
     end
   end
 
