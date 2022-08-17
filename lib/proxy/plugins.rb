@@ -50,28 +50,4 @@ class ::Proxy::Plugins
       yield plugin
     end
   end
-
-  #
-  # below are methods that are going to be removed/deprecated
-  #
-
-  def enabled_plugins
-    loaded.select { |p| p[:state] == :running && p[:class].ancestors.include?(::Proxy::Plugin) }.map { |p| p[:class] }
-  end
-
-  def plugin_enabled?(plugin_name)
-    plugin = loaded.find { |p| p[:name] == plugin_name.to_sym }
-    plugin.nil? ? false : plugin[:state] == :running
-  end
-
-  def find_plugin(plugin_name)
-    p = loaded.find { |plugin| plugin[:name] == plugin_name.to_sym }
-    return p[:class] if p
-  end
-
-  def find_provider(provider_name)
-    provider = loaded.find { |p| p[:name] == provider_name.to_sym }
-    raise ::Proxy::PluginProviderNotFound, "Provider '#{provider_name}' could not be found" if provider.nil? || !provider[:class].ancestors.include?(::Proxy::Provider)
-    provider[:class]
-  end
 end
