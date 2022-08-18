@@ -56,20 +56,24 @@ class ::Proxy::Plugins
   #
 
   def enabled_plugins
+    logger.warn('Proxy::Plugins#enabled_plugins is deprecated and will be removed in 3.5. Please use #select instead')
     loaded.select { |p| p[:state] == :running && p[:class].ancestors.include?(::Proxy::Plugin) }.map { |p| p[:class] }
   end
 
   def plugin_enabled?(plugin_name)
+    logger.warn('Proxy::Plugins#plugin_enabled? is deprecated and will be removed in 3.5. Please use #find instead')
     plugin = loaded.find { |p| p[:name] == plugin_name.to_sym }
     plugin.nil? ? false : plugin[:state] == :running
   end
 
   def find_plugin(plugin_name)
+    logger.warn('Proxy::Plugins#find_plugin is deprecated and will be removed in 3.5. Please use #find instead')
     p = loaded.find { |plugin| plugin[:name] == plugin_name.to_sym }
     return p[:class] if p
   end
 
   def find_provider(provider_name)
+    logger.warn('Proxy::Plugins#find_provider is deprecated and will be removed in 3.5. Please use #find instead')
     provider = loaded.find { |p| p[:name] == provider_name.to_sym }
     raise ::Proxy::PluginProviderNotFound, "Provider '#{provider_name}' could not be found" if provider.nil? || !provider[:class].ancestors.include?(::Proxy::Provider)
     provider[:class]
