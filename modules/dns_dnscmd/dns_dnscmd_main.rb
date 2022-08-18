@@ -1,4 +1,5 @@
 require 'open3'
+require 'timeout'
 
 module Proxy::Dns::Dnscmd
   class Record < ::Proxy::Dns::Record
