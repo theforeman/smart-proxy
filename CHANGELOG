@@ -1,3 +1,13 @@
+2022-08-25	Amit Upadhye <upadhyeammit@gmail.com>
+	* Release 3.4.0-rc2
+
+2022-08-24	Ewoud Kohl van Wijngaarden <ewoud@kohlvanwijngaarden.nl>
+	* Refs #33881 - Move up the HttpDownload deprecation to 3.5
+	* Refs #33881 - Add deprecation warnings
+
+2022-08-18	Ewoud Kohl van Wijngaarden <ewoud@kohlvanwijngaarden.nl>
+	* Fixes #35384 - Add missing require 'timeout'
+
 2022-08-11	Amit Upadhye <upadhyeammit@gmail.com>
 	* Release 3.4.0-rc1
 
