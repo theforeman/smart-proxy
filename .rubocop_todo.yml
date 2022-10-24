@@ -183,7 +183,7 @@ Style/MethodCallWithoutArgsParentheses:
   Enabled: false
 
 # Offense count: 3
-Style/MethodMissingSuper:
+Lint/MissingSuper:
   Enabled: false
 
 # Offense count: 3
