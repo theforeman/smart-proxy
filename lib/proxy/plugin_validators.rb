@@ -57,6 +57,12 @@ module ::Proxy::PluginValidators
     end
   end
 
+  class OptionalUrl < Url
+    def validate!(settings)
+      settings[@setting_name].nil? || super
+    end
+  end
+
   class Boolean < Base
     def validate!(settings)
       setting_value = settings[@setting_name]
