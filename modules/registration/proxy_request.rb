@@ -42,7 +42,7 @@ module Proxy::Registration
     end
 
     def register_url(request)
-      request.env['REQUEST_URI']&.split('/register')&.first
+      Proxy::Registration::Plugin.settings.registration_url || request.env['REQUEST_URI']&.split('/register')&.first
     end
 
     def headers(request)

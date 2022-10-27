@@ -4,5 +4,13 @@ module Proxy::Registration
 
     plugin :registration, ::Proxy::VERSION
     requires :templates, ::Proxy::VERSION
+
+    load_programmable_settings do |settings|
+      settings[:registration_url]&.chomp!('/')
+      settings
+    end
+
+    validate :registration_url, optional_url: true
+    expose_setting :registration_url
   end
 end
