@@ -1,2 +1,3 @@
 ---
 :enabled: false
+# :registration_url: https://loadbalancer.example.com
