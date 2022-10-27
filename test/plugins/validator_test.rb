@@ -134,6 +134,40 @@ class UrlValidatorTest < Test::Unit::TestCase
   end
 end
 
+class OptionalUrlValidatorTest < Test::Unit::TestCase
+  class OptionalUrlValidatorTestPlugin < ::Proxy::Plugin
+    default_settings url: 'http://example.com'
+  end
+
+  def validator
+    ::Proxy::PluginValidators::OptionalUrl.new(OptionalUrlValidatorTestPlugin, 'url', nil, nil)
+  end
+
+  def test_required_parameter_with_a_value_passes_validation
+    assert validator.validate!(url: 'http://example.com')
+  end
+
+  def test_empty_string_treated_as_missing_value
+    error = assert_raises ::Proxy::Error::ConfigurationError do
+      validator.validate!(url: '')
+    end
+
+    assert_match(/expected to contain a url/, error.message)
+  end
+
+  def test_without_a_value
+    assert validator.validate!(url: nil)
+  end
+
+  def test_required_parameter_without_scheme_fails_validation
+    error = assert_raises ::Proxy::Error::ConfigurationError do
+      validator.validate!(url: 'example.com')
+    end
+
+    assert_match(/missing a scheme/, error.message)
+  end
+end
+
 class BooleanValidatorTest < Test::Unit::TestCase
   class BooleanValidatorTestPlugin < ::Proxy::Plugin
     default_settings :a_settting => true
