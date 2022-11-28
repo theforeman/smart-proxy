@@ -1,3 +1,9 @@
+2022-11-28	Ewoud Kohl van Wijngaarden <ewoud@kohlvanwijngaarden.nl>
+	* Release 3.4.1
+
+2022-09-28	Ewoud Kohl van Wijngaarden <ewoud@kohlvanwijngaarden.nl>
+	* Fixes #35507 - Pin sinatra to 2.x
+
 2022-09-08	Amit Upadhye <upadhyeammit@gmail.com>
 	* Release 3.4.0
 
