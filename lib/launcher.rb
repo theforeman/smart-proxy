@@ -44,16 +44,13 @@ module Proxy
         plugins.each { |p| instance_eval(p.http_rackup) }
       end
 
-      {
+      http_settings = {
         :app => app,
-        :server => :webrick,
-        :DoNotListen => true,
         :Port => http_port, # only being used to correctly log http port being used
         :Logger => ::Proxy::LogBuffer::TraceDecorator.instance,
         :AccessLog => [],
-        :ServerSoftware => "foreman-proxy/#{Proxy::VERSION}",
-        :daemonize => false,
       }
+      base_app_settings.merge(http_settings)
     end
 
     def https_app(https_port, plugins = https_plugins)
@@ -91,13 +88,10 @@ module Proxy
         end
       end
 
-      {
+      https_settings = {
         :app => app,
-        :server => :webrick,
-        :DoNotListen => true,
         :Port => https_port, # only being used to correctly log https port being used
         :Logger => ::Proxy::LogBuffer::Decorator.instance,
-        :ServerSoftware => "foreman-proxy/#{Proxy::VERSION}",
         :SSLEnable => true,
         :SSLVerifyClient => OpenSSL::SSL::VERIFY_PEER,
         :SSLPrivateKey => load_ssl_private_key(settings.ssl_private_key),
@@ -105,8 +99,8 @@ module Proxy
         :SSLCACertificateFile => settings.ssl_ca_file,
         :SSLOptions => ssl_options,
         :SSLCiphers => CIPHERS - Proxy::SETTINGS.ssl_disabled_ciphers,
-        :daemonize => false,
       }
+      base_app_settings.merge(https_settings)
     end
 
     def load_ssl_private_key(path)
@@ -178,6 +172,15 @@ module Proxy
     def launched(apps)
       logger.info("Smart proxy has launched on #{apps.size} socket(s), waiting for requests")
       SdNotify.ready
+    end
+
+    def base_app_settings
+      {
+        :server => :webrick,
+        :DoNotListen => true,
+        :ServerSoftware => "foreman-proxy/#{Proxy::VERSION}",
+        :daemonize => false,
+      }
     end
   end
 end
