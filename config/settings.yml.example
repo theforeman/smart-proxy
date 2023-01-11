@@ -53,7 +53,7 @@
 #:https_port: 8443
 
 # Log configuration
-# Uncomment and modify if you want to change the location of the log file or use STDOUT or SYSLOG values
+# Uncomment and modify if you want to change the location of the log file or use STDOUT, SYSLOG or JOURNAL values
 #:log_file: /var/log/foreman-proxy/proxy.log
 # Uncomment and modify if you want to change the log level
 # WARN, DEBUG, ERROR, FATAL, INFO, UNKNOWN
