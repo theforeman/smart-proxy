@@ -48,7 +48,6 @@ module Proxy
         :app => app,
         :Port => http_port, # only being used to correctly log http port being used
         :Logger => ::Proxy::LogBuffer::TraceDecorator.instance,
-        :AccessLog => [],
       }
       base_app_settings.merge(http_settings)
     end
@@ -180,6 +179,7 @@ module Proxy
         :DoNotListen => true,
         :ServerSoftware => "foreman-proxy/#{Proxy::VERSION}",
         :daemonize => false,
+        :AccessLog => [],
       }
     end
   end
