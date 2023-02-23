@@ -26,7 +26,7 @@ module Proxy
       # keep last changed file attribute
       args << "--remote-time"
       # only download newer files
-      args += ["--time-cond", dst.to_s]
+      args += ["--time-cond", "file", dst.to_s]
       # print stats in the end
       args += [
         "--write-out",
