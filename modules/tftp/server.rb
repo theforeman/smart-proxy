@@ -63,6 +63,19 @@ module Proxy::TFTP
         logger.debug "TFTP: Skipping a request to delete a file which doesn't exists"
       end
     end
+
+    def delete_host_dir(mac)
+      host_dir = File.join(path, 'host-config', dashed_mac(mac).downcase)
+      logger.debug "TFTP: Removing directory '#{host_dir}'."
+      FileUtils.rm_rf host_dir
+    end
+
+    def setup_bootloader(mac:, os:, release:, arch:, bootfile_suffix:)
+    end
+
+    def dashed_mac(mac)
+      mac.tr(':', '-')
+    end
   end
 
   class Syslinux < Server
@@ -75,7 +88,7 @@ module Proxy::TFTP
     end
 
     def pxeconfig_file(mac)
-      ["#{pxeconfig_dir}/01-" + mac.tr(':', "-").downcase]
+      ["#{pxeconfig_dir}/01-" + dashed_mac(mac).downcase]
     end
   end
   class Pxelinux < Syslinux; end
@@ -90,13 +103,96 @@ module Proxy::TFTP
     end
 
     def pxeconfig_file(mac)
-      ["#{pxeconfig_dir}/menu.lst.01" + mac.delete(':').upcase, "#{pxeconfig_dir}/01-" + mac.tr(':', '-').upcase]
+      ["#{pxeconfig_dir}/menu.lst.01" + mac.delete(':').upcase, "#{pxeconfig_dir}/01-" + dashed_mac(mac).upcase]
     end
   end
 
   class Pxegrub2 < Server
-    def pxeconfig_dir
-      "#{path}/grub2"
+    def bootloader_path(os, release, arch)
+      [release, "default"].each do |version|
+        bootloader_path = File.join(path, 'bootloader-universe/pxegrub2', os, version, arch)
+
+        logger.debug "TFTP: Checking if bootloader universe is configured for OS '#{os}' version '#{version}' (#{arch})."
+
+        if Dir.exist?(bootloader_path)
+          logger.debug "TFTP: Directory '#{bootloader_path}' exists."
+          return bootloader_path
+        end
+
+        logger.debug "TFTP: Directory '#{bootloader_path}' does not exist."
+      end
+      nil
+    end
+
+    def bootloader_universe_symlinks(bootloader_path, pxeconfig_dir_mac)
+      Dir.glob(File.join(bootloader_path, '*.efi')).map do |source_file|
+        { source: source_file, symlink: File.join(pxeconfig_dir_mac, File.basename(source_file)) }
+      end
+    end
+
+    def default_symlinks(bootfile_suffix, pxeconfig_dir_mac)
+      pxeconfig_dir = pxeconfig_dir()
+
+      grub_source = "grub#{bootfile_suffix}.efi"
+      shim_source = "shim#{bootfile_suffix}.efi"
+
+      [
+        { source: grub_source, symlink: "boot.efi" },
+        { source: grub_source, symlink: grub_source },
+        { source: shim_source, symlink: "boot-sb.efi" },
+        { source: shim_source, symlink: shim_source },
+      ].map do |link|
+        { source: File.join(pxeconfig_dir, link[:source]), symlink: File.join(pxeconfig_dir_mac, link[:symlink]) }
+      end
+    end
+
+    def create_symlinks(symlinks)
+      symlinks.each do |link|
+        relative_source_path = Pathname.new(link[:source]).relative_path_from(Pathname.new(link[:symlink]).parent).to_s
+
+        logger.debug "TFTP: Creating relative symlink: #{link[:symlink]} -> #{relative_source_path}"
+        FileUtils.ln_s(relative_source_path, link[:symlink], force: true)
+      end
+    end
+
+    # Configures bootloader files for a host in its host-config directory
+    #
+    # @param mac [String] The MAC address of the host
+    # @param os [String] The lowercase name of the operating system of the host
+    # @param release [String] The major and minor version of the operating system of the host
+    # @param arch [String] The architecture of the operating system of the host
+    # @param bootfile_suffix [String] The architecture specific boot filename suffix
+    def setup_bootloader(mac:, os:, release:, arch:, bootfile_suffix:)
+      pxeconfig_dir_mac = pxeconfig_dir(mac)
+
+      logger.debug "TFTP: Deploying host specific bootloader files to '#{pxeconfig_dir_mac}'."
+
+      FileUtils.mkdir_p(pxeconfig_dir_mac)
+      FileUtils.rm_f(Dir.glob("#{pxeconfig_dir_mac}/*.efi"))
+
+      bootloader_path = bootloader_path(os, release, arch)
+
+      if bootloader_path
+        logger.debug "TFTP: Creating symlinks from bootloader universe."
+        symlinks = bootloader_universe_symlinks(bootloader_path, pxeconfig_dir_mac)
+      else
+        logger.debug "TFTP: Creating symlinks from default bootloader files."
+        symlinks = default_symlinks(bootfile_suffix, pxeconfig_dir_mac)
+      end
+      create_symlinks(symlinks)
+    end
+
+    def del(mac)
+      super mac
+      delete_host_dir mac
+    end
+
+    def pxeconfig_dir(mac = nil)
+      if mac
+        File.join(path, 'host-config', dashed_mac(mac).downcase, 'grub2')
+      else
+        File.join(path, 'grub2')
+      end
     end
 
     def pxe_default
@@ -104,7 +200,14 @@ module Proxy::TFTP
     end
 
     def pxeconfig_file(mac)
-      ["#{pxeconfig_dir}/grub.cfg-01-" + mac.tr(':', '-').downcase, "#{pxeconfig_dir}/grub.cfg-#{mac.downcase}"]
+      pxeconfig_dir_mac = pxeconfig_dir(mac)
+      [
+        "#{pxeconfig_dir_mac}/grub.cfg",
+        "#{pxeconfig_dir_mac}/grub.cfg-01-#{dashed_mac(mac).downcase}",
+        "#{pxeconfig_dir_mac}/grub.cfg-#{mac.downcase}",
+        "#{pxeconfig_dir}/grub.cfg-01-" + dashed_mac(mac).downcase,
+        "#{pxeconfig_dir}/grub.cfg-#{mac.downcase}",
+      ]
     end
   end
 
@@ -146,7 +249,7 @@ module Proxy::TFTP
     end
 
     def pxeconfig_file(mac)
-      ["#{pxeconfig_dir}/01-" + mac.tr(':', "-").downcase + ".ipxe"]
+      ["#{pxeconfig_dir}/01-" + dashed_mac(mac).downcase + ".ipxe"]
     end
   end
 
