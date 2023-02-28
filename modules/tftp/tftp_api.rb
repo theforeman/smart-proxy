@@ -8,7 +8,7 @@ module Proxy::TFTP
     helpers ::Proxy::Helpers
     authorize_with_trusted_hosts
     authorize_with_ssl_client
-    VARIANTS = ["Syslinux", "Pxelinux", "Pxegrub", "Pxegrub2", "Ztp", "Poap", "Ipxe"].freeze
+    VARIANTS = ["Syslinux", "Pxelinux", "Pxegrub", "Pxegrub2", "Pxegrub2targetos", "Ztp", "Poap", "Ipxe"].freeze
 
     helpers do
       def instantiate(variant, mac = nil)
@@ -20,6 +20,12 @@ module Proxy::TFTP
 
       def create(variant, mac)
         tftp = instantiate variant, mac
+        log_halt(400, "TFTP: Failed to create pxe config file: ") { tftp.set(mac, (params[:pxeconfig] || params[:syslinux_config])) }
+      end
+
+      def create_targetos(variant, mac, os)
+        tftp = instantiate variant, mac
+        log_halt(400, "TFTP: Failed to setup target OS bootloader directory: ") { tftp.setup_bootloader(mac, os)}
         log_halt(400, "TFTP: Failed to create pxe config file: ") { tftp.set(mac, (params[:pxeconfig] || params[:syslinux_config])) }
       end
 
@@ -48,7 +54,11 @@ module Proxy::TFTP
     end
 
     post "/:variant/:mac" do |variant, mac|
-      create variant, mac
+      unless params[:targetos].nil?
+        create_targetos variant, mac, params[:targetos]
+      else
+        create variant, mac
+      end
     end
 
     delete "/:variant/:mac" do |variant, mac|
