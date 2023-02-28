@@ -13,3 +13,6 @@
 # Defines the default certificate action for certificate checking.
 # When false, the argument --no-check-certificate will be used.
 #:verify_server_cert: true
+
+# Directory for OS specific NBPs for "Grub2 UEFI" PXE loaders
+#:bootloader_universe:
