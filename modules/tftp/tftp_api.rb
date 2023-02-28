@@ -18,8 +18,9 @@ module Proxy::TFTP
         Object.const_get("Proxy").const_get('TFTP').const_get(variant.capitalize).new
       end
 
-      def create(variant, mac)
+      def create(variant, mac, os: nil, release: nil, arch: nil, bootfile_suffix: nil)
         tftp = instantiate variant, mac
+        log_halt(400, "TFTP: Failed to setup host specific bootloader directory: ") { tftp.setup_bootloader(mac: mac, os: os, release: release, arch: arch, bootfile_suffix: bootfile_suffix) }
         log_halt(400, "TFTP: Failed to create pxe config file: ") { tftp.set(mac, (params[:pxeconfig] || params[:syslinux_config])) }
       end
 
@@ -48,7 +49,7 @@ module Proxy::TFTP
     end
 
     post "/:variant/:mac" do |variant, mac|
-      create variant, mac
+      create variant, mac, os: params[:targetos], release: params[:release], arch: params[:arch], bootfile_suffix: params[:bootfile_suffix]
     end
 
     delete "/:variant/:mac" do |variant, mac|
