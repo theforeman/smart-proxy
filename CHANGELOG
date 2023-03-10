@@ -1,3 +1,9 @@
+2023-03-10	Ewoud Kohl van Wijngaarden <ewoud@kohlvanwijngaarden.nl>
+	* Release 3.6.0-rc2
+
+2023-03-09	Leos Stejskal <lstejska@redhat.com>
+	* Fixes #36138 - Invalid syntax for curl --time-cond
+
 2023-02-23	Ewoud Kohl van Wijngaarden <ewoud@kohlvanwijngaarden.nl>
 	* Release 3.6.0-rc1
 
