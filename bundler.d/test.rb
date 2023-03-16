@@ -4,7 +4,7 @@ group :test do
   gem 'test-unit'
   gem 'benchmark-ips'
   gem 'ruby-prof', '< 1.4'
-  gem 'rubocop', '~> 0.89.0'
+  gem 'rubocop', '~> 1.28.0'
   gem 'rubocop-performance', '~> 1.5.2'
   gem 'rack-test'
   gem 'rake'
