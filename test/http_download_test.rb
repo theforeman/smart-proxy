@@ -17,7 +17,7 @@ class HttpDownloadsTest < Test::Unit::TestCase
       "--retry-delay", "10",
       "--max-time", "3600",
       "--remote-time",
-      "--time-cond", "file", "dst",
+      "--time-cond", "dst",
       "--write-out", "Task done, result: %{http_code}, size downloaded: %{size_download}b, speed: %{speed_download}b/s, time: %{time_total}ms",
       "--output", "dst",
       "--location", "src"
@@ -34,7 +34,7 @@ class HttpDownloadsTest < Test::Unit::TestCase
       "--retry-delay", "10",
       "--max-time", "3600",
       "--remote-time",
-      "--time-cond", "file", "dst",
+      "--time-cond", "dst",
       "--write-out", "Task done, result: %{http_code}, size downloaded: %{size_download}b, speed: %{speed_download}b/s, time: %{time_total}ms",
       "--output", "dst",
       "--location", "src"
