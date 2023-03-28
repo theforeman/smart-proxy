@@ -1,3 +1,9 @@
+2023-03-28	Ewoud Kohl van Wijngaarden <ewoud@kohlvanwijngaarden.nl>
+	* Release 3.6.1
+
+2023-03-23	Leos Stejskal <lstejska@redhat.com>
+	* Fixes #36209 - tftp initrd/vmlinux generation: curl malformed
+
 2023-03-21	Ewoud Kohl van Wijngaarden <ewoud@kohlvanwijngaarden.nl>
 	* Release 3.6.0
 
