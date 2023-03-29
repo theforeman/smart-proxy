@@ -86,4 +86,22 @@ class TemplateProxyRequestTest < Test::Unit::TestCase
     result = Proxy::Templates::TemplateProxyRequest.new.get('provision', @request_env, args)
     assert_equal(@expected_body, result)
   end
+
+  def test_post_status_code_from_foreman
+    stub_request(:post, @foreman_url + '/unattended/built?token=test-token&url=' + @template_url).to_return(status: 401)
+    error = assert_raises ::Proxy::Error::HttpError do
+      Proxy::Templates::TemplateProxyRequest.new.post('built', @request_env, { :token => "test-token" }, "")
+    end
+
+    assert_equal error.status_code, 401
+  end
+
+  def test_get_status_code_from_foreman
+    stub_request(:get, @foreman_url + '/unattended/built?token=test-token&url=' + @template_url).to_return(status: 401)
+    error = assert_raises ::Proxy::Error::HttpError do
+      Proxy::Templates::TemplateProxyRequest.new.get('built', @request_env, { :token => "test-token" })
+    end
+
+    assert_equal error.status_code, 401
+  end
 end
