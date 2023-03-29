@@ -48,7 +48,7 @@ module Proxy::Templates
       logger.debug "HTTP headers: #{proxy_headers.inspect}"
       res = send_request(proxy_req)
       # You get a 201 from the 'built' URL
-      raise "Error retrieving #{path} for #{opts.inspect} from #{uri.host}: #{res.class}" unless ["200", "201"].include?(res.code)
+      raise ::Proxy::Error::HttpError.new(res.code.to_i, nil, "Error retrieving #{path} for #{opts.inspect} from #{uri.host}: #{res.class}") unless ["200", "201"].include?(res.code)
       res.body
     end
   end
