@@ -28,7 +28,7 @@ Read the [Smart Proxy Settings section](https://theforeman.org/manuals/latest/in
 
 # For Developers
 * [API Reference](https://projects.theforeman.org/projects/smart-proxy/wiki/API)
-* Smart Proxy Plugin development [how-to] (https://projects.theforeman.org/projects/foreman/wiki/How_to_Create_a_Smart-Proxy_Plugin)
+* Smart Proxy Plugin development [how-to](https://projects.theforeman.org/projects/foreman/wiki/How_to_Create_a_Smart-Proxy_Plugin)
 
 # Special thanks
 The original author of this project is [Ohad Levy](https://github.com/ohadlevy). You can find a more thorough list of people who have contributed to this project at some point in [Contributors](Contributors).
