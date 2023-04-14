@@ -6,7 +6,8 @@ module Proxy::Helpers
 
   # Accepts a html error code and a message, which is then returned to the caller after adding to the proxy log
   # OR  a block which is executed and its errors handled in a similar way.
-  # If no code is supplied when the block is declared then the html error used is 400.
+  # If no code is supplied when the block is declared then the status code is ingerited
+  # from the rescued error. If error has no status_code then the default code is 400.
   def log_halt(code = nil, exception_or_msg = nil, custom_msg = nil)
     message = exception_or_msg.to_s
     message = "#{custom_msg}: #{message}" if custom_msg
@@ -20,7 +21,7 @@ module Proxy::Helpers
     rescue => e
       exception = e
       message += e.message
-      code ||= e.status_code
+      code ||= e.respond_to?(:status_code) ? e.status_code : 400
     end
     content_type :json if request.accept?("application/json")
     logger.error message, exception
