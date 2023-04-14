@@ -1,0 +1,49 @@
+[[provisioning-setup]]
+= Provisioning setup
+:toc: right
+:toclevels: 5
+
+Guide how to setup provisioning on Fedora with Libvirt.
+For Foreman configuration follow <TODO> LINK
+
+[[smart-proxy-configuration]]
+== Smart Proxy configuration
+[source, yaml]
+....
+# config/settings.d/dhcp_libvirt.yml
+---
+:network: default
+
+# config/settings.d/dhcp.yml
+---
+:enabled: true
+:use_provider: dhcp_libvirt
+
+# config/settings.d/dns_libvirt.yml
+---
+:network: default
+
+# config/settings.d/dns.yml
+---
+:enabled: true
+:use_provider: dns_libvirt
+
+# config/settings.d/templates.yml
+---
+:enabled: true
+:template_url: http://foreman.local.test:8080
+
+# config/settings.d/tftp.yml
+---
+:enabled: true
+....
+
+[[troubleshooting]]
+== Troubleshooting
+
+**Error when fetching kickstart from proxy**
+[source, console]
+....
+Warning: anaconda: failed to fetch kickstart from http://your-smart-proxy/unattende ...
+....
+Solution: Check your firewall and verify that `virbr0` is in `trusted` zone
