@@ -102,7 +102,7 @@ class Proxy::DhcpApi < ::Sinatra::Base
   delete "/:network/mac/:mac_address" do
     server.validate_supported_address(params[:network])
     validate_mac(params[:mac_address])
-    server.del_record_by_mac(params[:network], params[:mac_address].nil? ? nil : params[:mac_address].downcase)
+    server.del_record_by_mac(params[:network], params[:mac_address]&.downcase)
     nil
   rescue ::Proxy::DHCP::SubnetNotFound
     # no need to do anything
