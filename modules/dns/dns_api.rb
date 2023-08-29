@@ -47,11 +47,8 @@ module Proxy::Dns
 
     delete '/:value/?:type?' do
       name = params[:value]
-      if params[:type]
-        type = params[:type]
-      else
-        type = (name =~ /\.(in-addr|ip6)\.arpa$/) ? "PTR" : "A"
-      end
+      type = params[:type]
+      type ||= name.end_with?('.in-addr.arpa', '.ip6.arpa') ? 'PTR' : 'A'
 
       begin
         validate_dns_name!(name, type)

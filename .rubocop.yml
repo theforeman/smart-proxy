@@ -137,6 +137,3 @@ Style/TrailingCommaInHashLiteral:
 #Allow both ['a', 'b'], %w[a b] and %w(a b) style arrays
 Style/WordArray:
   Enabled: false
-
-Style/RedundantCondition:
-  Enabled: false
