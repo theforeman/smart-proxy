@@ -1,3 +1,14 @@
 ---
 # Can be true, false, or http/https to enable just one of the protocols
 :enabled: false
+
+# URL of the puppet master itself for API requests.
+#:puppet_url: https://puppet.example.com:8140
+
+# SSL certificates used to access the puppet API
+#:puppet_ssl_ca: /etc/puppetlabs/puppet/ssl/certs/ca.pem
+#:puppet_ssl_cert: /etc/puppetlabs/puppet/ssl/certs/puppet.example.com.pem
+#:puppet_ssl_key: /etc/puppetlabs/puppet/ssl/private_keys/puppet.example.com.pem
+
+# Smart Proxy api timeout when Puppet's environment classes api is used and classes cache is disabled
+#:api_timeout: 30
