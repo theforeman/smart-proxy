@@ -22,4 +22,6 @@ Gem::Specification.new do |s|
     Foreman Proxy is used via The Foreman Project, it allows Foreman to manage
     Remote DHCP, DNS, TFTP and Puppet servers via a REST API
   EOF
+  # The gem isn't really published, so this doesn't matter
+  s.metadata['rubygems_mfa_required'] = 'true'
 end
