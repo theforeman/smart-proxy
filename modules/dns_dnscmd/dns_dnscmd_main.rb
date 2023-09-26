@@ -6,7 +6,6 @@ module Proxy::Dns::Dnscmd
     include Proxy::Log
     include Proxy::Util
 
-
     def do_create(name, value, type)
       zone = match_zone(name, enum_zones)
       msg = "Added #{type} entry #{name} => #{value}"
