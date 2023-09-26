@@ -48,7 +48,7 @@ class PuppetCaTokenWhitelistingAutosignerTest < Test::Unit::TestCase
     token = JSON.parse(response)['generated_token']
     decoded = JWT.decode(token, @autosigner.smartproxy_cert.public_key, true, algorithm: 'RS512')
     assert_equal decoded.first['certname'], 'baz.example.com'
-    assert((decoded.first['exp'] - Time.now.to_i - 360 * 60).abs < 100)
+    assert((decoded.first['exp'] - Time.now.to_i - (360 * 60)).abs < 100)
   end
 
   def test_should_remove_autosign_entry

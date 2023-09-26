@@ -78,7 +78,7 @@ module Proxy::DHCP
       mask_as_i = ::Proxy::DHCP.ipv4_to_i(netmask)
 
       subnet_start_address = (network_address_as_i & mask_as_i) + 1
-      subnet_end_address = network_address_as_i | (0xffffffff ^ mask_as_i) - 1
+      subnet_end_address = network_address_as_i | ((0xffffffff ^ mask_as_i) - 1)
 
       from_address_as_i = from_address.nil? ? 0 : ::Proxy::DHCP.ipv4_to_i(from_address)
       to_address_as_i = to_address.nil? ? 0xffffffff : ::Proxy::DHCP.ipv4_to_i(to_address)
