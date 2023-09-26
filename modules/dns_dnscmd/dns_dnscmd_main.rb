@@ -6,9 +6,6 @@ module Proxy::Dns::Dnscmd
     include Proxy::Log
     include Proxy::Util
 
-    def initialize(a_server, a_ttl)
-      super(a_server, a_ttl)
-    end
 
     def do_create(name, value, type)
       zone = match_zone(name, enum_zones)
