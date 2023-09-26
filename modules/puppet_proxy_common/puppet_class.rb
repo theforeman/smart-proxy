@@ -16,7 +16,7 @@ module Proxy::Puppet
 
     # returns class name (excluding of the module name)
     def name
-      has_module?(klass) ? klass[(klass.index("::") + 2)..-1] : klass
+      has_module?(klass) ? klass[(klass.index("::") + 2)..] : klass
     end
 
     attr_reader :params

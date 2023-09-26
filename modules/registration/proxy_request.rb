@@ -46,7 +46,7 @@ module Proxy::Registration
     end
 
     def headers(request)
-      Hash[request.env.select { |k, v| k =~ /^HTTP_/ && k !~ /^HTTP_(VERSION|HOST)$/ }.map { |k, v| [k[5..-1], v] }]
+      Hash[request.env.select { |k, v| k =~ /^HTTP_/ && k !~ /^HTTP_(VERSION|HOST)$/ }.map { |k, v| [k[5..], v] }]
     rescue Exception => e
       logger.warn "Unable to extract request headers: #{e}"
       {}
