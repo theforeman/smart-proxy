@@ -74,7 +74,7 @@ class HelperServerTest < Test::Unit::TestCase
   def test_write_file
     tmp_filename = File.join(Dir.tmpdir(), 'foreman-proxy-tftp-server-write-file.txt')
     @subject.write_file(tmp_filename, "test")
-    assert_equal "test", File.open(tmp_filename, "rb").read
+    assert_equal "test", File.binread(tmp_filename)
   ensure
     File.unlink(tmp_filename) if tmp_filename
   end
