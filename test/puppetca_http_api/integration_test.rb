@@ -5,14 +5,7 @@ require 'puppetca/puppetca'
 require 'puppetca_hostname_whitelisting/puppetca_hostname_whitelisting'
 require 'puppetca_http_api/puppetca_http_api'
 
-class PuppetcaApiFeaturesTest < Test::Unit::TestCase
-  include Rack::Test::Methods
-
-  def app
-    Proxy::PluginInitializer.new(Proxy::Plugins.instance).initialize_plugins
-    Proxy::RootV2Api.new
-  end
-
+class PuppetcaApiFeaturesTest < SmartProxyRootApiTestCase
   def test_features
     ssl_ca = Tempfile.new('ssl_ca')
     ssl_cert = Tempfile.new('ssl_cert')

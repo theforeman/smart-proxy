@@ -4,14 +4,7 @@ require 'root/root_v2_api'
 require 'bmc/bmc_plugin'
 require 'bmc/ipmi'
 
-class BmcApiFeaturesTest < Test::Unit::TestCase
-  include Rack::Test::Methods
-
-  def app
-    Proxy::PluginInitializer.new(Proxy::Plugins.instance).initialize_plugins
-    Proxy::RootV2Api.new
-  end
-
+class BmcApiFeaturesTest < SmartProxyRootApiTestCase
   def test_features
     Proxy::DefaultModuleLoader.any_instance.expects(:load_configuration_file).with('bmc.yml').returns(enabled: true, bmc_default_provider: 'freeipmi')
     Proxy::BMC::IPMI.stubs(:providers_installed).returns([])

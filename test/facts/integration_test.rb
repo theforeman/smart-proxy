@@ -3,14 +3,7 @@ require 'json'
 require 'root/root_v2_api'
 require 'facts/facts_plugin'
 
-class FactsApiFeaturesTest < Test::Unit::TestCase
-  include Rack::Test::Methods
-
-  def app
-    Proxy::PluginInitializer.new(Proxy::Plugins.instance).initialize_plugins
-    Proxy::RootV2Api.new
-  end
-
+class FactsApiFeaturesTest < SmartProxyRootApiTestCase
   def test_features
     Proxy::DefaultModuleLoader.any_instance.expects(:load_configuration_file).with('facts.yml').returns(enabled: true)
 

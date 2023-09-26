@@ -66,3 +66,12 @@ module Proxy::IntegrationTestCase
     end
   end
 end
+
+class SmartProxyRootApiTestCase < Test::Unit::TestCase
+  include Rack::Test::Methods
+
+  def app
+    Proxy::PluginInitializer.new(Proxy::Plugins.instance).initialize_plugins
+    Proxy::RootV2Api.new
+  end
+end

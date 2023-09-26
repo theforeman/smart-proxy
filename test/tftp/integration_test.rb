@@ -3,14 +3,7 @@ require 'json'
 require 'root/root_v2_api'
 require 'tftp/tftp_plugin'
 
-class TftpApiFeaturesTest < Test::Unit::TestCase
-  include Rack::Test::Methods
-
-  def app
-    Proxy::PluginInitializer.new(Proxy::Plugins.instance).initialize_plugins
-    Proxy::RootV2Api.new
-  end
-
+class TftpApiFeaturesTest < SmartProxyRootApiTestCase
   def test_features
     Proxy::DefaultModuleLoader.any_instance.expects(:load_configuration_file).with('tftp.yml').returns(enabled: true, tftproot: '/var/lib/tftpboot', tftp_servername: 'tftp.example.com')
 

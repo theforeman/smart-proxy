@@ -3,14 +3,7 @@ require 'json'
 require 'root/root_v2_api'
 require 'logs/logs'
 
-class LogsApiFeaturesTest < Test::Unit::TestCase
-  include Rack::Test::Methods
-
-  def app
-    Proxy::PluginInitializer.new(Proxy::Plugins.instance).initialize_plugins
-    Proxy::RootV2Api.new
-  end
-
+class LogsApiFeaturesTest < SmartProxyRootApiTestCase
   def test_features
     Proxy::LegacyModuleLoader.any_instance.expects(:load_configuration_file).with('logs.yml').returns(enabled: true)
 

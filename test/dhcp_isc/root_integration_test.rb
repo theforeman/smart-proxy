@@ -4,14 +4,7 @@ require 'root/root_v2_api'
 require 'dhcp/dhcp'
 require 'dhcp_isc/dhcp_isc'
 
-class DhcpIscApiFeaturesTest < Test::Unit::TestCase
-  include Rack::Test::Methods
-
-  def app
-    Proxy::PluginInitializer.new(Proxy::Plugins.instance).initialize_plugins
-    Proxy::RootV2Api.new
-  end
-
+class DhcpIscApiFeaturesTest < SmartProxyRootApiTestCase
   def test_features
     config = Tempfile.new('config')
     leases = Tempfile.new('leases')

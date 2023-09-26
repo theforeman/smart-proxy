@@ -4,14 +4,7 @@ require 'root/root_v2_api'
 require 'realm/realm'
 require 'realm_freeipa/realm_freeipa'
 
-class RealmFreeipaApiFeaturesTest < Test::Unit::TestCase
-  include Rack::Test::Methods
-
-  def app
-    Proxy::PluginInitializer.new(Proxy::Plugins.instance).initialize_plugins
-    Proxy::RootV2Api.new
-  end
-
+class RealmFreeipaApiFeaturesTest < SmartProxyRootApiTestCase
   def test_features
     keytab = Tempfile.new('keytab')
     ipa_config = Tempfile.new('ipa_config')

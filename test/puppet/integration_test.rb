@@ -4,14 +4,7 @@ require 'root/root_v2_api'
 require 'puppet_proxy/puppet'
 require 'puppet_proxy_puppet_api/puppet_proxy_puppet_api'
 
-class PuppetApiFeaturesTest < Test::Unit::TestCase
-  include Rack::Test::Methods
-
-  def app
-    Proxy::PluginInitializer.new(Proxy::Plugins.instance).initialize_plugins
-    Proxy::RootV2Api.new
-  end
-
+class PuppetApiFeaturesTest < SmartProxyRootApiTestCase
   def test_features
     ssl_ca = Tempfile.new('ssl_ca')
     ssl_cert = Tempfile.new('ssl_cert')
