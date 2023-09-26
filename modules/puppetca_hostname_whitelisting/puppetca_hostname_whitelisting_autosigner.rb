@@ -13,11 +13,11 @@ module ::Proxy::PuppetCa::HostnameWhitelisting
 
       found = false
       entries = File.readlines(autosign_file).collect do |l|
-        if l.chomp != certname
-          l
-        else
+        if l.chomp == certname
           found = true
           nil
+        else
+          l
         end
       end.uniq.compact
       if found
