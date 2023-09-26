@@ -25,10 +25,6 @@ require 'provider_interface_validation/dhcp_provider'
 
 include DhcpProviderInterfaceValidation
 
-def hash_symbols_to_strings(hash)
-  Hash[hash.collect { |k, v| [k.to_s, v] }]
-end
-
 # Starts up a real smart proxy instance under WEBrick
 # Use sparingly.  API tests should use rack-test etc.
 module Proxy::IntegrationTestCase
