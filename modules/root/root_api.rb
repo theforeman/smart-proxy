@@ -13,7 +13,7 @@ class Proxy::RootApi < Sinatra::Base
   get "/version" do
     content_type :json
     enabled_plugins = ::Proxy::Plugins.instance.select { |p| p[:state] == :running && p[:class].ancestors.include?(::Proxy::Plugin) }
-    modules = Hash[enabled_plugins.map { |plugin| [plugin[:name].to_s, plugin[:version].to_s] }].reject { |key| key == 'foreman_proxy' }
+    modules = enabled_plugins.to_h { |plugin| [plugin[:name].to_s, plugin[:version].to_s] }.reject { |key| key == 'foreman_proxy' }
     {:version => Proxy::VERSION, :modules => modules}.to_json
   rescue => e
     log_halt 400, e
