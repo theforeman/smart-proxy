@@ -244,7 +244,7 @@ def parse_cli_options(args)
 end
 
 def load_main_config_file(main_config_file_path)
-  YAML.load(File.read(main_config_file_path)) || {}
+  YAML.load_file(main_config_file_path) || {}
 end
 
 def module_configuration_dir(main_config_file)
