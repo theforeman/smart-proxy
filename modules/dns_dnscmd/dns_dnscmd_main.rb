@@ -101,7 +101,7 @@ module Proxy::Dns::Dnscmd
       response = execute '/EnumZones', msg: 'EnumZones', error_only: true
       response.each do |line|
         next unless line =~  / Primary /
-        zones << line.sub(/^ +/, '').sub(/ +.*$/, '').chomp("\n")
+        zones << line.sub(/^ +/, '').sub(/ +.*$/, '').chomp
       end
       logger.debug "Enumerated authoritative dns zones: #{zones}"
       zones
