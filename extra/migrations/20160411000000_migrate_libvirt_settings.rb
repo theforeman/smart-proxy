@@ -46,8 +46,6 @@ class MigrateVirshToLibvirtConfig < ::Proxy::Migration
   end
 
   def write_yaml(filepath, yaml)
-    File.open(filepath, 'w') do |f|
-      f.write(yaml.to_yaml)
-    end
+    File.write(filepath, yaml.to_yaml)
   end
 end
