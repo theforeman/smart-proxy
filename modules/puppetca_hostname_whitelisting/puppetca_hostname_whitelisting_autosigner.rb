@@ -47,9 +47,7 @@ module ::Proxy::PuppetCa::HostnameWhitelisting
     # list of hosts which are now allowed to be installed via autosign
     def autosign_list
       return [] unless File.exist?(autosign_file)
-      File.read(autosign_file).split("\n").reject do |v|
-        v =~ /^\s*#.*|^$/ ## Remove comments and empty lines
-      end.map(&:chomp)
+      File.read(autosign_file).split("\n").grep_v(/^\s*#.*|^$/).map(&:chomp)
     end
   end
 end
