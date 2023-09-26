@@ -5,7 +5,7 @@ require 'puppet_proxy_common/environment'
 require 'puppet_proxy_common/environments_retriever_base'
 require 'puppet_proxy_common/errors'
 
-class ApiTestEnvironmentsRetriever < ::Proxy::Puppet::EnvironmentsRetrieverBase
+class ApiTestEnvironmentsRetriever < Proxy::Puppet::EnvironmentsRetrieverBase
   attr_reader :first, :second
 
   def initialize

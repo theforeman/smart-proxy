@@ -1,4 +1,4 @@
-class ::Proxy::RootPluginLoader < ::Proxy::DefaultModuleLoader
+class ::Proxy::RootPluginLoader < Proxy::DefaultModuleLoader
   # this is a special case: 'root' module doesn't have configuration file
   def load_configuration_file(settings_file)
     {}

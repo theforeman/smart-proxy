@@ -1,6 +1,6 @@
 require "proxy/validations"
 
-class Proxy::DhcpApi < ::Sinatra::Base
+class Proxy::DhcpApi < Sinatra::Base
   extend Proxy::DHCP::DependencyInjection
   include Proxy::Validations
 

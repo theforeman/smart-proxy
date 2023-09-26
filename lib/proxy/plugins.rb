@@ -1,8 +1,8 @@
-class ::Proxy::PluginNotFound < ::StandardError; end
-class ::Proxy::PluginVersionMismatch < ::StandardError; end
-class ::Proxy::PluginMisconfigured < ::StandardError; end
-class ::Proxy::PluginProviderNotFound < ::StandardError; end
-class ::Proxy::PluginLoadingAborted < ::StandardError; end
+class ::Proxy::PluginNotFound < StandardError; end
+class ::Proxy::PluginVersionMismatch < StandardError; end
+class ::Proxy::PluginMisconfigured < StandardError; end
+class ::Proxy::PluginProviderNotFound < StandardError; end
+class ::Proxy::PluginLoadingAborted < StandardError; end
 
 class ::Proxy::Plugins
   include ::Proxy::Log

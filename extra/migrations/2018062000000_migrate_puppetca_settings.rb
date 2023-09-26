@@ -1,6 +1,6 @@
 require 'yaml'
 
-class MigratePuppetCaSettings < ::Proxy::Migration
+class MigratePuppetCaSettings < Proxy::Migration
   def migrate
     copy_original_configuration_except(path('settings.d', 'puppetca.yml'),
                                        path('settings.d', 'puppetca_hostname_whitelisting.yml.example'))

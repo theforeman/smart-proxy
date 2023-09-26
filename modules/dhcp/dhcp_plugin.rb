@@ -1,4 +1,4 @@
-class Proxy::DhcpPlugin < ::Proxy::Plugin
+class Proxy::DhcpPlugin < Proxy::Plugin
   rackup_path File.expand_path("http_config.ru", __dir__)
 
   uses_provider

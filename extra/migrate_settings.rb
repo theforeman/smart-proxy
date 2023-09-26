@@ -260,8 +260,8 @@ if $PROGRAM_NAME == __FILE__
   migrations_dir_path = options[:migrations_dir]
   migrations_state_file_path = options[:migrations_state]
 
-  ::Proxy::Migrator.new(
+  Proxy::Migrator.new(
     working_dir_path, migrations_dir_path, config_src_path, modules_config_src_path,
-    ::Proxy::Migrations.new(migrations_state_file_path).load_past_migrations!).migrate
+    Proxy::Migrations.new(migrations_state_file_path).load_past_migrations!).migrate
   exit(0)
 end

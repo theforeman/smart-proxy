@@ -1,6 +1,6 @@
 require 'yaml'
 
-class MigrateAutosignSetting < ::Proxy::Migration
+class MigrateAutosignSetting < Proxy::Migration
   def migrate
     puppetca_config = path(src_dir, "settings.d", "puppetca.yml")
     unless File.exist?(puppetca_config)

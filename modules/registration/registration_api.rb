@@ -1,6 +1,6 @@
 require 'registration/proxy_request'
 
-class Proxy::Registration::Api < ::Sinatra::Base
+class Proxy::Registration::Api < Sinatra::Base
   get '/' do
     response = Proxy::Registration::ProxyRequest.new.global_register(request)
     handle_response(response)

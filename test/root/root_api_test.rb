@@ -5,15 +5,15 @@ require 'root/root_api'
 
 ENV['RACK_ENV'] = 'test'
 
-class TestPlugin0 < ::Proxy::Plugin
+class TestPlugin0 < Proxy::Plugin
   plugin :foreman_proxy, "0.0.1"
 end
 
-class TestPlugin2 < ::Proxy::Plugin
+class TestPlugin2 < Proxy::Plugin
   plugin :test2, "0.0.1"
 end
 
-class TestPlugin3 < ::Proxy::Plugin
+class TestPlugin3 < Proxy::Plugin
   plugin :test3, "0.0.1"
 end
 
