@@ -63,8 +63,8 @@ module Proxy::Dns::Dnscmd
 
       if response.grep(/completed successfully/).empty?
         logger.error "Command dnscmd failed:\n" + response.join("\n")
-        msg.sub!(/Removed/, "remove")
-        msg.sub!(/Added/, "add")
+        msg.sub!("Removed", "remove")
+        msg.sub!("Added", "add")
         msg = "Failed to #{msg}"
         raise Proxy::Dns::Error.new(msg) unless response.grep(/DNS_ERROR_NAME_DOES_NOT_EXIST/).any? && msg == "Failed to EnumRecords"
       else
