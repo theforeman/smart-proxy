@@ -84,7 +84,7 @@ class HelperServerTest < Test::Unit::TestCase
     @subject.delete_file tmp_filename
     assert_equal false, File.exist?(tmp_filename)
   ensure
-    File.unlink(tmp_filename) if File.exist?(tmp_filename)
+    FileUtils.rm_f(tmp_filename)
   end
 end
 

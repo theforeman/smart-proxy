@@ -6,7 +6,7 @@ $LOAD_PATH << File.join(__dir__, '..', 'lib')
 $LOAD_PATH << File.join(__dir__, '..', 'modules')
 
 logdir = File.join(__dir__, '..', 'logs')
-FileUtils.mkdir_p(logdir) unless File.exist?(logdir)
+FileUtils.mkdir_p(logdir)
 
 ENV['RACK_ENV'] = 'test'
 
