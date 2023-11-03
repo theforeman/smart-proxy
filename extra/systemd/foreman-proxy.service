@@ -8,6 +8,7 @@ Type=notify
 User=foreman-proxy
 ExecStart=/usr/share/foreman-proxy/bin/smart-proxy
 Environment=MALLOC_ARENA_MAX=2
+PrivateTmp=true
 
 [Install]
 WantedBy=multi-user.target
