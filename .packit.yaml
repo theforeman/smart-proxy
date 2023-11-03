@@ -1,0 +1,36 @@
+# See the documentation for more information:
+# https://packit.dev/docs/configuration/
+
+specfile_path: foreman-proxy.spec
+
+# add or remove files that should be synced
+files_to_sync:
+    - foreman-proxy.spec
+    - foreman-proxy.tmpfiles
+    - logrotate.conf
+    - .packit.yaml
+
+# name in upstream package repository or registry (e.g. in PyPI)
+upstream_package_name: foreman-proxy
+# downstream (Fedora) RPM package name
+downstream_package_name: foreman-proxy
+
+actions:
+  post-upstream-clone:
+    - "wget https://raw.githubusercontent.com/theforeman/foreman-packaging/rpm/develop/packages/foreman/foreman-proxy/foreman-proxy.spec -O foreman-proxy.spec"
+    - "wget https://raw.githubusercontent.com/theforeman/foreman-packaging/rpm/develop/packages/foreman/foreman-proxy/foreman-proxy.tmpfiles -O foreman-proxy.tmpfiles"
+    - "wget https://raw.githubusercontent.com/theforeman/foreman-packaging/rpm/develop/packages/foreman/foreman-proxy/logrotate.conf -O logrotate.conf"
+  get-current-version: "sed 's/-develop//' VERSION"
+
+jobs:
+  - job: copr_build
+    trigger: pull_request
+    targets:
+      centos-stream-8:
+        additional_modules: "foreman-devel:el8"
+        additional_repos:
+          - http://koji.katello.org/releases/yum/foreman-nightly/el8/x86_64/
+    module_hotfixes: true
+
+srpm_build_deps:
+  - wget
