@@ -1,9 +1,5 @@
-gem 'rsec', '< 1', groups: [:dhcp_isc_inotify, :dhcp_isc_kqueue]
-
-group :dhcp_isc_inotify do
-  gem 'rb-inotify'
-end
-
-group :dhcp_isc_kqueue do
-  gem 'rb-kqueue'
+group :dhcp_isc do
+  gem 'rb-inotify', install_if: -> { RUBY_PLATFORM.match?(/linux/) }
+  gem 'rb-kqueue', install_if: -> { RUBY_PLATFORM.match?(/bsd/) }
+  gem 'rsec', '< 1', platforms: [:ruby]
 end
