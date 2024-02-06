@@ -15,6 +15,8 @@ module Proxy
       args << "--silent"
       # except errors
       args << "--show-error"
+      # force it to set an exit code on failure
+      args << "--fail"
       # timeout (others were supported by wget but not by curl)
       args += ["--connect-timeout", connect_timeout.to_s]
       # try several times

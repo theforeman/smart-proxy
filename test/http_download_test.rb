@@ -12,6 +12,7 @@ class HttpDownloadsTest < Test::Unit::TestCase
       "/usr/bin/curl",
       "--insecure",
       "--silent", "--show-error",
+      '--fail',
       "--connect-timeout", "10",
       "--retry", "3",
       "--retry-delay", "10",
@@ -29,6 +30,7 @@ class HttpDownloadsTest < Test::Unit::TestCase
     expected = [
       "/usr/bin/curl",
       "--silent", "--show-error",
+      '--fail',
       "--connect-timeout", "10",
       "--retry", "3",
       "--retry-delay", "10",
@@ -47,5 +49,50 @@ class HttpDownloadsTest < Test::Unit::TestCase
       Proxy::FileLock.try_locking("#{tmpdir}/.dst.lock")
       assert_equal false, Proxy::HttpDownload.new('src', "#{tmpdir}/dst").start
     end
+  end
+end
+
+class HttpDownloadsIntegrationTest < Test::Unit::TestCase
+  def setup
+    @server = WEBrick::HTTPServer.new(Port: 0)
+    @server.mount_proc '/200' do |req, res|
+      res.body = 'Hello, world!'
+    end
+    @thread = Thread.new { @server.start }
+  end
+
+  def teardown
+    @thread.exit
+    @thread.join
+  end
+
+  def test_retrieving_found
+    src = "http://localhost:#{@server.config[:Port]}/200"
+
+    dest = Tempfile.new('found')
+    path = dest.path
+    dest.unlink
+
+    thread = Proxy::HttpDownload.new(src, path).start
+    thread.join
+
+    assert File.exist?(path)
+  ensure
+    FileUtils.rm_f(path)
+  end
+
+  def test_retrieving_not_found
+    src = "http://localhost:#{@server.config[:Port]}/404"
+
+    dest = Tempfile.new('not-found')
+    path = dest.path
+    dest.unlink
+
+    thread = Proxy::HttpDownload.new(src, path).start
+    thread.join
+
+    assert !File.exist?(path)
+  ensure
+    FileUtils.rm_f(path)
   end
 end
