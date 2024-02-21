@@ -1,13 +1,19 @@
 Contributors (sorted alphabetically)
 
 Aaron Stone <aaron@serendipity.cx>
+Adam Price <komidore64@gmail.com>
+Adam Ruzicka <a.ruzicka@outlook.com>
+Adam Ruzicka <aruzicka@redhat.com>
 Alexander Fisher <alex@linfratech.co.uk>
 Alexander Olofsson <alexander.olofsson@liu.se>
 Alyssa Hardy <alyssa@marketo.com>
+Amit Upadhye <upadhyeammit@gmail.com>
+Anna Vitova <avitova@avitova.remote.csb>
 Anthony Chevalet <anthony.chevalet@gmail.com>
 Anthony Chevalet <anthony.chevalet@kudelskisecurity.com>
 Ashley Penney <apenney@gmail.com>
 Baptiste Agasse <baptiste.agasse@lyra-network.com>
+Bernhard Suttner <suttner@atix.de>
 Brandon Weeks <weeks@squareup.com>
 Christian Arnold <christian.arnold@t-systems.de>
 Corey Osman <corey@logicminds.biz>
@@ -26,6 +32,7 @@ DoubleMalt <christoph@web.crofting.com>
 Dustin Tsang <dtsang@redhat.com>
 Eric D. Helms <ericdhelms@gmail.com>
 Eric Helms <eric.d.helms@gmail.com>
+Evgeni Golov <evgeni@golov.de>
 Ewoud Kohl van Wijngaarden <ekohlvanwijngaarden@antagonist.nl>
 Ewoud Kohl van Wijngaarden <ewoud@kohlvanwijngaarden.nl>
 Ewoud Kohl van Wijngaarden <github@kohlvanwijngaarden.nl>
@@ -44,6 +51,8 @@ Greg Petras <greg.petras@nwea.org>
 Greg Sutcliffe <greg.sutcliffe@gmail.com>
 Greg Sutcliffe <gsutclif@redhat.com>
 Greg Sutcliffe <gsutcliffe@ibahn.com>
+Griffin Sullivan <gsulliva@redhat.com>
+Griffin-Sullivan <gsulliva@redhat.com>
 Guido Günther <agx@sigxcpu.org>
 Hannes Schaller <admin@cyberkov.at>
 Ivan Nečas <inecas@redhat.com>
@@ -56,11 +65,15 @@ Jimmi Dyson <jimmi.dyson@specsavers.com>
 Jochen Schalanda <jochen@schalanda.name>
 Jon McKenzie <jcmcken@gmail.com>
 Julian Todt <julian.todt@dm.de>
+Justin Sherrill <jlsherrill@gmail.com>
 Justin Sherrill <jsherril@redhat.com>
 Kamil Winczek <kwinczek@gmail.com>
 Klaas Demter <demter@atix.de>
 Konstantin Orekhov <korekhov@ebaysf.com>
+Leos Stejskal <github@stejskalleos.cz>
+Leos Stejskal <lstejska@redhat.com>
 Lukas Zapletal <lzap+git@redhat.com>
+Lukáš Zapletal <lzap+git@redhat.com>
 Lukáš Zapletal <lzap@redhat.com>
 Marcello de Sousa <foreman-dev@area151.com>
 Marek Hulan <ares@igloonet.cz>
@@ -78,16 +91,20 @@ Matt Jarvis <matt.jarvis@datacentred.co.uk>
 Matthias Thubauville <matthias.thubo@gmail.com>
 Michael Moll <kvedulv@kvedulv.de>
 Mikael Fridh <mfridh@marinsoftware.com>
+Nathan Dietsch <njd@ndietsch.com>
 Nils Caspar <ncaspar@me.com>
 Ohad Levy <ohadlevy@gmail.com>
 Ondrej Prazak <oprazak@redhat.com>
+Ondřej Ezr <oezr@redhat.com>
 Ori Rabin <orabin@redhat.com>
+Pablo Hess <phess@redhat.com>
 Partha Aji <paji@redhat.com>
 Paul Kelly <paul.ian.kelly@gmail.com>
 Paul Kelly <paul.ian.kelly@googlemail.com>
 Paul Kelly <pikelly@blueyonder.co.uk>
 Paul kelly <paul.ian.kelly@googlemail.com>
 Pavel Moravec <pmoravec@dhcp-27-35.brq.redhat.com>
+Peter Bittner <peter@painless.software>
 Pieter Hollants <pieter@hollants.com>
 Povilas Daukintis <povilas@daukintis.lt>
 Raffael Schmid <raffael@yux.ch>
@@ -100,10 +117,13 @@ Sam Kottler <sam@kottlerdevelopment.com>
 Sam Kottler <shk@linux.com>
 Sam Kottler <shk@redhat.com>
 Sean Handley <sean.handley@gmail.com>
+Shira Maximov <shiramaximov@gmail.com>
 Shlomi Zadok <shlomi@ben-hanna.com>
+Stejskal Leos <github@stejskalleos.cz>
 Stephen Benjamin <stbenjam@redhat.com>
 Stephen Benjamin <stephen@bitbin.de>
 Stephen Benjamin <stephen@redhat.com>
+Sven Lueder <mail@svenlueder.de>
 Thomas Kuther <tom@kuther.net>
 Timo Goebel <mail@timogoebel.name>
 Timo Goebel <timo.goebel@dm.de>
@@ -112,12 +132,15 @@ Tomas Strachota <tstrachota@redhat.com>
 Tomer Brisker <tbrisker@gmail.com>
 Tomer Brisker <tbrisker@users.noreply.github.com>
 Trey Dockendorf <treydock@gmail.com>
+UXabre <arend.lapere@gmail.com>
 Ulrich Dangel <uli@spamt.net>
 Vincent Kramar <vincent@kramar.me>
+archanaserver <ak31960466@gmail.com>
 cyrus-mc <cyrus-mc@users.noreply.github.com>
 dima <pronix.service@gmail.com>
 kish <skihero@gmail.com>
 mjc <github@bitz.ca>
+r.stricklin <rstricklin@skytap.com>
 swadeley <swadeley@redhat.com>
 tek0011 <thecptsparrow@gmail.com>
 zjherner <zjherner@gmail.com>
