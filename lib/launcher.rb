@@ -38,6 +38,14 @@ module Proxy
       plugins.select { |p| p[:https_enabled] }.map { |p| p[:class] }
     end
 
+    # Imitate OpenSSL::X509::Certificate.load_file for openssl < 3.0.0
+    def load_fullchain(bundle_pem)
+      File.read(bundle_pem)
+          .lines
+          .slice_after(/END CERTIFICATE/)
+          .map { |pem| OpenSSL::X509::Certificate.new(pem.join) }
+    end
+
     def http_app(http_port, plugins = http_plugins)
       return nil unless http_enabled?
       app = Rack::Builder.new do
@@ -60,6 +68,10 @@ module Proxy
 
       unless File.readable?(settings.ssl_ca_file)
         logger.error "Unable to read #{settings.ssl_ca_file}. Are the values correct in settings.yml and do permissions allow reading?"
+      end
+
+      unless File.readable?(settings.foreman_ssl_ca)
+        logger.error "Unable to read #{settings.foreman_ssl_ca}. Are the values correct in settings.yml and do permissions allow reading?"
       end
 
       app = Rack::Builder.new do
@@ -95,6 +107,7 @@ module Proxy
         :SSLVerifyClient => OpenSSL::SSL::VERIFY_PEER,
         :SSLPrivateKey => load_ssl_private_key(settings.ssl_private_key),
         :SSLCertificate => load_ssl_certificate(settings.ssl_certificate),
+        :SSLExtraChainCert => load_fullchain(settings.foreman_ssl_ca),
         :SSLCACertificateFile => settings.ssl_ca_file,
         :SSLOptions => ssl_options,
         :SSLCiphers => CIPHERS - Proxy::SETTINGS.ssl_disabled_ciphers,
