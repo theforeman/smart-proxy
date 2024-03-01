@@ -35,7 +35,16 @@ module Proxy::TFTP
     end
 
     post "/fetch_boot_file" do
-      log_halt(400, "TFTP: Failed to fetch boot file: ") { Proxy::TFTP.fetch_boot_file(params[:prefix], params[:path]) }
+      log_halt(400, "TFTP: Failed to fetch boot file: ") do
+        result = Proxy::TFTP.fetch_boot_file(params[:prefix], params[:path])
+
+        # fetch_boot_file may start a thread
+        # This waits for a bit before telling the client we've accepted it
+        # TODO: implement a mechanism to poll for completion
+        if result.respond_to(:join)
+          202 unless result.join(5)
+        end
+      end
     end
 
     post "/:variant/create_default" do |variant|
