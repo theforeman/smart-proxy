@@ -1,0 +1,32 @@
+name: RuboCop Challenge
+
+on:
+  schedule:
+    - cron: "30 23 * * 2,3,4"
+
+jobs:
+  create-pr:
+    name: Create Pull Request
+    runs-on: ubuntu-latest
+    env:
+      RUBY_VERSION: 3.0.0
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.0
+      - name: Install bundler
+        run: gem install bundler
+      - name: Install gems
+        run: bundle install --jobs 4 --retry 3
+      - name: Install dependencies
+        run: gem install rubocop_challenger
+      - name: Set git configuration
+        run: git config remote.origin.url "git@github.com:theforeman/smart-proxy.git"
+      - name: Create RuboCop challenge pull request
+        # env:
+        #   GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # run: bundle exec rubocop_challenger
