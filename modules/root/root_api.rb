@@ -1,3 +1,5 @@
+require 'proxy/verify_runtime'
+
 class Proxy::RootApi < Sinatra::Base
   helpers ::Proxy::Helpers
 
@@ -17,5 +19,10 @@ class Proxy::RootApi < Sinatra::Base
     {:version => Proxy::VERSION, :modules => modules}.to_json
   rescue => e
     log_halt 400, e
+  end
+
+  get "/verify" do
+    content_type :json
+    Proxy::VerifyRuntime.verify.to_json
   end
 end
