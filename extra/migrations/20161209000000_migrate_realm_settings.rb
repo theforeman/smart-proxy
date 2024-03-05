@@ -1,6 +1,6 @@
 require 'yaml'
 
-class MigrateRealmSettings < ::Proxy::Migration
+class MigrateRealmSettings < Proxy::Migration
   KNOWN_PARAMETERS = {
     :enabled            => [:realm, :enabled],
     :realm_provider     => [:realm, :use_provider],

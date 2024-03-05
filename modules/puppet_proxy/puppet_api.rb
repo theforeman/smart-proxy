@@ -1,4 +1,4 @@
-class Proxy::Puppet::Api < ::Sinatra::Base
+class Proxy::Puppet::Api < Sinatra::Base
   extend Proxy::Puppet::DependencyInjection
   helpers ::Proxy::Helpers
 

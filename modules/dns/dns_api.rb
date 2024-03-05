@@ -76,7 +76,7 @@ module Proxy::Dns
     end
 
     def validate_srv_value!(value)
-      parts = value.split(' ')
+      parts = value.split
       priority, weight, port, target = parts
       validate_dns_name!(target, 'SRV')
       unless parts.size == 4 &&

@@ -1,4 +1,4 @@
-class TestMigrationTwo < ::Proxy::Migration
+class TestMigrationTwo < Proxy::Migration
   def migrate
   end
 end

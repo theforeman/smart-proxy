@@ -6,10 +6,6 @@ module Proxy::Dns::Dnscmd
     include Proxy::Log
     include Proxy::Util
 
-    def initialize(a_server, a_ttl)
-      super(a_server, a_ttl)
-    end
-
     def do_create(name, value, type)
       zone = match_zone(name, enum_zones)
       msg = "Added #{type} entry #{name} => #{value}"
@@ -63,8 +59,8 @@ module Proxy::Dns::Dnscmd
 
       if response.grep(/completed successfully/).empty?
         logger.error "Command dnscmd failed:\n" + response.join("\n")
-        msg.sub!(/Removed/, "remove")
-        msg.sub!(/Added/, "add")
+        msg.sub!("Removed", "remove")
+        msg.sub!("Added", "add")
         msg = "Failed to #{msg}"
         raise Proxy::Dns::Error.new(msg) unless response.grep(/DNS_ERROR_NAME_DOES_NOT_EXIST/).any? && msg == "Failed to EnumRecords"
       else
@@ -101,7 +97,7 @@ module Proxy::Dns::Dnscmd
       response = execute '/EnumZones', msg: 'EnumZones', error_only: true
       response.each do |line|
         next unless line =~  / Primary /
-        zones << line.sub(/^ +/, '').sub(/ +.*$/, '').chomp("\n")
+        zones << line.sub(/^ +/, '').sub(/ +.*$/, '').chomp
       end
       logger.debug "Enumerated authoritative dns zones: #{zones}"
       zones

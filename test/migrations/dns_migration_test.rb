@@ -1,6 +1,6 @@
 require 'test_helper'
 require File.join(__dir__, '../../extra/migrate_settings')
-::Proxy::Migration.inject_migrations_instance(::Proxy::Migrations.new("dummy"))
+Proxy::Migration.inject_migrations_instance(Proxy::Migrations.new("dummy"))
 require File.join(__dir__, '../../extra/migrations/20150611000000_migrate_dns_settings')
 
 class ProxyDnsMigrationTest < Test::Unit::TestCase

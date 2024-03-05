@@ -1,7 +1,7 @@
 require 'fileutils'
 require 'yaml'
 
-class MigrateVirshToLibvirtConfig < ::Proxy::Migration
+class MigrateVirshToLibvirtConfig < Proxy::Migration
   def migrate
     input_yaml = YAML.load_file(path(src_dir, "settings.yml"))
     copy_original_configuration_except("settings.yml",
@@ -46,8 +46,6 @@ class MigrateVirshToLibvirtConfig < ::Proxy::Migration
   end
 
   def write_yaml(filepath, yaml)
-    File.open(filepath, 'w') do |f|
-      f.write(yaml.to_yaml)
-    end
+    File.write(filepath, yaml.to_yaml)
   end
 end

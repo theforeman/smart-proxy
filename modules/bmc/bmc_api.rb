@@ -376,11 +376,11 @@ module Proxy::BMC
         else
           logger.warn "Invalid BMC type: #{provider_type}, must be one of #{Proxy::BMC::IPMI.providers.join(',')}"
         end
-        if !Proxy::BMC::IPMI.providers_installed.empty?
+        if Proxy::BMC::IPMI.providers_installed.empty?
+          log_halt 400, "No BMC providers are installed, please install at least freeipmi or ipmitool"
+        else
           provider_type = Proxy::BMC::IPMI.providers_installed.first
           logger.warn "Using #{provider_type} as the default BMC provider"
-        else
-          log_halt 400, "No BMC providers are installed, please install at least freeipmi or ipmitool"
         end
       end
       provider_type

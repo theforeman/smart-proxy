@@ -98,9 +98,9 @@ module Proxy::DHCP::CommonISC
       logger.debug(format_omshell_output(response))
       if response.nil? || (!response.empty? && !response.grep(/can't|no more|not connected|Syntax error/).empty?)
         logger.error "Omshell failed: " + (response.nil? ? "Problem launching omshell" : format_omshell_output(response))
-        msg.sub!(/Removed/, "remove")
-        msg.sub!(/Added/, "add")
-        msg.sub!(/Enumerated/, "enumerate")
+        msg.sub!("Removed", "remove")
+        msg.sub!("Added", "add")
+        msg.sub!("Enumerated", "enumerate")
         msg  = "Failed to #{msg}"
         msg += ": Entry already exists" if response && !response.grep(/object: already exists/).empty?
         msg += ": No response from DHCP server" if response.nil? || !response.grep(/(not connected|no more)/).empty?

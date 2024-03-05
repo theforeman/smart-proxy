@@ -25,11 +25,11 @@ require 'launcher'
 require 'sinatra/base'
 require 'sinatra/authorization'
 
-Proxy::SETTINGS = ::Proxy::Settings::Global.new(:log_file => './logs/test.log', :log_level => 'DEBUG')
+Proxy::SETTINGS = Proxy::Settings::Global.new(:log_file => './logs/test.log', :log_level => 'DEBUG')
 Proxy::VERSION = File.read(File.join(__dir__, '..', 'VERSION')).chomp
 
-::Sinatra::Base.set :run, false
-::Sinatra::Base.register ::Sinatra::Authorization
+Sinatra::Base.set :run, false
+Sinatra::Base.register Sinatra::Authorization
 
 module ::Proxy::Pluggable
   def load_test_settings(a_hash = {})

@@ -1,4 +1,4 @@
-class ::Proxy::LogsPlugin < ::Proxy::Plugin
+class ::Proxy::LogsPlugin < Proxy::Plugin
   rackup_path File.expand_path("http_config.ru", __dir__)
 
   plugin :logs, ::Proxy::VERSION

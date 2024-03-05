@@ -9,7 +9,6 @@ Gem::Specification.new do |s|
   s.files = (Dir.glob("{bin,public,config,views,lib,modules}/**/*") + ["VERSION"])
   s.executables << 'smart-proxy'
   s.require_paths = ["lib", "modules"]
-  s.test_files = Dir.glob("{test}/**/*test.rb")
   s.license = 'GPL-3.0'
   s.extra_rdoc_files = ["README.md"]
   s.required_ruby_version = '>= 2.7'
@@ -23,4 +22,6 @@ Gem::Specification.new do |s|
     Foreman Proxy is used via The Foreman Project, it allows Foreman to manage
     Remote DHCP, DNS, TFTP and Puppet servers via a REST API
   EOF
+  # The gem isn't really published, so this doesn't matter
+  s.metadata['rubygems_mfa_required'] = 'true'
 end
