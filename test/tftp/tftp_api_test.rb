@@ -111,6 +111,12 @@ class TftpApiTest < Test::Unit::TestCase
     assert last_response.ok?
   end
 
+  def test_api_can_fetch_system_image
+    Proxy::TFTP.expects(:fetch_system_image).with('some/image.iso', 'http://localhost/file.iso', ['dir/first', 'dir/second'], 'os/example-asdhf').returns(true)
+    post "/fetch_system_image", :path => 'some/image.iso', :url => 'http://localhost/file.iso', :files => ['dir/first', 'dir/second'], :tftp_path => 'os/example-asdhf'
+    assert last_response.ok?
+  end
+
   def test_api_can_get_servername
     Proxy::TFTP::Plugin.settings.stubs(:tftp_servername).returns("servername")
     result = get "/serverName"
