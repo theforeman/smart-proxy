@@ -108,6 +108,27 @@ module Proxy::TFTP
     end
   end
 
+  class Pxegrub2targetos < Server
+    def setup_bootloader(mac, os)
+      FileUtils.mkdir_p(pxeconfig_dir(mac))
+      FileUtils.cp "/usr/local/share/bootloader-universe/#{os}/shimx64.efi", pxeconfig_dir(mac) + "shimx64.efi"
+      FileUtils.cp "/usr/local/share/bootloader-universe/#{os}/grubx64.efi", pxeconfig_dir(mac) + "grubx64.efi"
+      File.open(pxeconfig_dir(mac) + "/targetos", 'w') { |f| f.write(os) }
+    end
+
+    def pxeconfig_dir(mac)
+      "#{path}/grub2/" + mac.tr(':', '-').downcase + "/"
+    end
+
+    def pxe_default(mac)
+      ["#{pxeconfig_dir}/grub.cfg", "#{pxeconfig_dir(mac)}/grub.cfg"]
+    end
+
+    def pxeconfig_file(mac)
+      ["#{pxeconfig_dir(mac)}/grub.cfg", "#{pxeconfig_dir(mac)}/grub.cfg-01-" + mac.tr(':', '-').downcase, "#{pxeconfig_dir(mac)}/grub.cfg-#{mac.downcase}"]
+    end
+  end
+
   class Ztp < Server
     def pxeconfig_dir
       "#{path}/ztp.cfg"
