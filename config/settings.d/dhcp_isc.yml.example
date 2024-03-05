@@ -18,6 +18,8 @@
 # Specifies TSIG key name and secret
 #:key_name: secret_key_name
 #:key_secret: secret_key
+# This needs to match the server configuration
+#:key_algorithm: HMAC-MD5
 
 #:omapi_port: 7911
 

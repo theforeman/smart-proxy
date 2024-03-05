@@ -6,11 +6,12 @@ module Proxy::DHCP::CommonISC
     include Proxy::Util
     attr_reader :omapi_port, :key_name, :key_secret
 
-    def initialize(server, omapi_port, subnets = nil, key_name = nil, key_secret = nil, service = nil, free_ips_service = nil)
+    def initialize(server, omapi_port, subnets = nil, key_name = nil, key_secret = nil, service = nil, free_ips_service = nil, key_algorithm = nil)
       super(server, subnets, service, free_ips_service)
       # TODO: verify key name and secret
       @key_name = key_name
       @key_secret = key_secret
+      @key_algorithm = key_algorithm
       @omapi_port = omapi_port
     end
 
@@ -67,6 +68,7 @@ module Proxy::DHCP::CommonISC
     end
 
     def om_connect
+      omcmd("key-algorithm #{@key_algorithm}") if @key_algorithm
       omcmd("key #{@key_name} \"#{@key_secret}\"", true) if @key_name && @key_secret
       omcmd "server #{name}"
       omcmd "port #{@omapi_port}"
