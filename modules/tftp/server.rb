@@ -63,6 +63,18 @@ module Proxy::TFTP
         logger.debug "TFTP: Skipping a request to delete a file which doesn't exists"
       end
     end
+
+    def delete_dir(dir)
+      if Dir.exist?(dir)
+        FileUtils.rm_rf dir
+        logger.debug "TFTP: #{dir} removed successfully"
+      else
+        logger.debug "TFTP: Skipping a request to delete a directory which doesn't exists"
+      end
+    end
+
+    def setup_bootloader(mac, os, major, minor, arch, bootfilename_efi, build)
+    end
   end
 
   class Syslinux < Server
@@ -95,8 +107,77 @@ module Proxy::TFTP
   end
 
   class Pxegrub2 < Server
-    def pxeconfig_dir
-      "#{path}/grub2"
+    def bootloader_path(os, version, arch)
+      unless (bootloader_universe = Proxy::TFTP::Plugin.settings.bootloader_universe)
+        logger.debug "TFTP: bootloader universe not configured."
+        return
+      end
+
+      bootloader_path = "#{bootloader_universe}/pxegrub2/#{os}/#{version}/#{arch}"
+
+      logger.debug "TFTP: Checking bootloader universe for suitable bootloader directory for"
+      logger.debug "TFTP:   * Operating system: #{os}"
+      logger.debug "TFTP:   * Version: #{version}"
+      logger.debug "TFTP:   * Architecture: #{arch}"
+      logger.debug "TFTP: Checking bootloader universe if \"#{bootloader_path}\" exists."
+      unless Dir.exist?(bootloader_path)
+        logger.debug "TFTP: Directory \"#{bootloader_path}\" does not exist."
+
+        bootloader_path = "#{bootloader_universe}/pxegrub2/#{os}/default/#{arch}"
+        logger.debug "TFTP: Checking if fallback directory at \"#{bootloader_path}\" exists."
+        unless Dir.exist?(bootloader_path)
+          logger.debug "TFTP: Directory \"#{bootloader_path}\" does not exist."
+          return
+        end
+      end
+
+      bootloader_path
+    end
+
+    def setup_bootloader(mac, os, major, minor, arch, bootfilename_efi, build)
+      pxeconfig_dir_mac = pxeconfig_dir(mac)
+
+      if build == "true"
+        logger.debug "TFTP: Host is in build mode."
+        logger.debug "TFTP:   => Deploying host specific bootloader files to \"#{pxeconfig_dir_mac}\""
+
+        FileUtils.mkdir_p(pxeconfig_dir_mac)
+
+        version = "#{major}#{".#{minor}" unless minor.empty?}"
+        bootloader_path = bootloader_path(os, version, arch)
+
+        if bootloader_path
+          logger.debug "TFTP: Copying bootloader files from bootloader universe:"
+          logger.debug "TFTP:   - \"#{bootloader_path}/*\" => \"#{pxeconfig_dir_mac}/\""
+          FileUtils.cp_r("#{bootloader_path}/.", "#{pxeconfig_dir_mac}/", remove_destination: true)
+        else
+          logger.debug "TFTP: Copying default bootloader files:"
+          logger.debug "TFTP:   - \"#{pxeconfig_dir}/grub#{bootfilename_efi}.efi\" => \"#{pxeconfig_dir_mac}/grub#{bootfilename_efi}.efi\""
+          logger.debug "TFTP:   - \"#{pxeconfig_dir}/shim#{bootfilename_efi}.efi\" => \"#{pxeconfig_dir_mac}/shim#{bootfilename_efi}.efi\""
+          logger.debug "TFTP:   - \"#{pxeconfig_dir}/grub#{bootfilename_efi}.efi\" => \"#{pxeconfig_dir_mac}/boot.efi\""
+          logger.debug "TFTP:   - \"#{pxeconfig_dir}/shim#{bootfilename_efi}.efi\" => \"#{pxeconfig_dir_mac}/boot-sb.efi\""
+          FileUtils.cp_r("#{pxeconfig_dir}/grub#{bootfilename_efi}.efi", "#{pxeconfig_dir_mac}/grub#{bootfilename_efi}.efi", remove_destination: true)
+          FileUtils.cp_r("#{pxeconfig_dir}/shim#{bootfilename_efi}.efi", "#{pxeconfig_dir_mac}/shim#{bootfilename_efi}.efi", remove_destination: true)
+          FileUtils.cp_r("#{pxeconfig_dir}/grub#{bootfilename_efi}.efi", "#{pxeconfig_dir_mac}/boot.efi", remove_destination: true)
+          FileUtils.cp_r("#{pxeconfig_dir}/shim#{bootfilename_efi}.efi", "#{pxeconfig_dir_mac}/boot-sb.efi", remove_destination: true)
+        end
+
+        File.write(File.join(pxeconfig_dir_mac, 'os_info'), "#{os} #{version} #{arch}")
+      else
+        logger.debug "TFTP: Host is not in build mode."
+        logger.debug "TFTP:   => Removing host specific bootloader files from \"#{pxeconfig_dir_mac}\""
+
+        FileUtils.rm_f(Dir.glob("#{pxeconfig_dir_mac}/*.efi"))
+      end
+    end
+
+    def del(mac)
+      super mac
+      delete_dir "#{path}/host_config/#{mac.tr(':', '-').downcase}"
+    end
+
+    def pxeconfig_dir(mac = nil)
+      "#{path}#{mac ? "/host_config/#{mac.tr(':', '-').downcase}" : ''}/grub2"
     end
 
     def pxe_default
@@ -104,7 +185,8 @@ module Proxy::TFTP
     end
 
     def pxeconfig_file(mac)
-      ["#{pxeconfig_dir}/grub.cfg-01-" + mac.tr(':', '-').downcase, "#{pxeconfig_dir}/grub.cfg-#{mac.downcase}"]
+      pxeconfig_dir_mac = pxeconfig_dir(mac)
+      ["#{pxeconfig_dir_mac}/grub.cfg", "#{pxeconfig_dir_mac}/grub.cfg-01-#{mac.tr(':', '-').downcase}", "#{pxeconfig_dir_mac}/grub.cfg-#{mac.downcase}", "#{pxeconfig_dir}/grub.cfg-01-" + mac.tr(':', '-').downcase, "#{pxeconfig_dir}/grub.cfg-#{mac.downcase}"]
     end
   end
 
