@@ -1,0 +1,8 @@
+---
+include:
+  - project: 'orcharhino/foreman_components/foreman_testing_ci_template'
+    file: 'rubygem.gitlab-ci.yml'
+    ref: '3.9.2'
+
+variables:
+  BUILD_OPTION: ""
