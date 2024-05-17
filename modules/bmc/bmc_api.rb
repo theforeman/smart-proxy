@@ -397,47 +397,47 @@ module Proxy::BMC
       end
 
       case provider_type
-        when 'freeipmi', 'ipmitool'
-          log_halt 401, "unauthorized" unless auth.provided?
-          log_halt 401, "bad_authentication_request, credentials are not in auth.basic format" unless auth.basic?
-          username, password = auth.credentials
-          # this causes rubyipmi to use the supplied logger, most actions in rubyipmi only output during Logger::DEBUG
-          Proxy::BMC::IPMI.logger = logger
+      when 'freeipmi', 'ipmitool'
+        log_halt 401, "unauthorized" unless auth.provided?
+        log_halt 401, "bad_authentication_request, credentials are not in auth.basic format" unless auth.basic?
+        username, password = auth.credentials
+        # this causes rubyipmi to use the supplied logger, most actions in rubyipmi only output during Logger::DEBUG
+        Proxy::BMC::IPMI.logger = logger
 
-          # we use the http auth basic header to pass credentials
-          # The idea here is to pass the credentials on the command line
-          # to execute ipmi commands and has nothing to do with authorization
-          # of using smart-proxy. Its simply a tunnel to pass credentials through,
-          # since we are essentially remotely executing ipmi commands using Rubyipmi.
+        # we use the http auth basic header to pass credentials
+        # The idea here is to pass the credentials on the command line
+        # to execute ipmi commands and has nothing to do with authorization
+        # of using smart-proxy. Its simply a tunnel to pass credentials through,
+        # since we are essentially remotely executing ipmi commands using Rubyipmi.
 
-          args = {
-            :host         => params[:host],
-            :username     => username,
-            :options      => body_parameters['options'],
-            :password     => password,
-            :bmc_provider => provider_type,
-          }
-          @bmc = Proxy::BMC::IPMI.new(args)
-        when 'redfish'
-          log_halt 401, "unauthorized" unless auth.provided?
-          log_halt 401, "bad_authentication_request, credentials are not in auth.basic format" unless auth.basic?
-          username, password = auth.credentials
+        args = {
+          :host         => params[:host],
+          :username     => username,
+          :options      => body_parameters['options'],
+          :password     => password,
+          :bmc_provider => provider_type,
+        }
+        @bmc = Proxy::BMC::IPMI.new(args)
+      when 'redfish'
+        log_halt 401, "unauthorized" unless auth.provided?
+        log_halt 401, "bad_authentication_request, credentials are not in auth.basic format" unless auth.basic?
+        username, password = auth.credentials
 
-          args = {
-            :host     => params[:host],
-            :username => username,
-            :options  => body_parameters['options'],
-            :password => password,
-          }
-          @bmc = Proxy::BMC::Redfish.new(args)
-        when "shell"
-          require 'bmc/shell'
-          @bmc = Proxy::BMC::Shell.new
-        when "ssh"
-          require 'bmc/ssh'
-          @bmc = Proxy::BMC::SSH.new(params[:host])
-        else
-          log_halt 400, "Invalid BMC type: #{provider_type}"
+        args = {
+          :host     => params[:host],
+          :username => username,
+          :options  => body_parameters['options'],
+          :password => password,
+        }
+        @bmc = Proxy::BMC::Redfish.new(args)
+      when "shell"
+        require 'bmc/shell'
+        @bmc = Proxy::BMC::Shell.new
+      when "ssh"
+        require 'bmc/ssh'
+        @bmc = Proxy::BMC::SSH.new(params[:host])
+      else
+        log_halt 400, "Invalid BMC type: #{provider_type}"
       end
     rescue => e
       log_halt 400, e
