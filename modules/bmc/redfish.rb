@@ -21,6 +21,12 @@ module Proxy
         connection
       end
 
+      def cleanup
+        host.logout
+      rescue StandardError => e
+        logger.exception("Redfish client logout failed", e)
+      end
+
       def load_vendor_overrides
         mod = case manufacturer
               when 'Dell Inc.' then :RedfishVendorOverridesDellInc

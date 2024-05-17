@@ -41,9 +41,8 @@ module Proxy::BMC
 
     # runs a test against the bmc device and returns true if the connection was successful
     get "/:host/test" do
-      bmc_setup
-      begin
-        result = @bmc.test
+      bmc_setup do |bmc|
+        result = bmc.test
         { :action => :test, :result => result }.to_json
       rescue NotImplementedError => e
         log_halt 501, e
@@ -63,15 +62,14 @@ module Proxy::BMC
       if params[:action].nil?
         return { :actions => ["on", "off", "status"] }.to_json
       end
-      bmc_setup
-      begin
+      bmc_setup do |bmc|
         case params[:action]
           when "status"
-            { :action => params[:action], :result => @bmc.powerstatus }.to_json
+            { :action => params[:action], :result => bmc.powerstatus }.to_json
           when "off"
-            { :action => params[:action], :result => @bmc.poweroff? }.to_json
+            { :action => params[:action], :result => bmc.poweroff? }.to_json
           when "on"
-            { :action => params[:action], :result => @bmc.poweron? }.to_json
+            { :action => params[:action], :result => bmc.poweron? }.to_json
           else
             { :error => "The action: #{params[:action]} is not a valid action" }.to_json
         end
@@ -86,25 +84,24 @@ module Proxy::BMC
       if params[:action].nil?
         return { :actions => ["ip", "netmask", "mac", "gateway", "snmp", "vlanid", "ipsrc", "print"] }.to_json
       end
-      bmc_setup
-      begin
+      bmc_setup do |bmc|
         case params[:action]
           when "ip"
-            { :action => params[:action], :result => @bmc.ip }.to_json
+            { :action => params[:action], :result => bmc.ip }.to_json
           when "netmask"
-            { :action => params[:action], :result => @bmc.netmask }.to_json
+            { :action => params[:action], :result => bmc.netmask }.to_json
           when "mac"
-            { :action => params[:action], :result => @bmc.mac }.to_json
+            { :action => params[:action], :result => bmc.mac }.to_json
           when "gateway"
-            { :action => params[:action], :result => @bmc.gateway }.to_json
+            { :action => params[:action], :result => bmc.gateway }.to_json
           when "snmp"
-            { :action => params[:action], :result => @bmc.snmp }.to_json
+            { :action => params[:action], :result => bmc.snmp }.to_json
           when "vlanid"
-            { :action => params[:action], :result => @bmc.vlanid }.to_json
+            { :action => params[:action], :result => bmc.vlanid }.to_json
           when "ipsrc"
-            { :action => params[:action], :result => @bmc.ipsrc }.to_json
+            { :action => params[:action], :result => bmc.ipsrc }.to_json
           when "print"
-            { :action => params[:action], :result => @bmc.lanprint }.to_json
+            { :action => params[:action], :result => bmc.lanprint }.to_json
           else
             { :error => "The action: #{params[:action]} is not a valid action" }.to_json
         end
@@ -120,12 +117,11 @@ module Proxy::BMC
       if params[:action].nil?
         return { :actions => ["status"] }.to_json
       end
-      bmc_setup
+      bmc_setup do |bmc|
       # determine which function should be executed
-      begin
         case params[:action]
           when "status"
-            { :action => params[:action], :result => @bmc.identifystatus }.to_json
+            { :action => params[:action], :result => bmc.identifystatus }.to_json
           else
             { :error => "The action: #{params[:action]} is not a valid action" }.to_json
         end
@@ -143,13 +139,12 @@ module Proxy::BMC
         # return {:actions => ["bootdevice", "bootdevices"]}.to_json
         return { :functions => ["bootdevices"] }.to_json
       end
-      bmc_setup
-      begin
+      bmc_setup do |bmc|
         case params[:function]
           # when "bootdevice"
-          #  @bmc.chassis.config.bootdevice.to_json
+          #  bmc.chassis.config.bootdevice.to_json
           when "bootdevices"
-            { :devices => @bmc.bootdevices }.to_json
+            { :devices => bmc.bootdevices }.to_json
           else
             { :error => "The action: #{params[:function]} is not a valid function" }.to_json
         end
@@ -165,19 +160,18 @@ module Proxy::BMC
       if params[:action].nil?
         return { :actions => ["on", "off", "cycle", "soft", "reset"] }.to_json
       end
-      bmc_setup
-      begin
+      bmc_setup do |bmc|
         case params[:action]
           when "on"
-            { :action => params[:action], :result => @bmc.poweron }.to_json
+            { :action => params[:action], :result => bmc.poweron }.to_json
           when "off"
-            { :action => params[:action], :result => @bmc.poweroff }.to_json
+            { :action => params[:action], :result => bmc.poweroff }.to_json
           when "cycle"
-            { :action => params[:action], :result => @bmc.powercycle }.to_json
+            { :action => params[:action], :result => bmc.powercycle }.to_json
           when "soft"
-            { :action => params[:action], :result => @bmc.poweroff(true) }.to_json
+            { :action => params[:action], :result => bmc.poweroff(true) }.to_json
           when "reset"
-            { :action => params[:action], :result => @bmc.powerreset }.to_json
+            { :action => params[:action], :result => bmc.powerreset }.to_json
           else
             { :error => "The action: #{params[:action]} is not a valid action" }.to_json
         end
@@ -192,28 +186,27 @@ module Proxy::BMC
       if params[:function].nil?
         return { :functions => ["bootdevice"] }.to_json
       end
-      bmc_setup
-      begin
+      bmc_setup do |bmc|
         case params[:function]
 
           when "bootdevice"
             if params[:action].nil?
-              return { :actions => @bmc.bootdevices, :options => ["reboot=true|false", "persistent=true|false"] }.to_json
+              return { :actions => bmc.bootdevices, :options => ["reboot=true|false", "persistent=true|false"] }.to_json
             end
             case params[:action]
               when /pxe/
-                { :action => params[:action], :result => @bmc.bootpxe(params[:reboot], params[:persistent]) }.to_json
+                { :action => params[:action], :result => bmc.bootpxe(params[:reboot], params[:persistent]) }.to_json
               when /cdrom/
-                { :action => params[:action], :result => @bmc.bootcdrom(params[:reboot], params[:persistent]) }.to_json
+                { :action => params[:action], :result => bmc.bootcdrom(params[:reboot], params[:persistent]) }.to_json
               when /bios/
-                { :action => params[:action], :result => @bmc.bootbios(params[:reboot], params[:persistent]) }.to_json
+                { :action => params[:action], :result => bmc.bootbios(params[:reboot], params[:persistent]) }.to_json
               when /disk/
-                { :action => params[:action], :result => @bmc.bootdisk(params[:reboot], params[:persistent]) }.to_json
+                { :action => params[:action], :result => bmc.bootdisk(params[:reboot], params[:persistent]) }.to_json
               else
                 # TODO: this appears to be deadcode; the only supported bootdevices are pxe, cdrom, bios, and disk
-                if @bmc.bootdevices.include?(params[:action])
+                if bmc.bootdevices.include?(params[:action])
                   { :action => params[:action],
-                    :result => @bmc.bootdevice = {:device => params[:action], :reboot => params[:reboot],
+                    :result => bmc.bootdevice = {:device => params[:action], :reboot => params[:reboot],
                                                   :persistent => params[:persistent]},
                   }.to_json
                 else
@@ -234,13 +227,12 @@ module Proxy::BMC
       if params[:action].nil?
         return { :actions => ["on", "off"] }.to_json
       end
-      bmc_setup
-      begin
+      bmc_setup do |bmc|
         case params[:action]
           when "on"
-            { :action => params[:action], :result => @bmc.identifyon }.to_json
+            { :action => params[:action], :result => bmc.identifyon }.to_json
           when "off"
-            { :action => params[:action], :result => @bmc.identifyoff }.to_json
+            { :action => params[:action], :result => bmc.identifyoff }.to_json
           else
             { :error => "The action: #{params[:function]} is not a valid function" }.to_json
         end
@@ -255,19 +247,18 @@ module Proxy::BMC
       if params[:action].nil?
         return { :actions => %w[list serial manufacturer model asset_tag] }.to_json
       end
-      bmc_setup
-      begin
+      bmc_setup do |bmc|
         case params[:action]
           when "list"
-            { :action => params[:action], :result => @bmc.frulist }.to_json
+            { :action => params[:action], :result => bmc.frulist }.to_json
           when "serial"
-            { :action => params[:action], :result => @bmc.serial }.to_json
+            { :action => params[:action], :result => bmc.serial }.to_json
           when "manufacturer"
-            { :action => params[:action], :result => @bmc.manufacturer }.to_json
+            { :action => params[:action], :result => bmc.manufacturer }.to_json
           when "model"
-            { :action => params[:action], :result => @bmc.model }.to_json
+            { :action => params[:action], :result => bmc.model }.to_json
           when "asset_tag"
-            { :action => params[:action], :result => @bmc.asset_tag}.to_json
+            { :action => params[:action], :result => bmc.asset_tag}.to_json
           else
             { :error => "The action: #{params[:action]} is not a valid action" }.to_json
         end
@@ -282,15 +273,14 @@ module Proxy::BMC
       if params[:action].nil?
         return { :actions => %w[info guid version] }.to_json
       end
-      bmc_setup
-      begin
+      bmc_setup do |bmc|
         case params[:action]
           when "info"
-            { :action => params[:action], :result => @bmc.info }.to_json
+            { :action => params[:action], :result => bmc.info }.to_json
           when "guid"
-            { :action => params[:action], :result => @bmc.guid }.to_json
+            { :action => params[:action], :result => bmc.guid }.to_json
           when "version"
-            { :action => params[:action], :result => @bmc.version }.to_json
+            { :action => params[:action], :result => bmc.version }.to_json
           else
             { :error => "The action: #{params[:action]} is not a valid action" }.to_json
         end
@@ -305,8 +295,7 @@ module Proxy::BMC
       if params[:action].nil?
         return { :actions => %w[reset] }.to_json
       end
-      bmc_setup
-      begin
+      bmc_setup do |bmc|
         case params[:action]
           when "reset"
             if params[:type].nil?
@@ -314,7 +303,7 @@ module Proxy::BMC
             end
             case params[:type]
               when /cold|warm/
-                { :action => params[:action], :result => @bmc.reset(params[:type])}.to_json
+                { :action => params[:action], :result => bmc.reset(params[:type])}.to_json
               else
                 { :error => "The type: #{params[:type]} is not a valid type" }.to_json
             end
@@ -332,24 +321,23 @@ module Proxy::BMC
       if params[:action].nil?
         return { :actions => %w[list count names fanlist templist get] }.to_json
       end
-      bmc_setup
-      begin
+      bmc_setup do |bmc|
         case params[:action]
           when "list"
-            { :action => params[:action], :result => @bmc.sensorlist }.to_json
+            { :action => params[:action], :result => bmc.sensorlist }.to_json
           when "count"
-            { :action => params[:action], :result => @bmc.sensorcount }.to_json
+            { :action => params[:action], :result => bmc.sensorcount }.to_json
           when "names"
-            { :action => params[:action], :result => @bmc.sensornames }.to_json
+            { :action => params[:action], :result => bmc.sensornames }.to_json
           when "fanlist"
-            { :action => params[:action], :result => @bmc.fanlist }.to_json
+            { :action => params[:action], :result => bmc.fanlist }.to_json
           when "templist"
-            { :action => params[:action], :result => @bmc.templist }.to_json
+            { :action => params[:action], :result => bmc.templist }.to_json
           when "get"
             if params[:sensor].nil?
               return { :options => "sensor=<name>" }.to_json
             end
-            { :action => params[:action], :result => @bmc.sensorget(params[:sensor]) }.to_json
+            { :action => params[:action], :result => bmc.sensorget(params[:sensor]) }.to_json
           else
             { :error => "The action: #{params[:action]} is not a valid action" }.to_json
         end
@@ -417,7 +405,7 @@ module Proxy::BMC
           :password     => password,
           :bmc_provider => provider_type,
         }
-        @bmc = Proxy::BMC::IPMI.new(args)
+        bmc = Proxy::BMC::IPMI.new(args)
       when 'redfish'
         log_halt 401, "unauthorized" unless auth.provided?
         log_halt 401, "bad_authentication_request, credentials are not in auth.basic format" unless auth.basic?
@@ -429,15 +417,21 @@ module Proxy::BMC
           :options  => body_parameters['options'],
           :password => password,
         }
-        @bmc = Proxy::BMC::Redfish.new(args)
+        bmc = Proxy::BMC::Redfish.new(args)
       when "shell"
         require 'bmc/shell'
-        @bmc = Proxy::BMC::Shell.new
+        bmc = Proxy::BMC::Shell.new
       when "ssh"
         require 'bmc/ssh'
-        @bmc = Proxy::BMC::SSH.new(params[:host])
+        bmc = Proxy::BMC::SSH.new(params[:host])
       else
         log_halt 400, "Invalid BMC type: #{provider_type}"
+      end
+
+      begin
+        yield bmc
+      ensure
+        bmc.cleanup
       end
     rescue => e
       log_halt 400, e

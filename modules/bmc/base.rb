@@ -6,6 +6,10 @@ module Proxy
         @host = connect(args)
       end
 
+      # Optionally clean up things, like logging out
+      def cleanup
+      end
+
       def poweroff(soft = false)
         raise NotImplementedError.new
       end
