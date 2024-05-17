@@ -16,7 +16,7 @@ module Proxy
       end
 
       def connect(args = { })
-        connection = RedfishClient.new("https://#{args[:host]}/", verify: @redfish_verify_ssl)
+        connection = RedfishClient.new("https://#{args[:host]}/", verify: @redfish_verify_ssl, use_session: false)
         connection.login(args[:username], args[:password])
         connection
       end
