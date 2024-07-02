@@ -205,7 +205,7 @@ module Proxy::DHCP::CommonISC
     rescue
       begin
         logger.info "Next-server option not IPv4, trying to resolve '#{server}'"
-        ip2hex(dns_resolv.getresource(server, Resolv::DNS::Resource::IN::A))
+        ip2hex(dns_resolv.getresource(server, Resolv::DNS::Resource::IN::A).address.to_s)
       rescue Resolv::ResolvError => e
         logger.warn "Unable to resolve DNS A query for '#{server}', will use the hostname"
         logger.debug "Reason: #{e}"

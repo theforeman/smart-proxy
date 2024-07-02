@@ -142,7 +142,7 @@ class IscOmapiProviderTest < Test::Unit::TestCase
   end
 
   def test_boot_server_hostname
-    ::Proxy::LoggingResolv.any_instance.expects(:getresource).with("ptr-doesnotexist.example.com", Resolv::DNS::Resource::IN::A).returns("127.0.0.2")
+    ::Proxy::LoggingResolv.any_instance.expects(:getresource).with("ptr-doesnotexist.example.com", Resolv::DNS::Resource::IN::A).returns(Resolv::DNS::Resource::IN::A.new("127.0.0.2"))
     assert_equal "7f:00:00:02", @dhcp.bootServer("ptr-doesnotexist.example.com")
   end
 
