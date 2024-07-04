@@ -10,7 +10,7 @@ module Proxy::HttpRequest
     end
 
     def query_string(input = {})
-      input.compact.map { |k, v| "#{CGI.escape(k.to_s)}=#{CGI.escape(v)}" }.join("&")
+      Rack::Utils.build_nested_query(input.compact)
     end
 
     def create_get(path, query = {}, headers = {})

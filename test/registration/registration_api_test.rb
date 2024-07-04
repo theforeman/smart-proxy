@@ -53,6 +53,14 @@ class RegistrationRegisterApiTest < Test::Unit::TestCase
     assert_match('template', last_response.body)
   end
 
+  def test_host_register_template_with_array_args
+    stub_request(:post, "#{@foreman_url}/register").to_return(body: 'template')
+
+    post '/', { host: { name: 'test.example.com', build: false, repo_data: [{repo: 'repo1', repo_gpg_key_url: 'url1'}, {repo: 'repo2', repo_gpg_key_url: 'url2'}] } }, { 'CONTENT_TYPE' => 'application/json' }
+    assert last_response.ok?
+    assert_match('template', last_response.body)
+  end
+
   def test_global_401
     stub_request(:get, "#{@foreman_url}/register").to_return(body: '401', status: 401, headers: { "Content-Type" => 'text/plain; charset=UTF-8' })
 
