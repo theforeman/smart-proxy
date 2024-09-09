@@ -25,6 +25,7 @@ require 'proxy/provider'
 require 'proxy/error'
 require 'proxy/request'
 require 'proxy/request_id_middleware'
+require 'proxy/hsts_middleware'
 
 require 'bundler_helper'
 Proxy::BundlerHelper.require_groups(:default)
@@ -44,6 +45,7 @@ module Proxy
   ::Sinatra::Base.set :logging, false
   ::Sinatra::Base.use ::Proxy::RequestIdMiddleware
   ::Sinatra::Base.use ::Proxy::LoggerMiddleware
+  ::Sinatra::Base.use ::Proxy::HstsMiddleware
   ::Sinatra::Base.set :env, :production
   ::Sinatra::Base.register ::Sinatra::Authorization
 
