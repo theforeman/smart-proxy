@@ -71,5 +71,24 @@ module Proxy::TFTP
     get "/serverName" do
       {"serverName" => (Proxy::TFTP::Plugin.settings.tftp_servername || "")}.to_json
     end
+
+    # Purge old entries
+    post "/prune" do
+      # how old a file can be, in seconds
+      age = params[:age]
+
+      if age.nil? || age.to_i <= 0
+        log_halt 400, "Invalid age; needs to be a valid integer > 0"
+      end
+
+      to_prune = Proxy::TFTP::Server.outdated_files(age.to_i)
+
+      to_prune.each do |file|
+        logger.debug("Removing outdated file", file)
+        File.unlink(file)
+      end
+
+      pruned.length
+    end
   end
 end

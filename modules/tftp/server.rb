@@ -63,6 +63,13 @@ module Proxy::TFTP
         logger.debug "TFTP: Skipping a request to delete a file which doesn't exists"
       end
     end
+
+    def self.outdated_files(age)
+      delete_before = Time.now - age
+      Dir.glob(File.join(Proxy::TFTP::Plugin.settings.tftproot, "boot", "*-{vmlinuz,initrd.img}")).filter do |file|
+        File.file?(file) && File.mtime(file) < delete_before
+      end
+    end
   end
 
   class Syslinux < Server
