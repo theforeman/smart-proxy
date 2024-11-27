@@ -110,7 +110,7 @@ module Proxy::TFTP
   class Pxegrub2 < Server
     def bootloader_path(os, release, arch)
       [release, "default"].each do |version|
-        bootloader_path = File.join(path, 'bootloader-universe/pxegrub2', os, version, arch)
+        bootloader_path = File.join(path, 'bootloader-universe', 'pxegrub2', os, version, arch)
 
         logger.debug "TFTP: Checking if bootloader universe is configured for OS '#{os}' version '#{version}' (#{arch})."
 

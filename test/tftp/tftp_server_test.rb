@@ -141,14 +141,14 @@ class TftpPxegrub2ServerTest < Test::Unit::TestCase
   end
 
   def test_release_specific_bootloader_path
-    release_specific_bootloader_path = File.join(@subject.path, "bootloader-universe/pxegrub2", @os, @release, @arch)
+    release_specific_bootloader_path = File.join(@subject.path, "bootloader-universe", "pxegrub2", @os, @release, @arch)
     Dir.stubs(:exist?).with(release_specific_bootloader_path).returns(true).once
     assert_equal release_specific_bootloader_path, @subject.bootloader_path(@os, @release, @arch)
   end
 
   def test_default_bootloader_path
-    release_specific_bootloader_path = File.join(@subject.path, "bootloader-universe/pxegrub2", @os, @release, @arch)
-    default_bootloader_path = File.join(@subject.path, "bootloader-universe/pxegrub2", @os, "default", @arch)
+    release_specific_bootloader_path = File.join(@subject.path, "bootloader-universe", "pxegrub2", @os, @release, @arch)
+    default_bootloader_path = File.join(@subject.path, "bootloader-universe", "pxegrub2", @os, "default", @arch)
     Dir.stubs(:exist?).with(release_specific_bootloader_path).returns(false).once
     Dir.stubs(:exist?).with(default_bootloader_path).returns(true).once
     assert_equal default_bootloader_path, @subject.bootloader_path(@os, @release, @arch)
