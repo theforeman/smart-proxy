@@ -1,0 +1,82 @@
+---
+name: Foreman Proxy
+
+on:
+  pull_request:
+  push:
+    branches:
+      - 'develop'
+      - '*-stable'
+
+env:
+  BUNDLE_WITHOUT: "development"
+
+concurrency:
+  group: ${{ github.ref_name }}-${{ github.workflow }}
+  cancel-in-progress: true
+
+jobs:
+  setup_matrix:
+    name: Setup matrix
+    runs-on: ubuntu-24.04
+    outputs:
+      matrix: ${{ steps.build_matrix.outputs.matrix }}
+    steps:
+      - name: Build test matrix
+        id: build_matrix
+        uses: theforeman/gha-matrix-builder@v0
+
+  rubocop:
+    name: Rubocop
+    needs: setup_matrix
+    runs-on: ubuntu-24.04
+    env:
+      BUNDLE_WITHOUT: bmc:development:dhcp_isc_inotify:dhcp_isc_kqueue:journald:krb5:libvirt:puppetca_token_whitelisting:realm_freeipa:windows
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ fromJson(needs.setup_matrix.outputs.matrix).ruby[0] }}
+          bundler-cache: true
+      - name: Run rubocop
+        run: bundle exec rubocop --parallel --format github
+
+  tests:
+    name: "Test - Ruby ${{ matrix.ruby }}"
+    runs-on: ubuntu-24.04
+    needs:
+      - setup_matrix
+      - rubocop
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.setup_matrix.outputs.matrix) }}
+    steps:
+      - run: sudo apt-get update
+      - run: sudo apt-get -qq -y install build-essential libcurl4-openssl-dev zlib1g-dev libvirt-dev libsystemd-dev libkrb5-dev
+      - name: "Check out Foreman Proxy"
+        uses: actions/checkout@v4
+      - name: "Set up Ruby ${{ matrix.ruby }}"
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
+      - name: Archive Gemfile.lock
+        uses: actions/upload-artifact@v4
+        with:
+          name: Gemfile-ruby-${{ matrix.ruby }}.lock
+          path: Gemfile.lock
+      - name: Run rake test
+        run: bundle exec rake test
+
+  result:
+    if: always()
+    name: Test suite
+    runs-on: ubuntu-24.04
+    needs:
+      - tests
+    steps:
+      - name: Decide whether the needed jobs succeeded or failed
+        uses: re-actors/alls-green@release/v1
+        with:
+          jobs: ${{ toJSON(needs) }}
