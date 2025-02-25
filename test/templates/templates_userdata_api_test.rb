@@ -25,4 +25,13 @@ class TemplatesApiTest < Test::Unit::TestCase
     assert last_response.ok?, "Last response was ok"
     assert_match("A user-data template", last_response.body)
   end
+
+  def test_api_can_ask_for_a_cloud_init_template_by_mac
+    stub_request(:get, "#{@foreman_url}/userdata/00:a1:b2:c3:d4:f5/user-data")
+      .with(query: {"url" => @template_url, "mac" => "00:a1:b2:c3:d4:f5"})
+      .to_return(:body => 'A user-data template')
+    get "/00:a1:b2:c3:d4:f5/user-data"
+    assert last_response.ok?, "Last response was ok"
+    assert_equal("A user-data template", last_response.body)
+  end
 end
