@@ -8,4 +8,10 @@ class Proxy::TemplatesUserdataApi < Sinatra::Base
       Proxy::Templates::UserdataProxyRequest.new.get(kind, request.env, params)
     end
   end
+
+  get "/:mac/:kind" do |mac, kind|
+    log_halt(500, "Failed to retrieve #{kind} userdata template for #{params.inspect}: ") do
+      Proxy::Templates::UserdataProxyRequest.new.get([mac, kind], request.env, params)
+    end
+  end
 end
