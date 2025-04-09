@@ -13,6 +13,7 @@ Gem::Specification.new do |s|
   s.license = 'GPL-3.0'
   s.extra_rdoc_files = ["README.md"]
   s.required_ruby_version = '>= 2.7'
+  s.add_dependency 'base64'
   s.add_dependency 'json'
   s.add_dependency 'logging'
   s.add_dependency 'rack', '>= 1.3'
