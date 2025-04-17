@@ -1,3 +1,4 @@
+require 'logger'
 require 'logging'
 require 'proxy/log_buffer/decorator'
 require 'proxy/time_utils'

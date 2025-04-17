@@ -10,3 +10,7 @@ gem "ffi", "<1.17" if RUBY_VERSION < '3.0'
 Dir[File.join(__dir__, 'bundler.d', '*.rb')].each do |bundle|
   eval_gemfile(bundle)
 end
+
+# Changed from a default gem to a bundled gem in Ruby 3.4
+# See: https://stdgems.org/new-in/3.4/
+gem 'syslog' if RUBY_VERSION >= '3.4'
