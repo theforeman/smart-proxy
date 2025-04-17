@@ -16,6 +16,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'base64'
   s.add_dependency 'json'
   s.add_dependency 'logging'
+  s.add_dependency 'ostruct'
   s.add_dependency 'rack', '>= 1.3'
   s.add_dependency 'rexml', '~> 3.2'
   s.add_dependency 'sd_notify', '~> 0.1'
