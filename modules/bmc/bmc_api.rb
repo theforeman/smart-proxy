@@ -163,7 +163,7 @@ module Proxy::BMC
     put "/:host/chassis/power/?:action?" do
       # return hint on valid options
       if params[:action].nil?
-        return { :actions => ["on", "off", "cycle", "soft", "reset"] }.to_json
+        return { :actions => ["on", "off", "cycle", "soft", "reset", "reboot"] }.to_json
       end
       bmc_setup
       begin
@@ -178,6 +178,8 @@ module Proxy::BMC
             { :action => params[:action], :result => @bmc.poweroff(true) }.to_json
           when "reset"
             { :action => params[:action], :result => @bmc.powerreset }.to_json
+          when "reboot"
+            { :action => params[:action], :result => @bmc.powerreboot }.to_json
           else
             { :error => "The action: #{params[:action]} is not a valid action" }.to_json
         end

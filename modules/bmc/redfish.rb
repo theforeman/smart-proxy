@@ -78,6 +78,10 @@ module Proxy
         poweraction('ForceRestart')
       end
 
+      def powerreboot
+        poweraction('GracefulRestart')
+      end
+
       def poweron
         poweraction('On')
       end

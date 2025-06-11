@@ -602,6 +602,13 @@ class BmcApiTest < Test::Unit::TestCase
     assert expect.once
   end
 
+  def test_api_calls_redfish_provider_reboot
+    expect = Proxy::BMC::Redfish.any_instance.stubs(:powerreboot)
+    test_args = { 'bmc_provider' => 'redfish' }
+    put "/#{@host}/chassis/power/reboot", test_args
+    assert expect.once
+  end
+
   def test_api_can_pass_options_in_body
     Rubyipmi.stubs(:is_provider_installed?).returns(true)
     args = { 'bmc_provider' => 'freeipmi', :options => {:driver => 'lan20', :privilege => 'USER'} }.to_json
