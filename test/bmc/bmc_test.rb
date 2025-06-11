@@ -56,6 +56,12 @@ class BmcTest < Test::Unit::TestCase
     assert bmc.powerreset
   end
 
+  def test_should_power_reboot
+    assert_raise(NotImplementedError) do
+      bmc.powerreboot
+    end
+  end
+
   def test_should_bootpxe
     Rubyipmi::Ipmitool::Chassis.any_instance.expects(:bootpxe).returns(true)
     bmc.bootpxe
