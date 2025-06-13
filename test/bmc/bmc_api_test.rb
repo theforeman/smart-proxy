@@ -583,6 +583,25 @@ class BmcApiTest < Test::Unit::TestCase
     assert expect.once
   end
 
+  def test_api_calls_ipmi_provider_reset
+    Rubyipmi.stubs(:is_provider_installed?).returns(true)
+    Proxy::BMC::IPMI.any_instance.stubs(:powerreset).returns(true)
+    Rack::Auth::Basic::Request.any_instance.stubs(:provided?).returns(true)
+    Rack::Auth::Basic::Request.any_instance.stubs(:basic?).returns(true)
+    Rack::Auth::Basic::Request.any_instance.stubs(:credentials).returns(['user', 'pass'])
+    put "/#{@host}/chassis/power/reset", { 'bmc_provider' => 'ipmitool' }
+    assert last_response.ok?, "Last response was not ok: #{last_response.body}"
+    data = JSON.parse(last_response.body)
+    assert_equal true, data["result"]
+  end
+
+  def test_api_calls_redfish_provider_reset
+    expect = Proxy::BMC::Redfish.any_instance.stubs(:powerreset)
+    test_args = { 'bmc_provider' => 'redfish' }
+    put "/#{@host}/chassis/power/reset", test_args
+    assert expect.once
+  end
+
   def test_api_can_pass_options_in_body
     Rubyipmi.stubs(:is_provider_installed?).returns(true)
     args = { 'bmc_provider' => 'freeipmi', :options => {:driver => 'lan20', :privilege => 'USER'} }.to_json

@@ -74,6 +74,10 @@ module Proxy
         poweraction('PowerCycle')
       end
 
+      def powerreset
+        poweraction('ForceRestart')
+      end
+
       def poweron
         poweraction('On')
       end

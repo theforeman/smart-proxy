@@ -16,7 +16,7 @@ class BmcApiFeaturesTest < SmartProxyRootApiTestCase
     mod = response['bmc']
     refute_nil(mod)
     assert_equal('running', mod['state'], Proxy::LogBuffer::Buffer.instance.info[:failed_modules][:bmc])
-    assert_equal(['redfish', 'shell', 'ssh'], mod['capabilities'])
+    assert_equal(['power_action_v2', 'redfish', 'shell', 'ssh'], mod['capabilities'])
 
     assert_equal({}, mod['settings'])
   end
@@ -32,7 +32,7 @@ class BmcApiFeaturesTest < SmartProxyRootApiTestCase
     mod = response['bmc']
     refute_nil(mod)
     assert_equal('running', mod['state'], Proxy::LogBuffer::Buffer.instance.info[:failed_modules][:bmc])
-    assert_equal(['freeipmi', 'redfish', 'shell', 'ssh'], mod['capabilities'])
+    assert_equal(['freeipmi', 'power_action_v2', 'redfish', 'shell', 'ssh'], mod['capabilities'])
 
     assert_equal({}, mod['settings'])
   end
