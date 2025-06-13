@@ -21,4 +21,11 @@ class BmcRedfishTest < Test::Unit::TestCase
       to_return(status: 200, body: JSON.generate({}))
     assert @bmc.powercycle
   end
+
+  def test_redfish_provider_reset
+    stub_request(:post, "#{@protocol}://#{@host}#{SYSTEM_DATA['Actions']['#ComputerSystem.Reset']['target']}").
+      with(body: JSON.generate({"ResetType" => "ForceRestart"})).
+      to_return(status: 200, body: JSON.generate({}))
+    assert @bmc.powerreset
+  end
 end
