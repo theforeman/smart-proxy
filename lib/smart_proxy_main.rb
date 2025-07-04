@@ -74,6 +74,7 @@ module Proxy
   require 'logs/logs'
   require 'httpboot/httpboot'
   require 'registration/registration'
+  require 'wol/wol'
 
   def self.version
     {:version => VERSION}
