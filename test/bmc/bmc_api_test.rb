@@ -2,6 +2,8 @@ require 'test_helper'
 require 'json'
 require 'bmc/bmc_plugin'
 require 'bmc/bmc_api'
+require 'bmc/redfish'
+require 'test/bmc/redfish_test_helper'
 
 ENV['RACK_ENV'] = 'test'
 
@@ -13,6 +15,7 @@ ENV['RACK_ENV'] = 'test'
 
 class BmcApiTest < Test::Unit::TestCase
   include Rack::Test::Methods
+  include RedfishTestHelper
 
   def app
     Proxy::BMC::Api.new
@@ -25,6 +28,7 @@ class BmcApiTest < Test::Unit::TestCase
     provider ||= ENV["ipmiprovider"] || "ipmitool"
     @args = { 'bmc_provider' => provider, 'blah' => 'test' }
     authorize user, pass
+    mask_redfish_acceess
   end
 
   def test_api_throws_401_error_when_auth_is_not_provided
@@ -570,6 +574,13 @@ class BmcApiTest < Test::Unit::TestCase
     get "/#{@host}/sensors/list", args
     assert_equal "StandardError", last_response.body
     assert_equal 400, last_response.status
+  end
+
+  def test_api_calls_redfish_provider_cycle
+    expect = Proxy::BMC::Redfish.any_instance.stubs(:powercycle)
+    test_args = { 'bmc_provider' => 'redfish' }
+    put "/#{@host}/chassis/power/cycle", test_args
+    assert expect.once
   end
 
   def test_api_can_pass_options_in_body
