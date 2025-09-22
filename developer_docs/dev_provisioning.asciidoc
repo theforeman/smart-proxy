@@ -1,0 +1,58 @@
+= Smart Proxy - Baremetal DEV Environment Provisioning
+
+Local development setup for simulating bare-metal provisioning in environments where Foreman is not directly accessible from the machines, but only via Smart Proxy.
+The Foreman setup is described in the link:https://github.com/theforeman/foreman/[Foreman repository].
+
+== DHCP
+
+`/config/settings.d/dhcp.yml`
+[source,yaml]
+----
+:enabled: true
+:use_provider: dhcp_isc
+:server: 127.0.0.1
+:ping_free_ip: true
+----
+
+`/config/settings.d/dhcp_isc.yml`
+[source,yaml]
+----
+:config: /etc/dhcp/dhcpd.conf
+:leases: /var/lib/dhcpd/dhcpd.leases
+----
+
+== TFTP
+
+`/config/settings.d/tftp.yml`
+[source,yaml]
+----
+:enabled: true
+:tftproot: /var/lib/tftpboot/
+:tftp_servername: 192.168.66.1
+----
+
+== Registration
+
+`/config/settings.d/registration.yml`
+[source,yaml]
+----
+:enabled: true
+:registration_url: "http://192.168.66.1:<proxy-port>"
+----
+
+== Facts
+
+`/config/settings.d/facts.yml`
+[source,yaml]
+----
+:enabled: true
+----
+
+== Templates
+
+`/config/settings.d/templates.yml`
+[source,yaml]
+----
+:enabled: true
+:template_url: "http://192.168.66.1:<proxy-port>"
+----
