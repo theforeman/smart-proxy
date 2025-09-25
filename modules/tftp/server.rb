@@ -92,21 +92,6 @@ module Proxy::TFTP
     end
   end
   class Pxelinux < Syslinux; end
-
-  class Pxegrub < Server
-    def pxeconfig_dir
-      "#{path}/grub"
-    end
-
-    def pxe_default
-      ["#{pxeconfig_dir}/menu.lst", "#{pxeconfig_dir}/efidefault"]
-    end
-
-    def pxeconfig_file(mac)
-      ["#{pxeconfig_dir}/menu.lst.01" + mac.delete(':').upcase, "#{pxeconfig_dir}/01-" + dashed_mac(mac).upcase]
-    end
-  end
-
   class Pxegrub2 < Server
     def bootloader_path(os, release, arch)
       [release, "default"].each do |version|

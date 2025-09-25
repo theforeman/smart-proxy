@@ -102,16 +102,6 @@ class TftpSyslinuxServerTest < Test::Unit::TestCase
   end
 end
 
-class TftpPxegrubServerTest < Test::Unit::TestCase
-  include TftpGenericServerSuite
-
-  def setup_paths
-    @subject = Proxy::TFTP::Pxegrub.new
-    @pxe_config_files = ["grub/menu.lst.01AABBCCDDEEFF", "grub/01-AA-BB-CC-DD-EE-FF"]
-    @pxe_default_files = ["grub/menu.lst", "grub/efidefault"]
-  end
-end
-
 class TftpPxegrub2ServerTest < Test::Unit::TestCase
   include TftpGenericServerSuite
 
