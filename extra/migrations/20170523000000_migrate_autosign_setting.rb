@@ -1,6 +1,6 @@
 require 'yaml'
 
-class MigrateAutosignSetting < ::Proxy::Migration
+class MigrateAutosignSetting < Proxy::Migration
   def migrate
     puppetca_config = path(src_dir, "settings.d", "puppetca.yml")
     unless File.exist?(puppetca_config)
@@ -40,9 +40,7 @@ class MigrateAutosignSetting < ::Proxy::Migration
   def write_to_files(output)
     output.keys.each do |m|
       next if output[m].empty? || m == :unknown
-      File.open(path(dst_dir, "settings.d", "#{m}.yml"), 'w') do |f|
-        f.write(strip_ruby_symbol_encoding(output[m].to_yaml))
-      end
+      File.write(path(dst_dir, "settings.d", "#{m}.yml"), strip_ruby_symbol_encoding(output[m].to_yaml))
     end
   end
 end

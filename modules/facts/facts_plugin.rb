@@ -1,4 +1,4 @@
-class Proxy::FactsPlugin < ::Proxy::Plugin
+class Proxy::FactsPlugin < Proxy::Plugin
   rackup_path File.expand_path("http_config.ru", __dir__)
 
   default_settings :enabled => false

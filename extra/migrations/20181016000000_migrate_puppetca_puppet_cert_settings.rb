@@ -1,6 +1,6 @@
 require 'yaml'
 
-class MigratePuppetCaSettings < ::Proxy::Migration
+class MigratePuppetCaSettings < Proxy::Migration
   def migrate
     copy_original_configuration_except(path('settings.d', 'puppetca.yml'),
                                        path('settings.d', 'puppetca_puppet_cert.yml.example'))
@@ -33,9 +33,7 @@ class MigratePuppetCaSettings < ::Proxy::Migration
   end
 
   def write_yaml(filepath, yaml)
-    File.open(filepath, 'w') do |f|
-      f.write(yaml.to_yaml)
-    end
+    File.write(filepath, yaml.to_yaml)
   end
 
   def settings_moved_to_provider

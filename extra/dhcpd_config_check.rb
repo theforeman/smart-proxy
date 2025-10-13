@@ -33,7 +33,7 @@ end
 if $PROGRAM_NAME == __FILE__
   begin
     options = parse_cli_options(ARGV)
-    parser = ::Proxy::DHCP::CommonISC::ConfigurationParser.new
+    parser = Proxy::DHCP::CommonISC::ConfigurationParser.new
     subnets, hosts, _, ignored = parser.subnets_hosts_and_leases(File.read(options[:cfg_path]), options[:cfg_path])
     puts "Subnets: %s" % [subnets.map { |s| "#{s.subnet_address}/#{s.subnet_mask}" }.join(', ')]
     puts "Hosts and leases: %s" % [hosts.map { |h| h.respond_to?(:ip_address) ? "Lease: #{h.ip_address}" : "Host: #{h.name}" }.join(', ')]

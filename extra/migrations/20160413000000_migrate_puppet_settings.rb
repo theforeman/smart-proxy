@@ -1,6 +1,6 @@
 require 'yaml'
 
-class MigratePuppetSettings < ::Proxy::Migration
+class MigratePuppetSettings < Proxy::Migration
   KNOWN_PARAMETERS = {
     :enabled            => [:puppet, :enabled],
     :puppet_provider    => [:puppet, :use_provider],

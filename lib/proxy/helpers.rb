@@ -13,7 +13,7 @@ module Proxy::Helpers
     message = "#{custom_msg}: #{message}" if custom_msg
     exception = exception_or_msg.is_a?(Exception) ? exception_or_msg : Exception.new(exception_or_msg)
     # just in case exception is passed in the 3rd parameter let's not loose the valuable info
-    exception = custom_msg.is_a?(Exception) ? custom_msg : exception
+    exception = custom_msg if custom_msg.is_a?(Exception)
     begin
       if block_given?
         return yield

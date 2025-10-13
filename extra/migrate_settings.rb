@@ -91,7 +91,7 @@ module ::Proxy
     end
 
     def underscore(src)
-      src = src.gsub(/::/, '/')
+      src = src.gsub("::", '/')
       src = src.gsub(/([A-Z]+)([A-Z][a-z])/, '\1_\2')
       src = src.gsub(/([a-z\d])([A-Z])/, '\1_\2')
       src = src.tr("-", "_")
@@ -244,7 +244,7 @@ def parse_cli_options(args)
 end
 
 def load_main_config_file(main_config_file_path)
-  YAML.load(File.read(main_config_file_path)) || {}
+  YAML.load_file(main_config_file_path) || {}
 end
 
 def module_configuration_dir(main_config_file)
@@ -260,8 +260,8 @@ if $PROGRAM_NAME == __FILE__
   migrations_dir_path = options[:migrations_dir]
   migrations_state_file_path = options[:migrations_state]
 
-  ::Proxy::Migrator.new(
+  Proxy::Migrator.new(
     working_dir_path, migrations_dir_path, config_src_path, modules_config_src_path,
-    ::Proxy::Migrations.new(migrations_state_file_path).load_past_migrations!).migrate
+    Proxy::Migrations.new(migrations_state_file_path).load_past_migrations!).migrate
   exit(0)
 end

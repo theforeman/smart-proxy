@@ -6,7 +6,7 @@ $LOAD_PATH << File.join(__dir__, '..', 'lib')
 $LOAD_PATH << File.join(__dir__, '..', 'modules')
 
 logdir = File.join(__dir__, '..', 'logs')
-FileUtils.mkdir_p(logdir) unless File.exist?(logdir)
+FileUtils.mkdir_p(logdir)
 
 ENV['RACK_ENV'] = 'test'
 
@@ -24,10 +24,6 @@ require 'smart_proxy_for_testing'
 require 'provider_interface_validation/dhcp_provider'
 
 include DhcpProviderInterfaceValidation
-
-def hash_symbols_to_strings(hash)
-  Hash[hash.collect { |k, v| [k.to_s, v] }]
-end
 
 # Starts up a real smart proxy instance under WEBrick
 # Use sparingly.  API tests should use rack-test etc.

@@ -36,9 +36,9 @@ module ::Proxy::Settings
       @used_defaults = DEFAULT_SETTINGS.keys - settings.keys
 
       default_and_user_settings = DEFAULT_SETTINGS.merge(settings)
-      settings_to_use = Hash[ default_and_user_settings.map do |key, value|
+      settings_to_use = default_and_user_settings.to_h do |key, value|
         [key, normalize_setting(key, value, HOW_TO_NORMALIZE)]
-      end ]
+      end
 
       super(settings_to_use)
     end

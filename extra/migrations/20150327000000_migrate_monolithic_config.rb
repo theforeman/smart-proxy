@@ -7,7 +7,7 @@
 require 'fileutils'
 require 'yaml'
 
-class MigrateMonolithicConfig < ::Proxy::Migration
+class MigrateMonolithicConfig < Proxy::Migration
   def migrate
     # Skip the migration if we are dealing with modularized proxy
     if File.directory?(File.join(src_dir, "settings.d"))

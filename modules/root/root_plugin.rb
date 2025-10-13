@@ -1,4 +1,4 @@
-class ::Proxy::RootPlugin < ::Proxy::Plugin
+class ::Proxy::RootPlugin < Proxy::Plugin
   plugin :foreman_proxy, ::Proxy::VERSION
   default_settings :enabled => true
 

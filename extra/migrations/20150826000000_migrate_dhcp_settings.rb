@@ -1,6 +1,6 @@
 require 'yaml'
 
-class MigrateDhcpSettings < ::Proxy::Migration
+class MigrateDhcpSettings < Proxy::Migration
   KNOWN_PARAMETERS = {
     :enabled         => [:dhcp, :enabled],
     :dhcp_vendor     => [:dhcp, :use_provider, :old_provider_name_to_new],

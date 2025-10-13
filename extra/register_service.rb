@@ -17,7 +17,7 @@ ruby = File.join(CONFIG['bindir'], 'ruby').tr('/', '\\')
 cmd  = "#{ruby} -C #{working_dir} \"#{executable}\""
 puts "Installing #{cmd} as a service"
 
-default_user         = ENV["USERNAME"]
+default_user         = ENV.fetch("USERNAME", nil)
 default_user         = ENV["USERDOMAIN"] + '\\' + default_user if ENV["USERDOMAIN"]
 default_service_name = 'smart proxy'
 
