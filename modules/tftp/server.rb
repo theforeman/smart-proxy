@@ -12,6 +12,17 @@ module Proxy::TFTP
       pxeconfig_file(mac).each do |file|
         write_file file, config
       end
+
+      host_pxe_dir = File.join(path, 'host-config', dashed_mac(mac).downcase, host_pxe_dir_name)
+      FileUtils.mkdir_p(host_pxe_dir)
+
+      pxeconfig_file(mac).each do |path|
+        ln_from = File.join(host_pxe_dir, path.split('/').last)
+        ln_to = Pathname.new(path).relative_path_from(host_pxe_dir)
+
+        FileUtils.ln_s ln_to, ln_from, force: true
+      end
+
       true
     end
 
@@ -20,6 +31,9 @@ module Proxy::TFTP
       pxeconfig_file(mac).each do |file|
         delete_file file
       end
+
+      delete_host_dir mac
+
       true
     end
 
@@ -66,6 +80,8 @@ module Proxy::TFTP
 
     def delete_host_dir(mac)
       host_dir = File.join(path, 'host-config', dashed_mac(mac).downcase)
+      return unless Dir.exist?(host_dir)
+
       logger.debug "TFTP: Removing directory '#{host_dir}'."
       FileUtils.rm_rf host_dir
     end
@@ -80,7 +96,7 @@ module Proxy::TFTP
 
   class Syslinux < Server
     def pxeconfig_dir
-      "#{path}/pxelinux.cfg"
+      File.join(path, 'pxelinux.cfg')
     end
 
     def pxe_default
@@ -89,6 +105,10 @@ module Proxy::TFTP
 
     def pxeconfig_file(mac)
       ["#{pxeconfig_dir}/01-" + dashed_mac(mac).downcase]
+    end
+
+    def host_pxe_dir_name
+      'pxe'
     end
   end
   class Pxelinux < Syslinux; end
@@ -116,8 +136,6 @@ module Proxy::TFTP
     end
 
     def default_symlinks(bootfile_suffix, pxeconfig_dir_mac)
-      pxeconfig_dir = pxeconfig_dir()
-
       grub_source = "grub#{bootfile_suffix}.efi"
       shim_source = "shim#{bootfile_suffix}.efi"
 
@@ -167,11 +185,6 @@ module Proxy::TFTP
       create_symlinks(symlinks)
     end
 
-    def del(mac)
-      super mac
-      delete_host_dir mac
-    end
-
     def pxeconfig_dir(mac = nil)
       if mac
         File.join(path, 'host-config', dashed_mac(mac).downcase, 'grub2')
@@ -185,14 +198,14 @@ module Proxy::TFTP
     end
 
     def pxeconfig_file(mac)
-      pxeconfig_dir_mac = pxeconfig_dir(mac)
       [
-        "#{pxeconfig_dir_mac}/grub.cfg",
-        "#{pxeconfig_dir_mac}/grub.cfg-01-#{dashed_mac(mac).downcase}",
-        "#{pxeconfig_dir_mac}/grub.cfg-#{mac.downcase}",
         "#{pxeconfig_dir}/grub.cfg-01-" + dashed_mac(mac).downcase,
         "#{pxeconfig_dir}/grub.cfg-#{mac.downcase}",
       ]
+    end
+
+    def host_pxe_dir_name
+      'grub2'
     end
   end
 
@@ -208,6 +221,10 @@ module Proxy::TFTP
     def pxeconfig_file(mac)
       ["#{pxeconfig_dir}/" + mac.delete(':').upcase, "#{pxeconfig_dir}/" + mac.delete(':').upcase + ".cfg"]
     end
+
+    def host_pxe_dir_name
+      'ztp'
+    end
   end
 
   class Poap < Server
@@ -222,11 +239,15 @@ module Proxy::TFTP
     def pxeconfig_file(mac)
       ["#{pxeconfig_dir}/" + mac.delete(':').upcase]
     end
+
+    def host_pxe_dir_name
+      'poap'
+    end
   end
 
   class Ipxe < Server
     def pxeconfig_dir
-      "#{path}/pxelinux.cfg"
+      File.join(path, 'pxelinux.cfg')
     end
 
     def pxe_default
@@ -234,7 +255,12 @@ module Proxy::TFTP
     end
 
     def pxeconfig_file(mac)
-      ["#{pxeconfig_dir}/01-" + dashed_mac(mac).downcase + ".ipxe"]
+      file = "01-" + dashed_mac(mac).downcase + ".ipxe"
+      [File.join(pxeconfig_dir, file)]
+    end
+
+    def host_pxe_dir_name
+      'ipxe'
     end
   end
 
