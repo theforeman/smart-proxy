@@ -22,7 +22,22 @@ module Proxy
 
     def self.logger
       logger = Logging.logger.root
-      if log_file.casecmp?('STDOUT')
+      if log_file.casecmp?('AUTO')
+        if ENV.key?('JOURNAL_STREAM')
+          # https://systemd.io/JOURNAL_NATIVE_PROTOCOL/#automatic-protocol-upgrading
+          # TODO: catch if unavailable
+          logger.add_appenders(appender(:journald))
+        elsif ENV.key?('LOGS_DIRECTORY')
+          # If LogsDirectory in systemd unit is provided
+          # TODO: does log_file respect LOGS_DIRECTORY?
+          # TODO: rolling file or expect logrotate?
+          logger.add_appenders(appender(:file))
+        elsif syslog_available?
+          logger.add_appenders(appender(:syslog))
+        else
+          logger.add_appenders(appender(:stdout))
+        end
+      elsif log_file.casecmp?('STDOUT')
         logger.add_appenders(appender(:stdout))
       elsif log_file.casecmp?('SYSLOG')
         unless syslog_available?
