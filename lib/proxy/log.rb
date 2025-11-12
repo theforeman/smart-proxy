@@ -21,39 +21,31 @@ module Proxy
     end
 
     def self.logger
-      logger_name = 'foreman-proxy'
-      layout = Logging::Layouts.pattern(pattern: ::Proxy::SETTINGS.file_logging_pattern + "\n")
-      notime_layout = Logging::Layouts.pattern(pattern: ::Proxy::SETTINGS.system_logging_pattern + "\n")
       logger = Logging.logger.root
       if log_file.casecmp?('STDOUT')
-        logger.add_appenders(Logging.appenders.stdout(logger_name, layout: layout))
+        logger.add_appenders(appender(:stdout))
       elsif log_file.casecmp?('SYSLOG')
         unless syslog_available?
           puts "Syslog is not supported on this platform, use STDOUT or a file"
           exit(1)
         end
-        logger.add_appenders(Logging.appenders.syslog(
-          logger_name, layout: notime_layout, facility: ::Syslog::Constants::LOG_LOCAL5))
+        logger.add_appenders(appender(:syslog))
       elsif log_file.casecmp?('JOURNAL') || log_file.casecmp?('JOURNALD')
         begin
-          logger.add_appenders(Logging.appenders.journald(
-            logger_name, logger_name: :proxy_logger, layout: notime_layout, facility: ::Syslog::Constants::LOG_LOCAL5))
+          logger.add_appenders(appender(:journald))
         rescue NoMethodError
-          logger.add_appenders(Logging.appenders.stdout(logger_name, layout: layout))
+          logger.add_appenders(appender(:stdout))
           logger.warn "Journald is not available on this platform. Falling back to STDOUT."
         end
       else
         begin
-          keep = ::Proxy::SETTINGS.file_rolling_keep
-          size = BASE_LOG_SIZE * ::Proxy::SETTINGS.file_rolling_size
-          age = ::Proxy::SETTINGS.file_rolling_age
-          if size > 0
-            logger.add_appenders(Logging.appenders.rolling_file(logger_name, layout: layout, filename: log_file, keep: keep, size: size, age: age, roll_by: 'date'))
+          if ::Proxy::SETTINGS.file_rolling_size.to_i > 0
+            logger.add_appenders(appender(:rolling_file))
           else
-            logger.add_appenders(Logging.appenders.file(logger_name, layout: layout, filename: log_file))
+            logger.add_appenders(appender(:file))
           end
         rescue ArgumentError => ae
-          logger.add_appenders(Logging.appenders.stdout(logger_name, layout: layout))
+          logger.add_appenders(appender(:stdout))
           logger.warn "Log file #{log_file} cannot be opened. Falling back to STDOUT: #{ae}"
         end
       end
@@ -67,6 +59,28 @@ module Proxy
 
     def self.log_file
       @log_file ||= ::Proxy::SETTINGS.log_file
+    end
+
+    def self.appender(variant)
+      logger_name = 'foreman-proxy'
+      layout = Logging::Layouts.pattern(pattern: ::Proxy::SETTINGS.file_logging_pattern + "\n")
+      notime_layout = Logging::Layouts.pattern(pattern: ::Proxy::SETTINGS.system_logging_pattern + "\n")
+
+      case variant
+      when :stdout
+        Logging.appenders.stdout(logger_name, layout: layout)
+      when :syslog
+        Logging.appenders.syslog(logger_name, layout: notime_layout, facility: ::Syslog::Constants::LOG_LOCAL5)
+      when :journald
+        Logging.appenders.journald(logger_name, logger_name: :proxy_logger, layout: notime_layout, facility: ::Syslog::Constants::LOG_LOCAL5)
+      when :rolling_file
+        keep = ::Proxy::SETTINGS.file_rolling_keep
+        size = BASE_LOG_SIZE * ::Proxy::SETTINGS.file_rolling_size
+        age = ::Proxy::SETTINGS.file_rolling_age
+        Logging.appenders.rolling_file(logger_name, layout: layout, filename: log_file, keep: keep, size: size, age: age, roll_by: 'date')
+      when :file
+        Logging.appenders.file(logger_name, layout: layout, filename: log_file)
+      end
     end
   end
 
