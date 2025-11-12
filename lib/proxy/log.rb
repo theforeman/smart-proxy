@@ -25,16 +25,16 @@ module Proxy
       layout = Logging::Layouts.pattern(pattern: ::Proxy::SETTINGS.file_logging_pattern + "\n")
       notime_layout = Logging::Layouts.pattern(pattern: ::Proxy::SETTINGS.system_logging_pattern + "\n")
       logger = Logging.logger.root
-      if log_file.casecmp('STDOUT').zero?
+      if log_file.casecmp?('STDOUT')
         logger.add_appenders(Logging.appenders.stdout(logger_name, layout: layout))
-      elsif log_file.casecmp('SYSLOG').zero?
+      elsif log_file.casecmp?('SYSLOG')
         unless syslog_available?
           puts "Syslog is not supported on this platform, use STDOUT or a file"
           exit(1)
         end
         logger.add_appenders(Logging.appenders.syslog(
           logger_name, layout: notime_layout, facility: ::Syslog::Constants::LOG_LOCAL5))
-      elsif log_file.casecmp('JOURNAL').zero? || log_file.casecmp('JOURNALD').zero?
+      elsif log_file.casecmp?('JOURNAL') || log_file.casecmp?('JOURNALD')
         begin
           logger.add_appenders(Logging.appenders.journald(
             logger_name, logger_name: :proxy_logger, layout: notime_layout, facility: ::Syslog::Constants::LOG_LOCAL5))
