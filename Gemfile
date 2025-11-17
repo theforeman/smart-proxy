@@ -13,4 +13,4 @@ end
 
 # Changed from a default gem to a bundled gem in Ruby 3.4
 # See: https://stdgems.org/new-in/3.4/
-gem 'syslog' if RUBY_VERSION >= '3.4'
+gem 'syslog', :platforms => [:ruby] if RUBY_VERSION >= '3.4'
