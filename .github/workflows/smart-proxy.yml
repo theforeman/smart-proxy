@@ -69,12 +69,47 @@ jobs:
       - name: Run rake test
         run: bundle exec rake test
 
+  tests-on-windows:
+    name: "Test on Windows - Ruby ${{ matrix.ruby }}"
+    runs-on: windows-latest
+    needs:
+      - setup_matrix
+    defaults:
+      run:
+        shell: pwsh
+    strategy:
+      matrix: ${{ fromJson(needs.setup_matrix.outputs.matrix) }}
+    env:
+      BUNDLE_WITHOUT: "krb5 libvirt"
+    steps:
+      - name: Checkout this repo
+        uses: actions/checkout@v4
+      - name: Set up Ruby (Windows)
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
+      - name: Show Ruby env (sanity)
+        run: |
+          ruby -v
+          gem -v
+          ridk version
+      - name: Rake sanity
+        run: |
+          bundle exec rake -T
+      - name: Archive Gemfile.lock
+        uses: actions/upload-artifact@v4
+        with:
+          name: Gemfile-windows-ruby-${{ matrix.ruby }}.lock
+          path: Gemfile.lock
+
   result:
     if: always()
     name: Test suite
     runs-on: ubuntu-24.04
     needs:
       - tests
+      - tests-on-windows
     steps:
       - name: Decide whether the needed jobs succeeded or failed
         uses: re-actors/alls-green@release/v1
