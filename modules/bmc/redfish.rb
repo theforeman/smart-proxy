@@ -131,13 +131,12 @@ module Proxy
                    'disk'  => 'Hdd',
                    'pxe'   => 'Pxe' }
 
-        system.patch(
-          payload: {
-            'Boot' => {
-              'BootSourceOverrideTarget' => devmap[args[:device]],
-              'BootSourceOverrideEnabled' => args[:persistent] ? 'Enabled' : 'Once',
-            },
-          })
+        system.patch_if_match({
+                                'Boot' => {
+                                  'BootSourceOverrideTarget' => devmap[args[:device]],
+                                  'BootSourceOverrideEnabled' => args[:persistent] ? 'Enabled' : 'Once',
+                                },
+                              })
         powercycle if args[:reboot]
       end
 
