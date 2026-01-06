@@ -102,6 +102,8 @@ jobs:
         with:
           name: Gemfile-windows-ruby-${{ matrix.ruby }}.lock
           path: Gemfile.lock
+      - name: Run rake test
+        run: bundle exec rake test
 
   result:
     if: always()
