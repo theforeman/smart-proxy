@@ -35,4 +35,130 @@ class BmcRedfishTest < Test::Unit::TestCase
       to_return(status: 200, body: JSON.generate({}))
     assert @bmc.powerreboot
   end
+
+  def test_bootdevice_pxe_uses_patch_if_match
+    # Test that bootdevice uses patch_if_match for PXE boot
+    system_mock = mock('system')
+
+    system_mock.expects(:patch_if_match).with(
+      'Boot' => {
+        'BootSourceOverrideTarget' => 'Pxe',
+        'BootSourceOverrideEnabled' => 'Once',
+      }
+    ).returns(true)
+
+    @bmc.expects(:system).returns(system_mock)
+    @bmc.expects(:powercycle).never
+
+    result = @bmc.bootdevice = { :device => 'pxe', :reboot => false, :persistent => false }
+    assert_not_nil result
+  end
+
+  def test_bootdevice_disk_persistent_uses_patch_if_match
+    # Test that bootdevice uses patch_if_match with persistent boot
+    system_mock = mock('system')
+
+    system_mock.expects(:patch_if_match).with(
+      'Boot' => {
+        'BootSourceOverrideTarget' => 'Hdd',
+        'BootSourceOverrideEnabled' => 'Enabled',
+      }
+    ).returns(true)
+
+    @bmc.expects(:system).returns(system_mock)
+    @bmc.expects(:powercycle).never
+
+    result = @bmc.bootdevice = { :device => 'disk', :reboot => false, :persistent => true }
+    assert_not_nil result
+  end
+
+  def test_bootdevice_with_reboot
+    # Test bootdevice with reboot option
+    system_mock = mock('system')
+
+    system_mock.expects(:patch_if_match).with(
+      'Boot' => {
+        'BootSourceOverrideTarget' => 'Pxe',
+        'BootSourceOverrideEnabled' => 'Enabled',
+      }
+    ).returns(true)
+
+    @bmc.expects(:system).returns(system_mock)
+    @bmc.expects(:powercycle).once
+
+    result = @bmc.bootdevice = { :device => 'pxe', :reboot => true, :persistent => true }
+    assert_not_nil result
+  end
+
+  def test_bootpxe_calls_bootdevice
+    # Test that convenience method bootpxe works
+    system_mock = mock('system')
+
+    system_mock.expects(:patch_if_match).with(
+      'Boot' => {
+        'BootSourceOverrideTarget' => 'Pxe',
+        'BootSourceOverrideEnabled' => 'Once',
+      }
+    ).returns(true)
+
+    @bmc.expects(:system).returns(system_mock)
+    @bmc.expects(:powercycle).never
+
+    result = @bmc.bootpxe(false, false)
+    assert_not_nil result
+  end
+
+  def test_bootdisk_calls_bootdevice
+    # Test that convenience method bootdisk works
+    system_mock = mock('system')
+
+    system_mock.expects(:patch_if_match).with(
+      'Boot' => {
+        'BootSourceOverrideTarget' => 'Hdd',
+        'BootSourceOverrideEnabled' => 'Once',
+      }
+    ).returns(true)
+
+    @bmc.expects(:system).returns(system_mock)
+    @bmc.expects(:powercycle).never
+
+    result = @bmc.bootdisk(false, false)
+    assert_not_nil result
+  end
+
+  def test_bootbios_calls_bootdevice
+    # Test that convenience method bootbios works
+    system_mock = mock('system')
+
+    system_mock.expects(:patch_if_match).with(
+      'Boot' => {
+        'BootSourceOverrideTarget' => 'BiosSetup',
+        'BootSourceOverrideEnabled' => 'Once',
+      }
+    ).returns(true)
+
+    @bmc.expects(:system).returns(system_mock)
+    @bmc.expects(:powercycle).never
+
+    result = @bmc.bootbios(false, false)
+    assert_not_nil result
+  end
+
+  def test_bootcdrom_calls_bootdevice
+    # Test that convenience method bootcdrom works
+    system_mock = mock('system')
+
+    system_mock.expects(:patch_if_match).with(
+      'Boot' => {
+        'BootSourceOverrideTarget' => 'Cd',
+        'BootSourceOverrideEnabled' => 'Once',
+      }
+    ).returns(true)
+
+    @bmc.expects(:system).returns(system_mock)
+    @bmc.expects(:powercycle).never
+
+    result = @bmc.bootcdrom(false, false)
+    assert_not_nil result
+  end
 end
