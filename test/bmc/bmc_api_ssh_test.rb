@@ -2,6 +2,7 @@ require 'test_helper'
 require 'json'
 require 'bmc/bmc_api'
 require 'bmc/ssh'
+require 'bmc/bmc_plugin'
 
 ENV['RACK_ENV'] = 'test'
 
@@ -47,10 +48,35 @@ class BmcApiShellTest < Test::Unit::TestCase
     assert_equal 200, last_response.status
   end
 
-  def test_lan_ip
-    Proxy::BMC::SSH.any_instance.expects(:ip).returns('')
-    get "/#{@host}/lan/ip", @args
+  def test_lan_ip_when_host_is_ip
+    host = "192.168.1.1"
+    get "/#{host}/lan/ip", @args
     assert_equal 200, last_response.status
+    assert_equal host, JSON.parse(last_response.body)["result"]
+  end
+
+  def test_lan_ip_when_host_is_ipv6
+    host = '2001:db8::1'
+    get "/#{host}/lan/ip", @args
+    assert_equal 200, last_response.status
+    assert_equal host, JSON.parse(last_response.body)['result']
+  end
+
+  def test_lan_ip_when_host_is_resolvable_fqdn
+    host = "resolvable.example.com"
+    resolved_ip = "192.168.1.2"
+    Resolv.expects(:getaddress).with(host).returns(resolved_ip)
+    get "/#{host}/lan/ip", @args
+    assert_equal 200, last_response.status
+    assert_equal resolved_ip, JSON.parse(last_response.body)["result"]
+  end
+
+  def test_lan_ip_when_host_is_unresolvable_fqdn
+    host = "unresolvable.example.com"
+    Resolv.expects(:getaddress).with(host).raises(Resolv::ResolvError.new("no address for #{host}"))
+    get "/#{host}/lan/ip", @args
+    assert_equal 200, last_response.status
+    assert_equal "", JSON.parse(last_response.body)["result"]
   end
 
   def test_lan_mac

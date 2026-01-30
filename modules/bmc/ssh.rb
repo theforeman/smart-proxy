@@ -1,3 +1,6 @@
+require 'ipaddr'
+require 'resolv'
+
 module Proxy
   module BMC
     class SSH < Base
@@ -62,7 +65,15 @@ module Proxy
       end
 
       def ip
-        host
+        IPAddr.new(host).to_s
+      rescue IPAddr::InvalidAddressError
+        begin
+          logger.debug("Host '#{host}' is not an IP address, attempting to resolve as FQDN.")
+          Resolv.getaddress(host)
+        rescue Resolv::ResolvError => e
+          logger.warn("Failed to resolve FQDN '#{host}': #{e.class} - #{e.message}")
+          ''
+        end
       end
 
       # the following are dummy implementations
