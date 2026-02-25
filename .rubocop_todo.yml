@@ -218,6 +218,7 @@ Naming/VariableNumber:
     - 'test/plugins/plugin_initializer_test.rb'
     - 'test/puppetca_http_api/puppetca_http_impl_test.rb'
     - 'test/registration/registration_api_test.rb'
+    - 'test/registration/registration_commands_api_test.rb'
     - 'test/sinatra/default_not_found_page_test.rb'
     - 'test/templates/templates_unattended_api_test.rb'
     - 'test/util_test.rb'

@@ -2,6 +2,14 @@ require 'proxy/request'
 
 module Proxy::Registration
   class ProxyRequest < ::Proxy::HttpRequest::ForemanRequest
+    def registration_command(request)
+      proxy_req = request_factory.create_post '/api/registration_commands',
+                                              request.body.read,
+                                              headers(request)
+
+      send_request(proxy_req)
+    end
+
     def global_register(request)
       proxy_req = request_factory.create_get '/register',
                                              request_params(request),
