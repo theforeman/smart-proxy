@@ -66,6 +66,9 @@ module Proxy::HttpRequest
       http             = Net::HTTP.new(uri.host, uri.port)
       http.use_ssl     = uri.scheme == 'https'
       http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+      if Proxy::SETTINGS.foreman_request_timeout.to_i > 0
+        http.read_timeout = Proxy::SETTINGS.foreman_request_timeout.to_i
+      end
 
       if http.use_ssl?
         ca_file = Proxy::SETTINGS.foreman_ssl_ca || Proxy::SETTINGS.ssl_ca_file
