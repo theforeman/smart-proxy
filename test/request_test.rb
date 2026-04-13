@@ -54,6 +54,24 @@ class RequestTest < Test::Unit::TestCase
     assert_equal("body", result.body)
   end
 
+  def test_read_timeout_applied_when_foreman_request_timeout_configured
+    Proxy::SETTINGS.stubs(:foreman_request_timeout).returns(120)
+    request = Proxy::HttpRequest::ForemanRequest.new
+    assert_equal 120, request.http.read_timeout
+  end
+
+  def test_read_timeout_defaults_to_180_when_foreman_request_timeout_not_configured
+    request = Proxy::HttpRequest::ForemanRequest.new
+    assert_equal 180, request.http.read_timeout
+  end
+
+  def test_read_timeout_uses_rubys_default_when_foreman_request_timeout_is_zero
+    Proxy::SETTINGS.stubs(:foreman_request_timeout).returns(0)
+    default_timeout = Net::HTTP.new('example.com').read_timeout
+    request = Proxy::HttpRequest::ForemanRequest.new
+    assert_equal default_timeout, request.http.read_timeout
+  end
+
   def test_post_with_nested_params
     stub_request(:post, @foreman_url + '/register?activation_keys%5B%5D=ac_AlmaLinux8&location_id=2&organization_id=1&repo_data%5B%5D%5Brepo%5D=repo1&repo_data%5B%5D%5Brepo_gpg_key_url%5D=key1&repo_data%5B%5D%5Brepo%5D=repo2&repo_data%5B%5D%5Brepo_gpg_key_url%5D=key2&update_packages=false')
       .to_return(status: 200, body: "body", headers: {h1: "header"})
