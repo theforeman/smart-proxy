@@ -1,0 +1,68 @@
+#!/bin/bash
+
+set -xe
+
+# TODO: read from Smart Proxy config?
+TFTPROOT=/var/lib/tftpboot
+TFTPROOT=$PWD/tftpboot
+
+os=$1
+version=$2
+arch=$3
+repo=$4
+
+case $arch in
+	x86_64)
+		grub_arch=x64
+	# TODO
+esac
+
+grub="grub2-efi-${grub_arch}"
+shim="shim-${grub_arch}"
+
+if [[ -z $repo ]] ; then
+	major=${version%.*}
+	case $os in
+		almalinux)
+			repo=https://repo.almalinux.org/almalinux/${major}/BaseOS/${arch}/os
+			;;
+		centos)
+			repo=https://mirror.stream.centos.org/${major}-stream/BaseOS/${arch}/os
+			;;
+		redhat)
+			echo "Download from https://access.redhat.com/downloads/content/package-browser" 2>&1
+			exit 1
+			;;
+		rocky_linux)
+			repo=https://dl.rockylinux.org/pub/rocky/${major}/BaseOS/${arch}/os
+			;;
+		*)
+			echo "Unknown OS '${os}'" 2>&1
+			exit 1
+	esac
+fi
+
+BOOTLOADER_PATH="${TFTPROOT}/bootloader-universe/pxegrub2/${os}/${version}/${arch}"
+
+dir=$(mktemp -d)
+trap 'rm -rf "$dir"' EXIT
+
+(
+	cd "$dir"
+
+	dnf --repofrompath "temp-repo,$repo" download --arch "$arch" --from-repo temp-repo "$grub" "$shim"
+
+	rpm2cpio "$grub"* | cpio --extract --make-directories --verbose
+	rpm2cpio "$shim"* | cpio --extract --make-directories --verbose
+
+	if [[ $UID == 0 ]] ; then
+		install -o foreman-proxy -g foreman-proxy -d "${BOOTLOADER_PATH}"
+	else
+		install -d "${BOOTLOADER_PATH}"
+	fi
+	cp "boot/efi/EFI/${os}/grub${grub_arch}.efi" "${BOOTLOADER_PATH}/grub${grub_arch}.efi"
+	cp "boot/efi/EFI/${os}/shim${grub_arch}.efi" "${BOOTLOADER_PATH}/shim${grub_arch}.efi"
+	ln -sr "${BOOTLOADER_PATH}/grub${grub_arch}.efi" "${BOOTLOADER_PATH}/boot.efi"
+	ln -sr "${BOOTLOADER_PATH}/shim${grub_arch}.efi" "${BOOTLOADER_PATH}/boot-sb.efi"
+	chmod 0644 "${BOOTLOADER_PATH}/grub${grub_arch}.efi" "${BOOTLOADER_PATH}/shim${grub_arch}.efi"
+)
