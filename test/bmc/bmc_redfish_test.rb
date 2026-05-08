@@ -1,7 +1,7 @@
 require 'test_helper'
 require 'bmc/bmc_plugin'
 require 'bmc/redfish'
-require 'test/bmc/redfish_test_helper'
+require 'bmc/redfish_test_helper'
 require 'json'
 
 class BmcRedfishTest < Test::Unit::TestCase
@@ -160,5 +160,26 @@ class BmcRedfishTest < Test::Unit::TestCase
 
     result = @bmc.bootcdrom(false, false)
     assert_not_nil result
+  end
+
+  def test_identifyon_sets_indicator_led_lit
+    system_mock = mock('system')
+    system_mock.expects(:patch_if_match).with({ 'IndicatorLED' => 'Lit' }).returns(true)
+    @bmc.expects(:system).returns(system_mock)
+    @bmc.identifyon
+  end
+
+  def test_identifyoff_sets_indicator_led_off
+    system_mock = mock('system')
+    system_mock.expects(:patch_if_match).with({ 'IndicatorLED' => 'Off' }).returns(true)
+    @bmc.expects(:system).returns(system_mock)
+    @bmc.identifyoff
+  end
+
+  def test_identifystatus_returns_downcased_indicator_led
+    system_mock = mock('system')
+    system_mock.expects(:IndicatorLED).returns('Lit')
+    @bmc.expects(:system).returns(system_mock)
+    assert_equal 'lit', @bmc.identifystatus
   end
 end
