@@ -59,11 +59,11 @@ module Proxy
       end
 
       def identifyon
-        system.patch(payload: { 'IndicatorLED' => 'On' })
+        system.patch_if_match({ 'IndicatorLED' => 'Lit' })
       end
 
       def identifyoff
-        system.patch(payload: { 'IndicatorLED' => 'Off' })
+        system.patch_if_match({ 'IndicatorLED' => 'Off' })
       end
 
       def poweroff(soft = false)
