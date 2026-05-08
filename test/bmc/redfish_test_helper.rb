@@ -37,6 +37,11 @@ module RedfishTestHelper
     },
   }.freeze
 
+  # Fixture for systems that support the newer LocationIndicatorActive field
+  SYSTEM_DATA_WITH_LOCATION_INDICATOR = SYSTEM_DATA.merge(
+    "LocationIndicatorActive" => false
+  ).freeze
+
   def mask_redfish_acceess(protocol: "https", host: "host")
     # root
     stub_request(:get, "#{protocol}://#{host}#{ROOT_DATA['@odata.id']}").
