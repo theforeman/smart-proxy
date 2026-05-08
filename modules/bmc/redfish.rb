@@ -55,15 +55,19 @@ module Proxy
       end
 
       def identifystatus
+        location_active = system.LocationIndicatorActive
+        return location_active ? 'on' : 'off' unless location_active.nil?
+
+        logger.debug('LocationIndicatorActive is nil, falling back to IndicatorLED for identify status')
         system.IndicatorLED&.downcase
       end
 
       def identifyon
-        system.patch_if_match({ 'IndicatorLED' => 'Lit' })
+        patch_identify(:on)
       end
 
       def identifyoff
-        system.patch_if_match({ 'IndicatorLED' => 'Off' })
+        patch_identify(:off)
       end
 
       def poweroff(soft = false)
@@ -216,6 +220,31 @@ module Proxy
 
       def poweraction(action)
         host.post(path: system.Actions&.[]('#ComputerSystem.Reset')&.[]('target'), payload: { 'ResetType' => action })
+      end
+
+      def patch_identify(state)
+        location_active = system.LocationIndicatorActive
+
+        payload = case state
+                  when :on
+                    if location_active.nil?
+                      logger.debug('LocationIndicatorActive is nil, falling back to IndicatorLED for identify on')
+                      { 'IndicatorLED' => 'Lit' }
+                    else
+                      { 'LocationIndicatorActive' => true }
+                    end
+                  when :off
+                    if location_active.nil?
+                      logger.debug('LocationIndicatorActive is nil, falling back to IndicatorLED for identify off')
+                      { 'IndicatorLED' => 'Off' }
+                    else
+                      { 'LocationIndicatorActive' => false }
+                    end
+                  else
+                    raise ArgumentError, "Unsupported identify state: #{state.inspect}"
+                  end
+
+        system.patch_if_match(payload)
       end
 
       # I haven't yet encountered a system (apart from a blade chassis, which I think

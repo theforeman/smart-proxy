@@ -162,24 +162,57 @@ class BmcRedfishTest < Test::Unit::TestCase
     assert_not_nil result
   end
 
-  def test_identifyon_sets_indicator_led_lit
+  def test_identifystatus_uses_indicator_led_when_location_indicator_absent
     system_mock = mock('system')
-    system_mock.expects(:patch_if_match).with({ 'IndicatorLED' => 'Lit' }).returns(true)
+    system_mock.expects(:LocationIndicatorActive).returns(nil)
+    system_mock.expects(:IndicatorLED).returns('Lit')
+    @bmc.expects(:system).twice.returns(system_mock)
+    assert_equal 'lit', @bmc.identifystatus
+  end
+
+  def test_identifystatus_uses_location_indicator_active_true
+    system_mock = mock('system')
+    system_mock.expects(:LocationIndicatorActive).returns(true)
     @bmc.expects(:system).returns(system_mock)
+    assert_equal 'on', @bmc.identifystatus
+  end
+
+  def test_identifystatus_uses_location_indicator_active_false
+    system_mock = mock('system')
+    system_mock.expects(:LocationIndicatorActive).returns(false)
+    @bmc.expects(:system).returns(system_mock)
+    assert_equal 'off', @bmc.identifystatus
+  end
+
+  def test_identifyon_uses_location_indicator_active_when_present
+    system_mock = mock('system')
+    system_mock.expects(:LocationIndicatorActive).returns(false)
+    system_mock.expects(:patch_if_match).with({ 'LocationIndicatorActive' => true }).returns(true)
+    @bmc.expects(:system).twice.returns(system_mock)
     @bmc.identifyon
   end
 
-  def test_identifyoff_sets_indicator_led_off
+  def test_identifyon_falls_back_to_indicator_led_when_location_indicator_absent
     system_mock = mock('system')
-    system_mock.expects(:patch_if_match).with({ 'IndicatorLED' => 'Off' }).returns(true)
-    @bmc.expects(:system).returns(system_mock)
+    system_mock.expects(:LocationIndicatorActive).returns(nil)
+    system_mock.expects(:patch_if_match).with({ 'IndicatorLED' => 'Lit' }).returns(true)
+    @bmc.expects(:system).twice.returns(system_mock)
+    @bmc.identifyon
+  end
+
+  def test_identifyoff_uses_location_indicator_active_when_present
+    system_mock = mock('system')
+    system_mock.expects(:LocationIndicatorActive).returns(true)
+    system_mock.expects(:patch_if_match).with({ 'LocationIndicatorActive' => false }).returns(true)
+    @bmc.expects(:system).twice.returns(system_mock)
     @bmc.identifyoff
   end
 
-  def test_identifystatus_returns_downcased_indicator_led
+  def test_identifyoff_falls_back_to_indicator_led_when_location_indicator_absent
     system_mock = mock('system')
-    system_mock.expects(:IndicatorLED).returns('Lit')
-    @bmc.expects(:system).returns(system_mock)
-    assert_equal 'lit', @bmc.identifystatus
+    system_mock.expects(:LocationIndicatorActive).returns(nil)
+    system_mock.expects(:patch_if_match).with({ 'IndicatorLED' => 'Off' }).returns(true)
+    @bmc.expects(:system).twice.returns(system_mock)
+    @bmc.identifyoff
   end
 end
