@@ -11,12 +11,22 @@ load 'tasks/rubocop.rake'
 desc 'Default: run unit tests.'
 task :default => :test
 
+
+# Collect all test files, excluding those specified in the SKIP_TEST_FILES environment variable
+all_test_files = FileList['test/**/*_test.rb']
+skip_tests = ENV['SKIP_TEST_FILES'] ? ENV['SKIP_TEST_FILES'].split(',') : []
+
+# remove all tests which start with test/#{skip_test}
+test_files = all_test_files.reject do |file|
+  skip_tests.any? { |skip_test| file.start_with?("test/#{skip_test}") }
+end
+
 desc 'Test the Foreman Proxy plugin.'
 Rake::TestTask.new(:test) do |t|
   t.libs << '.'
   t.libs << 'lib'
   t.libs << 'test'
-  t.test_files = FileList['test/**/*_test.rb']
+  t.test_files = test_files
   t.verbose = true
   t.ruby_opts = ["-W1"]
 end
