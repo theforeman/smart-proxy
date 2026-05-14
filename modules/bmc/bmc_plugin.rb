@@ -4,6 +4,7 @@ module Proxy::BMC
 
     default_settings :redfish_verify_ssl => true
     validate :redfish_verify_ssl, :boolean => true
+    expose_setting :bmc_default_provider
     plugin :bmc, ::Proxy::VERSION
 
     # Various installed providers are exposed as capabilties
