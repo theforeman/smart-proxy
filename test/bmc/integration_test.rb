@@ -18,7 +18,7 @@ class BmcApiFeaturesTest < SmartProxyRootApiTestCase
     assert_equal('running', mod['state'], Proxy::LogBuffer::Buffer.instance.info[:failed_modules][:bmc])
     assert_equal(['power_action_v2', 'redfish', 'shell', 'ssh'], mod['capabilities'])
 
-    assert_equal({}, mod['settings'])
+    assert_equal({'bmc_default_provider' => 'freeipmi'}, mod['settings'])
   end
 
   def test_features_with_freeipmi_installed
@@ -34,6 +34,6 @@ class BmcApiFeaturesTest < SmartProxyRootApiTestCase
     assert_equal('running', mod['state'], Proxy::LogBuffer::Buffer.instance.info[:failed_modules][:bmc])
     assert_equal(['freeipmi', 'power_action_v2', 'redfish', 'shell', 'ssh'], mod['capabilities'])
 
-    assert_equal({}, mod['settings'])
+    assert_equal({'bmc_default_provider' => 'freeipmi'}, mod['settings'])
   end
 end
