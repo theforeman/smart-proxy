@@ -14,6 +14,7 @@ Gem::Specification.new do |s|
   s.extra_rdoc_files = ["README.md"]
   s.required_ruby_version = '>= 3.0'
   s.add_dependency 'base64'
+  s.add_dependency 'faraday', '~> 2.0'
   s.add_dependency 'json'
   s.add_dependency 'logging'
   s.add_dependency 'ostruct'

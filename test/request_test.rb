@@ -1,4 +1,5 @@
 require 'test_helper'
+require 'faraday'
 require 'uri'
 require 'net/http'
 require 'mocha'
@@ -11,6 +12,14 @@ class RequestTest < Test::Unit::TestCase
   def setup
     @foreman_url = 'https://foreman.example.com'
     Proxy::SETTINGS.stubs(:foreman_url).returns(@foreman_url)
+    Proxy::SETTINGS.stubs(:foreman_request_timeout).returns(nil)
+    Proxy::SETTINGS.stubs(:foreman_open_timeout).returns(nil)
+    Proxy::SETTINGS.stubs(:foreman_ssl_ca).returns(nil)
+    Proxy::SETTINGS.stubs(:ssl_ca_file).returns(nil)
+    Proxy::SETTINGS.stubs(:foreman_ssl_cert).returns(nil)
+    Proxy::SETTINGS.stubs(:ssl_certificate).returns(nil)
+    Proxy::SETTINGS.stubs(:foreman_ssl_key).returns(nil)
+    Proxy::SETTINGS.stubs(:ssl_private_key).returns(nil)
     @template_url = 'http://proxy.lan:8443'
     Proxy::Templates::Plugin.load_test_settings(:template_url => @template_url)
     @request = Proxy::HttpRequest::ForemanRequest.new
@@ -52,6 +61,43 @@ class RequestTest < Test::Unit::TestCase
     proxy_req = @request.request_factory.create_post("/path", "body")
     result = @request.send_request(proxy_req)
     assert_equal("body", result.body)
+  end
+
+  def test_read_timeout_applied_when_foreman_request_timeout_configured
+    Proxy::SETTINGS.stubs(:foreman_request_timeout).returns(120)
+    request = Proxy::HttpRequest::ForemanRequest.new
+
+    assert_equal 120, request.http.read_timeout
+    assert_equal 120, request.connection.options.timeout
+  end
+
+  def test_read_timeout_uses_default_when_foreman_request_timeout_not_configured
+    default_timeout = Net::HTTP.new('example.com').read_timeout
+    request = Proxy::HttpRequest::ForemanRequest.new
+
+    assert_equal default_timeout, request.http.read_timeout
+  end
+
+  def test_open_timeout_applied_when_foreman_open_timeout_configured
+    Proxy::SETTINGS.stubs(:foreman_open_timeout).returns(30)
+    request = Proxy::HttpRequest::ForemanRequest.new
+
+    assert_equal 30, request.http.open_timeout
+    assert_equal 30, request.connection.options.open_timeout
+  end
+
+  def test_open_timeout_uses_net_http_default_when_foreman_open_timeout_not_configured
+    default_timeout = Net::HTTP.new('example.com').open_timeout
+    request = Proxy::HttpRequest::ForemanRequest.new
+
+    assert_equal default_timeout, request.http.open_timeout
+    assert_equal default_timeout, request.connection.options.open_timeout
+  end
+
+  def test_connection_uses_faraday
+    request = Proxy::HttpRequest::ForemanRequest.new
+
+    assert_kind_of Faraday::Connection, request.connection
   end
 
   def test_post_with_nested_params
