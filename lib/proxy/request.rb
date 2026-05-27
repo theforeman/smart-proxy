@@ -1,8 +1,7 @@
 require 'cgi'
-require 'faraday'
-require 'net/http'
-require 'openssl'
 require 'uri'
+
+require 'proxy/foreman_transport'
 
 module Proxy::HttpRequest
   Request = Struct.new(:http_method, :path, :body, :headers, keyword_init: true)
@@ -71,8 +70,14 @@ module Proxy::HttpRequest
     # Compatibility shim for existing callers that inspect timeout values via `http`.
     ConnectionInfo = Struct.new(:read_timeout, :open_timeout, :connection, keyword_init: true)
 
+    class << self
+      def reset_connection_cache!
+        ForemanTransport.reset!
+      end
+    end
+
     def send_request(request)
-      response = connection.run_request(request.http_method, request.path, request.body, request.headers)
+      response = ForemanTransport.run_request(uri, request)
       Response.new(status: response.status, body: response.body, headers: response.headers)
     end
 
@@ -85,7 +90,7 @@ module Proxy::HttpRequest
     end
 
     def connection
-      @connection ||= build_connection
+      ForemanTransport.connection_for(uri)
     end
 
     def http
@@ -96,54 +101,12 @@ module Proxy::HttpRequest
 
     private
 
-    def build_connection
-      Faraday.new(url: uri.to_s, ssl: ssl_options, request: request_options)
-    end
-
-    def request_options
-      { timeout: read_timeout, open_timeout: open_timeout }
-    end
-
     def read_timeout
-      # Preserve the historical Net::HTTP defaults when no explicit proxy setting is provided.
-      return Proxy::SETTINGS.foreman_request_timeout.to_i if Proxy::SETTINGS.foreman_request_timeout.to_i > 0
-
-      Net::HTTP.new(uri.host, uri.port).read_timeout
+      ForemanTransport.read_timeout(uri)
     end
 
     def open_timeout
-      # Preserve the historical Net::HTTP defaults when no explicit proxy setting is provided.
-      return Proxy::SETTINGS.foreman_open_timeout.to_i if Proxy::SETTINGS.foreman_open_timeout.to_i > 0
-
-      Net::HTTP.new(uri.host, uri.port).open_timeout
-    end
-
-    def ssl_options
-      options = { verify: false }
-      ca_file = presence(Proxy::SETTINGS.foreman_ssl_ca || Proxy::SETTINGS.ssl_ca_file)
-      certificate = presence(Proxy::SETTINGS.foreman_ssl_cert || Proxy::SETTINGS.ssl_certificate)
-      private_key = presence(Proxy::SETTINGS.foreman_ssl_key || Proxy::SETTINGS.ssl_private_key)
-
-      if ca_file
-        options[:ca_file] = ca_file
-        options[:verify] = true
-      end
-
-      if certificate && private_key
-        options[:client_cert] = OpenSSL::X509::Certificate.new(File.read(certificate))
-        options[:client_key] = OpenSSL::PKey.read(File.read(private_key), nil)
-      end
-
-      options
-    end
-
-    def presence(value)
-      return nil if value.nil?
-
-      normalized = value.to_s
-      return nil if normalized.empty?
-
-      normalized
+      ForemanTransport.open_timeout(uri)
     end
   end
 end

@@ -4,6 +4,8 @@ require 'uri'
 require 'net/http'
 require 'mocha'
 require 'templates/templates_plugin'
+require 'templates/proxy_request'
+require 'registration/proxy_request'
 require "proxy/util"
 require 'proxy/request'
 require 'webmock/test_unit'
@@ -20,6 +22,7 @@ class RequestTest < Test::Unit::TestCase
     Proxy::SETTINGS.stubs(:ssl_certificate).returns(nil)
     Proxy::SETTINGS.stubs(:foreman_ssl_key).returns(nil)
     Proxy::SETTINGS.stubs(:ssl_private_key).returns(nil)
+    Proxy::HttpRequest::ForemanRequest.reset_connection_cache!
     @template_url = 'http://proxy.lan:8443'
     Proxy::Templates::Plugin.load_test_settings(:template_url => @template_url)
     @request = Proxy::HttpRequest::ForemanRequest.new
@@ -98,6 +101,45 @@ class RequestTest < Test::Unit::TestCase
     request = Proxy::HttpRequest::ForemanRequest.new
 
     assert_kind_of Faraday::Connection, request.connection
+  end
+
+  def test_connection_is_shared_across_request_instances
+    request_a = Proxy::HttpRequest::ForemanRequest.new
+    request_b = Proxy::HttpRequest::ForemanRequest.new
+
+    assert_same request_a.connection, request_b.connection
+    assert_kind_of Faraday::Connection, request_a.connection
+  end
+
+  def test_connection_is_shared_across_foreman_request_subclasses
+    registration_request = Proxy::Registration::ProxyRequest.new
+    template_request = Proxy::Templates::ProxyRequest.new
+
+    assert_same registration_request.connection, template_request.connection
+  end
+
+  def test_reset_connection_cache_clears_shared_transport
+    request = Proxy::HttpRequest::ForemanRequest.new
+    cached_connection = request.connection
+
+    Proxy::HttpRequest::ForemanRequest.reset_connection_cache!
+
+    assert_not_same cached_connection, request.connection
+  end
+
+  def test_transport_retries_once_after_ssl_failure
+    uri = URI.parse(@foreman_url)
+    proxy_req = Proxy::HttpRequest::Request.new(http_method: :get, path: '/path', body: nil, headers: {})
+    connection = mock('connection')
+    sequence = sequence('ssl-retry')
+    connection.expects(:run_request).in_sequence(sequence).raises(Faraday::SSLError.new('ssl handshake failed'))
+    connection.expects(:run_request).in_sequence(sequence).returns(
+      stub(status: 200, body: 'body', headers: {})
+    )
+    Proxy::HttpRequest::ForemanTransport.stubs(:connection_for).with(uri).returns(connection)
+
+    response = Proxy::HttpRequest::ForemanTransport.run_request(uri, proxy_req)
+    assert_equal 200, response.status
   end
 
   def test_post_with_nested_params

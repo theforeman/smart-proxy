@@ -10,6 +10,15 @@ class TemplateProxyRequestTest < Test::Unit::TestCase
   def setup
     @foreman_url = 'https://foreman.example.com'
     Proxy::SETTINGS.stubs(:foreman_url).returns(@foreman_url)
+    Proxy::SETTINGS.stubs(:foreman_request_timeout).returns(nil)
+    Proxy::SETTINGS.stubs(:foreman_open_timeout).returns(nil)
+    Proxy::SETTINGS.stubs(:foreman_ssl_ca).returns(nil)
+    Proxy::SETTINGS.stubs(:ssl_ca_file).returns(nil)
+    Proxy::SETTINGS.stubs(:foreman_ssl_cert).returns(nil)
+    Proxy::SETTINGS.stubs(:ssl_certificate).returns(nil)
+    Proxy::SETTINGS.stubs(:foreman_ssl_key).returns(nil)
+    Proxy::SETTINGS.stubs(:ssl_private_key).returns(nil)
+    Proxy::HttpRequest::ForemanRequest.reset_connection_cache!
     @template_url = 'http://proxy.lan:8443'
     Proxy::Templates::Plugin.settings.stubs(:template_url).returns(@template_url)
     @request_env = {
@@ -50,10 +59,8 @@ class TemplateProxyRequestTest < Test::Unit::TestCase
       with(
         body: "my template",
         headers: {
-          'Accept'          => ['*/*', 'application/json,version=2'],
-          'Accept-Encoding' => 'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
+          'Accept'          => 'application/json,version=2',
           'Content-Type'    => 'application/json',
-          'User-Agent'      => 'Ruby',
           'X-Forwarded-For' => '1.2.3.4',
         }).
       to_return(status: 200, body: "", headers: {})
