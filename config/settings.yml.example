@@ -7,16 +7,16 @@
 #:ssl_ca_file: ssl/certs/ca.pem
 #:ssl_private_key: ssl/private_keys/fqdn.key
 
-# Use this option only if you need to disable certain cipher suites.
-# Note: we use the OpenSSL suite name, such as "RC4-MD5".
-# The complete list of cipher suite names can be found at:
-# https://www.openssl.org/docs/manmaster/man1/ciphers.html#CIPHER-SUITE-NAMES
-#:ssl_disabled_ciphers: [CIPHER-SUITE-1, CIPHER-SUITE-2]
+# TLS cipher string passed directly to OpenSSL. Accepts any valid OpenSSL cipher
+# string. When unset, foreman-proxy auto-detects: 'PROFILE=SYSTEM' is used if
+# /etc/crypto-policies/back-ends/opensslcnf.config, otherwise 'HIGH' is used
+# as a secure default.
+#:tls_ciphers: PROFILE=SYSTEM
 
-# Use this option only if you need to strictly specify TLS versions to be
-# disabled. SSLv3 and TLS v1.0 are always disabled and cannot be configured.
-# Specify versions like: '1.1', or '1.2'
-#:tls_disabled_versions: []
+# Minimum TLS protocol version to accept. When unset, the minimum version is
+# determined by the system's OpenSSL configuration (crypto-policies).
+# Valid values: '1.0', '1.1', '1.2', '1.3'.
+#:tls_min_version: '1.2'
 
 # Hosts which the proxy accepts connections from
 # commenting the following lines would mean every verified SSL connection allowed
