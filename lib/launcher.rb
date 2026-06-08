@@ -1,12 +1,17 @@
+require 'openssl'
 require 'proxy/log'
 require 'proxy/settings'
 require 'proxy/signal_handler'
 require 'proxy/log_buffer/trace_decorator'
 require 'sd_notify'
 
-CIPHERS = ['ECDHE-RSA-AES128-GCM-SHA256', 'ECDHE-RSA-AES256-GCM-SHA384',
-           'AES128-GCM-SHA256', 'AES256-GCM-SHA384', 'AES128-SHA256',
-           'AES256-SHA256', 'AES128-SHA', 'AES256-SHA'].freeze
+CRYPTO_POLICIES_CONFIG = '/etc/crypto-policies/back-ends/opensslcnf.config'.freeze
+TLS_MIN_VERSION_MAP = {
+  '1.0' => OpenSSL::SSL::TLS1_VERSION,
+  '1.1' => OpenSSL::SSL::TLS1_1_VERSION,
+  '1.2' => OpenSSL::SSL::TLS1_2_VERSION,
+  '1.3' => OpenSSL::SSL::TLS1_3_VERSION,
+}.freeze
 
 module Proxy
   class Launcher
@@ -66,26 +71,8 @@ module Proxy
         plugins.each { |p| instance_eval(p.https_rackup) }
       end
 
-      ssl_options = OpenSSL::SSL::SSLContext::DEFAULT_PARAMS[:options]
-      ssl_options |= OpenSSL::SSL::OP_CIPHER_SERVER_PREFERENCE if defined?(OpenSSL::SSL::OP_CIPHER_SERVER_PREFERENCE)
-      # This is required to disable SSLv3 on Ruby 1.8.7
-      ssl_options |= OpenSSL::SSL::OP_NO_SSLv2 if defined?(OpenSSL::SSL::OP_NO_SSLv2)
-      ssl_options |= OpenSSL::SSL::OP_NO_SSLv3 if defined?(OpenSSL::SSL::OP_NO_SSLv3)
-      ssl_options |= OpenSSL::SSL::OP_NO_TLSv1 if defined?(OpenSSL::SSL::OP_NO_TLSv1)
-      ssl_options |= OpenSSL::SSL::OP_NO_TLSv1_1 if defined?(OpenSSL::SSL::OP_NO_TLSv1_1)
-      # Disable client initiated renegotiation
-      ssl_options |= OpenSSL::SSL::OP_NO_RENEGOTIATION if defined?(OpenSSL::SSL::OP_NO_RENEGOTIATION)
-
-      Proxy::SETTINGS.tls_disabled_versions&.each do |version|
-        constant = OpenSSL::SSL.const_get("OP_NO_TLSv#{version.to_s.tr('.', '_')}") rescue nil
-
-        if constant
-          logger.info "TLSv#{version} will be disabled."
-          ssl_options |= constant
-        else
-          logger.warn "TLSv#{version} was not found."
-        end
-      end
+      tls_ciphers = resolve_tls_ciphers
+      cipher_list, ciphersuites = validate_tls_ciphers!(tls_ciphers)
 
       https_settings = {
         :app => app,
@@ -96,10 +83,91 @@ module Proxy
         :SSLPrivateKey => load_ssl_private_key(settings.ssl_private_key),
         :SSLCertificate => load_ssl_certificate(settings.ssl_certificate),
         :SSLCACertificateFile => settings.ssl_ca_file,
-        :SSLOptions => ssl_options,
-        :SSLCiphers => CIPHERS - Proxy::SETTINGS.ssl_disabled_ciphers,
+        :SSLOptions => build_ssl_options,
+        :SSLCiphers => cipher_list,
+        :SSLCiphersuites => ciphersuites,
+        :SSLMinVersion => resolve_tls_min_version,
       }
       base_app_settings.merge(https_settings)
+    end
+
+    def build_ssl_options
+      ssl_options = OpenSSL::SSL::SSLContext::DEFAULT_PARAMS[:options]
+      ssl_options |= OpenSSL::SSL::OP_CIPHER_SERVER_PREFERENCE
+      # Disable client initiated renegotiation
+      ssl_options |= OpenSSL::SSL::OP_NO_RENEGOTIATION
+
+      ssl_options
+    end
+
+    def resolve_tls_min_version
+      return nil unless settings.tls_min_version
+
+      min_version = settings.tls_min_version.to_s
+      unless TLS_MIN_VERSION_MAP.key?(min_version)
+        raise "Invalid tls_min_version '#{min_version}'. Valid values: #{TLS_MIN_VERSION_MAP.keys.join(', ')}"
+      end
+
+      logger.info "Setting minimum TLS version to #{min_version}."
+      TLS_MIN_VERSION_MAP[min_version]
+    end
+
+    def resolve_tls_ciphers
+      configured = settings.tls_ciphers
+      raise "Invalid tls_ciphers value '#{configured}': must be a String" if !configured.nil? && !configured.is_a?(String)
+      return nil if configured&.empty?
+      return configured unless configured.nil?
+
+      if File.exist?(CRYPTO_POLICIES_CONFIG)
+        logger.info "Crypto-policies detected, using PROFILE=SYSTEM for TLS ciphers."
+        'PROFILE=SYSTEM'
+      else
+        logger.debug "No crypto-policies detected, using HIGH cipher string as default."
+        'HIGH'
+      end
+    end
+
+    def validate_tls_ciphers!(ciphers)
+      return [nil, nil] if ciphers.nil?
+
+      if ciphers == 'PROFILE=SYSTEM' && !settings.tls_min_version.nil? && settings.tls_min_version != ''
+        logger.warn "tls_min_version is configured together with tls_ciphers 'PROFILE=SYSTEM'. " \
+                    "The system crypto policy minimum TLS version may be overridden by this setting."
+      end
+
+      cipher_list = begin
+        OpenSSL::SSL::SSLContext.new.ciphers = ciphers
+        ciphers
+      rescue OpenSSL::SSL::SSLError
+        nil
+      end
+
+      if OpenSSL::SSL::SSLContext.method_defined?(:ciphersuites=)
+        ciphersuites = begin
+          OpenSSL::SSL::SSLContext.new.ciphersuites = ciphers
+          ciphers
+        rescue OpenSSL::SSL::SSLError
+          nil
+        end
+      elsif settings.tls_ciphers
+        logger.warn "tls_ciphers is configured but this Ruby/OpenSSL build does not support " \
+                    "OpenSSL::SSL::SSLContext#ciphersuites=. TLS 1.3 connections will not be " \
+                    "restricted by tls_ciphers."
+      end
+
+      # If the cipher list and ciphersuites are not valid, return the original string to let the SSL server fail at startup
+      return [ciphers, nil] unless cipher_list || ciphersuites
+
+      if cipher_list.nil? && ciphersuites && settings.tls_min_version != '1.3'
+        logger.warn "tls_ciphers '#{ciphers}' is only valid for TLS 1.3. " \
+                    "Set tls_min_version to '1.3' to prevent TLS 1.2 and lower connections with unrestricted ciphers."
+      end
+
+      if settings.tls_ciphers && settings.tls_min_version == '1.3' && ciphersuites.nil?
+        raise "tls_ciphers '#{ciphers}' is not valid for TLS 1.3 but tls_min_version is 1.3."
+      end
+
+      [cipher_list, ciphersuites]
     end
 
     def load_ssl_private_key(path)
@@ -118,8 +186,24 @@ module Proxy
 
     def webrick_server(app, addresses, port)
       server = ::WEBrick::HTTPServer.new(app)
-      addresses.each { |a| server.listen(a, port) }
+      begin
+        addresses.each { |a| server.listen(a, port) }
+      rescue ::OpenSSL::SSL::SSLError => e
+        raise "Invalid tls_ciphers value '#{app[:SSLCiphers]}': #{e.message}"
+      end
       server.mount "/", Rack::Handler::WEBrick, app[:app]
+
+      # WEBrick 1.9.x does not support :SSLMinVersion in its config hash, so we
+      # apply min_version= directly on the SSL context after WEBrick creates it.
+      # This patch should be removed once WEBrick adds support for :SSLMinVersion.
+      #
+      # :SSLCiphers is passed to SSL_CTX_set_cipher_list(), covering TLS 1.0–1.2.
+      # :SSLCiphersuites is applied here via SSL_CTX_set_ciphersuites() for TLS 1.3.
+      if app[:SSLEnable]
+        server.ssl_context.min_version = app[:SSLMinVersion] if app[:SSLMinVersion]
+        server.ssl_context.ciphersuites = app[:SSLCiphersuites] if app[:SSLCiphersuites]
+      end
+
       server
     end
 
