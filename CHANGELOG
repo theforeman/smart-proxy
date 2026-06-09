@@ -1,3 +1,9 @@
+2026-06-09	Ondřej Gajdušek <ogajduse@redhat.com>
+	* Release 3.19.0
+
+2026-06-01	Evgeni Golov <evgeni@golov.de>
+	* Fixes #39320 - Expose bmc_default_provider setting via v2/features API (#946)
+
 2026-05-26	Ondřej Gajdušek <ogajduse@redhat.com>
 	* Release 3.19.0-rc2
 
