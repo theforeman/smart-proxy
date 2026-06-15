@@ -3,10 +3,12 @@
 :enabled: false
 
 # valid providers:
-#   - dhcp_isc (ISC dhcp server)
+#   - dhcp_kea (ISC KEA dhcp server)
 #   - dhcp_native_ms (Microsoft native implementation)
 #   - dhcp_libvirt
-#:use_provider: dhcp_isc
+#   - dhcp_isc (ISC dhcp server - DEPRECATED)
+#
+#:use_provider: dhcp_kea
 #:server: 127.0.0.1
 # subnets restricts the subnets queried to a subset, to reduce the query time.
 #:subnets: [192.168.205.0/255.255.255.128, 192.168.205.128/255.255.255.128]

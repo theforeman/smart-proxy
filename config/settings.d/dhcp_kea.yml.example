@@ -1,0 +1,16 @@
+---
+# KEA DHCP provider configuration
+# Requires ISC KEA DHCP server with Control Agent API enabled
+
+# URL of the KEA Control Agent
+#:dhcp_kea_url: http://127.0.0.1:8000/
+
+# Optional HTTP Basic Authentication credentials
+#:dhcp_kea_username: ~
+#:dhcp_kea_password: ~
+
+# SSL certificate verification (set to false for self-signed certificates)
+#:dhcp_kea_verify_ssl: true
+
+# Timeout for lease operations in seconds
+#:dhcp_kea_lease_timeout: 60
