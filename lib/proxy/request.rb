@@ -1,5 +1,6 @@
 require 'net/http'
 require 'net/https'
+require 'net/http/persistent'
 require 'uri'
 require 'cgi'
 
@@ -15,9 +16,10 @@ module Proxy::HttpRequest
 
     def create_get(path, query = {}, headers = {})
       uri = uri(path)
-      req = Net::HTTP::Get.new("#{uri.path || '/'}?#{query_string(query)}")
+      uri.query = query_string(query)
+      req = Net::HTTP::Get.new(uri)
       req = add_headers(req, headers)
-      req
+      [uri, req]
     end
 
     def uri(path)
@@ -39,13 +41,13 @@ module Proxy::HttpRequest
       req = Net::HTTP::Post.new(uri)
       req = add_headers(req, headers)
       req.body = body
-      req
+      [uri, req]
     end
   end
 
   class ForemanRequest
-    def send_request(request)
-      http.request(request)
+    def send_request(uri, request)
+      http.request(uri, request)
     end
 
     def request_factory
@@ -63,11 +65,10 @@ module Proxy::HttpRequest
     private
 
     def http_init
-      http             = Net::HTTP.new(uri.host, uri.port)
-      http.use_ssl     = uri.scheme == 'https'
+      http             = Net::HTTP::Persistent.new(name: 'foreman')
       http.verify_mode = OpenSSL::SSL::VERIFY_NONE
 
-      if http.use_ssl?
+      if uri.scheme == 'https'
         ca_file = Proxy::SETTINGS.foreman_ssl_ca || Proxy::SETTINGS.ssl_ca_file
         certificate = Proxy::SETTINGS.foreman_ssl_cert || Proxy::SETTINGS.ssl_certificate
         private_key = Proxy::SETTINGS.foreman_ssl_key || Proxy::SETTINGS.ssl_private_key

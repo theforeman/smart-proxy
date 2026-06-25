@@ -52,7 +52,9 @@ class TemplateProxyRequestTest < Test::Unit::TestCase
         headers: {
           'Accept'          => ['*/*', 'application/json,version=2'],
           'Accept-Encoding' => 'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
+          'Connection'      => 'keep-alive',
           'Content-Type'    => 'application/json',
+          'Keep-Alive'      => '30',
           'User-Agent'      => 'Ruby',
           'X-Forwarded-For' => '1.2.3.4',
         }).

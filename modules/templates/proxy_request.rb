@@ -38,15 +38,15 @@ module Proxy::Templates
       proxy_headers["X-Forwarded-For"] = env['REMOTE_ADDR']
       proxy_headers["Content-Type"] = params["Content-Type"] if params["Content-Type"]
       if method == :get
-        proxy_req = request_factory.create_get(path, opts, proxy_headers)
+        uri, proxy_req = request_factory.create_get(path, opts, proxy_headers)
       elsif method == :post
-        proxy_req = request_factory.create_post(path, body, proxy_headers, opts)
+        uri, proxy_req = request_factory.create_post(path, body, proxy_headers, opts)
       else
         raise "Unknown method: #{method}"
       end
       logger.debug "Retrieving a template from %s%s" % [uri, proxy_req.path]
       logger.debug "HTTP headers: #{proxy_headers.inspect}"
-      res = send_request(proxy_req)
+      res = send_request(uri, proxy_req)
       # You get a 201 from the 'built' URL
       raise ::Proxy::Error::HttpError.new(res.code.to_i, nil, "Error retrieving #{path} for #{opts.inspect} from #{uri.host}: #{res.class}") unless ["200", "201"].include?(res.code)
       res.body
