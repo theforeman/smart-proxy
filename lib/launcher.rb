@@ -119,7 +119,7 @@ module Proxy
     def webrick_server(app, addresses, port)
       server = ::WEBrick::HTTPServer.new(app)
       addresses.each { |a| server.listen(a, port) }
-      server.mount "/", Rack::Handler::WEBrick, app[:app]
+      server.mount "/", Rackup::Handler::WEBrick, app[:app]
       server
     end
 

@@ -94,7 +94,7 @@ class RegistrationRegisterApiTest < Test::Unit::TestCase
   end
 
   def test_global_500
-    Rack::NullLogger.any_instance.stubs(:exception)
+    Logger.any_instance.stubs(:exception)
     stub_request(:get, "#{@foreman_url}/register").to_timeout
 
     get '/'
@@ -103,7 +103,7 @@ class RegistrationRegisterApiTest < Test::Unit::TestCase
   end
 
   def test_host_500
-    Rack::NullLogger.any_instance.stubs(:exception)
+    Logger.any_instance.stubs(:exception)
     stub_request(:post, "#{@foreman_url}/register").to_timeout
 
     post '/'
