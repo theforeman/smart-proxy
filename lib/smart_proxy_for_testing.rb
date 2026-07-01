@@ -1,6 +1,7 @@
 require 'smart_proxy'
 require 'json'
 require 'rack'
+require 'rackup'
 require 'sinatra'
 require 'webrick/https'
 require 'proxy/log'

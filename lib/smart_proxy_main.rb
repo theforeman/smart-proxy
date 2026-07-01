@@ -32,6 +32,7 @@ Proxy::BundlerHelper.require_groups(:default)
 
 require 'json'
 require 'rack'
+require 'rackup'
 require 'sinatra'
 require 'sinatra/authorization'
 require 'sinatra/default_not_found_page'
