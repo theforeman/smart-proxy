@@ -40,7 +40,11 @@ module Proxy::IntegrationTestCase
 
   def launch(protocol: 'https', plugins: [], settings: {})
     port = 0
-    @settings = Proxy::Settings::Global.new(settings.merge("#{protocol}_port" => port))
+    # Pin tls_ciphers to OpenSSL defaults unless a test overrides it, so HTTPS
+    # integration tests don't depend on the host's crypto-policies/OpenSSL
+    # combination (tests shouldn't rely on where they happen to run).
+    default_settings = (protocol == 'https') ? { tls_ciphers: '' } : {}
+    @settings = Proxy::Settings::Global.new(default_settings.merge(settings).merge("#{protocol}_port" => port))
     @t = Thread.new do
       launcher = Proxy::Launcher.new(@settings)
       app = launcher.public_send("#{protocol}_app", port, plugins)
