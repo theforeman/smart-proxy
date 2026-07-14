@@ -1,5 +1,6 @@
 require 'test_helper'
 require 'registration/registration_api'
+require 'registration/registration_plugin'
 
 class RegistrationRegisterApiTest < Test::Unit::TestCase
   include Rack::Test::Methods
@@ -11,6 +12,7 @@ class RegistrationRegisterApiTest < Test::Unit::TestCase
   def setup
     @foreman_url = 'http://foreman.example.com'
     Proxy::SETTINGS.stubs(:foreman_url).returns(@foreman_url)
+    Proxy::Registration::Plugin.load_test_settings
   end
 
   def test_global_register_template
