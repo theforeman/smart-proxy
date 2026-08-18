@@ -1,5 +1,13 @@
 require 'openssl'
 require 'proxy/log'
+
+begin
+  require 'rackup/handler/webrick'
+  WEBRICK_HANDLER = Rackup::Handler::WEBrick
+rescue LoadError
+  require 'rack'
+  WEBRICK_HANDLER = Rack::Handler::WEBrick
+end
 require 'proxy/settings'
 require 'proxy/signal_handler'
 require 'proxy/log_buffer/trace_decorator'
@@ -191,7 +199,7 @@ module Proxy
       rescue ::OpenSSL::SSL::SSLError => e
         raise "Invalid tls_ciphers value '#{app[:SSLCiphers]}': #{e.message}"
       end
-      server.mount "/", Rack::Handler::WEBrick, app[:app]
+      server.mount "/", WEBRICK_HANDLER, app[:app]
 
       # WEBrick 1.9.x does not support :SSLMinVersion in its config hash, so we
       # apply min_version= directly on the SSL context after WEBrick creates it.

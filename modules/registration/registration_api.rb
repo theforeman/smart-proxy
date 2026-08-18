@@ -1,6 +1,11 @@
 require 'registration/proxy_request'
 
 class Proxy::Registration::Api < ::Sinatra::Base
+  # Needed so `logger` resolves to Proxy::LogBuffer::Decorator (which implements
+  # #exception, used in the rescue blocks below) instead of Sinatra's own null
+  # logger, which is a plain ::Logger with no #exception method as of Sinatra 4.
+  helpers ::Proxy::Helpers
+
   # Cache for the global registration script (GET /register).
   #
   # The script is identical for all hosts sharing the same registration
