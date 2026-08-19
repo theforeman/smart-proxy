@@ -65,7 +65,7 @@ class MigratePuppetSettings < ::Proxy::Migration
 
     if migrated.has_key?(:puppet_proxy_mcollective)
       puppet_user = migrated[:puppet_proxy_mcollective].delete(:puppet_user)
-      unless (migrated[:puppet_proxy_mcollective].has_key?(:user) || puppet_user.nil?)
+      unless migrated[:puppet_proxy_mcollective].has_key?(:user) || puppet_user.nil?
         migrated[:puppet_proxy_mcollective][:user] = puppet_user
       end
     end

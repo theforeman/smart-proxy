@@ -115,7 +115,7 @@ module Proxy
     def resolve_tls_ciphers
       configured = settings.tls_ciphers
       raise "Invalid tls_ciphers value '#{configured}': must be a String" if !configured.nil? && !configured.is_a?(String)
-      return nil if configured&.empty?
+      return nil if configured == ''
       return configured unless configured.nil?
 
       if File.exist?(CRYPTO_POLICIES_CONFIG)

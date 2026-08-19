@@ -205,7 +205,7 @@ module Proxy::DHCP
 
     # Default: manage any subnet. If specified: manage only specified subnets.
     def managed_subnet?(subnet)
-      @managed_subnets.empty? ? true : @managed_subnets.include?(subnet)
+      @managed_subnets.empty? || @managed_subnets.include?(subnet)
     end
   end
 end

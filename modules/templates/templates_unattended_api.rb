@@ -7,7 +7,7 @@ class Proxy::TemplatesUnattendedApi < Sinatra::Base
   # It will also modify the rendering of the foreman_url specified in the templates.
   get "/templateServer" do
     content_type :json
-    {"templateServer" => (Proxy::Templates::Plugin.settings.template_url || "")}.to_json
+    {"templateServer" => Proxy::Templates::Plugin.settings.template_url || ""}.to_json
   rescue => e
     log_halt 400, e
   end
