@@ -2,7 +2,7 @@ require 'test_helper'
 require 'dhcp_common/dhcp_common'
 require 'dhcp_common/isc/configuration_parser'
 
-class Proxy::DHCP::CommonISC::ConfigurationParserTest < Test::Unit::TestCase
+class Proxy::DHCP::CommonISC::ConfigurationParserTest < Minitest::Test
   def teardown
     Rsec::Fail.reset
   end

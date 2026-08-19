@@ -1,6 +1,6 @@
 require 'test_helper'
 
-class PluginTest < Test::Unit::TestCase
+class PluginTest < Minitest::Test
   class TestPlugin2 < Proxy::Plugin; plugin :test2, '1.0'; end
   def test_http_rackup_returns_empty_string_with_missing_rackup_path
     assert_equal "", TestPlugin2.http_rackup

@@ -4,7 +4,7 @@ require 'puppet_proxy_common/environments_retriever_base'
 require 'puppet_proxy_common/errors'
 require 'puppet_proxy_puppet_api/v3_environments_retriever'
 
-class PuppetApiV3EnvironmentsRetrieverTest < Test::Unit::TestCase
+class PuppetApiV3EnvironmentsRetrieverTest < Minitest::Test
   class EnvironmentApiForTesting
     attr_accessor :find_environments_response
     def find_environments

@@ -5,8 +5,9 @@ require 'dhcp_common/subnet'
 require 'dhcp_common/record/reservation'
 require 'dhcp_common/free_ips'
 
-class Proxy::DHCPFreeIpsTest < Test::Unit::TestCase
+class Proxy::DHCPFreeIpsTest < Minitest::Test
   def setup
+    Proxy::DhcpPlugin.load_test_settings()
     @blacklist_interval = 30 * 60
     @free_ips = Proxy::DHCP::FreeIps.new(@blacklist_interval)
     @subnet = Proxy::DHCP::Subnet.new("192.168.1.0", "255.255.255.0")
@@ -103,8 +104,8 @@ class Proxy::DHCPFreeIpsTest < Test::Unit::TestCase
 
     @free_ips.find_free_ip("192.168.1.1", "192.168.1.2", [r])
 
-    assert_false @free_ips.allocated_ips.empty?
-    assert_false @free_ips.allocation_timestamps.empty?
+    refute @free_ips.allocated_ips.empty?
+    refute @free_ips.allocation_timestamps.empty?
 
     @free_ips.expects(:time_now).returns(Time.now.to_i + @blacklist_interval + 10)
     @free_ips.clean_up_allocated_ips
