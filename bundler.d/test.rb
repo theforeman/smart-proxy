@@ -8,8 +8,8 @@ group :test do
   gem 'mocha', '~> 1.10', :require => false
   gem 'rack-test'
   gem 'rake'
-  gem 'rubocop', '~> 1.56.0'
-  gem 'rubocop-performance', '~> 1.5.2'
+  gem 'rubocop', '~> 1.88.0'
+  gem 'rubocop-performance', '~> 1.26.0'
   gem 'rubocop-rake'
   gem 'ruby-prof', '< 1.4'
   gem 'test-unit'
