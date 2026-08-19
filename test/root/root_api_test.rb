@@ -17,7 +17,7 @@ class TestPlugin3 < ::Proxy::Plugin
   plugin :test3, "0.0.1"
 end
 
-class RootApiTest < Test::Unit::TestCase
+class RootApiTest < Minitest::Test
   include Rack::Test::Methods
 
   def app

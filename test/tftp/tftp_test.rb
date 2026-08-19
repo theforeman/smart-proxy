@@ -2,7 +2,7 @@ require 'test_helper'
 require 'tftp/tftp_plugin'
 require "tftp/server"
 
-class TftpTest < Test::Unit::TestCase
+class TftpTest < Minitest::Test
   def setup
     @tftp = Proxy::TFTP::Server.new
     Proxy::TFTP::Plugin.load_test_settings(:tftproot => "/some/root")
@@ -74,9 +74,7 @@ class TftpTest < Test::Unit::TestCase
   end
 
   def test_choose_protocol_and_fetch_nfs
-    assert_nothing_raised RuntimeError do
-      Proxy::TFTP.choose_protocol_and_fetch 'nfs://proxy.test', '/destination'
-    end
+    Proxy::TFTP.choose_protocol_and_fetch 'nfs://proxy.test', '/destination'
   end
 
   def test_choose_protocol_and_fetch_unknown

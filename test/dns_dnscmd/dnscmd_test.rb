@@ -9,7 +9,7 @@ class DnscmdForTesting < Proxy::Dns::Dnscmd::Record
   attr_accessor :enum_zones
 end
 
-class DnsCmdTest < Test::Unit::TestCase
+class DnsCmdTest < Minitest::Test
   def setup
     @server = DnscmdForTesting.new(["_msdcs.bar.domain.local",
                                     "168.192.in-addr.arpa",
@@ -78,13 +78,13 @@ class DnsCmdTest < Test::Unit::TestCase
   end
 
   def test_dns_non_authoritative_zone_raises_exception
-    assert_raise Proxy::Dns::NotFound do
+    assert_raises Proxy::Dns::NotFound do
       @server.match_zone('host.foo.bar.domain.com', ['domain.local'])
     end
-    assert_raise Proxy::Dns::NotFound do
+    assert_raises Proxy::Dns::NotFound do
       @server.match_zone('33.33.16.192.in-addr.arpa', ['168.192.in-addr.arpa'])
     end
-    assert_raise Proxy::Dns::NotFound do
+    assert_raises Proxy::Dns::NotFound do
       @server.match_zone('1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.f.e.e.d.8.b.d.1.1.0.0.2.ip6.arpa', ['f.e.e.d.8.b.d.0.1.0.0.2.ip6.arpa'])
     end
   end

@@ -206,7 +206,7 @@ class EnvironmentClassesApiRetrieverForTesting < Proxy::PuppetApi::V3Environment
   attr_accessor :etag_cache, :classes_cache, :futures_cache
 end
 
-class PuppetApiv3EnvironmentClassesApiRetrieverTest < Test::Unit::TestCase
+class PuppetApiv3EnvironmentClassesApiRetrieverTest < Minitest::Test
   include PuppetApiv3EnvironmentClassesApiRetrieverTests
   include PuppetApiv3EnvironmentClassesApiParsingTests
 end

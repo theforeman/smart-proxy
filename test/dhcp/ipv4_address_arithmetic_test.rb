@@ -1,7 +1,7 @@
 require 'test/benchmark_helper'
 require 'dhcp_common/dhcp_common'
 
-class Ipv4AddressArithmeticTests < Test::Unit::TestCase
+class Ipv4AddressArithmeticTests < Minitest::Test
   def test_ipv4_to_i
     assert_equal 0xffffffff, Proxy::DHCP.ipv4_to_i("255.255.255.255")
     assert_equal 0x7f000001, Proxy::DHCP.ipv4_to_i("127.0.0.1")

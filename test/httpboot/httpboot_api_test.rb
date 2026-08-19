@@ -5,7 +5,7 @@ require 'httpboot/httpboot_api'
 
 ENV['RACK_ENV'] = 'test'
 
-class HttpbootApiTest < Test::Unit::TestCase
+class HttpbootApiTest < Minitest::Test
   include Rack::Test::Methods
 
   def app

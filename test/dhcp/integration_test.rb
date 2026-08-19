@@ -6,7 +6,7 @@ require 'dhcp_common/subnet_service'
 require 'dhcp_common/dhcp_common'
 require 'dhcp_common/record/reservation'
 
-class DhcpApiValidIPTest < Test::Unit::TestCase
+class DhcpApiValidIPTest < Minitest::Test
   include Rack::Test::Methods
 
   def app

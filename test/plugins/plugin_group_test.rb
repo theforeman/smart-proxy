@@ -1,6 +1,6 @@
 require 'test_helper'
 
-class PluginGroupTest < Test::Unit::TestCase
+class PluginGroupTest < Minitest::Test
   def test_group_initial_state
     group = ::Proxy::PluginGroup.new(nil)
 
@@ -244,8 +244,8 @@ class PluginGroupTest < Test::Unit::TestCase
     end
     group = ::Proxy::PluginGroup.new(TestStopServicesPlugin, [TestStopServicesProvider], di_container)
 
-    assert_not_equal :stopped, di_container.get_dependency(:service_a).state
-    assert_not_equal :stopped, di_container.get_dependency(:service_b).state
+    refute_equal :stopped, di_container.get_dependency(:service_a).state
+    refute_equal :stopped, di_container.get_dependency(:service_b).state
 
     group.stop_services
 
