@@ -1,9 +1,29 @@
-require 'net/http'
-require 'net/https'
-require 'uri'
 require 'cgi'
+require 'uri'
+
+require 'proxy/foreman_transport'
 
 module Proxy::HttpRequest
+  Request = Struct.new(:http_method, :path, :body, :headers, keyword_init: true)
+
+  class Response
+    attr_reader :body, :headers, :status
+
+    def initialize(status:, body:, headers:)
+      @status = status
+      @body = body
+      @headers = headers.transform_keys { |key| key.to_s.downcase }
+    end
+
+    def code
+      status.to_s
+    end
+
+    def [](header)
+      headers[header.to_s.downcase]
+    end
+  end
+
   class ForemanRequestFactory
     def initialize(base_uri)
       @base_uri = base_uri
@@ -14,38 +34,51 @@ module Proxy::HttpRequest
     end
 
     def create_get(path, query = {}, headers = {})
-      uri = uri(path)
-      req = Net::HTTP::Get.new("#{uri.path || '/'}?#{query_string(query)}")
-      req = add_headers(req, headers)
-      req
+      Request.new(http_method: :get,
+                  path: request_path(path, query),
+                  headers: add_headers(headers))
     end
 
     def uri(path)
       URI.join(@base_uri.to_s, path)
     end
 
-    def add_headers(req, headers = {})
-      req.add_field('Accept', 'application/json,version=2')
-      req.content_type = headers.delete("Content-Type") || 'application/json'
-      headers.each do |k, v|
-        req.add_field(k, v)
-      end
-      req
+    def add_headers(headers = {})
+      outgoing_headers = headers.dup
+      content_type = outgoing_headers.delete('Content-Type') || 'application/json'
+      { 'Accept' => 'application/json,version=2', 'Content-Type' => content_type }.merge(outgoing_headers)
     end
 
     def create_post(path, body, headers = {}, query = {})
-      uri = uri(path)
-      uri.query = query_string(query)
-      req = Net::HTTP::Post.new(uri)
-      req = add_headers(req, headers)
-      req.body = body
-      req
+      Request.new(http_method: :post,
+                  path: request_path(path, query),
+                  body: body,
+                  headers: add_headers(headers))
+    end
+
+    private
+
+    def request_path(path, query = {})
+      request_uri = uri(path)
+      query = query_string(query)
+      request_uri.query = query unless query.empty?
+      request_uri.request_uri
     end
   end
 
   class ForemanRequest
+    # Compatibility shim for existing callers that inspect timeout values via `http`.
+    ConnectionInfo = Struct.new(:read_timeout, :open_timeout, :connection, keyword_init: true)
+
+    class << self
+      def reset_connection_cache!
+        ForemanTransport.reset!
+      end
+    end
+
     def send_request(request)
-      http.request(request)
+      response = ForemanTransport.run_request(uri, request)
+      Response.new(status: response.status, body: response.body, headers: response.headers)
     end
 
     def request_factory
@@ -56,33 +89,24 @@ module Proxy::HttpRequest
       @uri ||= URI.parse(Proxy::SETTINGS.foreman_url.to_s)
     end
 
+    def connection
+      ForemanTransport.connection_for(uri)
+    end
+
     def http
-      @http ||= http_init
+      ConnectionInfo.new(read_timeout: read_timeout,
+                         open_timeout: open_timeout,
+                         connection: connection)
     end
 
     private
 
-    def http_init
-      http             = Net::HTTP.new(uri.host, uri.port)
-      http.use_ssl     = uri.scheme == 'https'
-      http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+    def read_timeout
+      ForemanTransport.read_timeout(uri)
+    end
 
-      if http.use_ssl?
-        ca_file = Proxy::SETTINGS.foreman_ssl_ca || Proxy::SETTINGS.ssl_ca_file
-        certificate = Proxy::SETTINGS.foreman_ssl_cert || Proxy::SETTINGS.ssl_certificate
-        private_key = Proxy::SETTINGS.foreman_ssl_key || Proxy::SETTINGS.ssl_private_key
-
-        if ca_file && !ca_file.to_s.empty?
-          http.ca_file     = ca_file
-          http.verify_mode = OpenSSL::SSL::VERIFY_PEER
-        end
-
-        if certificate && !certificate.to_s.empty? && private_key && !private_key.to_s.empty?
-          http.cert = OpenSSL::X509::Certificate.new(File.read(certificate))
-          http.key  = OpenSSL::PKey.read(File.read(private_key), nil)
-        end
-      end
-      http
+    def open_timeout
+      ForemanTransport.open_timeout(uri)
     end
   end
 end

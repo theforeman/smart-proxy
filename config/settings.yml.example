@@ -42,6 +42,17 @@
 #:foreman_ssl_cert: ssl/certs/fqdn.pem
 #:foreman_ssl_key: ssl/private_keys/fqdn.pem
 
+# Timeout in seconds for HTTP requests from smart-proxy to Foreman (e.g. POST /register).
+# Defaults to Ruby's Net::HTTP read timeout (60s) when unset. Consider raising this
+# above your client's timeout to avoid cutting connections the client is still waiting on.
+# subscription-manager's default server_timeout is 180s, so a value above that is recommended.
+#:foreman_request_timeout: 60
+
+# Timeout in seconds for establishing TCP/TLS connections from smart-proxy to Foreman.
+# Maps to the HTTP client open timeout. When unset, smart-proxy uses Net::HTTP's default.
+# Consider raising this if the upstream connection establishment is slower than usual.
+#:foreman_open_timeout: 60
+
 # host and ports configuration
 # an array of interfaces to bind ports to (possible values: *, localhost, 0.0.0.0)
 #:bind_host: ['*']
