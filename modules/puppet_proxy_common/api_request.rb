@@ -49,6 +49,7 @@ module Proxy::Puppet
     end
 
     def create_http_context(uri, timeout)
+      # TODO: Net::HTTP::Persistent.new
       http = Net::HTTP.new(uri.host, uri.port)
       http.use_ssl = uri.scheme == 'https'
       http.verify_mode = OpenSSL::SSL::VERIFY_NONE

@@ -16,6 +16,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'base64'
   s.add_dependency 'json'
   s.add_dependency 'logging'
+  s.add_dependency 'net-http-persistent', '~> 4.0'
   s.add_dependency 'ostruct'
   s.add_dependency 'rack', '>= 2.0', '< 4'
   s.add_dependency 'rackup'

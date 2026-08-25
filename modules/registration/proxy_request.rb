@@ -3,11 +3,11 @@ require 'proxy/request'
 module Proxy::Registration
   class ProxyRequest < ::Proxy::HttpRequest::ForemanRequest
     def global_register(request)
-      proxy_req = request_factory.create_get '/register',
-                                             request_params(request),
-                                             headers(request)
+      uri, proxy_req = request_factory.create_get '/register',
+                                                  request_params(request),
+                                                  headers(request)
 
-      send_request(proxy_req)
+      send_request(uri, proxy_req)
     end
 
     # we support two way of sending data - either a JSON or url encoded data
@@ -18,19 +18,19 @@ module Proxy::Registration
         # also request.params contain the same data that is in request.body, just parsed to hash,
         # in case they are nested (e.g. host hash) we need this causes problem during CGI escaping
         # therefore we only add url, everything else should be in body in this type of request
-        proxy_req = request_factory.create_post '/register',
-                                                request.body.read,
-                                                headers(request).merge("Content-Type" => request.content_type),
-                                                { url: register_url(request) }
+        uri, proxy_req = request_factory.create_post '/register',
+                                                     request.body.read,
+                                                     headers(request).merge("Content-Type" => request.content_type),
+                                                     { url: register_url(request) }
       else
         # the application/json request body contains the data - JSON as a string, query contains only the URL
-        proxy_req = request_factory.create_post '/register',
-                                                request.body.read,
-                                                headers(request),
-                                                request_params(request)
+        uri, proxy_req = request_factory.create_post '/register',
+                                                     request.body.read,
+                                                     headers(request),
+                                                     request_params(request)
       end
 
-      send_request(proxy_req)
+      send_request(uri, proxy_req)
     end
 
     private
