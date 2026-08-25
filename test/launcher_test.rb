@@ -1,7 +1,7 @@
 require 'test_helper'
 require 'launcher'
 
-class LauncherTest < Test::Unit::TestCase
+class LauncherTest < Minitest::Test
   def setup
     @launcher = Proxy::Launcher.new
   end
@@ -23,7 +23,7 @@ class LauncherTest < Test::Unit::TestCase
   end
 end
 
-class LauncherTlsCiphersTest < Test::Unit::TestCase
+class LauncherTlsCiphersTest < Minitest::Test
   def setup
     @launcher = Proxy::Launcher.new
   end
@@ -90,7 +90,7 @@ class LauncherTlsCiphersTest < Test::Unit::TestCase
     launcher = launcher_with(tls_min_version: '1.3')
     File.stubs(:exist?).with(CRYPTO_POLICIES_CONFIG).returns(false)
     launcher.logger.stubs(:debug)
-    assert_nothing_raised { launcher.validate_tls_ciphers!(launcher.resolve_tls_ciphers) }
+    launcher.validate_tls_ciphers!(launcher.resolve_tls_ciphers)
   end
 
   def test_validate_tls_ciphers_warns_when_ciphersuites_method_absent_and_tls_ciphers_set
@@ -112,7 +112,7 @@ class LauncherTlsCiphersTest < Test::Unit::TestCase
   end
 end
 
-class LauncherTlsMinVersionTest < Test::Unit::TestCase
+class LauncherTlsMinVersionTest < Minitest::Test
   def test_resolve_tls_min_version_raises_on_invalid_version
     settings = Proxy::Settings::Global.new(tls_min_version: '1.4')
     launcher = Proxy::Launcher.new(settings)
@@ -135,7 +135,7 @@ class LauncherTlsMinVersionTest < Test::Unit::TestCase
   end
 end
 
-class LauncherWebrickSslTest < Test::Unit::TestCase
+class LauncherWebrickSslTest < Minitest::Test
   def setup
     cert, key = WEBrick::Utils.create_self_signed_cert(2048, [['CN', 'test']], 'test')
     @ssl_app = {
@@ -174,7 +174,7 @@ class LauncherWebrickSslTest < Test::Unit::TestCase
   end
 end
 
-class LauncherSslCipherTest < Test::Unit::TestCase
+class LauncherSslCipherTest < Minitest::Test
   SSL_FIXTURES = File.expand_path(File.join(__dir__, 'fixtures', 'ssl')).freeze
 
   def launcher_with_cipher(cipher)

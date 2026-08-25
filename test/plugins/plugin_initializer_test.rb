@@ -1,6 +1,6 @@
 require 'test_helper'
 
-class PluginInitializerTest < Test::Unit::TestCase
+class PluginInitializerTest < Minitest::Test
   class TestPlugin1 < Proxy::Plugin
     plugin :plugin_1, "1.0"
     default_settings :enabled => true

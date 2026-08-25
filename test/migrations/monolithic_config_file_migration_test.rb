@@ -3,7 +3,7 @@ require File.join(__dir__, '../../extra/migrate_settings')
 ::Proxy::Migration.inject_migrations_instance(::Proxy::Migrations.new("dummy"))
 require File.join(__dir__, '../../extra/migrations/20150327000000_migrate_monolithic_config')
 
-class MonolithicConfigMigrationTest < Test::Unit::TestCase
+class MonolithicConfigMigrationTest < Minitest::Test
   def setup
     @old_config = YAML.load_file(File.join(__dir__, './migration_settings.yml'))
     @output, @unknown = MigrateMonolithicConfig.new("/tmp").migrate_monolithic_config(@old_config)

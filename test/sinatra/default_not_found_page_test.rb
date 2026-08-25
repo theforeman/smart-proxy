@@ -2,7 +2,7 @@ require 'test_helper'
 require 'sinatra/base'
 require 'sinatra/default_not_found_page'
 
-class DefaultNotFoundPageTest < Test::Unit::TestCase
+class DefaultNotFoundPageTest < Minitest::Test
   include Rack::Test::Methods
 
   def app

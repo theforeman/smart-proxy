@@ -1,7 +1,7 @@
 require 'test_helper'
 require 'proxy/validations'
 
-class ProxyValidationsTest < Test::Unit::TestCase
+class ProxyValidationsTest < Minitest::Test
   include Proxy::Validations
 
   def test_should_be_valid_mac
@@ -30,10 +30,10 @@ class ProxyValidationsTest < Test::Unit::TestCase
   end
 
   def test_should_not_return_invalid_ip
-    assert_raise InvalidIPAddress do
+    assert_raises InvalidIPAddress do
       validate_ip "192.168.1"
     end
-    assert_raise InvalidIPAddress do
+    assert_raises InvalidIPAddress do
       validate_ip "192.168.1.i"
     end
   end
@@ -53,10 +53,10 @@ class ProxyValidationsTest < Test::Unit::TestCase
   end
 
   def test_should_not_return_invalid_mac
-    assert_raise InvalidMACAddress do
+    assert_raises InvalidMACAddress do
       validate_mac "aa:bb:cc:00:11:22:33"
     end
-    assert_raise InvalidMACAddress do
+    assert_raises InvalidMACAddress do
       validate_mac "aa:bb:cc:00:11:zz"
     end
   end

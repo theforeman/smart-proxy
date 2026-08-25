@@ -1,7 +1,7 @@
 require 'test_helper'
 require 'realm_freeipa/ipa_config_parser'
 
-class IpaConfigParserTest < Test::Unit::TestCase
+class IpaConfigParserTest < Minitest::Test
   def setup
     @parser = Proxy::FreeIPARealm::IpaConfigParser.new(File.expand_path("realm.conf", File.expand_path(__dir__)))
   end
