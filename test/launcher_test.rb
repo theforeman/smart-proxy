@@ -53,6 +53,7 @@ class LauncherTlsCiphersTest < Test::Unit::TestCase
   def test_resolve_tls_ciphers_autodetects_profile_system_when_crypto_policies_present
     launcher = launcher_with({})
     File.expects(:exist?).with(CRYPTO_POLICIES_CONFIG).returns(true)
+    launcher.stubs(:cipher_string_supported?).with('PROFILE=SYSTEM').returns(true)
     launcher.logger.stubs(:info)
     assert_equal 'PROFILE=SYSTEM', launcher.resolve_tls_ciphers
   end
@@ -61,6 +62,35 @@ class LauncherTlsCiphersTest < Test::Unit::TestCase
     launcher = launcher_with({})
     File.expects(:exist?).with(CRYPTO_POLICIES_CONFIG).returns(false)
     launcher.logger.stubs(:debug)
+    assert_equal 'HIGH', launcher.resolve_tls_ciphers
+  end
+
+  def test_resolve_tls_ciphers_falls_back_to_parsed_cipher_string_when_profile_system_unsupported
+    launcher = launcher_with({})
+    File.expects(:exist?).with(CRYPTO_POLICIES_CONFIG).returns(true)
+    launcher.stubs(:cipher_string_supported?).with('PROFILE=SYSTEM').returns(false)
+    launcher.stubs(:crypto_policies_cipher_string).returns('HIGH:!aNULL')
+    launcher.stubs(:cipher_string_supported?).with('HIGH:!aNULL').returns(true)
+    launcher.logger.stubs(:info)
+    assert_equal 'HIGH:!aNULL', launcher.resolve_tls_ciphers
+  end
+
+  def test_resolve_tls_ciphers_falls_back_to_high_when_crypto_policies_unparseable
+    launcher = launcher_with({})
+    File.expects(:exist?).with(CRYPTO_POLICIES_CONFIG).returns(true)
+    launcher.stubs(:cipher_string_supported?).with('PROFILE=SYSTEM').returns(false)
+    launcher.stubs(:crypto_policies_cipher_string).returns(nil)
+    launcher.logger.stubs(:warn)
+    assert_equal 'HIGH', launcher.resolve_tls_ciphers
+  end
+
+  def test_resolve_tls_ciphers_falls_back_to_high_when_parsed_cipher_string_also_unsupported
+    launcher = launcher_with({})
+    File.expects(:exist?).with(CRYPTO_POLICIES_CONFIG).returns(true)
+    launcher.stubs(:cipher_string_supported?).with('PROFILE=SYSTEM').returns(false)
+    launcher.stubs(:crypto_policies_cipher_string).returns('BOGUS')
+    launcher.stubs(:cipher_string_supported?).with('BOGUS').returns(false)
+    launcher.logger.stubs(:warn)
     assert_equal 'HIGH', launcher.resolve_tls_ciphers
   end
 
