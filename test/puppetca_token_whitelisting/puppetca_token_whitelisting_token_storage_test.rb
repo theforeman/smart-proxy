@@ -45,7 +45,7 @@ class PuppetCaTokenWhitelistingTokenStorageTest < Test::Unit::TestCase
   end
 
   def test_should_queue_writes_when_locked
-    @storage.lock do
+    @storage.send(:lock) do
       assert_raise Timeout::Error do
         Timeout.timeout(3) do
           @storage.write ['test']
@@ -59,5 +59,46 @@ class PuppetCaTokenWhitelistingTokenStorageTest < Test::Unit::TestCase
       token.start_with? 'foo'
     end
     assert_equal ['test.bar.example.com'], @storage.read
+  end
+
+  def test_should_initialize_existing_empty_file
+    file = Tempfile.new('autosign_empty_test')
+    storage = Proxy::PuppetCa::TokenWhitelisting::TokenStorage.new file.path
+
+    assert_equal [], storage.read
+    storage.add 'foo.example.com'
+    assert_equal ['foo.example.com'], storage.read
+  ensure
+    file.close
+    file.unlink
+  end
+
+  def test_remove_returns_whether_entry_was_removed
+    assert_true @storage.remove 'foo.example.com'
+    assert_false @storage.remove 'does-not-exist.example.com'
+  end
+
+  def test_should_not_lose_concurrent_adds
+    @storage.write []
+
+    entries = Array.new(50) { |i| "host#{i}.example.com" }
+    threads = entries.map do |entry|
+      Thread.new { @storage.add entry }
+    end
+    threads.each(&:join)
+
+    assert_equal entries.sort, @storage.read.sort
+  end
+
+  def test_concurrent_remove_only_succeeds_once
+    @storage.write ['foo.example.com']
+
+    results = Array.new(50) do
+      Thread.new { @storage.remove 'foo.example.com' }
+    end.map(&:value)
+
+    assert_equal 1, results.count(true)
+    assert_equal 49, results.count(false)
+    assert_equal [], @storage.read
   end
 end
