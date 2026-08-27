@@ -19,6 +19,7 @@ Currently Supported modules:
  * HTTPBoot - endpoint exposing a (TFTP) directory via HTTP(s) for UEFI HTTP booting
  * Logs - log buffer of proxy logs for easier troubleshooting
  * Templates - unattended Foreman endpoint proxy
+ * External IPAM - Integration with External IPAM providers
 
 # Installation
 Read the [Smart Proxy Installation section](https://theforeman.org/manuals/latest/index.html#4.3.1SmartProxyInstallation) of the manual.

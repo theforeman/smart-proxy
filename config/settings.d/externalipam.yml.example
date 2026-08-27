@@ -1,0 +1,8 @@
+---
+:enabled: false
+
+# Built-in providers:
+#   1. phpIPAM: externalipam_phpipam
+#   2. Netbox:  externalipam_netbox
+
+:use_provider: externalipam_netbox
