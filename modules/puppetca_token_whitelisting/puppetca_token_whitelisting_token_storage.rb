@@ -16,11 +16,11 @@ module ::Proxy::PuppetCa::TokenWhitelisting
     end
 
     def read
-      YAML.safe_load File.read @tokens_file
+      lock(File::LOCK_SH) { parse }
     end
 
     def write(content)
-      lock do
+      lock(File::LOCK_EX) do
         unsafe_write content
       end
     end
@@ -29,9 +29,9 @@ module ::Proxy::PuppetCa::TokenWhitelisting
       File.write @tokens_file, content.to_yaml
     end
 
-    def lock(&block)
-      File.open(@tokens_file, "r+") do |f|
-        f.flock File::LOCK_EX
+    def lock(mode = File::LOCK_EX, &block)
+      File.open(@tokens_file, ((mode == File::LOCK_EX) ? 'r+' : 'r')) do |f|
+        f.flock mode
         yield
       ensure
         f.flock File::LOCK_UN
@@ -39,17 +39,30 @@ module ::Proxy::PuppetCa::TokenWhitelisting
     end
 
     def add(entry)
-      write read.push entry
+      modify { |tokens| tokens << entry }
     end
 
     def remove(entry)
-      write read.delete_if { |data| data == entry }
+      modify { |tokens| tokens.delete_if { |data| data == entry } }
     end
 
     def remove_if(&block)
-      lock do
-        unsafe_write read.delete_if { |token| yield(token) }
+      modify { |tokens| tokens.delete_if(&block) }
+    end
+
+    private
+
+    # Read-modify-write under a single exclusive lock so concurrent writers
+    # cannot overwrite each other's updates (last writer used to win).
+    def modify
+      lock(File::LOCK_EX) do
+        unsafe_write yield(parse)
       end
+    end
+
+    # An empty file (crash mid-write) reads as "no tokens" instead of nil.
+    def parse
+      YAML.safe_load(File.read(@tokens_file)) || []
     end
   end
 end

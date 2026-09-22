@@ -60,4 +60,24 @@ class PuppetCaTokenWhitelistingTokenStorageTest < Test::Unit::TestCase
     end
     assert_equal ['test.bar.example.com'], @storage.read
   end
+
+  def test_should_read_empty_file_as_empty_array
+    File.write @file.path, ''
+    assert_equal [], @storage.read
+  end
+
+  def test_should_add_to_empty_file_without_crashing
+    File.write @file.path, ''
+    @storage.add 'baz.example.com'
+    assert_equal ['baz.example.com'], @storage.read
+  end
+
+  def test_should_not_lose_concurrent_adds
+    entries = (1..20).map { |i| "token-#{i}.example.com" }
+    entries.map { |entry| Thread.new { @storage.add entry } }.each(&:join)
+    stored = @storage.read
+    entries.each do |entry|
+      assert_includes stored, entry, "concurrent add of #{entry} was lost"
+    end
+  end
 end
