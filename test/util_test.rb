@@ -1,4 +1,5 @@
 require 'test_helper'
+require 'tmpdir'
 
 class ProxyUtilTest < Test::Unit::TestCase
   class UtilClass; extend Proxy::Util; end
@@ -34,6 +35,19 @@ class ProxyUtilTest < Test::Unit::TestCase
   def test_commandtask_with_exit_1
     t = Proxy::Util::CommandTask.new('false').start
     assert_equal t.join, 1
+  end
+
+  def test_commandtask_limits_child_file_size
+    limit = 16
+    Dir.mktmpdir do |tmpdir|
+      path = File.join(tmpdir, 'large-file')
+      command = [RbConfig.ruby, '-e', 'File.binwrite(ARGV.fetch(0), "x" * 32)', path]
+
+      task = Proxy::Util::CommandTask.new(command).start(rlimit_fsize: limit)
+
+      assert_not_equal 0, task.join
+      assert_equal limit, File.size(path)
+    end
   end
 
   def test_strict_encode64
