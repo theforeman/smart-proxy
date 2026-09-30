@@ -14,7 +14,7 @@ class TftpApiFeaturesTest < SmartProxyRootApiTestCase
     mod = response['tftp']
     refute_nil(mod)
     assert_equal('running', mod['state'], Proxy::LogBuffer::Buffer.instance.info[:failed_modules][:tftp])
-    assert_equal(["bootloader_universe"], mod['capabilities'])
+    assert_equal(["bootloader_archive_iso", "bootloader_archive_tgz", "bootloader_universe", "bootloader_universe_boot_files"], mod['capabilities'])
 
     expected_settings = { 'tftp_servername' => 'tftp.example.com' }
     assert_equal(expected_settings, mod['settings'])

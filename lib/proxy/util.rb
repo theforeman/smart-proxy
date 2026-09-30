@@ -18,25 +18,34 @@ module Proxy::Util
       @input = input
     end
 
-    def start(&ensured_block)
+    def start(before_start: nil, rlimit_fsize: nil, &ensured_block)
       # run the task in its own thread
-      @task = Thread.new(@command, @input) do |cmd, input|
+      @task = Thread.new(@command, @input, before_start, rlimit_fsize) do |cmd, input, task_before_start, file_size_limit|
         status = nil
-        Open3.popen3(*cmd) do |stdin, stdout, stderr, thr|
-          cmdline_string = Shellwords.escape(cmd.is_a?(Array) ? cmd.join(' ') : cmd)
-          logger.info "[#{thr.pid}] Started task #{cmdline_string}"
-          stdin.write(input) if input
-          stdin.close
-          stdout.each do |line|
-            logger.debug "[#{thr.pid}] #{line}"
+        unless task_before_start && task_before_start.call == false
+          spawn_options = file_size_limit ? { rlimit_fsize: file_size_limit } : {}
+          Open3.popen3(*cmd, **spawn_options) do |stdin, stdout, stderr, thr|
+            cmdline_string = Shellwords.escape(cmd.is_a?(Array) ? cmd.join(' ') : cmd)
+            logger.info "[#{thr.pid}] Started task #{cmdline_string}"
+            stdin.write(input) if input
+            stdin.close
+            stdout.each do |line|
+              logger.debug "[#{thr.pid}] #{line}"
+            end
+            stderr.each do |line|
+              logger.warn "[#{thr.pid}] #{line}"
+            end
+            # call thr.value to wait for a Process::Status object.
+            status = thr.value
           end
-          stderr.each do |line|
-            logger.warn "[#{thr.pid}] #{line}"
-          end
-          # call thr.value to wait for a Process::Status object.
-          status = thr.value
         end
-        status ? status.exitstatus : $CHILD_STATUS
+        if status
+          status.exitstatus
+        elsif task_before_start
+          1
+        else
+          $CHILD_STATUS
+        end
       ensure
         yield if block_given?
       end
