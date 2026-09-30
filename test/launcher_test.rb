@@ -23,6 +23,34 @@ class LauncherTest < Test::Unit::TestCase
   end
 end
 
+class LauncherHostAuthorizationTest < Test::Unit::TestCase
+  def test_warns_when_permitted_hosts_are_not_enforced
+    settings = Proxy::Settings::Global.new(permitted_hosts: ['proxy.example.com'])
+    launcher = Proxy::Launcher.new(settings)
+    ::Sinatra::Base.expects(:respond_to?).with(:setup_host_authorization, true).returns(false)
+    launcher.logger.expects(:warn).with('permitted_hosts is configured but not enforced by this Sinatra version')
+
+    launcher.warn_if_unsupported_host_authorization
+  end
+
+  def test_no_warning_when_host_authorization_is_supported
+    settings = Proxy::Settings::Global.new(permitted_hosts: ['proxy.example.com'])
+    launcher = Proxy::Launcher.new(settings)
+    ::Sinatra::Base.expects(:respond_to?).with(:setup_host_authorization, true).returns(true)
+    launcher.logger.expects(:warn).never
+
+    launcher.warn_if_unsupported_host_authorization
+  end
+
+  def test_no_warning_when_permitted_hosts_are_empty
+    settings = Proxy::Settings::Global.new(permitted_hosts: [])
+    launcher = Proxy::Launcher.new(settings)
+    launcher.logger.expects(:warn).never
+
+    launcher.warn_if_unsupported_host_authorization
+  end
+end
+
 class LauncherTlsCiphersTest < Test::Unit::TestCase
   def setup
     @launcher = Proxy::Launcher.new

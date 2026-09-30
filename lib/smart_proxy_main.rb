@@ -51,6 +51,14 @@ module Proxy
   # requests whose Host header isn't localhost — breaking all real
   # deployments where Foreman reaches smart-proxy by hostname.
   ::Sinatra::Base.set :environment, :production
+  # Sinatra 2 ignores this setting; without configured hosts, Sinatra 4
+  # accepts all hostnames as it did before.
+  # Sinatra passes this hash to Rack::Protection::HostAuthorization, which runs
+  # before LoggerMiddleware. Use the proxy logger for rejected-host diagnostics.
+  ::Sinatra::Base.set :host_authorization, {
+    permitted_hosts: SETTINGS.permitted_hosts || [],
+    logger: ::Proxy::LogBuffer::Decorator.instance,
+  }
   ::Sinatra::Base.register ::Sinatra::Authorization
 
   require 'root/root'

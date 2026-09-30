@@ -33,6 +33,25 @@ class RootApiTest < Test::Unit::TestCase
     assert_equal ['test2'], JSON.parse(last_response.body)
   end
 
+  def test_features_rejects_unpermitted_host
+    omit 'This Sinatra version has no host authorization' unless ::Sinatra::Base.respond_to?(:setup_host_authorization, true)
+
+    ::Proxy::RootApi.stubs(:host_authorization).returns(permitted_hosts: ['proxy.example.com'])
+    get '/features', {}, 'HTTP_HOST' => 'proxy.example.com'
+    assert_equal 200, last_response.status
+
+    get '/features', {}, 'HTTP_HOST' => 'unknown.example.com'
+    assert_equal 403, last_response.status
+    assert_equal 'Host not permitted', last_response.body
+  end
+
+  def test_features_accepts_any_host_when_permitted_hosts_are_empty
+    ::Proxy::RootApi.stubs(:host_authorization).returns(permitted_hosts: [])
+
+    get '/features', {}, 'HTTP_HOST' => 'unknown.example.com'
+    assert_equal 200, last_response.status
+  end
+
   def test_version
     all_modules = [{:name => :foreman_proxy, :version => "0.0.1", :class => TestPlugin0, :state => :running},
                    {:name => :test2, :version => "0.0.1", :class => TestPlugin2, :state => :running},

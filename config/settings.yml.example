@@ -18,6 +18,11 @@
 # Valid values: '1.0', '1.1', '1.2', '1.3'.
 #:tls_min_version: '1.2'
 
+# Hostnames accepted in HTTP Host headers. An empty list allows any hostname.
+# This is unrelated to trusted_hosts, which authorizes client machines.
+#:permitted_hosts:
+#  - proxy.example.com
+
 # Hosts which the proxy accepts connections from
 # commenting the following lines would mean every verified SSL connection allowed
 # HTTPS: test the certificate CN
