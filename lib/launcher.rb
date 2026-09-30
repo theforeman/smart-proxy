@@ -219,6 +219,7 @@ module Proxy
       raise Exception.new("Both http and https are disabled, unable to start.") unless http_enabled? || https_enabled?
 
       ::Proxy::PluginInitializer.new(::Proxy::Plugins.instance).initialize_plugins
+      warn_if_unsupported_host_authorization
 
       http_app = http_app(settings.http_port)
       https_app = https_app(settings.https_port)
@@ -240,6 +241,14 @@ module Proxy
       logger.error "Error during startup, terminating", e
       puts "Errors detected on startup, see log for details. Exiting: #{e}"
       exit(1)
+    end
+
+    def warn_if_unsupported_host_authorization
+      return unless settings.permitted_hosts&.any?
+      # Sinatra 2 and 3 accept the setting but have no host authorization middleware.
+      return if ::Sinatra::Base.respond_to?(:setup_host_authorization, true)
+
+      logger.warn("permitted_hosts is configured but not enforced by this Sinatra version")
     end
 
     def install_webrick_callback!(*apps)
