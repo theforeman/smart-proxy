@@ -10,6 +10,14 @@
 # like initrd and vmlinuz. Default value 10 seconds
 #:tftp_connect_timeout: 10
 
+# Maximum time in seconds for each TFTP curl transfer attempt. Curl retries
+# transient failures up to three times, and this timeout applies per attempt.
+#:tftp_download_max_time: 3600
+
 # Defines the default certificate action for certificate checking.
 # When false, the argument --no-check-certificate will be used.
 #:verify_server_cert: true
+
+# Perform an HTTP HEAD request before downloading TFTP artifacts.
+# Disable this for HTTP servers that do not support HEAD. Default value is true.
+#:tftp_http_download_preflight: true
