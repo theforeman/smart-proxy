@@ -44,6 +44,10 @@ module Proxy::HttpRequest
   end
 
   class ForemanRequest
+    # subscription-manager's default server_timeout is 180s; matching it here
+    # avoids cutting connections the client is still waiting on.
+    DEFAULT_FOREMAN_REQUEST_TIMEOUT = 180
+
     def send_request(request)
       http.request(request)
     end
@@ -66,6 +70,10 @@ module Proxy::HttpRequest
       http             = Net::HTTP.new(uri.host, uri.port)
       http.use_ssl     = uri.scheme == 'https'
       http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+      timeout = Proxy::SETTINGS.foreman_request_timeout
+      timeout = DEFAULT_FOREMAN_REQUEST_TIMEOUT if timeout.nil?
+      http.read_timeout = timeout.to_i if timeout.to_i > 0
 
       if http.use_ssl?
         ca_file = Proxy::SETTINGS.foreman_ssl_ca || Proxy::SETTINGS.ssl_ca_file
