@@ -1,6 +1,6 @@
 require 'test_helper'
 
-class DecoratorTest < Test::Unit::TestCase
+class DecoratorTest < Minitest::Test
   class DecoratorForTesting < ::Proxy::LogBuffer::Decorator
     attr_reader :logger
   end
@@ -92,7 +92,7 @@ class DecoratorTest < Test::Unit::TestCase
     ::Logging.mdc['request'] = request_id
     @decorator.error('error message')
 
-    assert_false @buffer.to_a.empty?
+    refute @buffer.to_a.empty?
     assert_equal request_id, @buffer.to_a.first.request_id
   ensure
     ::Logging.mdc['request'] = nil

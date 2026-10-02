@@ -1,7 +1,7 @@
 require 'test_helper'
 require 'net/http'
 
-class SSLClientVerificationIntegrationTest < Test::Unit::TestCase
+class SSLClientVerificationIntegrationTest < Minitest::Test
   include Proxy::IntegrationTestCase
 
   class TestAPIWithSSLClientAuth < ::Sinatra::Base
@@ -43,7 +43,7 @@ class SSLClientVerificationIntegrationTest < Test::Unit::TestCase
     http.cert    = OpenSSL::X509::Certificate.new(File.read(File.join(fixtures, 'certs', 'badclient.example.com.pem')))
     http.key     = OpenSSL::PKey::RSA.new(File.read(File.join(fixtures, 'private_keys', 'badclient.example.com.pem')))
     http.verify_mode = OpenSSL::SSL::VERIFY_PEER
-    assert_raise OpenSSL::SSL::SSLError do
+    assert_raises OpenSSL::SSL::SSLError do
       http.get('/')
     end
   end

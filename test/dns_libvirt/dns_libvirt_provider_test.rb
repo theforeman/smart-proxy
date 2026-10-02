@@ -3,7 +3,7 @@ require 'dns_libvirt/plugin_configuration'
 require 'dns_libvirt/dns_libvirt_plugin'
 require 'dns_libvirt/dns_libvirt_main'
 
-class DnsLibvirtProviderTest < Test::Unit::TestCase
+class DnsLibvirtProviderTest < Minitest::Test
   def setup
     fixture = <<~XMLFIXTURE
       <network>
@@ -58,7 +58,7 @@ class DnsLibvirtProviderTest < Test::Unit::TestCase
   end
 
   def test_del_a_record_failure
-    assert_raise Proxy::Dns::NotFound do
+    assert_raises Proxy::Dns::NotFound do
       @subject.remove_a_record('does_not_exist')
     end
   end

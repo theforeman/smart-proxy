@@ -5,7 +5,7 @@ require 'tftp/tftp_api'
 
 ENV['RACK_ENV'] = 'test'
 
-class TftpApiTest < Test::Unit::TestCase
+class TftpApiTest < Minitest::Test
   include Rack::Test::Methods
 
   def app

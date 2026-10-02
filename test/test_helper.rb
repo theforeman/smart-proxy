@@ -1,5 +1,5 @@
 require 'English'
-require "test/unit"
+require 'minitest/autorun'
 require 'fileutils'
 
 $LOAD_PATH << File.join(__dir__, '..', 'lib')
@@ -15,10 +15,15 @@ ENV['RACK_ENV'] = 'test'
 ENV['TMPDIR'] = 'test/tmp'
 FileUtils.rm_f Dir.glob 'test/tmp/*.tmp'
 
-require "mocha/test_unit"
+if ENV['JENKINS_URL']
+  require 'minitest/reporters'
+  Minitest::Reporters.use! [Minitest::Reporters::JUnitReporter.new]
+end
+
+require 'mocha/minitest'
 require "rack/test"
 require 'timeout'
-require 'webmock/test_unit'
+require 'webmock/minitest'
 
 require 'smart_proxy_for_testing'
 require 'provider_interface_validation/dhcp_provider'
@@ -76,7 +81,7 @@ module Proxy::IntegrationTestCase
   end
 end
 
-class SmartProxyRootApiTestCase < Test::Unit::TestCase
+class SmartProxyRootApiTestCase < Minitest::Test
   include Rack::Test::Methods
 
   def setup

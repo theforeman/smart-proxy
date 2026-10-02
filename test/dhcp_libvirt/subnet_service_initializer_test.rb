@@ -2,7 +2,7 @@ require 'test_helper'
 require 'dhcp_common/subnet_service'
 require 'dhcp_libvirt/subnet_service_initializer'
 
-class SubnetServiceInitializerTest < Test::Unit::TestCase
+class SubnetServiceInitializerTest < Minitest::Test
   def setup
     @network_xml = <<~XMLFIXTURE
       <network>
