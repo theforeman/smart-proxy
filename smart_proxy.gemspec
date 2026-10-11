@@ -15,6 +15,7 @@ Gem::Specification.new do |s|
   s.required_ruby_version = '>= 3.0'
   s.add_dependency 'base64'
   s.add_dependency 'json'
+  s.add_dependency 'logger'
   s.add_dependency 'logging'
   s.add_dependency 'ostruct'
   s.add_dependency 'rack', '>= 2.0', '< 4'

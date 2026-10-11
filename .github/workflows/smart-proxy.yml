@@ -33,7 +33,7 @@ jobs:
     env:
       BUNDLE_WITHOUT: bmc:development:dhcp_isc_inotify:dhcp_isc_kqueue:journald:krb5:libvirt:puppetca_token_whitelisting:realm_freeipa:windows
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
@@ -55,7 +55,7 @@ jobs:
       - run: sudo apt-get update
       - run: sudo apt-get -qq -y install build-essential libcurl4-openssl-dev zlib1g-dev libvirt-dev libsystemd-dev libkrb5-dev
       - name: "Check out Foreman Proxy"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: "Set up Ruby ${{ matrix.ruby }}"
         uses: ruby/setup-ruby@v1
         with:
