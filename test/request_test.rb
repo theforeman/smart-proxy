@@ -1,8 +1,11 @@
 require 'test_helper'
+require 'faraday'
 require 'uri'
 require 'net/http'
 require 'mocha'
 require 'templates/templates_plugin'
+require 'templates/proxy_request'
+require 'registration/proxy_request'
 require "proxy/util"
 require 'proxy/request'
 require 'webmock/test_unit'
@@ -11,6 +14,15 @@ class RequestTest < Test::Unit::TestCase
   def setup
     @foreman_url = 'https://foreman.example.com'
     Proxy::SETTINGS.stubs(:foreman_url).returns(@foreman_url)
+    Proxy::SETTINGS.stubs(:foreman_request_timeout).returns(nil)
+    Proxy::SETTINGS.stubs(:foreman_open_timeout).returns(nil)
+    Proxy::SETTINGS.stubs(:foreman_ssl_ca).returns(nil)
+    Proxy::SETTINGS.stubs(:ssl_ca_file).returns(nil)
+    Proxy::SETTINGS.stubs(:foreman_ssl_cert).returns(nil)
+    Proxy::SETTINGS.stubs(:ssl_certificate).returns(nil)
+    Proxy::SETTINGS.stubs(:foreman_ssl_key).returns(nil)
+    Proxy::SETTINGS.stubs(:ssl_private_key).returns(nil)
+    Proxy::HttpRequest::ForemanRequest.reset_connection_cache!
     @template_url = 'http://proxy.lan:8443'
     Proxy::Templates::Plugin.load_test_settings(:template_url => @template_url)
     @request = Proxy::HttpRequest::ForemanRequest.new
@@ -52,6 +64,82 @@ class RequestTest < Test::Unit::TestCase
     proxy_req = @request.request_factory.create_post("/path", "body")
     result = @request.send_request(proxy_req)
     assert_equal("body", result.body)
+  end
+
+  def test_read_timeout_applied_when_foreman_request_timeout_configured
+    Proxy::SETTINGS.stubs(:foreman_request_timeout).returns(120)
+    request = Proxy::HttpRequest::ForemanRequest.new
+
+    assert_equal 120, request.http.read_timeout
+    assert_equal 120, request.connection.options.timeout
+  end
+
+  def test_read_timeout_uses_default_when_foreman_request_timeout_not_configured
+    default_timeout = Net::HTTP.new('example.com').read_timeout
+    request = Proxy::HttpRequest::ForemanRequest.new
+
+    assert_equal default_timeout, request.http.read_timeout
+  end
+
+  def test_open_timeout_applied_when_foreman_open_timeout_configured
+    Proxy::SETTINGS.stubs(:foreman_open_timeout).returns(30)
+    request = Proxy::HttpRequest::ForemanRequest.new
+
+    assert_equal 30, request.http.open_timeout
+    assert_equal 30, request.connection.options.open_timeout
+  end
+
+  def test_open_timeout_uses_net_http_default_when_foreman_open_timeout_not_configured
+    default_timeout = Net::HTTP.new('example.com').open_timeout
+    request = Proxy::HttpRequest::ForemanRequest.new
+
+    assert_equal default_timeout, request.http.open_timeout
+    assert_equal default_timeout, request.connection.options.open_timeout
+  end
+
+  def test_connection_uses_faraday
+    request = Proxy::HttpRequest::ForemanRequest.new
+
+    assert_kind_of Faraday::Connection, request.connection
+  end
+
+  def test_connection_is_shared_across_request_instances
+    request_a = Proxy::HttpRequest::ForemanRequest.new
+    request_b = Proxy::HttpRequest::ForemanRequest.new
+
+    assert_same request_a.connection, request_b.connection
+    assert_kind_of Faraday::Connection, request_a.connection
+  end
+
+  def test_connection_is_shared_across_foreman_request_subclasses
+    registration_request = Proxy::Registration::ProxyRequest.new
+    template_request = Proxy::Templates::ProxyRequest.new
+
+    assert_same registration_request.connection, template_request.connection
+  end
+
+  def test_reset_connection_cache_clears_shared_transport
+    request = Proxy::HttpRequest::ForemanRequest.new
+    cached_connection = request.connection
+
+    Proxy::HttpRequest::ForemanRequest.reset_connection_cache!
+
+    assert_not_same cached_connection, request.connection
+  end
+
+  def test_transport_retries_once_after_ssl_failure
+    uri = URI.parse(@foreman_url)
+    proxy_req = Proxy::HttpRequest::Request.new(http_method: :get, path: '/path', body: nil, headers: {})
+    connection = mock('connection')
+    sequence = sequence('ssl-retry')
+    connection.expects(:run_request).in_sequence(sequence).raises(Faraday::SSLError.new('ssl handshake failed'))
+    connection.expects(:run_request).in_sequence(sequence).returns(
+      stub(status: 200, body: 'body', headers: {})
+    )
+    Proxy::HttpRequest::ForemanTransport.stubs(:connection_for).with(uri).returns(connection)
+
+    response = Proxy::HttpRequest::ForemanTransport.run_request(uri, proxy_req)
+    assert_equal 200, response.status
   end
 
   def test_post_with_nested_params
