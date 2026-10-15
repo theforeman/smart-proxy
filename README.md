@@ -9,7 +9,7 @@
 # Supported Modules
 Currently Supported modules:
  * BMC - BMC management of devices supported by freeipmi and ipmitool
- * DHCP - ISC DHCP and MS DHCP Servers
+ * DHCP - ISC KEA, MS DHCP, and ISC DHCP (legacy, EOL 2022) Servers
  * DNS - Bind and MS DNS Servers
  * Puppet - Puppetserver 6 or 7
  * Puppet CA - Manage certificate signing, cleaning and autosign on a Puppet CA server
