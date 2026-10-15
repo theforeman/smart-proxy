@@ -1,5 +1,6 @@
 require 'test_helper'
 require 'launcher'
+require 'tempfile'
 
 class LauncherTest < Test::Unit::TestCase
   def setup
@@ -222,5 +223,247 @@ class LauncherSslCipherTest < Test::Unit::TestCase
       launcher.webrick_server(app.merge(AccessLog: [Logger.new('/dev/null')]), ['localhost'], 0)
     end
     assert_match(/NOT_A_VALID_CIPHER_STRING!!!/, error.message)
+  end
+end
+
+class LauncherSslCertificateTest < Test::Unit::TestCase
+  def setup
+    @launcher = Proxy::Launcher.new
+    @launcher.logger
+    @root = generate_ca('Test Root CA', 1)
+    @intermediate = generate_ca('Test Intermediate CA', 2, @root)
+    @leaf = generate_leaf('localhost', 3, @intermediate)
+  end
+
+  def test_load_ssl_certificates_single_cert
+    Tempfile.create(['cert', '.pem']) do |f|
+      f.write(@leaf[0].to_pem)
+      f.flush
+      certs = @launcher.load_ssl_certificates(f.path)
+      assert_equal 1, certs.size
+      assert_equal @leaf[0].subject.to_s, certs[0].subject.to_s
+    end
+  end
+
+  def test_load_ssl_certificates_fullchain
+    Tempfile.create(['fullchain', '.pem']) do |f|
+      f.write(@leaf[0].to_pem)
+      f.write(@intermediate[0].to_pem)
+      f.write(@root[0].to_pem)
+      f.flush
+      certs = @launcher.load_ssl_certificates(f.path)
+      assert_equal 3, certs.size
+      assert_equal @leaf[0].subject.to_s, certs[0].subject.to_s
+      assert_equal @intermediate[0].subject.to_s, certs[1].subject.to_s
+      assert_equal @root[0].subject.to_s, certs[2].subject.to_s
+    end
+  end
+
+  def test_load_ssl_certificates_empty_file_raises
+    Tempfile.create(['empty', '.pem']) do |f|
+      f.flush
+      assert_raises(OpenSSL::X509::CertificateError) { @launcher.load_ssl_certificates(f.path) }
+    end
+  end
+
+  def test_load_ssl_certificates_unreadable_file_raises
+    assert_raises(Errno::ENOENT) { @launcher.load_ssl_certificates('/nonexistent/cert.pem') }
+  end
+
+  def test_https_app_sets_extra_chain_cert_with_fullchain
+    Tempfile.create(['fullchain', '.pem']) do |chain_f|
+      Tempfile.create(['key', '.pem']) do |key_f|
+        chain_f.write(@leaf[0].to_pem)
+        chain_f.write(@intermediate[0].to_pem)
+        chain_f.flush
+        key_f.write(@leaf[1].to_pem)
+        key_f.flush
+
+        settings = Proxy::Settings::Global.new(
+          ssl_certificate: chain_f.path,
+          ssl_private_key: key_f.path,
+          ssl_ca_file: chain_f.path
+        )
+        launcher = Proxy::Launcher.new(settings)
+        launcher.stubs(:resolve_tls_ciphers).returns(nil)
+
+        app = launcher.https_app(0, [])
+        assert_equal 1, app[:SSLExtraChainCert].size
+        assert_equal @intermediate[0].subject.to_s, app[:SSLExtraChainCert][0].subject.to_s
+      end
+    end
+  end
+
+  def test_https_app_omits_extra_chain_cert_with_single_cert
+    Tempfile.create(['single', '.pem']) do |cert_f|
+      Tempfile.create(['key', '.pem']) do |key_f|
+        cert_f.write(@leaf[0].to_pem)
+        cert_f.flush
+        key_f.write(@leaf[1].to_pem)
+        key_f.flush
+
+        settings = Proxy::Settings::Global.new(
+          ssl_certificate: cert_f.path,
+          ssl_private_key: key_f.path,
+          ssl_ca_file: cert_f.path
+        )
+        launcher = Proxy::Launcher.new(settings)
+        launcher.stubs(:resolve_tls_ciphers).returns(nil)
+
+        app = launcher.https_app(0, [])
+        assert_nil app[:SSLExtraChainCert]
+      end
+    end
+  end
+
+  def test_load_file_api_is_preferred
+    OpenSSL::X509::Certificate.expects(:load_file).with('chain.pem').returns([@leaf[0], @intermediate[0]])
+    OpenSSL::X509::Certificate.stubs(:respond_to?).with(:load_file).returns(true)
+    assert_equal [@leaf[0], @intermediate[0]], @launcher.load_ssl_certificates('chain.pem')
+  end
+
+  def test_load_api_is_used_when_load_file_is_unavailable
+    added_load = !OpenSSL::X509::Certificate.respond_to?(:load)
+    OpenSSL::X509::Certificate.define_singleton_method(:load) { |_data| [] } if added_load
+    OpenSSL::X509::Certificate.stubs(:respond_to?).with(:load_file).returns(false)
+    OpenSSL::X509::Certificate.stubs(:respond_to?).with(:load).returns(true)
+    File.expects(:binread).with('chain.pem').returns('PEM data')
+    OpenSSL::X509::Certificate.expects(:load).with('PEM data').returns([@leaf[0], @intermediate[0]])
+    assert_equal [@leaf[0], @intermediate[0]], @launcher.load_ssl_certificates('chain.pem')
+  ensure
+    OpenSSL::X509::Certificate.unstub(:load)
+    OpenSSL::X509::Certificate.singleton_class.send(:remove_method, :load) if added_load
+  end
+
+  def test_fallback_preserves_certificate_order
+    OpenSSL::X509::Certificate.stubs(:respond_to?).with(:load_file).returns(false)
+    OpenSSL::X509::Certificate.stubs(:respond_to?).with(:load).returns(false)
+    File.expects(:binread).with('chain.pem').returns(@leaf[0].to_pem + @intermediate[0].to_pem)
+    assert_equal [@leaf[0].to_der, @intermediate[0].to_der], @launcher.load_ssl_certificates('chain.pem').map(&:to_der)
+  end
+
+  def test_fallback_loads_der_certificate
+    OpenSSL::X509::Certificate.stubs(:respond_to?).with(:load_file).returns(false)
+    OpenSSL::X509::Certificate.stubs(:respond_to?).with(:load).returns(false)
+    Tempfile.create(['certificate', '.der']) do |f|
+      f.binmode
+      f.write(@leaf[0].to_der)
+      f.flush
+      certs = @launcher.load_ssl_certificates(f.path)
+      assert_equal [@leaf[0].to_der], certs.map(&:to_der)
+    end
+  end
+
+  def test_fallback_rejects_invalid_der
+    OpenSSL::X509::Certificate.stubs(:respond_to?).with(:load_file).returns(false)
+    OpenSSL::X509::Certificate.stubs(:respond_to?).with(:load).returns(false)
+    Tempfile.create(['invalid', '.der']) do |f|
+      f.binmode
+      f.write(@leaf[0].to_der[0, 20])
+      f.flush
+      assert_raises(OpenSSL::X509::CertificateError) { @launcher.load_ssl_certificates(f.path) }
+    end
+  end
+
+  def test_malformed_certificate_raises
+    Tempfile.create(['malformed', '.pem']) do |f|
+      f.write("-----BEGIN CERTIFICATE-----\ninvalid\n-----END CERTIFICATE-----\n")
+      f.flush
+      assert_raises(OpenSSL::X509::CertificateError) { @launcher.load_ssl_certificates(f.path) }
+    end
+  end
+
+  def test_fallback_rejects_truncated_intermediate
+    OpenSSL::X509::Certificate.stubs(:respond_to?).with(:load_file).returns(false)
+    OpenSSL::X509::Certificate.stubs(:respond_to?).with(:load).returns(false)
+    File.expects(:binread).with('chain.pem').returns(@leaf[0].to_pem + "-----BEGIN CERTIFICATE-----\ntruncated")
+    assert_raises(OpenSSL::X509::CertificateError) { @launcher.load_ssl_certificates('chain.pem') }
+  end
+
+  def test_launcher_serves_chain_to_root_only_client
+    require 'socket'
+    require 'timeout'
+    Tempfile.create(['fullchain', '.pem']) do |cert_f|
+      Tempfile.create(['key', '.pem']) do |key_f|
+        cert_f.write(@leaf[0].to_pem + @intermediate[0].to_pem)
+        cert_f.flush
+        key_f.write(@leaf[1].to_pem)
+        key_f.flush
+        settings = Proxy::Settings::Global.new(ssl_certificate: cert_f.path,
+                                               ssl_private_key: key_f.path,
+                                               ssl_ca_file: cert_f.path, tls_ciphers: '')
+        launcher = Proxy::Launcher.new(settings)
+        app = launcher.https_app(0, []).merge(AccessLog: [Logger.new('/dev/null')])
+        server = launcher.webrick_server(app, ['127.0.0.1'], 0)
+        port = server.listeners.first.addr[1]
+        thread = Thread.new { server.start }
+        begin
+          context = OpenSSL::SSL::SSLContext.new
+          context.verify_mode = OpenSSL::SSL::VERIFY_PEER
+          context.cert_store = OpenSSL::X509::Store.new
+          context.cert_store.add_cert(@root[0])
+          Timeout.timeout(5) do
+            TCPSocket.open('127.0.0.1', port) do |tcp|
+              ssl = OpenSSL::SSL::SSLSocket.new(tcp, context)
+              begin
+                ssl.hostname = 'localhost'
+                ssl.connect
+                ssl.post_connection_check('localhost')
+                assert_equal [@leaf[0].to_der, @intermediate[0].to_der], ssl.peer_cert_chain.map(&:to_der)
+              ensure
+                ssl.close
+              end
+            end
+          end
+        ensure
+          server.shutdown
+          thread.join(5)
+          thread.kill if thread.alive?
+        end
+      end
+    end
+  end
+
+  private
+
+  def generate_ca(cname, serial, issuer = nil)
+    key = OpenSSL::PKey::RSA.new(2048)
+    cert = OpenSSL::X509::Certificate.new
+    cert.version = 2
+    cert.serial = serial
+    cert.subject = OpenSSL::X509::Name.parse("/CN=#{cname}")
+    cert.issuer = issuer ? issuer[0].subject : cert.subject
+    cert.public_key = key.public_key
+    cert.not_before = Time.now - 60
+    cert.not_after = Time.now + 3600
+    ef = OpenSSL::X509::ExtensionFactory.new
+    ef.subject_certificate = cert
+    ef.issuer_certificate = issuer ? issuer[0] : cert
+    cert.add_extension(ef.create_extension('basicConstraints', 'CA:TRUE', true))
+    cert.add_extension(ef.create_extension('keyUsage', 'keyCertSign,cRLSign', true))
+    cert.add_extension(ef.create_extension('subjectKeyIdentifier', 'hash'))
+    cert.sign(issuer ? issuer[1] : key, OpenSSL::Digest.new('SHA256'))
+    [cert, key]
+  end
+
+  def generate_leaf(cname, serial, issuer)
+    key = OpenSSL::PKey::RSA.new(2048)
+    cert = OpenSSL::X509::Certificate.new
+    cert.version = 2
+    cert.serial = serial
+    cert.subject = OpenSSL::X509::Name.parse("/CN=#{cname}")
+    cert.issuer = issuer[0].subject
+    cert.public_key = key.public_key
+    cert.not_before = Time.now - 60
+    cert.not_after = Time.now + 3600
+    ef = OpenSSL::X509::ExtensionFactory.new
+    ef.subject_certificate = cert
+    ef.issuer_certificate = issuer[0]
+    cert.add_extension(ef.create_extension('basicConstraints', 'CA:FALSE', true))
+    cert.add_extension(ef.create_extension('keyUsage', 'digitalSignature,keyEncipherment', true))
+    cert.add_extension(ef.create_extension('subjectKeyIdentifier', 'hash'))
+    cert.add_extension(ef.create_extension('subjectAltName', "DNS:#{cname}"))
+    cert.sign(issuer[1], OpenSSL::Digest.new('SHA256'))
+    [cert, key]
   end
 end
