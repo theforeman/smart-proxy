@@ -18,15 +18,57 @@ module Proxy::TFTP
         Object.const_get("Proxy").const_get('TFTP').const_get(variant.capitalize).new
       end
 
+      def with_host_config_lock(mac)
+        lock = log_halt(400, "TFTP: Failed to reserve host configuration: ") do
+          Proxy::TFTP.try_lock_host_config(mac)
+        end
+        log_halt(409, "TFTP: Host configuration is already being updated for #{mac}") unless lock
+        yield
+      ensure
+        Proxy::FileLock.unlock(lock) if lock
+      end
+
       def create(variant, mac, os: nil, release: nil, arch: nil, bootfile_suffix: nil)
         tftp = instantiate variant, mac
-        log_halt(400, "TFTP: Failed to setup host specific bootloader directory: ") { tftp.setup_bootloader(mac: mac, os: os, release: release, arch: arch, bootfile_suffix: bootfile_suffix) }
-        log_halt(400, "TFTP: Failed to create pxe config file: ") { tftp.set(mac, params[:pxeconfig] || params[:syslinux_config]) }
+        with_host_config_lock(mac) do
+          read_directories =
+            if tftp.is_a?(Proxy::TFTP::Pxegrub2)
+              log_halt(409, "TFTP: Failed to reserve bootloader universe files: ") do
+                Proxy::TFTP.bootloader_universe_directories(os: os, release: release, arch: arch)
+              end
+            else
+              []
+            end
+
+          log_halt(nil, "TFTP: Failed to reserve bootloader universe files: ") do
+            Proxy::TFTP::DIR_LOCK.with_read(read_directories) do
+              if %w[universe_archive universe_kernel universe_initrd universe_source_digest].any? { |key| params.key?(key) }
+                log_halt(409, "TFTP: Failed to validate bootloader universe files: ") do
+                  Proxy::TFTP.validate_universe_boot_files!(
+                    os: os, release: release, arch: arch,
+                    archive: params[:universe_archive], kernel: params[:universe_kernel],
+                    initrd: params[:universe_initrd], source_digest: params[:universe_source_digest]
+                  )
+                end
+              end
+              # Preserve the usual 400 response for setup failures, while allowing
+              # a busy-universe error to provide its specific 409 status.
+              log_halt(nil, "TFTP: Failed to setup host specific bootloader directory: ") do
+                tftp.setup_bootloader(mac: mac, os: os, release: release, arch: arch,
+                                      bootfile_suffix: bootfile_suffix,
+                                      use_universe: params.key?(:universe_archive) || params.key?('universe_archive'))
+              end
+              log_halt(400, "TFTP: Failed to create pxe config file: ") { tftp.set(mac, params[:pxeconfig] || params[:syslinux_config]) }
+            end
+          end
+        end
       end
 
       def delete(variant, mac)
         tftp = instantiate variant, mac
-        log_halt(400, "TFTP: Failed to delete pxe config file: ") { tftp.del(mac) }
+        with_host_config_lock(mac) do
+          log_halt(400, "TFTP: Failed to delete pxe config file: ") { tftp.del(mac) }
+        end
       end
 
       def create_default(variant)
@@ -39,13 +81,29 @@ module Proxy::TFTP
       log_halt(400, "TFTP: Failed to fetch boot file: ") { Proxy::TFTP.fetch_boot_file(params[:prefix], params[:path]) }
     end
 
+    post "/fetch_and_process" do
+      request_params = parse_json_body.merge(params)
+      destination = request_params[:destination] || request_params['destination']
+      extract = request_params[:extract] || request_params['extract']
+      source = request_params[:source] || request_params['source']
+      log_halt(nil, "TFTP: Failed to fetch and process boot file: ") do
+        if extract
+          Proxy::TFTP.fetch_boot_file(nil, nil, extract)
+        else
+          Proxy::TFTP.fetch_boot_file(destination, source, nil, exact_destination: true)
+        end
+      end
+    end
+
     post "/:variant/create_default" do |variant|
       create_default variant
     end
 
     get "/:variant/:mac" do |variant, mac|
       tftp = instantiate variant, mac
-      log_halt(404, "TFTP: Failed to retrieve pxe config file: ") { tftp.get(mac) }
+      with_host_config_lock(mac) do
+        log_halt(404, "TFTP: Failed to retrieve pxe config file: ") { tftp.get(mac) }
+      end
     end
 
     post "/:variant/:mac" do |variant, mac|
