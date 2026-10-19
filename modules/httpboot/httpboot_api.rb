@@ -1,5 +1,18 @@
+require 'httpboot/request_limiter'
+
 class Proxy::HttpbootApi < Sinatra::Base
   helpers ::Proxy::Helpers
+  REQUEST_LIMITER = Proxy::Httpboot::RequestLimiter.new
+
+  def self.request_limiter
+    REQUEST_LIMITER
+  end
+
+  before do
+    limit = Proxy::Httpboot::Plugin.settings.request_limit_5m
+    allowed = limit.zero? || self.class.request_limiter.allow?(request.env['REMOTE_ADDR'], limit)
+    halt 429, 'Too many requests' unless allowed
+  end
 
   get "/*" do
     file = Pathname.new(params[:splat].first).cleanpath
