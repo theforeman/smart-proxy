@@ -33,7 +33,7 @@ end
 
 require 'puppetca/puppetca_api'
 
-class PuppetcaApiTest < Test::Unit::TestCase
+class PuppetcaApiTest < Minitest::Test
   include Rack::Test::Methods
 
   def app

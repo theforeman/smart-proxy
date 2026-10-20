@@ -4,7 +4,7 @@ require 'dhcp_common/subnet_service'
 require 'dhcp_libvirt/dhcp_libvirt'
 require 'dhcp_libvirt/dhcp_libvirt_main'
 
-class DhcpLibvirtProviderTest < Test::Unit::TestCase
+class DhcpLibvirtProviderTest < Minitest::Test
   def setup
     @libvirt_network = mock()
     @subnet = Proxy::DHCP::Subnet.new("192.168.122.0", "255.255.255.0")
@@ -32,9 +32,7 @@ class DhcpLibvirtProviderTest < Test::Unit::TestCase
   end
 
   def test_validate_ip
-    assert_nothing_raised do
-      @subject.validate_supported_address("192.168.122.0", "192.168.122.0", "192.168.122.0", "192.168.122.0", "192.168.122.0")
-    end
+    @subject.validate_supported_address("192.168.122.0", "192.168.122.0", "192.168.122.0", "192.168.122.0", "192.168.122.0")
   end
 
   def test_should_not_validate_ipv6

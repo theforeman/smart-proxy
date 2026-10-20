@@ -1,6 +1,6 @@
 require 'test_helper'
 
-class GlobalSettingsTest < Test::Unit::TestCase
+class GlobalSettingsTest < Minitest::Test
   def test_default_values
     settings = ::Proxy::Settings::Global.new({})
     assert_equal Pathname.new(__dir__).join("..", "config", "settings.d").expand_path.to_s, settings.settings_directory

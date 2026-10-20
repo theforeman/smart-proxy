@@ -1,6 +1,6 @@
 require 'test_helper'
 
-class ModuleLoaderTest < Test::Unit::TestCase
+class ModuleLoaderTest < Minitest::Test
   class TestPlugin < ::Proxy::Plugin; end
 
   def setup

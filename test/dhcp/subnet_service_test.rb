@@ -3,7 +3,7 @@ require 'dhcp_common/dhcp_common'
 require 'dhcp_common/server'
 require 'dhcp_common/subnet_service'
 
-class SubnetServiceTest < Test::Unit::TestCase
+class SubnetServiceTest < Minitest::Test
   def setup
     @subnets = {}
     @leases_ip_store = Proxy::MemoryStore.new
@@ -26,7 +26,7 @@ class SubnetServiceTest < Test::Unit::TestCase
   def test_should_not_add_duplicate_subnets
     @service.add_subnet(Proxy::DHCP::Subnet.new("192.168.0.0", "255.255.255.0"))
 
-    assert_raise Proxy::DHCP::Error do
+    assert_raises Proxy::DHCP::Error do
       @service.add_subnet(Proxy::DHCP::Subnet.new("192.168.0.0", "255.255.255.0"))
     end
   end
@@ -75,7 +75,7 @@ class SubnetServiceTest < Test::Unit::TestCase
                Proxy::DHCP::Subnet.new("192.168.0.128", "255.255.255.192"),
                Proxy::DHCP::Subnet.new("192.168.0.192", "255.255.255.192")]
     @service.add_subnets(*subnets)
-    assert_not_nil @service.find_subnet("192.168.0.100")
+    refute_nil @service.find_subnet("192.168.0.100")
     assert_equal subnets[4], @service.find_subnet("192.168.0.100")
   end
 
@@ -88,7 +88,7 @@ class SubnetServiceTest < Test::Unit::TestCase
                Proxy::DHCP::Subnet.new("196.168.0.128", "255.255.255.192"),
                Proxy::DHCP::Subnet.new("196.168.0.192", "255.255.255.192")]
     @service.add_subnets(*subnets)
-    assert_not_nil @service.find_subnet("192.168.0.100")
+    refute_nil @service.find_subnet("192.168.0.100")
     assert_equal subnets[4], @service.find_subnet("192.168.0.100")
   end
 

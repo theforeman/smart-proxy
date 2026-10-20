@@ -1,6 +1,6 @@
 require 'test_helper'
 
-class RingBufferTest < Test::Unit::TestCase
+class RingBufferTest < Minitest::Test
   SIZE = 3
 
   def setup

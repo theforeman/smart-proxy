@@ -6,7 +6,7 @@ require 'realm/realm_api'
 
 ENV['RACK_ENV'] = 'test'
 
-class RealmApiTest < Test::Unit::TestCase
+class RealmApiTest < Minitest::Test
   include Rack::Test::Methods
 
   class RealmProviderForTesting

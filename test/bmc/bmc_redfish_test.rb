@@ -4,7 +4,7 @@ require 'bmc/redfish'
 require 'bmc/redfish_test_helper'
 require 'json'
 
-class BmcRedfishTest < Test::Unit::TestCase
+class BmcRedfishTest < Minitest::Test
   include RedfishTestHelper
 
   def setup
@@ -41,9 +41,11 @@ class BmcRedfishTest < Test::Unit::TestCase
     system_mock = mock('system')
 
     system_mock.expects(:patch_if_match).with(
-      'Boot' => {
-        'BootSourceOverrideTarget' => 'Pxe',
-        'BootSourceOverrideEnabled' => 'Once',
+      {
+        'Boot' => {
+          'BootSourceOverrideTarget' => 'Pxe',
+          'BootSourceOverrideEnabled' => 'Once',
+        },
       }
     ).returns(true)
 
@@ -51,7 +53,7 @@ class BmcRedfishTest < Test::Unit::TestCase
     @bmc.expects(:powercycle).never
 
     result = @bmc.bootdevice = { :device => 'pxe', :reboot => false, :persistent => false }
-    assert_not_nil result
+    refute_nil result
   end
 
   def test_bootdevice_disk_persistent_uses_patch_if_match
@@ -59,9 +61,11 @@ class BmcRedfishTest < Test::Unit::TestCase
     system_mock = mock('system')
 
     system_mock.expects(:patch_if_match).with(
-      'Boot' => {
-        'BootSourceOverrideTarget' => 'Hdd',
-        'BootSourceOverrideEnabled' => 'Enabled',
+      {
+        'Boot' => {
+          'BootSourceOverrideTarget' => 'Hdd',
+          'BootSourceOverrideEnabled' => 'Enabled',
+        },
       }
     ).returns(true)
 
@@ -69,7 +73,7 @@ class BmcRedfishTest < Test::Unit::TestCase
     @bmc.expects(:powercycle).never
 
     result = @bmc.bootdevice = { :device => 'disk', :reboot => false, :persistent => true }
-    assert_not_nil result
+    refute_nil result
   end
 
   def test_bootdevice_with_reboot
@@ -77,9 +81,11 @@ class BmcRedfishTest < Test::Unit::TestCase
     system_mock = mock('system')
 
     system_mock.expects(:patch_if_match).with(
-      'Boot' => {
-        'BootSourceOverrideTarget' => 'Pxe',
-        'BootSourceOverrideEnabled' => 'Enabled',
+      {
+        'Boot' => {
+          'BootSourceOverrideTarget' => 'Pxe',
+          'BootSourceOverrideEnabled' => 'Enabled',
+        },
       }
     ).returns(true)
 
@@ -87,7 +93,7 @@ class BmcRedfishTest < Test::Unit::TestCase
     @bmc.expects(:powercycle).once
 
     result = @bmc.bootdevice = { :device => 'pxe', :reboot => true, :persistent => true }
-    assert_not_nil result
+    refute_nil result
   end
 
   def test_bootpxe_calls_bootdevice
@@ -95,9 +101,11 @@ class BmcRedfishTest < Test::Unit::TestCase
     system_mock = mock('system')
 
     system_mock.expects(:patch_if_match).with(
-      'Boot' => {
-        'BootSourceOverrideTarget' => 'Pxe',
-        'BootSourceOverrideEnabled' => 'Once',
+      {
+        'Boot' => {
+          'BootSourceOverrideTarget' => 'Pxe',
+          'BootSourceOverrideEnabled' => 'Once',
+        },
       }
     ).returns(true)
 
@@ -105,7 +113,7 @@ class BmcRedfishTest < Test::Unit::TestCase
     @bmc.expects(:powercycle).never
 
     result = @bmc.bootpxe(false, false)
-    assert_not_nil result
+    refute_nil result
   end
 
   def test_bootdisk_calls_bootdevice
@@ -113,9 +121,11 @@ class BmcRedfishTest < Test::Unit::TestCase
     system_mock = mock('system')
 
     system_mock.expects(:patch_if_match).with(
-      'Boot' => {
-        'BootSourceOverrideTarget' => 'Hdd',
-        'BootSourceOverrideEnabled' => 'Once',
+      {
+        'Boot' => {
+          'BootSourceOverrideTarget' => 'Hdd',
+          'BootSourceOverrideEnabled' => 'Once',
+        },
       }
     ).returns(true)
 
@@ -123,7 +133,7 @@ class BmcRedfishTest < Test::Unit::TestCase
     @bmc.expects(:powercycle).never
 
     result = @bmc.bootdisk(false, false)
-    assert_not_nil result
+    refute_nil result
   end
 
   def test_bootbios_calls_bootdevice
@@ -131,9 +141,11 @@ class BmcRedfishTest < Test::Unit::TestCase
     system_mock = mock('system')
 
     system_mock.expects(:patch_if_match).with(
-      'Boot' => {
-        'BootSourceOverrideTarget' => 'BiosSetup',
-        'BootSourceOverrideEnabled' => 'Once',
+      {
+        'Boot' => {
+          'BootSourceOverrideTarget' => 'BiosSetup',
+          'BootSourceOverrideEnabled' => 'Once',
+        },
       }
     ).returns(true)
 
@@ -141,7 +153,7 @@ class BmcRedfishTest < Test::Unit::TestCase
     @bmc.expects(:powercycle).never
 
     result = @bmc.bootbios(false, false)
-    assert_not_nil result
+    refute_nil result
   end
 
   def test_bootcdrom_calls_bootdevice
@@ -149,9 +161,11 @@ class BmcRedfishTest < Test::Unit::TestCase
     system_mock = mock('system')
 
     system_mock.expects(:patch_if_match).with(
-      'Boot' => {
-        'BootSourceOverrideTarget' => 'Cd',
-        'BootSourceOverrideEnabled' => 'Once',
+      {
+        'Boot' => {
+          'BootSourceOverrideTarget' => 'Cd',
+          'BootSourceOverrideEnabled' => 'Once',
+        },
       }
     ).returns(true)
 
@@ -159,7 +173,7 @@ class BmcRedfishTest < Test::Unit::TestCase
     @bmc.expects(:powercycle).never
 
     result = @bmc.bootcdrom(false, false)
-    assert_not_nil result
+    refute_nil result
   end
 
   def test_identifystatus_uses_indicator_led_when_location_indicator_absent

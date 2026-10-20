@@ -11,7 +11,7 @@ require 'puppetca_token_whitelisting/puppetca_token_whitelisting_autosigner'
 require 'puppetca_token_whitelisting/puppetca_token_whitelisting_csr'
 require 'puppetca_token_whitelisting/puppetca_token_whitelisting_token_storage'
 
-class PuppetCaTokenWhitelistingAutosignerTest < Test::Unit::TestCase
+class PuppetCaTokenWhitelistingAutosignerTest < Minitest::Test
   def setup
     @file = Tempfile.new('autosign_test')
     begin
@@ -58,34 +58,34 @@ class PuppetCaTokenWhitelistingAutosignerTest < Test::Unit::TestCase
 
   def test_should_validate_on_sign_all
     @autosigner.stubs(:sign_all).returns(true)
-    assert_true @autosigner.validate_csr ''
+    assert @autosigner.validate_csr ''
   end
 
   def test_should_call_verification
     csr_example = File.read './test/fixtures/puppetca/csr_example.pem'
     @autosigner.expects(:validate_token).with('1234').returns(true)
-    assert_true @autosigner.validate_csr csr_example
+    assert @autosigner.validate_csr csr_example
   end
 
   def test_should_validate_a_correct_token
     response = @autosigner.autosign 'signme.example.com', 0
     token = JSON.parse(response)['generated_token']
 
-    assert_true @autosigner.validate_token token
+    assert @autosigner.validate_token token
   end
 
   def test_should_not_validate_expired_token
     payload = { certname: 'foo.example.com', exp: Time.now.to_i - 10 }
     token = JWT.encode payload, @autosigner.smartproxy_cert, 'RS512'
 
-    assert_false @autosigner.validate_token token
+    refute @autosigner.validate_token token
   end
 
   def test_should_not_validate_token_with_invalid_certname
     payload = { certname: 'unknown.example.com', exp: Time.now.to_i + 999_999 }
     token = JWT.encode payload, @autosigner.smartproxy_cert, 'RS512'
 
-    assert_false @autosigner.validate_token token
+    refute @autosigner.validate_token token
   end
 
   def test_should_not_validate_token_with_unkown_signature
@@ -93,6 +93,6 @@ class PuppetCaTokenWhitelistingAutosignerTest < Test::Unit::TestCase
     payload = { certname: 'foo.example.com', exp: Time.now.to_i + 999_999 }
     token = JWT.encode payload, unknown_cert, 'RS512'
 
-    assert_false @autosigner.validate_token token
+    refute @autosigner.validate_token token
   end
 end

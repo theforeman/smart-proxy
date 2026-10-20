@@ -1,7 +1,7 @@
 require 'test_helper'
 require 'dns_common/dns_common'
 
-class DnsRecordTest < Test::Unit::TestCase
+class DnsRecordTest < Minitest::Test
   def setup
     @record = Proxy::Dns::Record.new
   end
@@ -15,7 +15,7 @@ class DnsRecordTest < Test::Unit::TestCase
   end
 
   def test_ptr_to_ip_without_record_exception
-    assert_raise Proxy::Dns::Error do
+    assert_raises Proxy::Dns::Error do
       Proxy::Dns::Record.new.ptr_to_ip('host.example.com')
     end
   end
@@ -92,7 +92,7 @@ class DnsRecordTest < Test::Unit::TestCase
   def test_create_duplicate_a_record_fails
     Proxy::Dns::Record.any_instance.expects(:a_record_conflicts).returns(1)
 
-    assert_raise Proxy::Dns::Collision do
+    assert_raises Proxy::Dns::Collision do
       Proxy::Dns::Record.new.create_a_record('some.host', '2001:db8::1')
     end
   end
@@ -113,7 +113,7 @@ class DnsRecordTest < Test::Unit::TestCase
   def test_create_duplicate_aaaa_record_fails
     Proxy::Dns::Record.any_instance.expects(:aaaa_record_conflicts).returns(1)
 
-    assert_raise Proxy::Dns::Collision do
+    assert_raises Proxy::Dns::Collision do
       Proxy::Dns::Record.new.create_aaaa_record('some.host', '2001:db8::1')
     end
   end
@@ -134,7 +134,7 @@ class DnsRecordTest < Test::Unit::TestCase
   def test_create_duplicate_cname_record_fails
     Proxy::Dns::Record.any_instance.expects(:cname_record_conflicts).returns(1)
 
-    assert_raise Proxy::Dns::Collision do
+    assert_raises Proxy::Dns::Collision do
       Proxy::Dns::Record.new.create_cname_record('some.host', 'target.example.com')
     end
   end
@@ -155,7 +155,7 @@ class DnsRecordTest < Test::Unit::TestCase
   def test_create_duplicate_ptr_record_fails
     Proxy::Dns::Record.any_instance.expects(:ptr_record_conflicts).returns(1)
 
-    assert_raise Proxy::Dns::Collision do
+    assert_raises Proxy::Dns::Collision do
       Proxy::Dns::Record.new.create_ptr_record('some.host', '22.33.168.192.in-addr.arpa')
     end
   end

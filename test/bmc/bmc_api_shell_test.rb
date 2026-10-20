@@ -5,7 +5,7 @@ require 'bmc/shell'
 
 ENV['RACK_ENV'] = 'test'
 
-class BmcApiShellTest < Test::Unit::TestCase
+class BmcApiShellTest < Minitest::Test
   include Rack::Test::Methods
 
   def app

@@ -11,7 +11,7 @@ require 'dhcp/sparc_attrs'
 
 ENV['RACK_ENV'] = 'test'
 
-class DhcpApiTest < Test::Unit::TestCase
+class DhcpApiTest < Minitest::Test
   include Rack::Test::Methods
   include SparcAttrs
 

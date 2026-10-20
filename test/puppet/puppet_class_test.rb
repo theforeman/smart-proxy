@@ -1,7 +1,7 @@
 require 'test_helper'
 require 'puppet_proxy_common/puppet_class'
 
-class PuppetClassTest < Test::Unit::TestCase
+class PuppetClassTest < Minitest::Test
   def test_should_parse_modulename_correctly
     klass = Proxy::Puppet::PuppetClass.new "foreman_proxy::install"
     assert_equal "foreman_proxy", klass.module

@@ -4,7 +4,7 @@ require 'logs/logs_api'
 
 ENV['RACK_ENV'] = 'test'
 
-class LogsApiTest < Test::Unit::TestCase
+class LogsApiTest < Minitest::Test
   include Rack::Test::Methods
 
   def app

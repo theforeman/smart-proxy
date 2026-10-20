@@ -52,7 +52,7 @@ module TftpGenericServerSuite
   end
 end
 
-class HelperServerTest < Test::Unit::TestCase
+class HelperServerTest < Minitest::Test
   def setup
     @subject = Proxy::TFTP::Server.new
   end
@@ -92,7 +92,7 @@ class HelperServerTest < Test::Unit::TestCase
   end
 end
 
-class TftpSyslinuxServerTest < Test::Unit::TestCase
+class TftpSyslinuxServerTest < Minitest::Test
   include TftpGenericServerSuite
 
   def setup_paths
@@ -107,7 +107,7 @@ class TftpSyslinuxServerTest < Test::Unit::TestCase
   end
 end
 
-class TftpPxegrub2ServerTest < Test::Unit::TestCase
+class TftpPxegrub2ServerTest < Minitest::Test
   include TftpGenericServerSuite
 
   def setup
@@ -200,7 +200,7 @@ class TftpPxegrub2ServerTest < Test::Unit::TestCase
   end
 end
 
-class TftpPoapServerTest < Test::Unit::TestCase
+class TftpPoapServerTest < Minitest::Test
   include TftpGenericServerSuite
 
   def setup_paths
@@ -213,7 +213,7 @@ class TftpPoapServerTest < Test::Unit::TestCase
   end
 end
 
-class TftpZtpServerTest < Test::Unit::TestCase
+class TftpZtpServerTest < Minitest::Test
   include TftpGenericServerSuite
 
   def setup_paths
@@ -226,7 +226,7 @@ class TftpZtpServerTest < Test::Unit::TestCase
   end
 end
 
-class TftpIpxeServerTest < Test::Unit::TestCase
+class TftpIpxeServerTest < Minitest::Test
   include TftpGenericServerSuite
 
   def setup_paths

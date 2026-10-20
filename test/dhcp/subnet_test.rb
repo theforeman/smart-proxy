@@ -2,7 +2,7 @@ require 'test_helper'
 require 'dhcp_common/dhcp_common'
 require 'dhcp_common/server'
 
-class Proxy::DHCPSubnetTest < Test::Unit::TestCase
+class Proxy::DHCPSubnetTest < Minitest::Test
   def setup
     @network = "192.168.0.0"
     @netmask = "255.255.255.0"
@@ -14,38 +14,38 @@ class Proxy::DHCPSubnetTest < Test::Unit::TestCase
   end
 
   def test_should_not_save_invalid_network_addresses
-    assert_raise Proxy::Validations::InvalidIPAddress do
+    assert_raises Proxy::Validations::InvalidIPAddress do
       Proxy::DHCP::Subnet.new("1..1.1", @netmask)
     end
   end
 
   def test_should_not_save_invalid_router_addresses
-    assert_raise Proxy::Validations::InvalidIPAddress do
+    assert_raises Proxy::Validations::InvalidIPAddress do
       Proxy::DHCP::Subnet.new(@network, @netmask, :routers => ["192.168..1"])
     end
   end
 
   def test_should_not_save_invalid_range
-    assert_raise Proxy::Validations::InvalidIPAddress do
+    assert_raises Proxy::Validations::InvalidIPAddress do
       Proxy::DHCP::Subnet.new(@network, @netmask, :range => ["192.168.0..", "192.168.0.50"])
     end
-    assert_raise Proxy::Validations::InvalidIPAddress do
+    assert_raises Proxy::Validations::InvalidIPAddress do
       Proxy::DHCP::Subnet.new(@network, @netmask, :range => ["192.168.0.3", "192.168.0.."])
     end
-    assert_raise Proxy::DHCP::Error do
+    assert_raises Proxy::DHCP::Error do
       Proxy::DHCP::Subnet.new(@network, @netmask, :range => ["192.168.0.3", "192.168.1.100"])
     end
-    assert_raise Proxy::DHCP::Error do
+    assert_raises Proxy::DHCP::Error do
       Proxy::DHCP::Subnet.new(@network, @netmask, :range => ["192.168.1.3", "192.168.0.100"])
     end
-    assert_raise Proxy::DHCP::Error do
+    assert_raises Proxy::DHCP::Error do
       Proxy::DHCP::Subnet.new(@network, @netmask, :range => ["192.168.0.100", "192.168.0.3"])
     end
   end
 
   def test_should_not_save_invalid_netmask
     netmask = "XYZxxVVcc123"
-    assert_raise Proxy::Validations::InvalidIPAddress do
+    assert_raises Proxy::Validations::InvalidIPAddress do
       Proxy::DHCP::Subnet.new(@network, netmask)
     end
   end
@@ -76,11 +76,11 @@ class Proxy::DHCPSubnetTest < Test::Unit::TestCase
 
   def test_equality
     assert_equal ::Proxy::DHCP::Subnet.new(@network, @netmask, :domain_name => 'a.b.c'), ::Proxy::DHCP::Subnet.new(@network, @netmask, :domain_name => 'a.b.c')
-    assert_not_equal ::Proxy::DHCP::Subnet.new(@network, @netmask, :domain_name => 'a.b.c'),
-                     ::Proxy::DHCP::Subnet.new('1.1.1.0', @netmask, :domain_name => 'a.b.c')
-    assert_not_equal ::Proxy::DHCP::Subnet.new(@network, @netmask, :domain_name => 'a.b.c'),
-                     ::Proxy::DHCP::Subnet.new(@network, '255.255.255.128', :domain_name => 'a.b.c')
-    assert_not_equal ::Proxy::DHCP::Subnet.new(@network, @netmask, :domain_name => 'a.b.c'),
-                     ::Proxy::DHCP::Subnet.new(@network, @netmask, :domain_name => 'd.e.f')
+    refute_equal ::Proxy::DHCP::Subnet.new(@network, @netmask, :domain_name => 'a.b.c'),
+                 ::Proxy::DHCP::Subnet.new('1.1.1.0', @netmask, :domain_name => 'a.b.c')
+    refute_equal ::Proxy::DHCP::Subnet.new(@network, @netmask, :domain_name => 'a.b.c'),
+                 ::Proxy::DHCP::Subnet.new(@network, '255.255.255.128', :domain_name => 'a.b.c')
+    refute_equal ::Proxy::DHCP::Subnet.new(@network, @netmask, :domain_name => 'a.b.c'),
+                 ::Proxy::DHCP::Subnet.new(@network, @netmask, :domain_name => 'd.e.f')
   end
 end

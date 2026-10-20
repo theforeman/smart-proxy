@@ -2,14 +2,14 @@ require 'test_helper'
 require 'dns_libvirt/plugin_configuration'
 require 'dns_libvirt/dns_libvirt_main'
 
-class DnsLibvirtConfigTest < Test::Unit::TestCase
+class DnsLibvirtConfigTest < Minitest::Test
   def test_default_settings
     ::Proxy::Dns::Libvirt::Plugin.load_test_settings()
     assert_equal 'default', Proxy::Dns::Libvirt::Plugin.settings.network
   end
 end
 
-class DnsLibvirtWiringTest < Test::Unit::TestCase
+class DnsLibvirtWiringTest < Minitest::Test
   def setup
     @container = ::Proxy::DependencyInjection::Container.new
     @config = ::Proxy::Dns::Libvirt::PluginConfiguration.new

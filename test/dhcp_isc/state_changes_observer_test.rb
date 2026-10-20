@@ -6,7 +6,7 @@ require 'dhcp_common/record/deleted_reservation'
 require 'dhcp_common/subnet_service'
 require 'dhcp_isc/isc_state_changes_observer'
 
-class IscStateChangesObserverEventsTest < Test::Unit::TestCase
+class IscStateChangesObserverEventsTest < Minitest::Test
   class EventsForTesting < ::Proxy::DHCP::ISC::IscStateChangesObserver::Events
     attr_writer :last_event
   end
@@ -76,7 +76,7 @@ class IscStateChangesObserverEventsTest < Test::Unit::TestCase
   end
 end
 
-class StateChangesObserverTest < Test::Unit::TestCase
+class StateChangesObserverTest < Minitest::Test
   class EventsForTesting < ::Proxy::DHCP::ISC::IscStateChangesObserver::Events
     attr_writer :last_event
   end
@@ -105,7 +105,7 @@ class StateChangesObserverTest < Test::Unit::TestCase
     @observer.expects(:new_worker).returns(Object.new)
     @observer.start
     assert @observer.event_loop_active
-    assert_not_nil @observer.worker.nil?
+    refute_nil @observer.worker.nil?
   end
 
   def test_event_loop_with_stopped_event

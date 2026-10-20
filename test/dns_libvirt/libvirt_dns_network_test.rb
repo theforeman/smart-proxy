@@ -2,7 +2,7 @@ require 'test_helper'
 require 'ostruct'
 require 'dns_libvirt/libvirt_dns_network'
 
-class LibvirtDNSNetworkTest < Test::Unit::TestCase
+class LibvirtDNSNetworkTest < Minitest::Test
   def setup
     @connection = mock()
     @network = mock()
