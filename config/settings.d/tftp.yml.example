@@ -1,5 +1,5 @@
 ---
-# Can be true, false, or http/https to enable just one of the protocols
+# Can be true or false
 :enabled: false
 
 #:tftproot: /var/lib/tftpboot
@@ -13,3 +13,12 @@
 # Defines the default certificate action for certificate checking.
 # When false, the argument --no-check-certificate will be used.
 #:verify_server_cert: true
+
+# Enable/Disable Smart Proxy support for managing boot images. Allows the Smart
+# Proxy to download, extract, and store system images. It becomes important when
+# automating the extraction process as it is done for the Ubuntu Autoinstall
+# procedure.
+#:enable_system_image: true
+
+# Defines the default folder to provide system images.
+#:system_image_root: /var/lib/foreman-proxy/tftp/system_images
