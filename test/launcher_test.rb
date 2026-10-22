@@ -322,29 +322,23 @@ class LauncherSslCertificateTest < Test::Unit::TestCase
     assert_equal [@leaf[0], @intermediate[0]], @launcher.load_ssl_certificates('chain.pem')
   end
 
-  def test_load_api_is_used_when_load_file_is_unavailable
-    added_load = !OpenSSL::X509::Certificate.respond_to?(:load)
-    OpenSSL::X509::Certificate.define_singleton_method(:load) { |_data| [] } if added_load
+  def test_load_ssl_certificates_accepts_trailing_text
+    assert_trailing_text_is_ignored
+  end
+
+  def test_fallback_accepts_trailing_text
     OpenSSL::X509::Certificate.stubs(:respond_to?).with(:load_file).returns(false)
-    OpenSSL::X509::Certificate.stubs(:respond_to?).with(:load).returns(true)
-    File.expects(:binread).with('chain.pem').returns('PEM data')
-    OpenSSL::X509::Certificate.expects(:load).with('PEM data').returns([@leaf[0], @intermediate[0]])
-    assert_equal [@leaf[0], @intermediate[0]], @launcher.load_ssl_certificates('chain.pem')
-  ensure
-    OpenSSL::X509::Certificate.unstub(:load)
-    OpenSSL::X509::Certificate.singleton_class.send(:remove_method, :load) if added_load
+    assert_trailing_text_is_ignored
   end
 
   def test_fallback_preserves_certificate_order
     OpenSSL::X509::Certificate.stubs(:respond_to?).with(:load_file).returns(false)
-    OpenSSL::X509::Certificate.stubs(:respond_to?).with(:load).returns(false)
     File.expects(:binread).with('chain.pem').returns(@leaf[0].to_pem + @intermediate[0].to_pem)
     assert_equal [@leaf[0].to_der, @intermediate[0].to_der], @launcher.load_ssl_certificates('chain.pem').map(&:to_der)
   end
 
   def test_fallback_loads_der_certificate
     OpenSSL::X509::Certificate.stubs(:respond_to?).with(:load_file).returns(false)
-    OpenSSL::X509::Certificate.stubs(:respond_to?).with(:load).returns(false)
     Tempfile.create(['certificate', '.der']) do |f|
       f.binmode
       f.write(@leaf[0].to_der)
@@ -356,7 +350,6 @@ class LauncherSslCertificateTest < Test::Unit::TestCase
 
   def test_fallback_rejects_invalid_der
     OpenSSL::X509::Certificate.stubs(:respond_to?).with(:load_file).returns(false)
-    OpenSSL::X509::Certificate.stubs(:respond_to?).with(:load).returns(false)
     Tempfile.create(['invalid', '.der']) do |f|
       f.binmode
       f.write(@leaf[0].to_der[0, 20])
@@ -367,7 +360,15 @@ class LauncherSslCertificateTest < Test::Unit::TestCase
 
   def test_malformed_certificate_raises
     Tempfile.create(['malformed', '.pem']) do |f|
-      f.write("-----BEGIN CERTIFICATE-----\ninvalid\n-----END CERTIFICATE-----\n")
+      f.write(@leaf[0].to_pem + "-----BEGIN CERTIFICATE-----\ninvalid\n-----END CERTIFICATE-----\n")
+      f.flush
+      assert_raises(OpenSSL::X509::CertificateError) { @launcher.load_ssl_certificates(f.path) }
+    end
+  end
+
+  def test_load_ssl_certificates_rejects_truncated_intermediate
+    Tempfile.create(['truncated', '.pem']) do |f|
+      f.write(@leaf[0].to_pem + "-----BEGIN CERTIFICATE-----\ntruncated")
       f.flush
       assert_raises(OpenSSL::X509::CertificateError) { @launcher.load_ssl_certificates(f.path) }
     end
@@ -375,7 +376,6 @@ class LauncherSslCertificateTest < Test::Unit::TestCase
 
   def test_fallback_rejects_truncated_intermediate
     OpenSSL::X509::Certificate.stubs(:respond_to?).with(:load_file).returns(false)
-    OpenSSL::X509::Certificate.stubs(:respond_to?).with(:load).returns(false)
     File.expects(:binread).with('chain.pem').returns(@leaf[0].to_pem + "-----BEGIN CERTIFICATE-----\ntruncated")
     assert_raises(OpenSSL::X509::CertificateError) { @launcher.load_ssl_certificates('chain.pem') }
   end
@@ -425,6 +425,17 @@ class LauncherSslCertificateTest < Test::Unit::TestCase
   end
 
   private
+
+  def assert_trailing_text_is_ignored
+    ["\n \t\n", "# comment\n", "arbitrary trailer\n"].each do |trailer|
+      Tempfile.create(['fullchain', '.pem']) do |f|
+        f.write(@leaf[0].to_pem + @intermediate[0].to_pem + trailer)
+        f.flush
+        certs = @launcher.load_ssl_certificates(f.path)
+        assert_equal [@leaf[0].to_der, @intermediate[0].to_der], certs.map(&:to_der), trailer.inspect
+      end
+    end
+  end
 
   def generate_ca(cname, serial, issuer = nil)
     key = OpenSSL::PKey::RSA.new(2048)

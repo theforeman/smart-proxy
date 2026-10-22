@@ -196,11 +196,10 @@ module Proxy
     def load_ssl_certificates(path)
       certs = if OpenSSL::X509::Certificate.respond_to?(:load_file)
                 OpenSSL::X509::Certificate.load_file(path)
-              elsif OpenSSL::X509::Certificate.respond_to?(:load)
-                OpenSSL::X509::Certificate.load(File.binread(path))
               else
                 certificate_data = File.binread(path)
                 blocks = certificate_data.scan(/-----BEGIN CERTIFICATE-----.*?-----END CERTIFICATE-----/m)
+                # Like the native PEM loader, ignore surrounding text but reject incomplete certificates.
                 remainder = certificate_data.gsub(/-----BEGIN CERTIFICATE-----.*?-----END CERTIFICATE-----/m, '')
                 if remainder.include?('-----BEGIN CERTIFICATE-----') || remainder.include?('-----END CERTIFICATE-----')
                   raise OpenSSL::X509::CertificateError, "Incomplete certificate in #{path}"
