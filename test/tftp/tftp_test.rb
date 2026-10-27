@@ -125,17 +125,17 @@ class TftpTest < Test::Unit::TestCase
     # Debian Secure Boot must have both the Shim binary and its DHCP alias.
     shim = File.join(absolute_directory, 'shimx64.efi')
     File.unlink(shim)
-    error = assert_raises(RuntimeError) { Proxy::TFTP.validate_universe_boot_files!(**options) }
+    error = assert_raises(Proxy::TFTP::BootFilesNotReady) { Proxy::TFTP.validate_universe_boot_files!(**options) }
     assert_match(/Missing files: #{Regexp.escape(shim)}/, error.message)
     File.write(shim, 'data')
     boot_sb = File.join(absolute_directory, 'boot-sb.efi')
     File.unlink(boot_sb)
-    error = assert_raises(RuntimeError) { Proxy::TFTP.validate_universe_boot_files!(**options) }
+    error = assert_raises(Proxy::TFTP::BootFilesNotReady) { Proxy::TFTP.validate_universe_boot_files!(**options) }
     assert_match(/Missing files: #{Regexp.escape(boot_sb)}/, error.message)
     File.symlink('shimx64.efi', boot_sb)
 
     File.unlink(File.join(root, initrd))
-    error = assert_raises(RuntimeError) { Proxy::TFTP.validate_universe_boot_files!(**options) }
+    error = assert_raises(Proxy::TFTP::BootFilesNotReady) { Proxy::TFTP.validate_universe_boot_files!(**options) }
     assert_match(/Missing files: #{Regexp.escape(File.join(root, initrd))}/, error.message)
     assert_match(/Provide boot files for Operating System 'debian 12'/, error.message)
   ensure
@@ -176,7 +176,7 @@ class TftpTest < Test::Unit::TestCase
 
     File.unlink(File.join(absolute_directory, 'boot-sb.efi'))
     File.symlink('grubx64.efi', File.join(absolute_directory, 'boot-sb.efi'))
-    error = assert_raises(RuntimeError) { Proxy::TFTP.validate_universe_boot_files!(**options) }
+    error = assert_raises(Proxy::TFTP::BootFilesNotReady) { Proxy::TFTP.validate_universe_boot_files!(**options) }
     assert_match(/Invalid symlinks: #{Regexp.escape(File.join(absolute_directory, 'boot-sb.efi'))}/, error.message)
   ensure
     FileUtils.rm_rf(root) if root
@@ -187,7 +187,7 @@ class TftpTest < Test::Unit::TestCase
     Proxy::TFTP::Plugin.settings.stubs(:tftproot).returns(root)
     directory = 'bootloader-universe/pxegrub2/centos_stream/10/x86_64'
 
-    error = assert_raises(RuntimeError) do
+    error = assert_raises(Proxy::TFTP::BootFilesNotReady) do
       Proxy::TFTP.validate_universe_boot_files!(
         os: 'centos_stream', release: '10', arch: 'x86_64',
         kernel: "#{directory}/vmlinuz", initrd: "#{directory}/initrd.img"

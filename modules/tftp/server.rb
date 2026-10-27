@@ -11,6 +11,7 @@ module Proxy::TFTP
   extend Proxy::Log
 
   DIR_LOCK = DirLock.new
+  class BootFilesNotReady < RuntimeError; end
 
   def self.ensure_no_extraction!(directory)
     return unless DIR_LOCK.active?(directory)
@@ -78,7 +79,7 @@ module Proxy::TFTP
     end
     errors << "Invalid symlinks: #{invalid_links.join(', ')}" unless invalid_links.empty?
     unless errors.empty?
-      raise "Bootloader universe boot files are missing or invalid: #{directory}. " \
+      raise BootFilesNotReady, "Bootloader universe boot files are missing or invalid: #{directory}. " \
         "#{errors.join('. ')}. Provide boot files for Operating System '#{os} #{release}'"
     end
 

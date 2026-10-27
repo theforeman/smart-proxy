@@ -10,7 +10,7 @@ require 'tftp/tftp_plugin'
 require 'tftp/tftp_api'
 
 class TftpApiExtractionInProgressIntegrationTest < Test::Unit::TestCase
-  def test_host_config_fails_fast_while_real_archive_download_is_in_progress
+  def test_legacy_host_config_proceeds_while_real_archive_download_is_in_progress
     tftp_root = Dir.mktmpdir('tftp-sync-integration-')
     universe_path = 'bootloader-universe/pxegrub2/debian/12/x86_64'
     universe_dir = File.join(tftp_root, universe_path)
@@ -87,8 +87,20 @@ class TftpApiExtractionInProgressIntegrationTest < Test::Unit::TestCase
         'CONTENT_TYPE' => 'application/x-www-form-urlencoded'
       )
     end
-    assert_equal 409, host_response.status, host_response.body
-    assert_match(/currently being downloaded or extracted/, host_response.body)
+    assert_equal 200, host_response.status, host_response.body
+
+    universe_response = api_request.post(
+      "/pxegrub2/#{mac}",
+      input: URI.encode_www_form(
+        targetos: 'debian', release: '12', arch: 'x86_64',
+        bootfile_suffix: 'x64', pxeconfig: 'set default=0',
+        universe_archive: "#{universe_path}/netboot.tar.gz",
+        universe_kernel: "#{universe_path}/linux", universe_initrd: "#{universe_path}/initrd.gz"
+      ),
+      'CONTENT_TYPE' => 'application/x-www-form-urlencoded'
+    )
+    assert_equal 409, universe_response.status, universe_response.body
+    assert_match(/currently being downloaded or extracted/, universe_response.body)
 
     allow_download << true
     Timeout.timeout(10) do
@@ -110,7 +122,7 @@ class TftpApiExtractionInProgressIntegrationTest < Test::Unit::TestCase
     FileUtils.rm_rf(tftp_root) if tftp_root
   end
 
-  def test_direct_universe_download_is_async_and_blocks_host_config
+  def test_direct_universe_download_is_async_and_allows_legacy_host_config
     tftp_root = Dir.mktmpdir('tftp-direct-download-')
     universe_path = 'bootloader-universe/pxegrub2/debian/12/x86_64'
     universe_dir = File.join(tftp_root, universe_path)
@@ -179,7 +191,7 @@ class TftpApiExtractionInProgressIntegrationTest < Test::Unit::TestCase
       ),
       'CONTENT_TYPE' => 'application/x-www-form-urlencoded'
     )
-    assert_equal 409, host_response.status, host_response.body
+    assert_equal 200, host_response.status, host_response.body
 
     allow_preflight << true
     Timeout.timeout(5) { download_started.pop }

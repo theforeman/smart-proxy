@@ -132,6 +132,62 @@ class TftpApiTest < Test::Unit::TestCase
     assert File.symlink?(File.join(@tftp_root, 'host-config/aa-bb-cc-dd-ee-ff/grub2/boot.efi'))
   end
 
+  def test_api_reports_universe_file_readiness
+    directory = 'bootloader-universe/pxegrub2/centos_stream/10/x86_64'
+    absolute_directory = File.join(@tftp_root, directory)
+    query = {
+      targetos: 'centos_stream', release: '10', arch: 'x86_64',
+      universe_kernel: "#{directory}/vmlinuz", universe_initrd: "#{directory}/initrd.img"
+    }
+
+    get '/universe_boot_files', query
+    assert_equal false, JSON.parse(last_response.body)['ready']
+
+    FileUtils.mkdir_p(absolute_directory)
+    %w[vmlinuz initrd.img grubx64.efi shimx64.efi].each do |name|
+      File.write(File.join(absolute_directory, name), 'manual boot file')
+    end
+    File.symlink('grubx64.efi', File.join(absolute_directory, 'boot.efi'))
+    File.symlink('shimx64.efi', File.join(absolute_directory, 'boot-sb.efi'))
+
+    get '/universe_boot_files', query
+    assert_equal true, JSON.parse(last_response.body)['ready']
+
+    Proxy::TFTP::DIR_LOCK.with_write([absolute_directory]) do
+      get '/universe_boot_files', query
+      assert_equal false, JSON.parse(last_response.body)['ready']
+    end
+  end
+
+  def test_api_reports_universe_files_unready_without_creating_the_tftp_root
+    root = File.join(@tftp_root, 'absent')
+    Proxy::TFTP::Plugin.settings.stubs(:tftproot).returns(root)
+    directory = 'bootloader-universe/pxegrub2/centos_stream/10/x86_64'
+
+    query = {
+      targetos: 'centos_stream', release: '10', arch: 'x86_64',
+      universe_kernel: "#{directory}/vmlinuz", universe_initrd: "#{directory}/initrd.img"
+    }
+    get '/universe_boot_files', query
+
+    assert_equal false, JSON.parse(last_response.body)['ready']
+    assert !File.exist?(root)
+  end
+
+  def test_legacy_pxegrub2_config_does_not_reserve_universe_files
+    mac = 'aa:bb:cc:dd:ee:ff'
+    directory = File.join(@tftp_root, 'bootloader-universe/pxegrub2/centos_stream/10/x86_64')
+    Proxy::TFTP::Pxegrub2.any_instance.expects(:setup_bootloader).with(
+      mac: mac, os: 'centos_stream', release: '10', arch: 'x86_64', bootfile_suffix: nil, use_universe: false
+    ).returns(true)
+    Proxy::TFTP::Pxegrub2.any_instance.expects(:set).with(mac, 'foo').returns(true)
+
+    Proxy::TFTP::DIR_LOCK.with_write([directory]) do
+      post "/PXEGrub2/#{mac}", @args.merge(targetos: 'centos_stream', release: '10', arch: 'x86_64')
+      assert last_response.ok?, last_response.body
+    end
+  end
+
   def test_api_can_create_config_64bit
     mac = "aa:bb:cc:dd:ee:ff:00:11:22:33:44:55:66:77:88:99:aa:bb:cc:dd"
     Proxy::TFTP::Syslinux.any_instance.expects(:set).with(mac, "foo").returns(true)

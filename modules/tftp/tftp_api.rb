@@ -31,8 +31,9 @@ module Proxy::TFTP
       def create(variant, mac, os: nil, release: nil, arch: nil, bootfile_suffix: nil)
         tftp = instantiate variant, mac
         with_host_config_lock(mac) do
+          universe_requested = %w[universe_archive universe_kernel universe_initrd universe_source_digest].any? { |key| params.key?(key) }
           read_directories =
-            if tftp.is_a?(Proxy::TFTP::Pxegrub2)
+            if universe_requested && tftp.is_a?(Proxy::TFTP::Pxegrub2)
               log_halt(409, "TFTP: Failed to reserve bootloader universe files: ") do
                 Proxy::TFTP.bootloader_universe_directories(os: os, release: release, arch: arch)
               end
@@ -42,7 +43,7 @@ module Proxy::TFTP
 
           log_halt(nil, "TFTP: Failed to reserve bootloader universe files: ") do
             Proxy::TFTP::DIR_LOCK.with_read(read_directories) do
-              if %w[universe_archive universe_kernel universe_initrd universe_source_digest].any? { |key| params.key?(key) }
+              if universe_requested
                 log_halt(409, "TFTP: Failed to validate bootloader universe files: ") do
                   Proxy::TFTP.validate_universe_boot_files!(
                     os: os, release: release, arch: arch,
@@ -92,6 +93,31 @@ module Proxy::TFTP
           Proxy::TFTP.fetch_boot_file(destination, source, nil, exact_destination: true)
         end
       end
+    end
+
+    get "/universe_boot_files" do
+      content_type :json
+      headers 'Cache-Control' => 'no-store'
+      ready = if File.directory?(Proxy::TFTP.configured_tftp_root)
+                log_halt(400, "TFTP: Failed to check bootloader universe files: ") do
+                  directories = Proxy::TFTP.bootloader_universe_directories(
+                    os: params[:targetos], release: params[:release], arch: params[:arch]
+                  )
+                  begin
+                    Proxy::TFTP::DIR_LOCK.with_read(directories) do
+                      Proxy::TFTP.validate_universe_boot_files!(
+                        os: params[:targetos], release: params[:release], arch: params[:arch],
+                        kernel: params[:universe_kernel], initrd: params[:universe_initrd]
+                      )
+                    end
+                  rescue Proxy::TFTP::BootFilesNotReady, Proxy::TFTP::BootFilesInProgress
+                    false
+                  end
+                end
+              else
+                false
+              end
+      { ready: ready }.to_json
     end
 
     post "/:variant/create_default" do |variant|
