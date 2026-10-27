@@ -21,6 +21,7 @@ module TftpGenericServerSuite
   end
 
   def test_set
+    @subject.stubs(:write_file)
     pxe_config_files.each do |file|
       @subject.expects(:write_file).with(file, @content).once
     end
@@ -55,6 +56,7 @@ end
 class HelperServerTest < Test::Unit::TestCase
   def setup
     @subject = Proxy::TFTP::Server.new
+    Proxy::TFTP::Plugin.settings.stubs(:tftproot).returns(Dir.tmpdir)
   end
 
   def test_path_with_settings
@@ -132,8 +134,26 @@ class TftpPxegrub2ServerTest < Test::Unit::TestCase
     assert_equal File.join(@subject.path, "grub2"), @subject.pxeconfig_dir
   end
 
+  def test_plain_config_is_host_specific_and_survives_rebuild
+    @subject.set(@mac, 'first host build')
+    plain = File.join(@subject.pxeconfig_dir(@mac), 'grub.cfg')
+    assert_equal 'first host build', File.read(plain)
+    @subject.set(@mac, 'first host local boot')
+    assert_equal 'first host local boot', File.read(plain)
+
+    other_mac = 'aa:bb:cc:dd:ee:00'
+    @subject.set(other_mac, 'second host build')
+    assert_equal 'second host build', File.read(File.join(@subject.pxeconfig_dir(other_mac), 'grub.cfg'))
+    assert_equal 'first host local boot', File.read(plain)
+
+    @subject.del(@mac)
+    assert !File.exist?(plain)
+    assert_equal 'second host build', File.read(File.join(@subject.pxeconfig_dir(other_mac), 'grub.cfg'))
+  end
+
   def test_release_specific_bootloader_path
     release_specific_bootloader_path = File.join(@subject.path, "bootloader-universe", "pxegrub2", @os, @release, @arch)
+    FileUtils.mkdir_p File.dirname(release_specific_bootloader_path)
     Dir.stubs(:exist?).with(release_specific_bootloader_path).returns(true).once
     assert_equal release_specific_bootloader_path, @subject.bootloader_path(@os, @release, @arch)
   end
@@ -141,6 +161,7 @@ class TftpPxegrub2ServerTest < Test::Unit::TestCase
   def test_default_bootloader_path
     release_specific_bootloader_path = File.join(@subject.path, "bootloader-universe", "pxegrub2", @os, @release, @arch)
     default_bootloader_path = File.join(@subject.path, "bootloader-universe", "pxegrub2", @os, "default", @arch)
+    FileUtils.mkdir_p File.dirname(default_bootloader_path)
     Dir.stubs(:exist?).with(release_specific_bootloader_path).returns(false).once
     Dir.stubs(:exist?).with(default_bootloader_path).returns(true).once
     assert_equal default_bootloader_path, @subject.bootloader_path(@os, @release, @arch)
@@ -152,6 +173,8 @@ class TftpPxegrub2ServerTest < Test::Unit::TestCase
     symlinks = [
       { source: File.join(temp_dir, "dummy1.efi"), symlink: File.join(pxeconfig_dir_mac, "dummy1.efi") },
       { source: File.join(temp_dir, "dummy2.efi"), symlink: File.join(pxeconfig_dir_mac, "dummy2.efi") },
+      { source: File.join(temp_dir, "linux"), symlink: File.join(pxeconfig_dir_mac, "linux") },
+      { source: File.join(temp_dir, "initrd.gz"), symlink: File.join(pxeconfig_dir_mac, "initrd.gz") },
     ]
     symlinks.each do |entry|
       FileUtils.touch(entry[:source])
@@ -160,6 +183,53 @@ class TftpPxegrub2ServerTest < Test::Unit::TestCase
       symlinks.sort_by { |entry| entry[:source] },
       @subject.bootloader_universe_symlinks(temp_dir, pxeconfig_dir_mac).sort_by { |entry| entry[:source] }
     )
+  end
+
+  def test_setup_bootloader_links_kernel_and_initramdisk_and_removes_stale_links
+    redhat_dir = File.join(@rootdir, 'bootloader-universe', 'pxegrub2', @os, @release, @arch)
+    FileUtils.mkdir_p(redhat_dir)
+    %w[grubx64.efi vmlinuz initrd.img].each { |name| File.write(File.join(redhat_dir, name), name) }
+
+    @subject.setup_bootloader(mac: @mac, os: @os, release: @release, arch: @arch,
+                              bootfile_suffix: @bootfile_suffix, use_universe: true)
+
+    host_dir = @subject.pxeconfig_dir(@mac)
+    %w[vmlinuz initrd.img].each do |name|
+      assert File.symlink?(File.join(host_dir, name))
+      assert_equal name, File.read(File.join(host_dir, name))
+    end
+
+    debian_dir = File.join(@rootdir, 'bootloader-universe', 'pxegrub2', 'debian', '12', @arch)
+    FileUtils.mkdir_p(debian_dir)
+    %w[grubx64.efi linux initrd.gz].each { |name| File.write(File.join(debian_dir, name), name) }
+
+    @subject.setup_bootloader(mac: @mac, os: 'debian', release: '12', arch: @arch,
+                              bootfile_suffix: @bootfile_suffix, use_universe: true)
+
+    %w[vmlinuz initrd.img].each { |name| assert !File.symlink?(File.join(host_dir, name)) }
+    %w[linux initrd.gz].each do |name|
+      assert File.symlink?(File.join(host_dir, name))
+      assert_equal name, File.read(File.join(host_dir, name))
+    end
+  end
+
+  def test_setup_bootloader_uses_legacy_files_when_universe_is_disabled
+    redhat_dir = File.join(@rootdir, 'bootloader-universe', 'pxegrub2', @os, @release, @arch)
+    FileUtils.mkdir_p(redhat_dir)
+    %w[grubx64.efi vmlinuz initrd.img].each { |name| File.write(File.join(redhat_dir, name), name) }
+    FileUtils.mkdir_p(@subject.pxeconfig_dir)
+    %W[grub#{@bootfile_suffix}.efi shim#{@bootfile_suffix}.efi].each do |name|
+      File.write(File.join(@subject.pxeconfig_dir, name), name)
+    end
+
+    @subject.setup_bootloader(mac: @mac, os: @os, release: @release, arch: @arch,
+                              bootfile_suffix: @bootfile_suffix, use_universe: false)
+
+    host_dir = @subject.pxeconfig_dir(@mac)
+    assert_equal "grub#{@bootfile_suffix}.efi", File.read(File.join(host_dir, 'boot.efi'))
+    assert_equal "shim#{@bootfile_suffix}.efi", File.read(File.join(host_dir, 'boot-sb.efi'))
+    assert !File.exist?(File.join(host_dir, 'vmlinuz'))
+    assert !File.exist?(File.join(host_dir, 'initrd.img'))
   end
 
   def test_default_symlinks
@@ -176,11 +246,11 @@ class TftpPxegrub2ServerTest < Test::Unit::TestCase
 
   def test_create_symlinks
     symlinks = [
-      { source: "/path/to/source1", symlink: "/path/to/symlink1" },
-      { source: "/path/to/source2", symlink: "/another/path/to/symlink2" },
+      { source: File.join(@rootdir, "source1"), symlink: File.join(@rootdir, "symlink1") },
+      { source: File.join(@rootdir, "nested", "source2"), symlink: File.join(@rootdir, "another", "path", "symlink2") },
     ]
-    FileUtils.expects(:ln_s).with("source1", "/path/to/symlink1", {:force => true}).once
-    FileUtils.expects(:ln_s).with("../../../path/to/source2", "/another/path/to/symlink2", {:force => true}).once
+    FileUtils.expects(:ln_s).with("source1", File.join(@rootdir, "symlink1"), {:force => true}).once
+    FileUtils.expects(:ln_s).with("../../nested/source2", File.join(@rootdir, "another", "path", "symlink2"), {:force => true}).once
     @subject.create_symlinks(symlinks)
   end
 
@@ -192,10 +262,17 @@ class TftpPxegrub2ServerTest < Test::Unit::TestCase
     @subject.del @mac
   end
 
-  def test_symlinks_in_host_config_dir
+  def test_host_config_dir_uses_the_plain_grub_cfg_link
     @subject.set(@mac, @content)
+    host_dir = @subject.pxeconfig_dir(@mac)
+    grub_cfg = File.join(host_dir, 'grub.cfg')
+    assert File.symlink?(grub_cfg)
+    assert_equal @content, File.read(grub_cfg)
+
     ['grub.cfg-01-aa-bb-cc-dd-ee-ff', 'grub.cfg-aa:bb:cc:dd:ee:ff'].each do |file|
-      assert_equal @content, File.read(File.join(@subject.path, 'host-config', @subject.dashed_mac(@mac).downcase, 'grub2', file))
+      path = File.join(host_dir, file)
+      assert !File.exist?(path)
+      assert !File.symlink?(path)
     end
   end
 end
