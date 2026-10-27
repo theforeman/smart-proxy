@@ -95,8 +95,7 @@ class TftpApiTest < Test::Unit::TestCase
     digest = 'a' * 64
     Proxy::TFTP.expects(:bootloader_universe_directories).returns([File.join(@tftp_root, 'universe')])
     Proxy::TFTP.expects(:validate_universe_boot_files!).with(
-      os: 'debian', release: '12', arch: 'x86_64', archive: archive,
-      kernel: kernel, initrd: initrd, source_digest: digest
+      os: 'debian', release: '12', arch: 'x86_64', kernel: kernel, initrd: initrd
     ).returns(true)
     Proxy::TFTP::Pxegrub2.any_instance.expects(:setup_bootloader).with(
       mac: mac, os: 'debian', release: '12', arch: 'x86_64', bootfile_suffix: nil, use_universe: true
@@ -110,6 +109,27 @@ class TftpApiTest < Test::Unit::TestCase
     )
 
     assert last_response.ok?
+  end
+
+  def test_api_accepts_manually_provided_universe_files_without_an_archive
+    mac = 'aa:bb:cc:dd:ee:ff'
+    directory = 'bootloader-universe/pxegrub2/centos_stream/10/x86_64'
+    absolute_directory = File.join(@tftp_root, directory)
+    FileUtils.mkdir_p(absolute_directory)
+    %w[vmlinuz initrd.img grubx64.efi shimx64.efi].each do |name|
+      File.write(File.join(absolute_directory, name), 'manual boot file')
+    end
+    File.symlink('grubx64.efi', File.join(absolute_directory, 'boot.efi'))
+    File.symlink('shimx64.efi', File.join(absolute_directory, 'boot-sb.efi'))
+
+    post "/PXEGrub2/#{mac}", @args.merge(
+      targetos: 'centos_stream', release: '10', arch: 'x86_64',
+      universe_archive: "#{directory}/boot.iso",
+      universe_kernel: "#{directory}/vmlinuz", universe_initrd: "#{directory}/initrd.img"
+    )
+
+    assert last_response.ok?, last_response.body
+    assert File.symlink?(File.join(@tftp_root, 'host-config/aa-bb-cc-dd-ee-ff/grub2/boot.efi'))
   end
 
   def test_api_can_create_config_64bit

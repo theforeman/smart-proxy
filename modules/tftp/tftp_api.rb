@@ -46,8 +46,7 @@ module Proxy::TFTP
                 log_halt(409, "TFTP: Failed to validate bootloader universe files: ") do
                   Proxy::TFTP.validate_universe_boot_files!(
                     os: os, release: release, arch: arch,
-                    archive: params[:universe_archive], kernel: params[:universe_kernel],
-                    initrd: params[:universe_initrd], source_digest: params[:universe_source_digest]
+                    kernel: params[:universe_kernel], initrd: params[:universe_initrd]
                   )
                 end
               end

@@ -107,43 +107,37 @@ class TftpTest < Test::Unit::TestCase
     FileUtils.rm_rf root if root
   end
 
-  def test_universe_boot_files_are_ready_only_for_the_matching_archive_source
+  def test_universe_boot_files_require_served_files_and_aliases_without_an_archive
     root = Dir.mktmpdir
     Proxy::TFTP::Plugin.settings.stubs(:tftproot).returns(root)
     directory = 'bootloader-universe/pxegrub2/debian/12/x86_64'
     absolute_directory = File.join(root, directory)
     FileUtils.mkdir_p(absolute_directory)
-    archive = "#{directory}/netboot.tar.gz"
     kernel = "#{directory}/linux"
     initrd = "#{directory}/initrd.gz"
-    [archive, kernel, initrd, "#{directory}/grubx64.efi", "#{directory}/shimx64.efi"].each { |path| File.write(File.join(root, path), 'data') }
+    [kernel, initrd, "#{directory}/grubx64.efi", "#{directory}/shimx64.efi"].each { |path| File.write(File.join(root, path), 'data') }
     File.symlink('grubx64.efi', File.join(absolute_directory, 'boot.efi'))
     File.symlink('shimx64.efi', File.join(absolute_directory, 'boot-sb.efi'))
-    digest = Digest::SHA256.hexdigest('https://example.test/netboot.tar.gz')
-    File.write(File.join(root, "#{archive}.source"), digest)
-    options = { os: 'debian', release: '12', arch: 'x86_64', archive: archive,
-                kernel: kernel, initrd: initrd, source_digest: digest }
+    options = { os: 'debian', release: '12', arch: 'x86_64', kernel: kernel, initrd: initrd }
 
     assert Proxy::TFTP.validate_universe_boot_files!(**options)
 
     # Debian Secure Boot must have both the Shim binary and its DHCP alias.
     shim = File.join(absolute_directory, 'shimx64.efi')
     File.unlink(shim)
-    assert_raises(RuntimeError) { Proxy::TFTP.validate_universe_boot_files!(**options) }
+    error = assert_raises(RuntimeError) { Proxy::TFTP.validate_universe_boot_files!(**options) }
+    assert_match(/Missing files: #{Regexp.escape(shim)}/, error.message)
     File.write(shim, 'data')
     boot_sb = File.join(absolute_directory, 'boot-sb.efi')
     File.unlink(boot_sb)
-    assert_raises(RuntimeError) { Proxy::TFTP.validate_universe_boot_files!(**options) }
+    error = assert_raises(RuntimeError) { Proxy::TFTP.validate_universe_boot_files!(**options) }
+    assert_match(/Missing files: #{Regexp.escape(boot_sb)}/, error.message)
     File.symlink('shimx64.efi', boot_sb)
-
-    error = assert_raises(RuntimeError) do
-      Proxy::TFTP.validate_universe_boot_files!(**options.merge(source_digest: '0' * 64))
-    end
-    assert_match(/Download boot files for Operating System 'debian 12'/, error.message)
 
     File.unlink(File.join(root, initrd))
     error = assert_raises(RuntimeError) { Proxy::TFTP.validate_universe_boot_files!(**options) }
-    assert_match(/Download boot files for Operating System 'debian 12'/, error.message)
+    assert_match(/Missing files: #{Regexp.escape(File.join(root, initrd))}/, error.message)
+    assert_match(/Provide boot files for Operating System 'debian 12'/, error.message)
   ensure
     FileUtils.rm_rf(root) if root
   end
@@ -155,10 +149,8 @@ class TftpTest < Test::Unit::TestCase
     assert_raises(RuntimeError) do
       Proxy::TFTP.validate_universe_boot_files!(
         os: 'debian', release: '12', arch: 'x86_64',
-        archive: 'bootloader-universe/pxegrub2/debian/12/x86_64/netboot.tar.gz',
         kernel: 'bootloader-universe/pxegrub2/debian/13/x86_64/linux',
-        initrd: 'bootloader-universe/pxegrub2/debian/12/x86_64/initrd.gz',
-        source_digest: '0' * 64
+        initrd: 'bootloader-universe/pxegrub2/debian/12/x86_64/initrd.gz'
       )
     end
   ensure
@@ -171,40 +163,39 @@ class TftpTest < Test::Unit::TestCase
     directory = 'bootloader-universe/pxegrub2/centos/10/x86_64'
     absolute_directory = File.join(root, directory)
     FileUtils.mkdir_p(absolute_directory)
-    archive = "#{directory}/boot.iso"
     kernel = "#{directory}/vmlinuz"
     initrd = "#{directory}/initrd.img"
-    [archive, kernel, initrd, "#{directory}/grubx64.efi", "#{directory}/shimx64.efi"].each do |path|
+    [kernel, initrd, "#{directory}/grubx64.efi", "#{directory}/shimx64.efi"].each do |path|
       File.write(File.join(root, path), 'data')
     end
     File.symlink('grubx64.efi', File.join(absolute_directory, 'boot.efi'))
     File.symlink('shimx64.efi', File.join(absolute_directory, 'boot-sb.efi'))
-    digest = Digest::SHA256.hexdigest('https://example.test/boot.iso')
-    File.write(File.join(root, "#{archive}.source"), digest)
-    options = { os: 'centos', release: '10', arch: 'x86_64', archive: archive,
-                kernel: kernel, initrd: initrd, source_digest: digest }
+    options = { os: 'centos', release: '10', arch: 'x86_64', kernel: kernel, initrd: initrd }
 
     assert Proxy::TFTP.validate_universe_boot_files!(**options)
 
     File.unlink(File.join(absolute_directory, 'boot-sb.efi'))
-    assert_raises(RuntimeError) { Proxy::TFTP.validate_universe_boot_files!(**options) }
+    File.symlink('grubx64.efi', File.join(absolute_directory, 'boot-sb.efi'))
+    error = assert_raises(RuntimeError) { Proxy::TFTP.validate_universe_boot_files!(**options) }
+    assert_match(/Invalid symlinks: #{Regexp.escape(File.join(absolute_directory, 'boot-sb.efi'))}/, error.message)
   ensure
     FileUtils.rm_rf(root) if root
   end
 
-  def test_missing_universe_directory_reports_the_operating_system_download_action
+  def test_missing_universe_directory_reports_all_required_boot_files
     root = Dir.mktmpdir
     Proxy::TFTP::Plugin.settings.stubs(:tftproot).returns(root)
-    directory = 'bootloader-universe/pxegrub2/centos/10/x86_64'
+    directory = 'bootloader-universe/pxegrub2/centos_stream/10/x86_64'
 
     error = assert_raises(RuntimeError) do
       Proxy::TFTP.validate_universe_boot_files!(
-        os: 'centos', release: '10', arch: 'x86_64',
-        archive: "#{directory}/boot.iso", kernel: "#{directory}/vmlinuz",
-        initrd: "#{directory}/initrd.img", source_digest: 'a' * 64
+        os: 'centos_stream', release: '10', arch: 'x86_64',
+        kernel: "#{directory}/vmlinuz", initrd: "#{directory}/initrd.img"
       )
     end
-    assert_match(/Download boot files for Operating System 'centos 10'/, error.message)
+    missing = '{vmlinuz,initrd.img,grubx64.efi,shimx64.efi,boot.efi,boot-sb.efi}'
+    assert_match(/Missing files: #{Regexp.escape(File.join(root, directory, missing))}/, error.message)
+    assert_match(/Provide boot files for Operating System 'centos_stream 10'/, error.message)
   ensure
     FileUtils.rm_rf(root) if root
   end

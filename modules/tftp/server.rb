@@ -37,15 +37,13 @@ module Proxy::TFTP
     Proxy::FileLock.try_locking(lock_path)
   end
 
-  def self.validate_universe_boot_files!(os:, release:, arch:, archive:, kernel:, initrd:, source_digest:)
+  def self.validate_universe_boot_files!(os:, release:, arch:, kernel:, initrd:)
     parts = [os, release, arch].map(&:to_s)
     unless parts.all? { |part| !%w[. ..].include?(part) && /\A[a-z0-9_.-]+\z/i.match?(part) }
       raise 'Invalid bootloader universe operating system path'
     end
-    raise 'Invalid bootloader universe source digest' unless /\A[0-9a-f]{64}\z/.match?(source_digest.to_s)
-
     directory = File.join('bootloader-universe', 'pxegrub2', *parts)
-    boot_files = { archive: archive, kernel: kernel, initrd: initrd }.transform_values do |path|
+    boot_files = { kernel: kernel, initrd: initrd }.transform_values do |path|
       relative = validate_tftp_relative_path(path)
       raise 'Boot files must belong to the selected bootloader universe directory' unless relative.dirname.to_s == directory
 
@@ -55,17 +53,33 @@ module Proxy::TFTP
     grub = tftp_path("#{directory}/grubx64.efi")
     shim = tftp_path("#{directory}/shimx64.efi")
     links = { 'boot.efi' => grub, 'boot-sb.efi' => shim }
-    links_ready = links.all? do |name, target|
+    missing_files = (boot_files.values + [grub, shim]).reject { |path| File.file?(path) }
+    invalid_links = []
+    links.each do |name, target|
       link = tftp_path("#{directory}/#{name}", reject_final_symlink: false)
-      File.symlink?(link) && File.realpath(link) == target.to_s
+      if File.symlink?(link)
+        invalid_links << "#{link} -> #{target}" unless File.realpath(link) == target.to_s
+      elsif File.exist?(link)
+        invalid_links << "#{link} -> #{target}"
+      else
+        missing_files << link
+      end
     rescue Errno::ENOENT
-      false
+      invalid_links << "#{link} -> #{target}"
     end
-    source_marker = tftp_path("#{archive}.source")
-    files_ready = (boot_files.values + [source_marker, grub, shim]).all? { |path| File.file?(path) }
-    unless files_ready && links_ready && File.read(source_marker).strip == source_digest
-      raise "Bootloader universe boot files are missing or do not match the selected source: #{directory}. " \
-        "Download boot files for Operating System '#{os} #{release}'"
+    errors = []
+    unless missing_files.empty?
+      missing = if missing_files.one?
+                  missing_files.first.to_s
+                else
+                  "#{grub.dirname}/{#{missing_files.map(&:basename).join(',')}}"
+                end
+      errors << "Missing files: #{missing}"
+    end
+    errors << "Invalid symlinks: #{invalid_links.join(', ')}" unless invalid_links.empty?
+    unless errors.empty?
+      raise "Bootloader universe boot files are missing or invalid: #{directory}. " \
+        "#{errors.join('. ')}. Provide boot files for Operating System '#{os} #{release}'"
     end
 
     true

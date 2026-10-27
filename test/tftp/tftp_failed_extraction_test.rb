@@ -5,11 +5,11 @@ require 'rubygems/package'
 require 'rubygems/package/tar_writer'
 require 'zlib'
 class TftpFailedExtractionTest < Test::Unit::TestCase
-  def test_failed_refresh_from_another_source_invalidates_readiness
+  def test_failed_refresh_from_another_source_removes_source_marker
     check_failed_refresh('https://source-b.test/netboot.tar.gz')
   end
 
-  def test_failed_refresh_from_the_same_source_invalidates_readiness
+  def test_failed_refresh_from_the_same_source_removes_source_marker
     check_failed_refresh('https://source-a.test/netboot.tar.gz')
   end
 
@@ -49,9 +49,6 @@ class TftpFailedExtractionTest < Test::Unit::TestCase
     assert_equal 'source B', File.read(File.join(absolute, 'linux'))
     assert_equal 'source A', File.read(File.join(absolute, 'initrd.gz'))
     assert !File.exist?(File.join(absolute, 'netboot.tar.gz.source'))
-    assert_raise(RuntimeError) do
-      Proxy::TFTP.validate_universe_boot_files!(os: 'debian', release: '12', arch: 'x86_64', archive: "#{directory}/netboot.tar.gz", kernel: "#{directory}/linux", initrd: "#{directory}/initrd.gz", source_digest: digest)
-    end
     Zlib::GzipWriter.open(incoming) do |gzip|
       Gem::Package::TarWriter.new(gzip) do |tar|
         %w[linux initrd.gz grubx64.efi shimx64.efi].each do |name|
@@ -61,7 +58,7 @@ class TftpFailedExtractionTest < Test::Unit::TestCase
     end
     Proxy::TFTP.extract_boot_files(request).join
     assert_equal 'source B', File.read(File.join(absolute, 'initrd.gz'))
-    assert Proxy::TFTP.validate_universe_boot_files!(os: 'debian', release: '12', arch: 'x86_64', archive: "#{directory}/netboot.tar.gz", kernel: "#{directory}/linux", initrd: "#{directory}/initrd.gz", source_digest: Digest::SHA256.hexdigest(source))
+    assert Proxy::TFTP.validate_universe_boot_files!(os: 'debian', release: '12', arch: 'x86_64', kernel: "#{directory}/linux", initrd: "#{directory}/initrd.gz")
   ensure
     FileUtils.rm_rf(root) if root
   end
