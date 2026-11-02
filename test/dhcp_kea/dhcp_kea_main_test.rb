@@ -26,6 +26,12 @@ class DhcpKeaProviderTest < ::Test::Unit::TestCase
     subnet = @provider.find_subnet('192.168.1.0/24')
     assert_not_nil subnet
     assert_equal 1, subnet.options[:kea_subnet_id]
+    assert_equal '255.255.255.0', subnet.netmask
+
+    subnet = @provider.find_subnet('10.0.0.0/8')
+    assert_not_nil subnet
+    assert_equal 2, subnet.options[:kea_subnet_id]
+    assert_equal '255.0.0.0', subnet.netmask
   end
 
   def test_load_subnets_error_handling
@@ -149,15 +155,6 @@ class DhcpKeaProviderTest < ::Test::Unit::TestCase
     assert_raise(Proxy::DHCP::Error) do
       @provider.del_record(record)
     end
-  end
-
-  def test_netmask_from_cidr
-    provider = @provider
-
-    assert_equal '255.255.255.0', provider.send(:netmask_from_cidr, '192.168.1.0/24')
-    assert_equal '255.255.0.0', provider.send(:netmask_from_cidr, '10.0.0.0/16')
-    assert_equal '255.0.0.0', provider.send(:netmask_from_cidr, '10.0.0.0/8')
-    assert_equal '255.255.255.128', provider.send(:netmask_from_cidr, '192.168.1.0/25')
   end
 
   def test_load_subnet_options

@@ -1,3 +1,4 @@
+require 'ipaddr'
 require 'dhcp_common/server'
 
 module Proxy::DHCP::Kea
@@ -37,7 +38,7 @@ module Proxy::DHCP::Kea
 
         # Extract network address and netmask from CIDR (e.g., "192.168.1.0/24" -> "192.168.1.0", "255.255.255.0")
         network = network_cidr.split('/').first
-        netmask = netmask_from_cidr(network_cidr)
+        netmask = IPAddr.new(network_cidr).netmask.to_s
 
         subnet = ::Proxy::DHCP::Subnet.new(network, netmask)
 
@@ -116,15 +117,6 @@ module Proxy::DHCP::Kea
 
     def load_subnet_options(subnet)
       logger.debug "Loading subnet options for #{subnet.network}"
-    end
-
-    private
-
-    def netmask_from_cidr(cidr)
-      prefix = cidr.split('/').last.to_i
-
-      mask = (0xffffffff << (32 - prefix)) & 0xffffffff
-      [mask].pack('N').unpack('C4').join('.')
     end
   end
 end
