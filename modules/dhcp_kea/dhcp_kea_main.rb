@@ -4,11 +4,10 @@ module Proxy::DHCP::Kea
   class Provider < ::Proxy::DHCP::Server
     include Proxy::Log
 
-    attr_reader :kea_client, :lease_timeout
+    attr_reader :kea_client
 
-    def initialize(kea_client, subnet_service, free_ips_service, lease_timeout = 60)
+    def initialize(kea_client, subnet_service, free_ips_service)
       @kea_client = kea_client
-      @lease_timeout = lease_timeout
 
       super('kea-dhcp-server', nil, subnet_service, free_ips_service)
 
@@ -107,9 +106,9 @@ module Proxy::DHCP::Kea
       end
 
       if record.is_a?(::Proxy::DHCP::Reservation)
-        service.delete_host(subnet.network, record)
+        service.delete_host(record)
       elsif record.is_a?(::Proxy::DHCP::Lease)
-        service.delete_lease(subnet.network, record)
+        service.delete_lease(record)
       end
 
       logger.info "Successfully deleted KEA DHCP reservation: #{record.ip}"
