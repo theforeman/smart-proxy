@@ -12,5 +12,5 @@
 # SSL certificate verification (set to false for self-signed certificates)
 #:dhcp_kea_verify_ssl: true
 
-# Timeout for lease operations in seconds
-#:dhcp_kea_lease_timeout: 60
+# HTTP connection and read timeout for Kea API requests (seconds)
+#:dhcp_kea_http_timeout: 5
