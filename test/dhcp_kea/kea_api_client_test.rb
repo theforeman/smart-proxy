@@ -1,4 +1,5 @@
 require 'test_helper'
+require 'dhcp_common/dhcp_common'
 require 'dhcp_kea/kea_api_client'
 require 'webmock/test_unit'
 
@@ -19,6 +20,40 @@ class KeaApiClientTest < ::Test::Unit::TestCase
     assert_equal 'admin', client.username
     assert_equal 'secret', client.password
     assert_equal false, client.verify_ssl
+  end
+
+  def test_default_http_timeout
+    assert_equal 5, @client.http_timeout
+  end
+
+  def test_custom_http_timeout
+    client = Proxy::DHCP::Kea::KeaApiClient.new(
+      @api_url,
+      http_timeout: 10
+    )
+
+    assert_equal 10, client.http_timeout
+  end
+
+  def test_applies_http_timeouts
+    client = Proxy::DHCP::Kea::KeaApiClient.new(
+      @api_url,
+      http_timeout: 10
+    )
+
+    http = mock('http')
+    response = Net::HTTPOK.new('1.1', '200', 'OK')
+    response.stubs(:body).returns('[{"result":0,"arguments":{}}]')
+
+    Net::HTTP.expects(:new).with('kea-server', 8000).returns(http)
+
+    http.stubs(:use_ssl=)
+    http.stubs(:verify_mode=)
+    http.expects(:open_timeout=).with(10)
+    http.expects(:read_timeout=).with(10)
+    http.stubs(:request).returns(response)
+
+    client.send_command('dhcp4', 'config-get')
   end
 
   def test_send_command_success

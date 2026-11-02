@@ -1,4 +1,5 @@
 require 'test_helper'
+require 'dhcp_common/dhcp_common'
 require 'dhcp_common/subnet_service'
 require 'dhcp_common/free_ips'
 require 'dhcp_kea/kea_api_client'
@@ -9,7 +10,7 @@ class DhcpKeaProductionDIWiringsTest < Test::Unit::TestCase
     @settings = {
       :dhcp_kea_url => 'http://127.0.0.1:8000/',
       :dhcp_kea_verify_ssl => true,
-      :dhcp_kea_lease_timeout => 60,
+      :dhcp_kea_http_timeout => 5,
     }
   end
 
@@ -18,7 +19,8 @@ class DhcpKeaProductionDIWiringsTest < Test::Unit::TestCase
       @settings[:dhcp_kea_url],
       nil,
       nil,
-      verify_ssl: @settings[:dhcp_kea_verify_ssl]
+      verify_ssl: @settings[:dhcp_kea_verify_ssl],
+      http_timeout: @settings[:dhcp_kea_http_timeout]
     )
 
     assert_not_nil client
@@ -26,6 +28,7 @@ class DhcpKeaProductionDIWiringsTest < Test::Unit::TestCase
     assert_nil client.username
     assert_nil client.password
     assert_equal true, client.verify_ssl
+    assert_equal 5, client.http_timeout
   end
 
   def test_subnet_service_initialization
@@ -55,12 +58,10 @@ class DhcpKeaProductionDIWiringsTest < Test::Unit::TestCase
       kea_client,
       subnet_service,
       free_ips,
-      @settings[:dhcp_kea_lease_timeout]
     )
 
     assert_not_nil provider
     assert_instance_of ::Proxy::DHCP::Kea::Provider, provider
-    assert_equal @settings[:dhcp_kea_lease_timeout], provider.lease_timeout
   end
 
   def test_kea_api_client_with_authentication
