@@ -24,8 +24,7 @@ module Proxy::DHCP::Kea
         'arguments' => arguments,
       }
 
-      logger.debug "Sending KEA command: #{command} to service: #{service}"
-      logger.debug "Arguments: #{arguments.inspect}"
+      logger.debug "Sending KEA command: #{command} to service: #{service}, arguments: #{arguments.inspect}"
 
       response = http_post('/', payload)
 
@@ -34,7 +33,7 @@ module Proxy::DHCP::Kea
       if result['result'] != 0
         error_msg = "KEA command '#{command}' failed: #{result['text']}"
         logger.error error_msg
-        raise error_msg
+        raise Proxy::DHCP::Error, error_msg
       end
 
       logger.debug "KEA command successful: #{result['text']}"
@@ -74,16 +73,16 @@ module Proxy::DHCP::Kea
     def delete_reservation_by_ip(subnet_id, ip_address)
       logger.info "Deleting KEA reservation: #{ip_address} from subnet #{subnet_id}"
       send_command('dhcp4', 'reservation-del', {
-                     'subnet-id' => subnet_id.to_i,
+        'subnet-id' => subnet_id.to_i,
         'ip-address' => ip_address,
-                   })
+      })
     end
 
     def reservation_by_ip(subnet_id, ip_address)
       send_command('dhcp4', 'reservation-get', {
-                     'subnet-id' => subnet_id.to_i,
+        'subnet-id' => subnet_id.to_i,
         'ip-address' => ip_address,
-                   })
+      })
     rescue => e
       logger.debug "Reservation not found for #{ip_address}: #{e.message}"
       nil
@@ -94,9 +93,7 @@ module Proxy::DHCP::Kea
     end
 
     def lease_by_ip(ip_address)
-      result = send_command('dhcp4', 'lease4-get', {
-                              'ip-address' => ip_address,
-                            })
+      result = send_command('dhcp4', 'lease4-get', {'ip-address' => ip_address})
       result['leases']&.first
     rescue => e
       logger.debug "Lease not found for #{ip_address}: #{e.message}"
