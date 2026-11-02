@@ -7,7 +7,7 @@ module Proxy::DHCP::Kea
 
     default_settings :dhcp_kea_url => 'http://127.0.0.1:8000/',
                      :dhcp_kea_verify_ssl => true,
-                     :dhcp_kea_lease_timeout => 60
+                     :dhcp_kea_http_timeout => 5
 
     requires :dhcp, ::Proxy::VERSION
 
@@ -27,7 +27,8 @@ module Proxy::DHCP::Kea
           settings[:dhcp_kea_url],
           settings[:dhcp_kea_username],
           settings[:dhcp_kea_password],
-          verify_ssl: settings[:dhcp_kea_verify_ssl]
+          verify_ssl: settings[:dhcp_kea_verify_ssl],
+          http_timeout: settings[:dhcp_kea_http_timeout]
         )
       end)
 
@@ -48,7 +49,6 @@ module Proxy::DHCP::Kea
           container_instance.get_dependency(:kea_api_client),
           container_instance.get_dependency(:subnet_service),
           container_instance.get_dependency(:free_ips),
-          settings[:dhcp_kea_lease_timeout]
         )
       end)
     end

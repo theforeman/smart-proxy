@@ -1,4 +1,5 @@
 require 'test_helper'
+require 'dhcp_common/dhcp_common'
 require 'dhcp_kea/dhcp_kea_main'
 require 'dhcp_common/subnet'
 require 'dhcp_common/subnet_service'
@@ -14,7 +15,9 @@ class DhcpKeaProviderTest < ::Test::Unit::TestCase
                                                {'subnet' => '10.0.0.0/8', 'id' => 2},
                                              ])
 
-    @provider = Proxy::DHCP::Kea::Provider.new(@kea_client, @subnet_service, @free_ips, 60)
+    @provider = Proxy::DHCP::Kea::Provider.new(
+      @kea_client, @subnet_service, @free_ips
+    )
   end
 
   def test_initialize_loads_subnets
@@ -124,7 +127,7 @@ class DhcpKeaProviderTest < ::Test::Unit::TestCase
       'test.example.com',
       '172.16.0.50',
       'aa:bb:cc:dd:ee:ff',
-      Proxy::DHCP::Subnet.new('172.16.0.0/24', '255.255.255.0')
+      Proxy::DHCP::Subnet.new('172.16.0.0', '255.255.255.0')
     )
 
     assert_raise(Proxy::DHCP::Error) do

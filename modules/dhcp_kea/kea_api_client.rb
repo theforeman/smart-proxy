@@ -1,18 +1,20 @@
 require 'net/http'
 require 'uri'
 require 'json'
+require 'dhcp_common/dhcp_common'
 
 module Proxy::DHCP::Kea
   class KeaApiClient
     include Proxy::Log
 
-    attr_reader :api_url, :username, :password, :verify_ssl
+    attr_reader :api_url, :username, :password, :verify_ssl, :http_timeout
 
-    def initialize(api_url, username = nil, password = nil, verify_ssl: true)
+    def initialize(api_url, username = nil, password = nil, verify_ssl: true, http_timeout: 5)
       @api_url = api_url.chomp('/')
       @username = username
       @password = password
       @verify_ssl = verify_ssl
+      @http_timeout = http_timeout
     end
 
     def send_command(service, command, arguments = {})
@@ -108,6 +110,8 @@ module Proxy::DHCP::Kea
 
       http = Net::HTTP.new(uri.host, uri.port)
       http.use_ssl = (uri.scheme == 'https')
+      http.open_timeout = @http_timeout
+      http.read_timeout = @http_timeout
       http.verify_mode = @verify_ssl ? OpenSSL::SSL::VERIFY_PEER : OpenSSL::SSL::VERIFY_NONE
 
       request = Net::HTTP::Post.new(uri.path, {'Content-Type' => 'application/json'})
