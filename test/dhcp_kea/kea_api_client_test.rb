@@ -271,4 +271,18 @@ class KeaApiClientTest < ::Test::Unit::TestCase
 
     assert_not_nil result
   end
+
+  def test_delete_lease_by_ip
+    stub_request(:post, "#{@api_url}/")
+      .with(body: hash_including(
+        'command' => 'lease4-del',
+        'arguments' => {'ip-address' => '192.168.1.50'}
+      ))
+      .to_return(
+        status: 200,
+        body: [{'result' => 0, 'text' => 'Lease deleted'}].to_json
+      )
+
+    assert_equal({}, @client.delete_lease_by_ip('192.168.1.50'))
+  end
 end

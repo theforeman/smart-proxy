@@ -91,28 +91,38 @@ module Proxy::DHCP::Kea
     def del_record(record)
       logger.debug "Deleting DHCP record: #{record.inspect}"
 
-      # Record already has the subnet object
       subnet = record.subnet
-
       subnet_id = subnet.options[:kea_subnet_id]
+
       unless subnet_id
         raise Proxy::DHCP::Error, "KEA subnet ID not found for #{subnet.network}"
       end
 
-      begin
-        kea_client.delete_reservation_by_ip(subnet_id, record.ip)
-      rescue => e
-        logger.error "Failed to delete KEA reservation: #{e.message}"
-        raise Proxy::DHCP::Error, "Failed to delete reservation from KEA: #{e.message}"
+      unless record.is_a?(::Proxy::DHCP::Reservation) ||
+            record.is_a?(::Proxy::DHCP::Lease)
+        raise Proxy::DHCP::Error, "Unsupported DHCP record type: #{record.class}"
       end
 
+      # First, delete the record from Kea
+      begin
+        if record.is_a?(::Proxy::DHCP::Reservation)
+          kea_client.delete_reservation_by_ip(subnet_id, record.ip)
+        else
+          kea_client.delete_lease_by_ip(record.ip)
+        end
+      rescue => e
+        logger.error "Failed to delete record from KEA: #{e.message}"
+        raise Proxy::DHCP::Error, "Failed to delete record from KEA: #{e.message}"
+      end
+
+      # Then update the local cache
       if record.is_a?(::Proxy::DHCP::Reservation)
         service.delete_host(record)
-      elsif record.is_a?(::Proxy::DHCP::Lease)
+      else
         service.delete_lease(record)
       end
 
-      logger.info "Successfully deleted KEA DHCP reservation: #{record.ip}"
+      logger.info "Successfully deleted KEA DHCP record: #{record.ip}"
     end
 
     def load_subnet_options(subnet)
