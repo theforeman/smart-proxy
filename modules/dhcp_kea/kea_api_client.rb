@@ -78,6 +78,11 @@ module Proxy::DHCP::Kea
       })
     end
 
+    def delete_lease_by_ip(ip_address)
+      logger.info "Deleting KEA lease: #{ip_address}"
+      send_command('dhcp4', 'lease4-del', {'ip-address' => ip_address})
+    end
+
     def reservation_by_ip(subnet_id, ip_address)
       send_command('dhcp4', 'reservation-get', {
         'subnet-id' => subnet_id.to_i,
