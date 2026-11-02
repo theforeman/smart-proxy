@@ -128,6 +128,35 @@ class DhcpKeaProviderTest < ::Test::Unit::TestCase
     assert_nil @subnet_service.find_host_by_mac('192.168.1.0/24', 'aa:bb:cc:dd:ee:ff')
   end
 
+  def test_del_lease_success
+    subnet = @provider.find_subnet('192.168.1.0/24')
+
+    lease = Proxy::DHCP::Lease.new(
+      'test.example.com',
+      '192.168.1.50',
+      'aa:bb:cc:dd:ee:ff',
+      subnet,
+      Time.now,
+      Time.now + 3600,
+      'active'
+    )
+
+    @subnet_service.add_lease(subnet.network, lease)
+
+    @kea_client.expects(:delete_lease_by_ip)
+              .with('192.168.1.50')
+              .returns({})
+
+    @kea_client.expects(:delete_reservation_by_ip).never
+
+    @provider.del_record(lease)
+
+    assert_nil @subnet_service.find_lease_by_ip(
+      subnet.network,
+      '192.168.1.50'
+    )
+  end
+
   def test_del_record_subnet_not_found
     record = Proxy::DHCP::Reservation.new(
       'test.example.com',
