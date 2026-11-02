@@ -84,9 +84,11 @@ class KeaApiClientTest < ::Test::Unit::TestCase
         headers: {'Content-Type' => 'application/json'}
       )
 
-    assert_raise(RuntimeError) do
+    error = assert_raise(Proxy::DHCP::Error) do
       @client.send_command('dhcp4', 'test-command', {})
     end
+
+    assert_match(/KEA command 'test-command' failed/, error.message)
   end
 
   def test_send_command_http_error
