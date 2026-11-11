@@ -8,7 +8,7 @@ module Proxy::DHCP::Kea
     default_settings :dhcp_kea_url => 'http://127.0.0.1:8000/',
                      :dhcp_kea_verify_ssl => true,
                      :dhcp_kea_http_timeout => 5,
-                     :blacklist_duration_minutes => 30 * 60
+                     :blacklist_duration_seconds => 30 * 60
 
     requires :dhcp, ::Proxy::VERSION
 
@@ -31,7 +31,7 @@ module Proxy::DHCP::Kea
         )
       end)
 
-      container_instance.singleton_dependency :free_ips, -> { ::Proxy::DHCP::FreeIps.new(settings[:blacklist_duration_minutes]) }
+      container_instance.singleton_dependency :free_ips, -> { ::Proxy::DHCP::FreeIps.new(settings[:blacklist_duration_seconds]) }
 
       container_instance.dependency :dhcp_provider, (lambda do
         ::Proxy::DHCP::Kea::Provider.new(
