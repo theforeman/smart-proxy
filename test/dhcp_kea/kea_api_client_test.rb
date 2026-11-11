@@ -54,6 +54,34 @@ class KeaApiClientTest < ::Test::Unit::TestCase
     assert_raises(Proxy::DHCP::Error) { @client.send_command('version-get') }
   end
 
+  def test_default_http_timeout
+    assert_equal 5, @client.timeout
+  end
+
+  def test_custom_http_timeout
+    client = Proxy::DHCP::Kea::KeaApiClient.new(URL, timeout: 10)
+
+    assert_equal 10, client.timeout
+  end
+
+  def test_applies_http_timeouts
+    client = Proxy::DHCP::Kea::KeaApiClient.new(URL, timeout: 10)
+
+    http = mock('http')
+    response = Net::HTTPOK.new('1.1', '200', 'OK')
+    response.stubs(:body).returns('[{"result":0,"arguments":{}}]')
+
+    Net::HTTP.expects(:new).with('kea.example.com', 8000).returns(http)
+
+    http.stubs(:use_ssl=)
+    http.stubs(:verify_mode=)
+    http.expects(:open_timeout=).with(10)
+    http.expects(:read_timeout=).with(10)
+    http.stubs(:request).returns(response)
+
+    client.send_command('config-get')
+  end
+
   def test_invalid_json
     stub_request(:post, URL).to_return(body: 'not json')
     assert_raises(Proxy::DHCP::Error) { @client.send_command('version-get') }
@@ -121,5 +149,15 @@ class KeaApiClientTest < ::Test::Unit::TestCase
     request = stub_kea('lease4-del', 'ip-address' => '192.168.1.5')
     @client.delete_lease('192.168.1.5')
     assert_requested request
+  end
+
+  def test_send_command_handles_empty_response
+    stub_request(:post, URL).to_return(body: '[]')
+
+    error = assert_raises(Proxy::DHCP::Error) do
+      @client.send_command('version-get')
+    end
+
+    assert_match(/Unexpected Kea API response/, error.message)
   end
 end
