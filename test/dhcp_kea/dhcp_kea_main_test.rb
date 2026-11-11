@@ -173,6 +173,33 @@ class DhcpKeaProviderTest < Test::Unit::TestCase
     @provider.del_record(Proxy::DHCP::Lease.new(nil, '192.168.1.150', 'aa:bb:cc:dd:ee:99', subnet, nil, nil, nil))
   end
 
+  def test_del_record_rejects_unsupported_type
+    @client.expects(:delete_reservation).never
+    @client.expects(:delete_lease).never
+
+    error = assert_raises(Proxy::DHCP::Error) do
+      @provider.del_record(Object.new)
+    end
+
+    assert_match(/Unsupported DHCP record type/, error.message)
+  end
+
+  def test_del_reservation_with_unknown_subnet
+    subnet = Proxy::DHCP::Subnet.new('172.16.0.0', '255.255.255.0')
+    record = Proxy::DHCP::Reservation.new(
+      'host.example.com',
+      '172.16.0.10',
+      'aa:bb:cc:dd:ee:01',
+      subnet
+    )
+
+    @client.expects(:delete_reservation).never
+
+    assert_raises(Proxy::DHCP::SubnetNotFound) do
+      @provider.del_record(record)
+    end
+  end
+
   def test_unused_ip_skips_used_addresses
     ::Proxy::DhcpPlugin.settings.stubs(:ping_free_ip).returns(false)
     @client.stubs(:reservations).returns([HOST.merge('ip-address' => '192.168.1.100')])

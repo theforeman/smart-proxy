@@ -107,10 +107,14 @@ module Proxy::DHCP::Kea
 
     def del_record(record)
       logger.debug "Deleting '#{record}'"
-      if record.is_a?(::Proxy::DHCP::Reservation)
+
+      case record
+      when ::Proxy::DHCP::Reservation
         kea_client.delete_reservation(subnet_id(record.subnet), record.mac)
-      else
+      when ::Proxy::DHCP::Lease
         kea_client.delete_lease(record.ip)
+      else
+        raise Proxy::DHCP::Error, "Unsupported DHCP record type: #{record.class}"
       end
     end
 
@@ -130,7 +134,8 @@ module Proxy::DHCP::Kea
     end
 
     def subnet_id(subnet)
-      kea_subnets.fetch(subnet.network)[:id]
+      kea_subnets[subnet.network]&.fetch(:id) ||
+        raise(Proxy::DHCP::SubnetNotFound, "No such subnet: #{subnet.network}")
     end
 
     def subnet_options(config)
