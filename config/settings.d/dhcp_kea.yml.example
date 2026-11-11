@@ -20,4 +20,4 @@
 #:dhcp_kea_http_timeout: 5
 
 # Time in minutes during which an IP address suggested as free is not suggested again
-#:blacklist_duration_minutes: 1800
+#:blacklist_duration_seconds: 1800

@@ -11,7 +11,7 @@ class DhcpKeaProductionDIWiringsTest < Test::Unit::TestCase
     Proxy::DHCP::Kea::Plugin.di_wirings.load_dependency_injection_wirings(@container,
                                                                           :dhcp_kea_url => 'https://kea.example.com:8000/', :dhcp_kea_username => 'foreman', :dhcp_kea_password => 'secret',
                                                                           :dhcp_kea_verify_ssl => false, :dhcp_kea_http_timeout => 3, :subnets => ['192.168.1.0/255.255.255.0'],
-                                                                          :blacklist_duration_minutes => 10)
+                                                                          :blacklist_duration_seconds => 10)
   end
 
   def test_kea_api_client_wiring

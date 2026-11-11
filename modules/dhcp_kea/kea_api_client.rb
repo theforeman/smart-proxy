@@ -28,7 +28,12 @@ module Proxy::DHCP::Kea
       payload['arguments'] = arguments if arguments
 
       logger.debug "Sending Kea command '#{command}' with arguments #{arguments.inspect}"
-      result = http_post(payload).first
+      response = http_post(payload)
+      result = response.first if response.is_a?(Array)
+
+      unless result.is_a?(Hash) && result.key?('result')
+        raise Proxy::DHCP::Error, "Unexpected Kea API response for '#{command}'"
+      end
 
       case result['result']
       when RESULT_SUCCESS
