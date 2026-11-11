@@ -74,6 +74,7 @@ module Proxy
   require 'dhcp_isc/dhcp_isc'
   require 'dhcp_native_ms/dhcp_native_ms'
   require 'dhcp_libvirt/dhcp_libvirt'
+  require 'dhcp_kea/dhcp_kea'
   require 'puppetca/puppetca'
   require 'puppetca_http_api/puppetca_http_api'
   require 'puppetca_hostname_whitelisting/puppetca_hostname_whitelisting'
