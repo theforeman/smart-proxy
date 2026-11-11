@@ -1,142 +1,119 @@
 require 'net/http'
 require 'uri'
 require 'json'
-require 'dhcp_common/dhcp_common'
 
 module Proxy::DHCP::Kea
   class KeaApiClient
     include Proxy::Log
 
-    attr_reader :api_url, :username, :password, :verify_ssl, :http_timeout
+    RESULT_SUCCESS = 0
+    RESULT_ERROR = 1
+    RESULT_UNSUPPORTED = 2
+    RESULT_EMPTY = 3
 
-    def initialize(api_url, username = nil, password = nil, verify_ssl: true, http_timeout: 5)
-      @api_url = api_url.chomp('/')
+    PAGE_SIZE = 1000
+
+    attr_reader :api_url, :username, :password, :verify_ssl, :timeout
+
+    def initialize(api_url, username = nil, password = nil, verify_ssl: true, timeout: 5)
+      @api_url = URI.parse(api_url)
       @username = username
       @password = password
       @verify_ssl = verify_ssl
-      @http_timeout = http_timeout
+      @timeout = timeout
     end
 
-    def send_command(service, command, arguments = {})
-      payload = {
-        'command' => command,
-        'service' => [service],
-        'arguments' => arguments,
-      }
+    def send_command(command, arguments = nil)
+      payload = {'command' => command, 'service' => ['dhcp4']}
+      payload['arguments'] = arguments if arguments
 
-      logger.debug "Sending KEA command: #{command} to service: #{service}, arguments: #{arguments.inspect}"
+      logger.debug "Sending Kea command '#{command}' with arguments #{arguments.inspect}"
+      result = http_post(payload).first
 
-      response = http_post('/', payload)
-
-      result = response.first
-
-      if result['result'] != 0
-        error_msg = "KEA command '#{command}' failed: #{result['text']}"
-        logger.error error_msg
-        raise Proxy::DHCP::Error, error_msg
+      case result['result']
+      when RESULT_SUCCESS
+        result['arguments'] || {}
+      when RESULT_EMPTY
+        nil
+      when RESULT_UNSUPPORTED
+        raise Proxy::DHCP::Error, "Kea command '#{command}' is not supported, is the required hook library loaded? #{result['text']}"
+      else
+        raise Proxy::DHCP::Error, "Kea command '#{command}' failed: #{result['text']}"
       end
-
-      logger.debug "KEA command successful: #{result['text']}"
-      result['arguments'] || {}
     end
 
-    def config
-      send_command('dhcp4', 'config-get')
+    def subnets
+      config = send_command('config-get')['Dhcp4'] || {}
+      shared = (config['shared-networks'] || []).flat_map { |network| network['subnet4'] || [] }
+      (config['subnet4'] || []) + shared
     end
 
-    def list_subnets
-      conf = config
-      conf.dig('Dhcp4', 'subnet4') || []
-    end
-
-    def add_reservation(subnet_id, ip_address, hw_address, hostname = nil, options = {})
-      reservation = {
-        'subnet-id' => subnet_id.to_i,
-        'ip-address' => ip_address,
-        'hw-address' => hw_address,
-      }
-
-      reservation['hostname'] = hostname if hostname
-
-      if options[:next_server]
-        reservation['next-server'] = options[:next_server]
+    def reservations(subnet_id)
+      hosts = []
+      arguments = {'subnet-id' => subnet_id, 'limit' => PAGE_SIZE}
+      loop do
+        page = send_command('reservation-get-page', arguments)
+        break if page.nil? || page['count'].to_i.zero?
+        hosts.concat(page['hosts'])
+        arguments = arguments.merge(page['next'])
       end
-
-      if options[:boot_file_name]
-        reservation['boot-file-name'] = options[:boot_file_name]
-      end
-
-      logger.info "Adding KEA reservation: #{ip_address} for #{hw_address} in subnet #{subnet_id}"
-      send_command('dhcp4', 'reservation-add', reservation)
-    end
-
-    def delete_reservation_by_ip(subnet_id, ip_address)
-      logger.info "Deleting KEA reservation: #{ip_address} from subnet #{subnet_id}"
-      send_command('dhcp4', 'reservation-del', {
-        'subnet-id' => subnet_id.to_i,
-        'ip-address' => ip_address,
-      })
-    end
-
-    def delete_lease_by_ip(ip_address)
-      logger.info "Deleting KEA lease: #{ip_address}"
-      send_command('dhcp4', 'lease4-del', {'ip-address' => ip_address})
+      hosts
     end
 
     def reservation_by_ip(subnet_id, ip_address)
-      send_command('dhcp4', 'reservation-get', {
-        'subnet-id' => subnet_id.to_i,
-        'ip-address' => ip_address,
-      })
-    rescue => e
-      logger.debug "Reservation not found for #{ip_address}: #{e.message}"
-      nil
+      send_command('reservation-get', 'subnet-id' => subnet_id, 'ip-address' => ip_address)
     end
 
-    def list_leases
-      send_command('dhcp4', 'lease4-get-all')
+    def reservation_by_mac(subnet_id, mac_address)
+      send_command('reservation-get', 'subnet-id' => subnet_id, 'identifier-type' => 'hw-address', 'identifier' => mac_address)
+    end
+
+    def add_reservation(reservation)
+      send_command('reservation-add', 'reservation' => reservation)
+    end
+
+    def delete_reservation(subnet_id, mac_address)
+      send_command('reservation-del', 'subnet-id' => subnet_id, 'identifier-type' => 'hw-address', 'identifier' => mac_address)
+    end
+
+    def leases(subnet_id)
+      result = send_command('lease4-get-all', 'subnets' => [subnet_id])
+      result ? result['leases'] : []
     end
 
     def lease_by_ip(ip_address)
-      result = send_command('dhcp4', 'lease4-get', {'ip-address' => ip_address})
-      result['leases']&.first
-    rescue => e
-      logger.debug "Lease not found for #{ip_address}: #{e.message}"
-      nil
+      send_command('lease4-get', 'ip-address' => ip_address)
+    end
+
+    def lease_by_mac(subnet_id, mac_address)
+      send_command('lease4-get', 'subnet-id' => subnet_id, 'identifier-type' => 'hw-address', 'identifier' => mac_address)
+    end
+
+    def delete_lease(ip_address)
+      send_command('lease4-del', 'ip-address' => ip_address)
     end
 
     private
 
-    def http_post(path, payload)
-      uri = URI.parse("#{@api_url}#{path}")
+    def http_post(payload)
+      http = Net::HTTP.new(api_url.host, api_url.port)
+      http.use_ssl = (api_url.scheme == 'https')
+      http.verify_mode = verify_ssl ? OpenSSL::SSL::VERIFY_PEER : OpenSSL::SSL::VERIFY_NONE
+      http.open_timeout = timeout
+      http.read_timeout = timeout
 
-      http = Net::HTTP.new(uri.host, uri.port)
-      http.use_ssl = (uri.scheme == 'https')
-      http.open_timeout = @http_timeout
-      http.read_timeout = @http_timeout
-      http.verify_mode = @verify_ssl ? OpenSSL::SSL::VERIFY_PEER : OpenSSL::SSL::VERIFY_NONE
-
-      request = Net::HTTP::Post.new(uri.path, {'Content-Type' => 'application/json'})
+      request = Net::HTTP::Post.new(api_url.request_uri, 'Content-Type' => 'application/json')
+      request.basic_auth(username, password) if username && password
       request.body = payload.to_json
 
-      if @username && @password
-        request.basic_auth(@username, @password)
-      end
-
-      logger.debug "HTTP POST to #{uri}"
       response = http.request(request)
-
-      unless response.is_a?(Net::HTTPSuccess)
-        error_msg = "HTTP request failed: #{response.code} #{response.message}"
-        logger.error error_msg
-        raise error_msg
-      end
+      raise Proxy::DHCP::Error, "Kea API request failed: #{response.code} #{response.message}" unless response.is_a?(Net::HTTPSuccess)
 
       JSON.parse(response.body)
     rescue JSON::ParserError => e
-      error_msg = "Failed to parse KEA response: #{e.message}"
-      logger.error error_msg
-      raise error_msg
+      raise Proxy::DHCP::Error, "Failed to parse Kea API response: #{e.message}"
+    rescue SystemCallError, Net::OpenTimeout, Net::ReadTimeout, OpenSSL::SSL::SSLError => e
+      raise Proxy::DHCP::Error, "Unable to connect to Kea API at #{api_url}: #{e.message}"
     end
   end
 end

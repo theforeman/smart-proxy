@@ -4,285 +4,122 @@ require 'dhcp_kea/kea_api_client'
 require 'webmock/test_unit'
 
 class KeaApiClientTest < ::Test::Unit::TestCase
+  URL = 'http://kea.example.com:8000/'.freeze
+
   def setup
-    @api_url = 'http://kea-server:8000'
-    @client = Proxy::DHCP::Kea::KeaApiClient.new(@api_url)
+    @client = Proxy::DHCP::Kea::KeaApiClient.new(URL, 'foreman', 'secret')
   end
 
-  def teardown
-    WebMock.reset!
+  def stub_kea(command, arguments = nil, response = {'result' => 0, 'text' => 'ok'})
+    body = {'command' => command, 'service' => ['dhcp4']}
+    body['arguments'] = arguments if arguments
+    stub_request(:post, URL).with(body: body.to_json, basic_auth: ['foreman', 'secret']).to_return(body: [response].to_json)
   end
 
-  def test_initialize
-    client = Proxy::DHCP::Kea::KeaApiClient.new('http://example.com:8000/', 'admin', 'secret', verify_ssl: false)
-
-    assert_equal 'http://example.com:8000', client.api_url
-    assert_equal 'admin', client.username
-    assert_equal 'secret', client.password
-    assert_equal false, client.verify_ssl
+  def test_send_command_returns_arguments
+    stub_kea('version-get', nil, 'result' => 0, 'arguments' => {'extended' => '3.2.1'})
+    assert_equal({'extended' => '3.2.1'}, @client.send_command('version-get'))
   end
 
-  def test_default_http_timeout
-    assert_equal 5, @client.http_timeout
+  def test_send_command_returns_nil_for_empty_result
+    stub_kea('lease4-get', {'ip-address' => '192.168.1.5'}, 'result' => 3, 'text' => 'Lease not found.')
+    assert_nil @client.lease_by_ip('192.168.1.5')
   end
 
-  def test_custom_http_timeout
-    client = Proxy::DHCP::Kea::KeaApiClient.new(
-      @api_url,
-      http_timeout: 10
-    )
-
-    assert_equal 10, client.http_timeout
+  def test_send_command_raises_on_error
+    stub_kea('reservation-add', {'reservation' => {}}, 'result' => 1, 'text' => 'Host database not available')
+    error = assert_raises(Proxy::DHCP::Error) { @client.add_reservation({}) }
+    assert_match(/Host database not available/, error.message)
   end
 
-  def test_applies_http_timeouts
-    client = Proxy::DHCP::Kea::KeaApiClient.new(
-      @api_url,
-      http_timeout: 10
-    )
-
-    http = mock('http')
-    response = Net::HTTPOK.new('1.1', '200', 'OK')
-    response.stubs(:body).returns('[{"result":0,"arguments":{}}]')
-
-    Net::HTTP.expects(:new).with('kea-server', 8000).returns(http)
-
-    http.stubs(:use_ssl=)
-    http.stubs(:verify_mode=)
-    http.expects(:open_timeout=).with(10)
-    http.expects(:read_timeout=).with(10)
-    http.stubs(:request).returns(response)
-
-    client.send_command('dhcp4', 'config-get')
+  def test_send_command_raises_on_unsupported_command
+    stub_kea('reservation-get', {'subnet-id' => 1, 'ip-address' => '192.168.1.5'}, 'result' => 2, 'text' => "'reservation-get' command not supported.")
+    error = assert_raises(Proxy::DHCP::Error) { @client.reservation_by_ip(1, '192.168.1.5') }
+    assert_match(/hook library/, error.message)
   end
 
-  def test_send_command_success
-    stub_request(:post, "#{@api_url}/")
-      .with(
-        body: {
-          'command' => 'test-command',
-          'service' => ['dhcp4'],
-          'arguments' => {'key' => 'value'},
-        }.to_json
-      )
-      .to_return(
-        status: 200,
-        body: [{'result' => 0, 'text' => 'Success', 'arguments' => {'data' => 'result'}}].to_json,
-        headers: {'Content-Type' => 'application/json'}
-      )
-
-    result = @client.send_command('dhcp4', 'test-command', {'key' => 'value'})
-
-    assert_equal({'data' => 'result'}, result)
+  def test_http_error
+    stub_request(:post, URL).to_return(status: 401, body: 'Unauthorized')
+    assert_raises(Proxy::DHCP::Error) { @client.send_command('version-get') }
   end
 
-  def test_send_command_failure
-    stub_request(:post, "#{@api_url}/")
-      .to_return(
-        status: 200,
-        body: [{'result' => 1, 'text' => 'Command failed'}].to_json,
-        headers: {'Content-Type' => 'application/json'}
-      )
-
-    error = assert_raise(Proxy::DHCP::Error) do
-      @client.send_command('dhcp4', 'test-command', {})
-    end
-
-    assert_match(/KEA command 'test-command' failed/, error.message)
+  def test_connection_error
+    stub_request(:post, URL).to_raise(Errno::ECONNREFUSED)
+    error = assert_raises(Proxy::DHCP::Error) { @client.send_command('version-get') }
+    assert_match(/Unable to connect/, error.message)
   end
 
-  def test_send_command_http_error
-    stub_request(:post, "#{@api_url}/")
-      .to_return(status: 500, body: 'Internal Server Error')
-
-    assert_raise(RuntimeError) do
-      @client.send_command('dhcp4', 'test-command', {})
-    end
+  def test_timeout
+    stub_request(:post, URL).to_timeout
+    assert_raises(Proxy::DHCP::Error) { @client.send_command('version-get') }
   end
 
-  def test_list_subnets
-    stub_request(:post, "#{@api_url}/")
-      .with(
-        body: hash_including('command' => 'config-get')
-      )
-      .to_return(
-        status: 200,
-        body: [{
-          'result' => 0,
-          'text' => 'Success',
-          'arguments' => {
-            'Dhcp4' => {
-              'subnet4' => [
-                {'subnet' => '192.168.1.0/24', 'id' => 1},
-                {'subnet' => '10.0.0.0/8', 'id' => 2},
-              ],
-            },
-          },
-        }].to_json,
-        headers: {'Content-Type' => 'application/json'}
-      )
-
-    subnets = @client.list_subnets
-
-    assert_equal 2, subnets.length
-    assert_equal '192.168.1.0/24', subnets[0]['subnet']
-    assert_equal 1, subnets[0]['id']
+  def test_invalid_json
+    stub_request(:post, URL).to_return(body: 'not json')
+    assert_raises(Proxy::DHCP::Error) { @client.send_command('version-get') }
   end
 
-  def test_add_reservation
-    stub_request(:post, "#{@api_url}/")
-      .with(
-        body: hash_including(
-          'command' => 'reservation-add',
-          'service' => ['dhcp4']
-        )
-      )
-      .to_return(
-        status: 200,
-        body: [{'result' => 0, 'text' => 'Host added.'}].to_json,
-        headers: {'Content-Type' => 'application/json'}
-      )
-
-    result = @client.add_reservation(1, '192.168.1.50', 'aa:bb:cc:dd:ee:ff', 'test.example.com')
-
-    assert_not_nil result
+  def test_no_basic_auth_without_credentials
+    stub_request(:post, URL).with { |request| !request.headers.key?('Authorization') }.to_return(body: [{'result' => 0}].to_json)
+    Proxy::DHCP::Kea::KeaApiClient.new(URL).send_command('version-get')
   end
 
-  def test_add_reservation_with_pxe_options
-    stub_request(:post, "#{@api_url}/")
-      .with(
-        body: hash_including(
-          'command' => 'reservation-add',
-          'arguments' => hash_including(
-            'next-server' => '192.168.1.1',
-            'boot-file-name' => 'pxelinux.0'
-          )
-        )
-      )
-      .to_return(
-        status: 200,
-        body: [{'result' => 0, 'text' => 'Host added.'}].to_json,
-        headers: {'Content-Type' => 'application/json'}
-      )
-
-    result = @client.add_reservation(
-      1,
-      '192.168.1.50',
-      'aa:bb:cc:dd:ee:ff',
-      'test.example.com',
-      {next_server: '192.168.1.1', boot_file_name: 'pxelinux.0'}
-    )
-
-    assert_not_nil result
+  def test_subnets_include_shared_networks
+    config = {'Dhcp4' => {
+      'subnet4' => [{'id' => 1, 'subnet' => '192.168.1.0/24'}],
+      'shared-networks' => [{'name' => 'net', 'subnet4' => [{'id' => 2, 'subnet' => '10.0.0.0/8'}]}],
+    }}
+    stub_kea('config-get', nil, 'result' => 0, 'arguments' => config)
+    assert_equal([1, 2], @client.subnets.map { |s| s['id'] })
   end
 
-  def test_delete_reservation_by_ip
-    stub_request(:post, "#{@api_url}/")
-      .with(
-        body: hash_including(
-          'command' => 'reservation-del',
-          'arguments' => hash_including('ip-address' => '192.168.1.50')
-        )
-      )
-      .to_return(
-        status: 200,
-        body: [{'result' => 0, 'text' => 'Host deleted.'}].to_json,
-        headers: {'Content-Type' => 'application/json'}
-      )
+  def test_reservations_are_paged
+    first = stub_kea('reservation-get-page', {'subnet-id' => 1, 'limit' => 1000},
+                     'result' => 0, 'arguments' => {'count' => 1, 'hosts' => [{'ip-address' => '192.168.1.5'}], 'next' => {'from' => 1, 'source-index' => 1}})
+    second = stub_kea('reservation-get-page', {'subnet-id' => 1, 'limit' => 1000, 'from' => 1, 'source-index' => 1},
+                      'result' => 3, 'arguments' => {'count' => 0, 'hosts' => []})
 
-    result = @client.delete_reservation_by_ip(1, '192.168.1.50')
-
-    assert_not_nil result
+    assert_equal [{'ip-address' => '192.168.1.5'}], @client.reservations(1)
+    assert_requested first
+    assert_requested second
   end
 
-  def test_reservation_by_ip_found
-    stub_request(:post, "#{@api_url}/")
-      .with(
-        body: hash_including('command' => 'reservation-get')
-      )
-      .to_return(
-        status: 200,
-        body: [{
-          'result' => 0,
-          'text' => 'Success',
-          'arguments' => {'ip-address' => '192.168.1.50', 'hw-address' => 'aa:bb:cc:dd:ee:ff'},
-        }].to_json,
-        headers: {'Content-Type' => 'application/json'}
-      )
-
-    result = @client.reservation_by_ip(1, '192.168.1.50')
-
-    assert_not_nil result
-    assert_equal '192.168.1.50', result['ip-address']
+  def test_reservation_by_mac
+    stub_kea('reservation-get', {'subnet-id' => 1, 'identifier-type' => 'hw-address', 'identifier' => 'aa:bb:cc:dd:ee:ff'},
+             'result' => 0, 'arguments' => {'ip-address' => '192.168.1.5'})
+    assert_equal({'ip-address' => '192.168.1.5'}, @client.reservation_by_mac(1, 'aa:bb:cc:dd:ee:ff'))
   end
 
-  def test_reservation_by_ip_not_found
-    stub_request(:post, "#{@api_url}/")
-      .to_return(
-        status: 200,
-        body: [{'result' => 3, 'text' => 'reservation not found'}].to_json,
-        headers: {'Content-Type' => 'application/json'}
-      )
-
-    result = @client.reservation_by_ip(1, '192.168.1.99')
-
-    assert_nil result
+  def test_add_reservation_wraps_arguments
+    request = stub_kea('reservation-add', 'reservation' => {'subnet-id' => 1, 'ip-address' => '192.168.1.5'})
+    @client.add_reservation('subnet-id' => 1, 'ip-address' => '192.168.1.5')
+    assert_requested request
   end
 
-  def test_lease_by_ip
-    stub_request(:post, "#{@api_url}/")
-      .with(
-        body: hash_including('command' => 'lease4-get')
-      )
-      .to_return(
-        status: 200,
-        body: [{
-          'result' => 0,
-          'text' => 'Success',
-          'arguments' => {
-            'leases' => [
-              {'ip-address' => '192.168.1.50', 'hw-address' => 'aa:bb:cc:dd:ee:ff'},
-            ],
-          },
-        }].to_json,
-        headers: {'Content-Type' => 'application/json'}
-      )
-
-    result = @client.lease_by_ip('192.168.1.50')
-
-    assert_not_nil result
-    assert_equal '192.168.1.50', result['ip-address']
+  def test_delete_reservation_by_mac
+    request = stub_kea('reservation-del', 'subnet-id' => 1, 'identifier-type' => 'hw-address', 'identifier' => 'aa:bb:cc:dd:ee:ff')
+    @client.delete_reservation(1, 'aa:bb:cc:dd:ee:ff')
+    assert_requested request
   end
 
-  def test_http_basic_auth
-    client = Proxy::DHCP::Kea::KeaApiClient.new(@api_url, 'admin', 'secret')
-
-    stub_request(:post, "#{@api_url}/")
-      .with(
-        headers: {'Authorization' => 'Basic YWRtaW46c2VjcmV0'}  # base64('admin:secret')
-      )
-      .to_return(
-        status: 200,
-        body: [{'result' => 0, 'text' => 'Success', 'arguments' => {}}].to_json,
-        headers: {'Content-Type' => 'application/json'}
-      )
-
-    result = client.send_command('dhcp4', 'test', {})
-
-    assert_not_nil result
+  def test_leases
+    stub_kea('lease4-get-all', {'subnets' => [1]}, 'result' => 0, 'arguments' => {'leases' => [{'ip-address' => '192.168.1.5'}]})
+    assert_equal [{'ip-address' => '192.168.1.5'}], @client.leases(1)
   end
 
-  def test_delete_lease_by_ip
-    stub_request(:post, "#{@api_url}/")
-      .with(body: hash_including(
-        'command' => 'lease4-del',
-        'arguments' => {'ip-address' => '192.168.1.50'}
-      ))
-      .to_return(
-        status: 200,
-        body: [{'result' => 0, 'text' => 'Lease deleted'}].to_json
-      )
+  def test_leases_empty
+    stub_kea('lease4-get-all', {'subnets' => [1]}, 'result' => 3, 'arguments' => {'leases' => []})
+    assert_equal [], @client.leases(1)
+  end
 
-    assert_equal({}, @client.delete_lease_by_ip('192.168.1.50'))
+  def test_lease_by_ip_returns_lease
+    stub_kea('lease4-get', {'ip-address' => '192.168.1.5'}, 'result' => 0, 'arguments' => {'ip-address' => '192.168.1.5'})
+    assert_equal({'ip-address' => '192.168.1.5'}, @client.lease_by_ip('192.168.1.5'))
+  end
+
+  def test_delete_lease
+    request = stub_kea('lease4-del', 'ip-address' => '192.168.1.5')
+    @client.delete_lease('192.168.1.5')
+    assert_requested request
   end
 end
