@@ -126,13 +126,46 @@ module Proxy
       return nil if configured == ''
       return configured unless configured.nil?
 
-      if File.exist?(CRYPTO_POLICIES_CONFIG)
-        logger.info "Crypto-policies detected, using PROFILE=SYSTEM for TLS ciphers."
-        'PROFILE=SYSTEM'
-      else
+      unless File.exist?(CRYPTO_POLICIES_CONFIG)
         logger.debug "No crypto-policies detected, using HIGH cipher string as default."
-        'HIGH'
+        return 'HIGH'
       end
+
+      if cipher_string_supported?('PROFILE=SYSTEM')
+        logger.info "Crypto-policies detected, using PROFILE=SYSTEM for TLS ciphers."
+        return 'PROFILE=SYSTEM'
+      end
+
+      cipher_string = crypto_policies_cipher_string
+      if cipher_string && cipher_string_supported?(cipher_string)
+        logger.info "Crypto-policies detected, but this OpenSSL build does not support the " \
+                    "'PROFILE=SYSTEM' cipher-list alias. Using the CipherString resolved from " \
+                    "#{CRYPTO_POLICIES_CONFIG} directly instead."
+        return cipher_string
+      end
+
+      logger.warn "Crypto-policies detected but could not be applied on this Ruby/OpenSSL build; " \
+                  "falling back to the 'HIGH' cipher string."
+      'HIGH'
+    end
+
+    # Extracted so resolve_tls_ciphers can probe candidate cipher strings before
+    # committing to them, instead of only discovering they're unusable at startup.
+    def cipher_string_supported?(ciphers)
+      OpenSSL::SSL::SSLContext.new.ciphers = ciphers
+      true
+    rescue OpenSSL::SSL::SSLError
+      false
+    end
+
+    def crypto_policies_cipher_string
+      File.foreach(CRYPTO_POLICIES_CONFIG) do |line|
+        return Regexp.last_match(1).strip if line =~ /^CipherString\s*=\s*(.+)$/
+      end
+      nil
+    rescue SystemCallError => e
+      logger.warn "Unable to read #{CRYPTO_POLICIES_CONFIG}: #{e.message}"
+      nil
     end
 
     def validate_tls_ciphers!(ciphers)
@@ -143,12 +176,7 @@ module Proxy
                     "The system crypto policy minimum TLS version may be overridden by this setting."
       end
 
-      cipher_list = begin
-        OpenSSL::SSL::SSLContext.new.ciphers = ciphers
-        ciphers
-      rescue OpenSSL::SSL::SSLError
-        nil
-      end
+      cipher_list = cipher_string_supported?(ciphers) ? ciphers : nil
 
       if OpenSSL::SSL::SSLContext.method_defined?(:ciphersuites=)
         ciphersuites = begin
