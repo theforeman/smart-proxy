@@ -13,12 +13,19 @@ module Proxy::Util
     # stderr is redirected to proxy error log, stdout to proxy debug log
     # command can be either string or array (command + arguments)
     # input is passed into STDIN and must be string
-    def initialize(command, input = nil)
+    # output can be a string containing a file path. If this is the case,
+    # output is not logged but written to this file.
+    def initialize(command, input = nil, output = nil)
       @command = command
       @input = input
+      @output = output
     end
 
     def start(&ensured_block)
+      @output.nil? ? spawn_logging_thread(&ensured_block) : spawn_output_thread(&ensured_block)
+    end
+
+    def spawn_logging_thread(&ensured_block)
       # run the task in its own thread
       @task = Thread.new(@command, @input) do |cmd, input|
         status = nil
@@ -35,6 +42,26 @@ module Proxy::Util
           end
           # call thr.value to wait for a Process::Status object.
           status = thr.value
+        end
+        status ? status.exitstatus : $CHILD_STATUS
+      ensure
+        yield if block_given?
+      end
+      self
+    end
+
+    def spawn_output_thread(&ensured_block)
+      # run the task in its own thread
+      @task = Thread.new(@command, @input, @output) do |cmd, input, file|
+        status = nil
+        Open3.pipeline_w(cmd, :out => file.to_s) do |stdin, thr|
+          cmdline_string = Shellwords.escape(cmd.is_a?(Array) ? cmd.join(' ') : cmd)
+          last_thr = thr[-1]
+          logger.info "[#{last_thr.pid}] Started task #{cmdline_string}"
+          stdin.write(input) if input
+          stdin.close
+          # call thr.value to wait for a Process::Status object.
+          status = last_thr.value
         end
         status ? status.exitstatus : $CHILD_STATUS
       ensure
