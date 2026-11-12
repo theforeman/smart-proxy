@@ -1,0 +1,6 @@
+---
+# url is the hostname and path of the Netbox instance
+:url: 'https://netbox.example.com'
+
+# token is the Netbox API token
+:token: 'netbox_token'
