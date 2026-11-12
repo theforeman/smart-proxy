@@ -8,7 +8,7 @@ require 'dhcp_native_ms/dhcp_native_ms'
 require 'dhcp_native_ms/dhcp_native_ms_main'
 require 'dhcp/sparc_attrs'
 
-class DHCPServerMicrosoftTest < Test::Unit::TestCase
+class DHCPServerMicrosoftTest < Minitest::Test
   def setup
     @dhcpsapi = Object.new
     @network = '192.168.42.0'
@@ -106,21 +106,21 @@ class DHCPServerMicrosoftTest < Test::Unit::TestCase
 
   def test_should_not_return_free_ip_address_wrong_end
     @dhcpsapi.expects(:list_subnet_elements).with(@network, anything).returns([{:element => {:start_address => '192.168.42.100', :end_address => '192.168.42.200'}}])
-    assert_equal nil, @server.unused_ip(@network, '00:01:02:03:04:05', '192.168.42.100', '192.168.42.250')
+    assert_nil @server.unused_ip(@network, '00:01:02:03:04:05', '192.168.42.100', '192.168.42.250')
   end
 
   def test_should_not_return_free_ip_address_wrong_start
     @dhcpsapi.expects(:list_subnet_elements).with(@network, anything).returns([{:element => {:start_address => '192.168.42.100', :end_address => '192.168.42.200'}}])
-    assert_equal nil, @server.unused_ip(@network, '00:01:02:03:04:05', '192.168.42.10', '192.168.42.200')
+    assert_nil @server.unused_ip(@network, '00:01:02:03:04:05', '192.168.42.10', '192.168.42.200')
   end
 
   def test_should_not_return_free_ip_address_wrong_subnet
-    assert_equal nil, @server.unused_ip(@network, '00:01:02:03:04:05', nil, nil)
+    assert_nil @server.unused_ip(@network, '00:01:02:03:04:05', nil, nil)
   end
 
   def test_should_not_return_free_ip_address_wrong_dhcp_range
     @dhcpsapi.expects(:list_subnet_elements).with(@network, anything).returns([{:element => {:start_address => '192.168.42.100'}}])
-    assert_equal nil, @server.unused_ip(@network, '00:01:02:03:04:05', nil, nil)
+    assert_nil @server.unused_ip(@network, '00:01:02:03:04:05', nil, nil)
   end
 
   def test_should_return_no_free_ip_address
@@ -128,7 +128,7 @@ class DHCPServerMicrosoftTest < Test::Unit::TestCase
     @server.expects(:all_hosts).with(@network).returns([])
     @server.expects(:all_leases).with(@network).returns([])
     @free_ips.expects(:find_free_ip).returns(nil)
-    assert_equal nil, @server.unused_ip(@network, nil, nil, nil)
+    assert_nil @server.unused_ip(@network, nil, nil, nil)
   end
 
   def test_unused_ip_address_for_known_mac_address
@@ -241,9 +241,9 @@ class DHCPServerMicrosoftTest < Test::Unit::TestCase
 
     @dhcpsapi.expects(:get_subnet).with(@network).returns(:subnet_address => @network, :subnet_mask => @netmask)
     @server.expects(:create_reservation).with(client_ip, @netmask, client_mac, client_name)
-    @server.expects(:build_option_values).with(:hostname => client_name, :option_one => 'option_one_value', :option_two => 'option_two_value')
+    @server.expects(:build_option_values).with({:hostname => client_name, :option_one => 'option_one_value', :option_two => 'option_two_value'})
            .returns(:option_one => 'option_one_value', :option_two => 'option_two_value')
-    @server.expects(:set_option_values).with(client_ip, @network, :option_one => 'option_one_value', :option_two => 'option_two_value')
+    @server.expects(:set_option_values).with(client_ip, @network, {:option_one => 'option_one_value', :option_two => 'option_two_value'})
 
     @server.add_record('ip' => client_ip, 'mac' => client_mac, 'hostname' => client_name, 'network' => @network, :option_one => 'option_one_value', :option_two => 'option_two_value')
   end
@@ -282,7 +282,7 @@ class DHCPServerMicrosoftTest < Test::Unit::TestCase
   end
 
   def test_set_option_values_should_skip_unrecognised_options
-    assert_nothing_raised { @server.set_option_values('192.168.42.1', @network, :blah => '192.168.42.10') }
+    @server.set_option_values('192.168.42.1', @network, :blah => '192.168.42.10')
   end
 
   def test_should_delete_reservation
@@ -304,9 +304,7 @@ class DHCPServerMicrosoftTest < Test::Unit::TestCase
   end
 
   def test_validate_ip
-    assert_nothing_raised do
-      @server.validate_supported_address("192.168.122.0", "192.168.122.0", "192.168.122.0", "192.168.122.0", "192.168.122.0")
-    end
+    @server.validate_supported_address("192.168.122.0", "192.168.122.0", "192.168.122.0", "192.168.122.0", "192.168.122.0")
   end
 
   def test_should_not_validate_ipv6

@@ -1,7 +1,7 @@
 require 'test_helper'
 require 'bmc/ipmi'
 
-class BmcTest < Test::Unit::TestCase
+class BmcTest < Minitest::Test
   def setup
     Rubyipmi.stubs(:is_provider_installed?).with('ipmitool').returns(true)
     @args = { :username => "user", :password => "pass", :bmc_provider => "ipmitool", :host => "host" }
@@ -16,7 +16,7 @@ class BmcTest < Test::Unit::TestCase
   end
 
   def test_creates_rubyipmi_object
-    assert_not_nil bmc
+    refute_nil bmc
   end
 
   def test_should_run_connection_test
@@ -57,7 +57,7 @@ class BmcTest < Test::Unit::TestCase
   end
 
   def test_should_power_reboot
-    assert_raise(NotImplementedError) do
+    assert_raises(NotImplementedError) do
       bmc.powerreboot
     end
   end

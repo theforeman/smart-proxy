@@ -74,7 +74,7 @@ end
 
 require 'dns/dns_api'
 
-class DnsApiTest < Test::Unit::TestCase
+class DnsApiTest < Minitest::Test
   include Rack::Test::Methods
 
   def app
@@ -270,67 +270,63 @@ class DnsApiTest < Test::Unit::TestCase
 
   def test_validate_srv_value_fails_if_more_than_four_parts
     app = Proxy::Dns::Api.new!
-    assert_raise Proxy::Dns::Error do
+    assert_raises Proxy::Dns::Error do
       app.validate_srv_value!('0 5 5060 sipserver.example.com. 1 2 3')
     end
   end
 
   def test_validate_srv_value_fails_if_priority_weight_port_not_integer
     app = Proxy::Dns::Api.new!
-    assert_raise Proxy::Dns::Error do
+    assert_raises Proxy::Dns::Error do
       app.validate_srv_value!('a 5 5060 sipserver.example.com.')
     end
-    assert_raise Proxy::Dns::Error do
+    assert_raises Proxy::Dns::Error do
       app.validate_srv_value!('0 % 5060 sipserver.example.com.')
     end
-    assert_raise Proxy::Dns::Error do
+    assert_raises Proxy::Dns::Error do
       app.validate_srv_value!('0 5 X sipserver.example.com.')
     end
   end
 
   def test_validate_srv_value_fails_if_priority_weight_port_exceed_range
     app = Proxy::Dns::Api.new!
-    assert_raise Proxy::Dns::Error do
+    assert_raises Proxy::Dns::Error do
       app.validate_srv_value!('70000 5 5060 sipserver.example.com.')
     end
-    assert_raise Proxy::Dns::Error do
+    assert_raises Proxy::Dns::Error do
       app.validate_srv_value!('0 70000 5060 sipserver.example.com.')
     end
-    assert_raise Proxy::Dns::Error do
+    assert_raises Proxy::Dns::Error do
       app.validate_srv_value!('0 5 70000 sipserver.example.com.')
     end
   end
 
   def test_validate_srv_value_fails_if_fewer_than_four_parts
     app = Proxy::Dns::Api.new!
-    assert_raise Proxy::Dns::Error do
+    assert_raises Proxy::Dns::Error do
       app.validate_srv_value!('0 5 sipserver.example.com.')
     end
   end
 
   def test_validate_srv_name_allows_correct_input
     app = Proxy::Dns::Api.new!
-    assert_nothing_raised do
-      app.validate_srv_name!('_sip._tcp.example.com')
-    end
-    assert_nothing_raised do
-      app.validate_srv_name!('sipserver.example.com.')
-    end
+    app.validate_srv_name!('_sip._tcp.example.com')
+    app.validate_srv_name!('sipserver.example.com.')
   end
 
   def test_validate_srv_name_fails_if_srv_name_blank
     app = Proxy::Dns::Api.new!
-    assert_raise Proxy::Dns::Error do
+    assert_raises Proxy::Dns::Error do
       app.validate_srv_name!(' ')
     end
-    assert_raise Proxy::Dns::Error do
+    assert_raises Proxy::Dns::Error do
       app.validate_srv_name!('')
     end
   end
 
   def test_validate_srv_name_fails_if_srv_name_contains_inappropriate_chars
     app = Proxy::Dns::Api.new!
-    assert_raise Proxy::Dns::Error do
+    assert_raises Proxy::Dns::Error do
       app.validate_srv_name!('google com')
     end
   end

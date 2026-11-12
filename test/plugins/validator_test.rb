@@ -1,6 +1,6 @@
 require 'test_helper'
 
-class BaseValidatorTest < Test::Unit::TestCase
+class BaseValidatorTest < Minitest::Test
   class TestValidator < ::Proxy::PluginValidators::Base
     attr_reader :validate_called
 
@@ -36,7 +36,7 @@ class BaseValidatorTest < Test::Unit::TestCase
   end
 end
 
-class FileReadableValidatorTest < Test::Unit::TestCase
+class FileReadableValidatorTest < Minitest::Test
   class FileReadableValidatorTestPlugin < ::Proxy::Plugin
     default_settings :a_setting => 'some_file'
   end
@@ -64,7 +64,7 @@ class FileReadableValidatorTest < Test::Unit::TestCase
   end
 end
 
-class PresenceValidatorTest < Test::Unit::TestCase
+class PresenceValidatorTest < Minitest::Test
   class PresenceValidatorTestPlugin < ::Proxy::Plugin
     default_settings :a_setting => 'some_file'
   end
@@ -92,7 +92,7 @@ class PresenceValidatorTest < Test::Unit::TestCase
   end
 end
 
-class UrlValidatorTest < Test::Unit::TestCase
+class UrlValidatorTest < Minitest::Test
   class UrlValidatorTestPlugin < ::Proxy::Plugin
     default_settings :a_setting => 'http://example.com'
   end
@@ -134,7 +134,7 @@ class UrlValidatorTest < Test::Unit::TestCase
   end
 end
 
-class OptionalUrlValidatorTest < Test::Unit::TestCase
+class OptionalUrlValidatorTest < Minitest::Test
   class OptionalUrlValidatorTestPlugin < ::Proxy::Plugin
     default_settings url: 'http://example.com'
   end
@@ -168,7 +168,7 @@ class OptionalUrlValidatorTest < Test::Unit::TestCase
   end
 end
 
-class BooleanValidatorTest < Test::Unit::TestCase
+class BooleanValidatorTest < Minitest::Test
   class BooleanValidatorTestPlugin < ::Proxy::Plugin
     default_settings :a_settting => true
   end
@@ -202,7 +202,7 @@ class BooleanValidatorTest < Test::Unit::TestCase
   end
 end
 
-class EnumValidatorTest < Test::Unit::TestCase
+class EnumValidatorTest < Minitest::Test
   class TestPlugin < ::Proxy::Plugin
   end
 
@@ -219,20 +219,23 @@ class EnumValidatorTest < Test::Unit::TestCase
   end
 
   def test_an_invalid_value_fails_validation
-    assert_raise_with_message ::Proxy::Error::ConfigurationError, "Parameter 'drink' must be one of beer, whisky" do
+    error = assert_raises ::Proxy::Error::ConfigurationError do
       validator.validate!(drink: 'wine')
     end
+    assert_equal "Parameter 'drink' must be one of beer, whisky", error.message
   end
 
   def test_empty_string_fails_validation
-    assert_raise_with_message ::Proxy::Error::ConfigurationError, "Parameter 'drink' must be one of beer, whisky" do
+    error = assert_raises ::Proxy::Error::ConfigurationError do
       validator.validate!(drink: '')
     end
+    assert_equal "Parameter 'drink' must be one of beer, whisky", error.message
   end
 
   def test_nil_fails_validation
-    assert_raise_with_message ::Proxy::Error::ConfigurationError, "Parameter 'drink' must be one of beer, whisky" do
+    error = assert_raises ::Proxy::Error::ConfigurationError do
       validator.validate!(drink: nil)
     end
+    assert_equal "Parameter 'drink' must be one of beer, whisky", error.message
   end
 end

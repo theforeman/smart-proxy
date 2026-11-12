@@ -2,7 +2,7 @@ require 'test_helper'
 require 'ostruct'
 require 'dhcp_libvirt/libvirt_dhcp_network'
 
-class LibvirtDHCPNetworkTest < Test::Unit::TestCase
+class LibvirtDHCPNetworkTest < Minitest::Test
   def setup
     @connection = mock()
     @network = mock()

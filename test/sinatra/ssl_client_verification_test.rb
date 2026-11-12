@@ -4,7 +4,7 @@ require 'sinatra/base'
 
 ENV['RACK_ENV'] = 'test'
 
-class SSLClientVerificationTest < Test::Unit::TestCase
+class SSLClientVerificationTest < Minitest::Test
   include Rack::Test::Methods
 
   def app

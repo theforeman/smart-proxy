@@ -1,7 +1,7 @@
 require 'test_helper'
 require 'puppet_proxy_puppet_api/puppet_proxy_puppet_api'
 
-class PuppetApiConfigurationTest < Test::Unit::TestCase
+class PuppetApiConfigurationTest < Minitest::Test
   def setup
     @configuration = ::Proxy::PuppetApi::PluginConfiguration.new
   end
@@ -15,7 +15,7 @@ class PuppetApiConfigurationTest < Test::Unit::TestCase
   end
 end
 
-class PuppetApiDefaultSettingsTest < Test::Unit::TestCase
+class PuppetApiDefaultSettingsTest < Minitest::Test
   def test_default_settings
     Proxy::PuppetApi::Plugin.load_test_settings()
     assert_equal '/var/lib/puppet/ssl/certs/ca.pem', Proxy::PuppetApi::Plugin.settings.puppet_ssl_ca
@@ -28,7 +28,7 @@ require 'puppet_proxy_puppet_api/v3_api_request'
 require 'puppet_proxy_puppet_api/v3_environments_retriever'
 require 'puppet_proxy_puppet_api/v3_environment_classes_api_classes_retriever'
 
-class PuppetApiDIWiringsTest < Test::Unit::TestCase
+class PuppetApiDIWiringsTest < Minitest::Test
   def setup
     @configuration = ::Proxy::PuppetApi::PluginConfiguration.new
     @container = ::Proxy::DependencyInjection::Container.new

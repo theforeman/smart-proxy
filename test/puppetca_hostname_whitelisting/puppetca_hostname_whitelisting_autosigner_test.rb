@@ -6,7 +6,7 @@ require 'puppetca/puppetca'
 require 'puppetca_hostname_whitelisting/puppetca_hostname_whitelisting'
 require 'puppetca_hostname_whitelisting/puppetca_hostname_whitelisting_autosigner'
 
-class PuppetCaHostnameWhitelistingAutosignerTest < Test::Unit::TestCase
+class PuppetCaHostnameWhitelistingAutosignerTest < Minitest::Test
   def setup
     @file = Tempfile.new('autosign_test')
     begin
@@ -36,7 +36,7 @@ class PuppetCaHostnameWhitelistingAutosignerTest < Test::Unit::TestCase
       @file.close
       @file.unlink
     end
-    assert_true content.include?('foobar.example.com')
+    assert content.include?('foobar.example.com')
   end
 
   def test_should_not_duplicate_autosign_entry
@@ -62,7 +62,7 @@ class PuppetCaHostnameWhitelistingAutosignerTest < Test::Unit::TestCase
       @file.close
       @file.unlink
     end
-    assert_false content.split("\n").include?('foo.example.com')
-    assert_true content.end_with?("\n")
+    refute content.split("\n").include?('foo.example.com')
+    assert content.end_with?("\n")
   end
 end

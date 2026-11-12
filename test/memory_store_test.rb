@@ -1,13 +1,13 @@
 require 'test_helper'
 require 'set'
 
-class MemoryStoreTest < Test::Unit::TestCase
+class MemoryStoreTest < Minitest::Test
   def setup
     @store = Proxy::MemoryStore.new
   end
 
   def test_should_return_nil_when_key_does_not_exist
-    assert_equal nil, @store["key"]
+    assert_nil @store["key"]
   end
 
   def test_should_store

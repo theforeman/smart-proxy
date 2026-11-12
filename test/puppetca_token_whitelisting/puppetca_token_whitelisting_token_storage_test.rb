@@ -4,7 +4,7 @@ require 'timeout'
 require 'puppetca/puppetca'
 require 'puppetca_token_whitelisting/puppetca_token_whitelisting_token_storage'
 
-class PuppetCaTokenWhitelistingTokenStorageTest < Test::Unit::TestCase
+class PuppetCaTokenWhitelistingTokenStorageTest < Minitest::Test
   def setup
     @file = Tempfile.new('autosign_test')
     begin
@@ -46,7 +46,7 @@ class PuppetCaTokenWhitelistingTokenStorageTest < Test::Unit::TestCase
 
   def test_should_queue_writes_when_locked
     @storage.lock do
-      assert_raise Timeout::Error do
+      assert_raises Timeout::Error do
         Timeout.timeout(3) do
           @storage.write ['test']
         end

@@ -7,7 +7,7 @@ require 'dhcp_common/record/reservation'
 require 'dhcp_common/isc/configuration_parser'
 require 'dhcp_common/isc/subnet_service_initialization'
 
-class DhcpIscSubnetServiceInitializationTest < Test::Unit::TestCase
+class DhcpIscSubnetServiceInitializationTest < Minitest::Test
   DHCPD_CONFIG = <<~END
     # This is a comment.
 
@@ -111,7 +111,7 @@ class DhcpIscSubnetServiceInitializationTest < Test::Unit::TestCase
     @initialization.load_configuration_file(DHCPD_CONFIG)
     subnets = @subnet_service.all_subnets
     assert_equal ["192.168.122.250"], subnets[0].options[:routers]
-    assert_equal nil, subnets[0].options[:routers][1]
+    assert_nil subnets[0].options[:routers][1]
     assert_equal ["192.168.123.1"], subnets[1].options[:routers]
     assert_equal ["192.168.124.1", "192.168.124.2"], subnets[2].options[:routers]
   end
@@ -119,7 +119,7 @@ class DhcpIscSubnetServiceInitializationTest < Test::Unit::TestCase
   def test_managed_subnets_domain_name_servers
     @initialization.load_configuration_file(DHCPD_CONFIG)
     subnets = @subnet_service.all_subnets
-    assert_equal nil, subnets[0].options[:domain_name_servers]
+    assert_nil subnets[0].options[:domain_name_servers]
     assert_equal ["192.168.123.1"], subnets[1].options[:domain_name_servers]
     assert_equal ["192.168.123.1", "192.168.122.250"], subnets[2].options[:domain_name_servers]
   end
@@ -127,9 +127,9 @@ class DhcpIscSubnetServiceInitializationTest < Test::Unit::TestCase
   def test_managed_subnets_range
     @initialization.load_configuration_file(DHCPD_CONFIG)
     subnets = @subnet_service.all_subnets
-    assert_equal nil, subnets[0].options[:range]
+    assert_nil subnets[0].options[:range]
     assert_equal ["192.168.123.2", "192.168.123.62"], subnets[1].options[:range]
-    assert_equal nil, subnets[2].options[:range]
+    assert_nil subnets[2].options[:range]
   end
 
   def test_parse_config_and_leases
@@ -155,7 +155,7 @@ class DhcpIscSubnetServiceInitializationTest < Test::Unit::TestCase
     @subnet_service.add_subnet(subnet)
     @initialization.load_leases_file(File.read("./test/fixtures/dhcp/dhcp.leases"))
 
-    assert_not_nil @subnet_service.find_host_by_hostname("undeleted.example.com")
+    refute_nil @subnet_service.find_host_by_hostname("undeleted.example.com")
   end
 
   def test_host_with_duplicate_mac_address_is_removed

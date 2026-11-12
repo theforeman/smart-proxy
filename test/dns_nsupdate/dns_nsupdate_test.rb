@@ -4,7 +4,7 @@ require 'dns_nsupdate/nsupdate_configuration'
 require 'dns_nsupdate/dns_nsupdate_plugin'
 require 'dns_nsupdate/dns_nsupdate_main'
 
-class DnsNsupdateTest < Test::Unit::TestCase
+class DnsNsupdateTest < Minitest::Test
   def test_do_create_ptr
     Proxy::Dns::Nsupdate::Record.any_instance.expects(:nsupdate_connect).returns(true)
     Proxy::Dns::Nsupdate::Record.any_instance.expects(:nsupdate).with('update add 33.33.168.192.in-addr.arpa. 100 PTR some.host').returns(true)

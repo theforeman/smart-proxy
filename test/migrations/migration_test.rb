@@ -1,7 +1,7 @@
 require 'test_helper'
 require File.join(__dir__, '../../extra/migrate_settings')
 
-class MigrationTest < Test::Unit::TestCase
+class MigrationTest < Minitest::Test
   def setup
     @module = Module.new
 
@@ -44,7 +44,7 @@ class MigrationTest < Test::Unit::TestCase
       "./work_dir", "./migrations_dir", "./config/dummy-settings.yml", "./modules_config_dir",
       ::Proxy::Migrations.new("./dummy", []))
 
-    assert_raise RuntimeError do
+    assert_raises RuntimeError do
       migrator.verify_paths
     end
   end
@@ -54,7 +54,7 @@ class MigrationTest < Test::Unit::TestCase
       "./work_dir", "./migrations_dir", "./config/dummy-settings.yml", "./modules_config_dir",
       ::Proxy::Migrations.new("./dummy", []))
     File.expects(:directory?).with("./migrations_dir").returns(true)
-    assert_raise RuntimeError do
+    assert_raises RuntimeError do
       migrator.verify_paths
     end
   end

@@ -4,7 +4,7 @@ require 'dhcp_common/subnet_service'
 require 'dhcp_common/dhcp_common'
 require 'dhcp_common/server'
 
-class DHCPServerTest < Test::Unit::TestCase
+class DHCPServerTest < Minitest::Test
   def setup
     @service = Proxy::DHCP::SubnetService.initialized_instance
     @free_ips = Object.new
@@ -22,9 +22,7 @@ class DHCPServerTest < Test::Unit::TestCase
   end
 
   def test_validate_ip
-    assert_nothing_raised do
-      @server.validate_supported_address("192.168.122.0", "192.168.122.0", "192.168.122.0", "192.168.122.0", "192.168.122.0")
-    end
+    @server.validate_supported_address("192.168.122.0", "192.168.122.0", "192.168.122.0", "192.168.122.0", "192.168.122.0")
   end
 
   def test_should_raise_exception_for_invalid_ip
@@ -59,26 +57,20 @@ class DHCPServerTest < Test::Unit::TestCase
 
   def test_should_ignore_ip_address_collision_with_a_lease
     @service.add_lease(@subnet.network, ::Proxy::DHCP::Lease.new('test-2', "192.168.0.12", "00:11:22:33:44:55", @subnet, nil, nil, nil))
-    assert_nothing_raised do
-      @server.add_record('hostname' => 'test-1', 'name' => 'test', 'network' => @subnet.network, 'ip' => "192.168.0.12", 'mac' => "aa:bb:cc:dd:ee:ef")
-    end
+    @server.add_record('hostname' => 'test-1', 'name' => 'test', 'network' => @subnet.network, 'ip' => "192.168.0.12", 'mac' => "aa:bb:cc:dd:ee:ef")
   end
 
   def test_should_ignore_mac_address_collision_with_a_lease
     @service.add_lease(@subnet.network, ::Proxy::DHCP::Lease.new('test-2', "192.168.0.13", "00:11:22:33:44:55", @subnet, nil, nil, nil))
-    assert_nothing_raised Proxy::DHCP::Collision do
-      @server.add_record('hostname' => 'test-1', 'name' => 'test', 'network' => @subnet.network, 'ip' => "192.168.0.12", 'mac' => "00:11:22:33:44:55")
-    end
+    @server.add_record('hostname' => 'test-1', 'name' => 'test', 'network' => @subnet.network, 'ip' => "192.168.0.12", 'mac' => "00:11:22:33:44:55")
   end
 
   def test_not_should_raise_exception_when_address_with_related_mac_in_use
     record = Proxy::DHCP::Reservation.new('example.com-01', "192.168.0.15", "aa:bb:cc:dd:ee:ee", @subnet, :hostname => 'example.com')
     @service.add_host(@subnet.network, record)
-    assert_nothing_raised do
-      @server.add_record('hostname' => 'example.com', 'name' => 'example.com-02',
-                         'network' => @subnet.network, 'ip' => "192.168.0.15", 'mac' => "aa:bb:cc:dd:ee:de",
-                         'related_macs' => ['aa:bb:cc:dd:ee:ee'])
-    end
+    @server.add_record('hostname' => 'example.com', 'name' => 'example.com-02',
+                       'network' => @subnet.network, 'ip' => "192.168.0.15", 'mac' => "aa:bb:cc:dd:ee:de",
+                       'related_macs' => ['aa:bb:cc:dd:ee:ee'])
   end
 
   def test_should_find_subnet_based_on_network

@@ -4,7 +4,7 @@ require 'sinatra/base'
 
 ENV['RACK_ENV'] = 'test'
 
-class TrustedHostsTest < Test::Unit::TestCase
+class TrustedHostsTest < Minitest::Test
   include Rack::Test::Methods
 
   def app

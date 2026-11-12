@@ -1,7 +1,7 @@
 require 'test_helper'
 require 'sinatra/base'
 
-class AuthorizationHelpersTest < Test::Unit::TestCase
+class AuthorizationHelpersTest < Minitest::Test
   include Rack::Test::Methods
 
   def app

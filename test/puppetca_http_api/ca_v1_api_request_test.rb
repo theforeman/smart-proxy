@@ -2,7 +2,7 @@ require 'test_helper'
 require 'puppetca_http_api/puppetca_http_api'
 require 'puppetca_http_api/ca_v1_api_request'
 
-class CaApiv1RequestTest < Test::Unit::TestCase
+class CaApiv1RequestTest < Minitest::Test
   def setup
     @client = Proxy::PuppetCa::PuppetcaHttpApi::CaApiv1Request.new('https://puppet:8140/', nil, nil, nil)
   end

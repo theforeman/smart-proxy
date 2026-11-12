@@ -1,6 +1,6 @@
 require 'test_helper'
 
-class BufferTest < Test::Unit::TestCase
+class BufferTest < Minitest::Test
   SIZE = 3
   SIZE_TAIL = 2
 

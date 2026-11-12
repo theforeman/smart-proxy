@@ -5,7 +5,7 @@ require 'dhcp_common/isc/omapi_provider'
 require 'dhcp_isc/isc_state_changes_observer'
 require 'dhcp_isc/configuration_loader'
 
-class IscDhcpProductionDiWiringsTest < Test::Unit::TestCase
+class IscDhcpProductionDiWiringsTest < Minitest::Test
   def setup
     @settings = {:server => "a_server", :omapi_port => 7911, :key_name => "key_name", :key_secret => "key_secret",
                  :subnets => ["192.168.0.0/255.255.255.0"], :leases_file_observer => :inotify_leases_file_observer,

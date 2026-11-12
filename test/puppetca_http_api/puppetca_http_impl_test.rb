@@ -3,7 +3,7 @@ require 'puppetca/puppetca'
 require 'puppetca/dependency_injection'
 require 'puppetca_http_api/puppetca_impl'
 
-class PuppetCaHttpImplTest < Test::Unit::TestCase
+class PuppetCaHttpImplTest < Minitest::Test
   class FakeCaApiV1Request
     def sign(certname)
     end
