@@ -176,6 +176,45 @@ Command completed successfully.
     assert_equal ['host.domain.local.', 'host2.domain.local.'], Proxy::Dns::Dnscmd::Record.new('server', 999).enum_records('33.168.192.in-addr.arpa', '33.33.168.192.in-addr.arpa', 'PTR')
   end
 
+  def test_enum_ptr_records_with_aging
+    to_parse = '
+Returned records:
+@              [Aging:3730894] 900        PTR        host.domain.local.
+		 [Aging:3740963] 1200 PTR	host2.domain.local.
+
+Command completed successfully.
+'.split("\n")
+    Proxy::Dns::Dnscmd::Record.any_instance.expects(:execute).with('/EnumRecords', '33.168.192.in-addr.arpa', "33.33.168.192.in-addr.arpa.", '/Type', 'PTR', msg: 'EnumRecords', error_only: true).returns(to_parse)
+    assert_equal ['host.domain.local.', 'host2.domain.local.'], Proxy::Dns::Dnscmd::Record.new('server', 999).enum_records('33.168.192.in-addr.arpa', '33.33.168.192.in-addr.arpa', 'PTR')
+  end
+
+  def test_enum_a_records_with_aging
+    to_parse = '
+Returned records:
+@ [Aging:3740962] 1200 A	192.168.33.33
+
+Command completed successfully.
+'.split("\n")
+    Proxy::Dns::Dnscmd::Record.any_instance.expects(:execute).with('/EnumRecords', "domain.local", "host.domain.local.", '/Type', 'A', msg: 'EnumRecords', error_only: true).returns(to_parse)
+    assert_equal ['192.168.33.33'], Proxy::Dns::Dnscmd::Record.new('server', 999).enum_records('domain.local', 'host.domain.local', 'A')
+  end
+
+  # End-to-end through do_remove: an aged PTR must result in a /RecordDelete call.
+  def test_remove_aged_ptr_issues_record_delete
+    enum_zones = ['33.168.192.in-addr.arpa']
+    enum_out = '
+Returned records:
+@              [Aging:3730894] 900        PTR        host.domain.local.
+
+Command completed successfully.
+'.split("\n")
+    rec = Proxy::Dns::Dnscmd::Record.new('server', 999)
+    rec.expects(:enum_zones).returns(enum_zones)
+    rec.expects(:execute).with('/EnumRecords', '33.168.192.in-addr.arpa', '33.33.168.192.in-addr.arpa.', '/Type', 'PTR', msg: 'EnumRecords', error_only: true).returns(enum_out)
+    rec.expects(:execute).with('/RecordDelete', '33.168.192.in-addr.arpa', '33.33.168.192.in-addr.arpa.', 'PTR', 'host.domain.local.', '/f', msg: 'Removed host.domain.local. PTR record 33.33.168.192.in-addr.arpa from 33.168.192.in-addr.arpa', error_only: false).returns(['Command completed successfully.'])
+    assert_nil rec.remove_ptr_record('33.33.168.192.in-addr.arpa')
+  end
+
   def test_enum_ptr_records_when_none
     to_parse = '
 DNS Server failed to enumerate records for node 33.33.168.192.in-addr.arpa..
