@@ -51,7 +51,7 @@ module Proxy::DHCP::Kea
     def find_records_by_ip(subnet_address, ip)
       subnet = get_subnet(subnet_address)
       host = kea_client.reservation_by_ip(subnet_id(subnet), ip)
-      return [build_reservation(host, subnet)].compact if host
+      return [build_reservation(host, subnet)].compact if host && host['ip-address']
       lease = kea_client.lease_by_ip(ip)
       return [build_lease(lease, subnet)].compact if lease && lease['subnet-id'] == subnet_id(subnet)
       []
@@ -60,7 +60,7 @@ module Proxy::DHCP::Kea
     def find_record_by_mac(subnet_address, mac_address)
       subnet = get_subnet(subnet_address)
       host = kea_client.reservation_by_mac(subnet_id(subnet), mac_address)
-      return build_reservation(host, subnet) if host
+      return build_reservation(host, subnet) if host && host['ip-address']
       lease = kea_client.lease_by_mac(subnet_id(subnet), mac_address)
       build_lease(lease, subnet) if lease
     end
@@ -72,6 +72,24 @@ module Proxy::DHCP::Kea
         return record.ip
       end
       nil
+    end
+
+    def unused_ip(subnet_address, mac_address, from_address, to_address)
+      subnet = get_subnet(subnet_address)
+
+      from_address, to_address =
+        subnet.subnet_range_addresses(from_address, to_address)
+
+      if mac_address
+        existing_ip = find_ip_by_mac_address_and_range(
+          subnet, mac_address, from_address, to_address
+        )
+        return existing_ip if existing_ip
+      end
+
+      free_ips.find_free_ip(from_address, to_address, []) do |ip|
+        find_records_by_ip(subnet_address, ip).empty?
+      end
     end
 
     def find_similar_records(subnet_address, ip_address, mac_address)

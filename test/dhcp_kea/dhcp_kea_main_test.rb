@@ -97,6 +97,13 @@ class DhcpKeaProviderTest < Test::Unit::TestCase
     assert_kind_of Proxy::DHCP::Lease, @provider.find_records_by_ip('192.168.1.0', '192.168.1.150').first
   end
 
+  def test_find_records_by_ip_falls_back_on_empty_reservation
+    @client.expects(:reservation_by_ip).with(1, '192.168.1.150').returns({})
+    @client.expects(:lease_by_ip).with('192.168.1.150').returns(LEASE)
+    records = @provider.find_records_by_ip('192.168.1.0', '192.168.1.150')
+    assert_kind_of Proxy::DHCP::Lease, records.first
+  end
+
   def test_find_records_by_ip_ignores_lease_in_other_subnet
     @client.expects(:reservation_by_ip).returns(nil)
     @client.expects(:lease_by_ip).returns(LEASE.merge('subnet-id' => 7))
@@ -107,6 +114,14 @@ class DhcpKeaProviderTest < Test::Unit::TestCase
     @client.expects(:reservation_by_mac).with(1, 'aa:bb:cc:dd:ee:99').returns(nil)
     @client.expects(:lease_by_mac).with(1, 'aa:bb:cc:dd:ee:99').returns(LEASE)
     assert_equal '192.168.1.150', @provider.find_record_by_mac('192.168.1.0', 'aa:bb:cc:dd:ee:99').ip
+  end
+
+  def test_find_record_by_mac_falls_back_on_empty_reservation
+    @client.expects(:reservation_by_mac).with(1, 'aa:bb:cc:dd:ee:99').returns({})
+    @client.expects(:lease_by_mac).with(1, 'aa:bb:cc:dd:ee:99').returns(LEASE)
+    record = @provider.find_record_by_mac('192.168.1.0', 'aa:bb:cc:dd:ee:99')
+    assert_kind_of Proxy::DHCP::Lease, record
+    assert_equal '192.168.1.150', record.ip
   end
 
   def test_add_record
@@ -200,11 +215,86 @@ class DhcpKeaProviderTest < Test::Unit::TestCase
     end
   end
 
-  def test_unused_ip_skips_used_addresses
+  def test_unused_ip_uses_targeted_lookups
     ::Proxy::DhcpPlugin.settings.stubs(:ping_free_ip).returns(false)
-    @client.stubs(:reservations).returns([HOST.merge('ip-address' => '192.168.1.100')])
-    @client.stubs(:leases).returns([LEASE.merge('ip-address' => '192.168.1.101')])
-    assert_equal '192.168.1.102', @provider.unused_ip('192.168.1.0', nil, '192.168.1.100', '192.168.1.102')
+
+    @client.expects(:reservations).never
+    @client.expects(:leases).never
+
+    @client.expects(:reservation_by_ip).with(1, '192.168.1.102').returns(nil)
+
+    @client.expects(:lease_by_ip).with('192.168.1.102').returns(nil)
+
+    assert_equal(
+      '192.168.1.102',
+      @provider.unused_ip(
+        '192.168.1.0',
+        nil,
+        '192.168.1.102',
+        '192.168.1.102'
+      )
+    )
+  end
+
+  def test_unused_ip_skips_reserved_address
+    ::Proxy::DhcpPlugin.settings.stubs(:ping_free_ip).returns(false)
+
+    @client.expects(:reservations).never
+    @client.expects(:leases).never
+
+    @client.expects(:reservation_by_ip).with(1, '192.168.1.100').returns(HOST.merge('ip-address' => '192.168.1.100'))
+
+    @client.expects(:lease_by_ip).never
+
+    assert_nil @provider.unused_ip(
+      '192.168.1.0', nil, '192.168.1.100', '192.168.1.100'
+    )
+  end
+
+  def test_unused_ip_skips_leased_address
+    ::Proxy::DhcpPlugin.settings.stubs(:ping_free_ip).returns(false)
+
+    @client.expects(:reservations).never
+    @client.expects(:leases).never
+
+    @client.expects(:reservation_by_ip).with(1, '192.168.1.101').returns(nil)
+
+    @client.expects(:lease_by_ip).with('192.168.1.101').returns(LEASE.merge('ip-address' => '192.168.1.101'))
+
+    assert_nil @provider.unused_ip(
+      '192.168.1.0', nil, '192.168.1.101', '192.168.1.101'
+    )
+  end
+
+  def test_unused_ip_respects_blacklist
+    ::Proxy::DhcpPlugin.settings.stubs(:ping_free_ip).returns(false)
+
+    @client.expects(:reservation_by_ip).with(1, '192.168.1.102').once.returns(nil)
+
+    @client.expects(:lease_by_ip).with('192.168.1.102').once.returns(nil)
+
+    first_ip = @provider.unused_ip(
+      '192.168.1.0', nil, '192.168.1.102', '192.168.1.102'
+    )
+
+    second_ip = @provider.unused_ip(
+      '192.168.1.0', nil, '192.168.1.102', '192.168.1.102'
+    )
+
+    assert_equal '192.168.1.102', first_ip
+    assert_nil second_ip
+  end
+
+  def test_free_ip_lookup_does_not_hold_lock
+    free_ips = Proxy::DHCP::FreeIps.new
+    ::Proxy::DhcpPlugin.settings.stubs(:ping_free_ip).returns(false)
+
+    result = free_ips.find_free_ip('192.168.1.102', '192.168.1.102', []) do
+      assert_equal false, free_ips.m.mon_owned?
+      true
+    end
+
+    assert_equal '192.168.1.102', result
   end
 
   def test_unused_ip_reuses_address_of_known_mac
