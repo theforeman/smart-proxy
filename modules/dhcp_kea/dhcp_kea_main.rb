@@ -74,6 +74,24 @@ module Proxy::DHCP::Kea
       nil
     end
 
+    def unused_ip(subnet_address, mac_address, from_address, to_address)
+      subnet = get_subnet(subnet_address)
+
+      from_address, to_address =
+        subnet.subnet_range_addresses(from_address, to_address)
+
+      if mac_address
+        existing_ip = find_ip_by_mac_address_and_range(
+          subnet, mac_address, from_address, to_address
+        )
+        return existing_ip if existing_ip
+      end
+
+      free_ips.find_free_ip(from_address, to_address, []) do |ip|
+        find_records_by_ip(subnet_address, ip).empty?
+      end
+    end
+
     def find_similar_records(subnet_address, ip_address, mac_address)
       subnet = get_subnet(subnet_address)
       [

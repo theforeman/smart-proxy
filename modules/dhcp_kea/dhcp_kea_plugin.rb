@@ -41,5 +41,7 @@ module Proxy::DHCP::Kea
         )
       end)
     end
+
+    start_services :free_ips
   end
 end
