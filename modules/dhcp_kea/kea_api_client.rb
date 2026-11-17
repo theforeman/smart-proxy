@@ -78,7 +78,10 @@ module Proxy::DHCP::Kea
     end
 
     def delete_reservation(subnet_id, mac_address)
-      send_command('reservation-del', 'subnet-id' => subnet_id, 'identifier-type' => 'hw-address', 'identifier' => mac_address)
+      result = send_command('reservation-del', 'subnet-id' => subnet_id, 'identifier-type' => 'hw-address', 'identifier' => mac_address)
+
+      logger.warn "Kea did not delete reservation for MAC #{mac_address} in subnet #{subnet_id}" if result.nil?
+      result
     end
 
     def leases(subnet_id)
@@ -95,7 +98,10 @@ module Proxy::DHCP::Kea
     end
 
     def delete_lease(ip_address)
-      send_command('lease4-del', 'ip-address' => ip_address)
+      result = send_command('lease4-del', 'ip-address' => ip_address)
+
+      logger.warn "Kea did not delete lease for IP #{ip_address}" if result.nil?
+      result
     end
 
     private

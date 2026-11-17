@@ -130,6 +130,21 @@ class KeaApiClientTest < ::Test::Unit::TestCase
     assert_requested request
   end
 
+  def test_delete_reservation_warns_when_not_deleted
+    stub_kea(
+      'reservation-del',
+      {'subnet-id' => 1, 'identifier-type' => 'hw-address',
+      'identifier' => 'aa:bb:cc:dd:ee:ff'},
+      'result' => 3, 'text' => 'Host not deleted.'
+    )
+
+    @client.stubs(:logger).returns(logger = mock)
+    logger.stubs(:debug)
+    logger.expects(:warn).with(regexp_matches(/did not delete reservation/))
+
+    assert_nil @client.delete_reservation(1, 'aa:bb:cc:dd:ee:ff')
+  end
+
   def test_leases
     stub_kea('lease4-get-all', {'subnets' => [1]}, 'result' => 0, 'arguments' => {'leases' => [{'ip-address' => '192.168.1.5'}]})
     assert_equal [{'ip-address' => '192.168.1.5'}], @client.leases(1)
@@ -149,6 +164,20 @@ class KeaApiClientTest < ::Test::Unit::TestCase
     request = stub_kea('lease4-del', 'ip-address' => '192.168.1.5')
     @client.delete_lease('192.168.1.5')
     assert_requested request
+  end
+
+  def test_delete_lease_warns_when_not_deleted
+    stub_kea(
+      'lease4-del',
+      {'ip-address' => '192.168.1.5'},
+      'result' => 3, 'text' => 'Lease not deleted.'
+    )
+
+    @client.stubs(:logger).returns(logger = mock)
+    logger.stubs(:debug)
+    logger.expects(:warn).with(regexp_matches(/did not delete lease/))
+
+    assert_nil @client.delete_lease('192.168.1.5')
   end
 
   def test_send_command_handles_empty_response

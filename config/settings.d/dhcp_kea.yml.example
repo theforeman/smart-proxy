@@ -2,12 +2,16 @@
 # Kea DHCP provider configuration
 #
 # Requires Kea DHCPv4 3.0 or newer with:
-#   * an HTTP control socket ("control-sockets" with "socket-type": "http")
+#   * an HTTP or HTTPS API endpoint
 #   * the libdhcp_lease_cmds.so and libdhcp_host_cmds.so hook libraries
 #   * a hosts database ("hosts-database", e.g. PostgreSQL) to store reservations
+#
+# Current limitations:
+#   * global reservations are not supported
+#   * only the first pool of each subnet is used
 
-# URL of the Kea HTTP control socket
-#:dhcp_kea_url: http://127.0.0.1:8000/
+# URL of the Kea API endpoint (HTTP or HTTPS)
+#:dhcp_kea_url: https://kea.example.com:8000/
 
 # HTTP basic authentication credentials, required by Kea for unencrypted HTTP
 #:dhcp_kea_username: ~
@@ -19,5 +23,5 @@
 # Connect and read timeout in seconds for requests to the Kea HTTP API
 #:dhcp_kea_http_timeout: 5
 
-# Time in minutes during which an IP address suggested as free is not suggested again
+# Time in seconds during which an IP address suggested as free is not suggested again
 #:blacklist_duration_seconds: 1800

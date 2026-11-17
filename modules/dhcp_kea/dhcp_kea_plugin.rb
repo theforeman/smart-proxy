@@ -5,8 +5,7 @@ module Proxy::DHCP::Kea
     capability 'dhcp_filename_ipv4'
     capability 'dhcp_filename_hostname'
 
-    default_settings :dhcp_kea_url => 'http://127.0.0.1:8000/',
-                     :dhcp_kea_verify_ssl => true,
+    default_settings :dhcp_kea_verify_ssl => true,
                      :dhcp_kea_http_timeout => 5,
                      :blacklist_duration_seconds => 30 * 60
 
@@ -41,5 +40,7 @@ module Proxy::DHCP::Kea
         )
       end)
     end
+
+    start_services :free_ips
   end
 end

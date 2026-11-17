@@ -7,7 +7,6 @@ class DhcpKeaPluginTest < ::Test::Unit::TestCase
     Proxy::DHCP::Kea::Plugin.load_test_settings
     settings = Proxy::DHCP::Kea::Plugin.settings
 
-    assert_equal 'http://127.0.0.1:8000/', settings.dhcp_kea_url
     assert_equal true, settings.dhcp_kea_verify_ssl
     assert_equal 5, settings.dhcp_kea_http_timeout
     assert_equal 1800, settings.blacklist_duration_seconds
