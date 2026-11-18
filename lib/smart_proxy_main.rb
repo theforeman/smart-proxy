@@ -43,6 +43,9 @@ module Proxy
   ::Sinatra::Base.set :run, false
   ::Sinatra::Base.set :root, APP_ROOT
   ::Sinatra::Base.set :logging, false
+  # Rack 3+ no longer makes rack.input rewindable by default.
+  # Ensure backwards compatibility with Rack 2.x using defined?.
+  ::Sinatra::Base.use ::Rack::RewindableInput::Middleware if defined?(Rack::RewindableInput::Middleware)
   ::Sinatra::Base.use ::Proxy::RequestIdMiddleware
   ::Sinatra::Base.use ::Proxy::LoggerMiddleware
   ::Sinatra::Base.use ::Proxy::HstsMiddleware
