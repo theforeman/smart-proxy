@@ -58,6 +58,11 @@ module Proxy::DHCP
       record_ips = Set.new(records.collect(&:ip))
       random_index(num_of_addresses + 1) do |i|
         possible_ip = ::Proxy::DHCP.i_to_ipv4(start_address_i + i)
+        if block_given?
+          next if @m.synchronize { @allocated_ips.include?(possible_ip) || record_ips.include?(possible_ip) }
+          next unless yield(possible_ip)
+        end
+
         next if @m.synchronize do
           if @allocated_ips.include?(possible_ip) || record_ips.include?(possible_ip)
             true
@@ -66,6 +71,7 @@ module Proxy::DHCP
             false
           end
         end
+
         return possible_ip unless Proxy::DhcpPlugin.settings.ping_free_ip
         begin
           logger.debug "Searching for free IP - pinging #{possible_ip}."
