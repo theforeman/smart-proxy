@@ -109,6 +109,17 @@ class UrlValidatorTest < Test::Unit::TestCase
     assert_match(/expected to contain a url/, error.message)
   end
 
+  def test_custom_missing_value_message
+    message = 'A custom URL message'
+    validator = ::Proxy::PluginValidators::Url.new(UrlValidatorTestPlugin, 'a_setting', {:missing_message => message}, nil)
+
+    error = assert_raises ::Proxy::Error::ConfigurationError do
+      validator.validate!(:a_setting => nil)
+    end
+
+    assert_equal message, error.message
+  end
+
   def test_required_parameter_without_a_value_fails_validation
     error = assert_raises ::Proxy::Error::ConfigurationError do
       ::Proxy::PluginValidators::Url.new(UrlValidatorTestPlugin, 'a_setting', nil, nil).validate!(:a_setting => nil)

@@ -252,4 +252,14 @@ class PluginGroupTest < Test::Unit::TestCase
     assert_equal :stopped, di_container.get_dependency(:service_a).state
     assert_equal :stopped, di_container.get_dependency(:service_b).state
   end
+
+  def test_stop_services_skips_dependencies_that_were_not_wired
+    di_container = ::Proxy::DependencyInjection::Container.new do |c|
+      c.singleton_dependency :service_a, TestStopServicesService
+    end
+    group = ::Proxy::PluginGroup.new(TestStopServicesPlugin, [], di_container)
+
+    assert_nothing_raised { group.stop_services }
+    assert_equal :stopped, di_container.get_dependency(:service_a).state
+  end
 end

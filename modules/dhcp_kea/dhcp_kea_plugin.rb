@@ -9,6 +9,9 @@ module Proxy::DHCP::Kea
                      :dhcp_kea_http_timeout => 5,
                      :blacklist_duration_seconds => 30 * 60
 
+    validate :dhcp_kea_url,
+             :url => {:missing_message => "Kea API URL is missing. Set 'dhcp_kea_url' in 'config/settings.d/dhcp_kea.yml' (see 'config/settings.d/dhcp_kea.yml.example')."}
+
     requires :dhcp, ::Proxy::VERSION
 
     load_classes do

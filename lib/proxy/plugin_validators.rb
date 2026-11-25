@@ -46,7 +46,11 @@ module ::Proxy::PluginValidators
   class Url < Base
     def validate!(settings)
       setting_value = settings[@setting_name]
-      raise ::Proxy::Error::ConfigurationError, "Setting '#{@setting_name}' is expected to contain a url" if setting_value.to_s.empty?
+      if setting_value.to_s.empty?
+        message = @params[:missing_message] if @params.is_a?(Hash)
+        message ||= "Setting '#{@setting_name}' is expected to contain a url"
+        raise ::Proxy::Error::ConfigurationError, message
+      end
 
       parsed = URI.parse(setting_value)
       raise ::Proxy::Error::ConfigurationError, "Setting '#{@setting_name}' is missing a scheme" if parsed.scheme.nil? || parsed.scheme.empty?
