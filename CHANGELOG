@@ -1,3 +1,9 @@
+2026-11-25	Ondřej Gajdušek <ogajduse@redhat.com>
+	* Release 5.0.2
+
+2026-10-26	Pablo Méndez Hernández <pablomh@redhat.com>
+	* Fixes #39229 - Add foreman_request_timeout setting to control Net::HTTP read timeout
+
 2026-10-02	Odilon Sousa <osousa@redhat.com>
 	* Release 5.0.1
 
