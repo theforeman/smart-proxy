@@ -16,4 +16,17 @@ class DhcpKeaPluginTest < ::Test::Unit::TestCase
     assert_equal ['dhcp_filename_hostname', 'dhcp_filename_ipv4'],
                  Proxy::DHCP::Kea::Plugin.capabilities.sort
   end
+
+  def test_dhcp_kea_url_is_required
+    settings = Proxy::DHCP::Kea::Plugin.default_settings
+    loader = Proxy::DefaultModuleLoader.new(Proxy::DHCP::Kea::Plugin, ::Proxy::DependencyInjection::Container.new)
+
+    error = assert_raise(Proxy::Error::ConfigurationError) do
+      loader.validate_settings(Proxy::DHCP::Kea::Plugin, settings)
+    end
+
+    assert_match "Kea API URL is missing", error.message
+    assert_match "config/settings.d/dhcp_kea.yml", error.message
+    assert_match "config/settings.d/dhcp_kea.yml.example", error.message
+  end
 end

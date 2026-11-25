@@ -127,7 +127,12 @@ class ::Proxy::PluginGroup
 
   def stop_services
     members.each do |member|
-      member.services.map { |label| di_container.get_dependency(label) }.each { |service| service.stop if service.respond_to?(:stop) }
+      member.services.each do |label|
+        next unless di_container.dependencies.key?(label)
+
+        service = di_container.get_dependency(label)
+        service.stop if service.respond_to?(:stop)
+      end
     end
   end
 
