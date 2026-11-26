@@ -8,3 +8,10 @@
 :enabled: false
 
 #:root_dir: /var/lib/tftpboot
+
+# TFTP content can contain sensitive provisioning data, including tokens.
+# HTTPBoot exposes that directory over HTTP(S), where guessed filenames could
+# be used to collect that data. Limit HTTPBoot requests per remote IP in any
+# five-minute window. Requests to missing files count. The default is 300;
+# set this to 0 to disable the limit.
+#:request_limit_5m: 300
