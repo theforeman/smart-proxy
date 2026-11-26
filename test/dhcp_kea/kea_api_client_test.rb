@@ -189,4 +189,85 @@ class KeaApiClientTest < ::Test::Unit::TestCase
 
     assert_match(/Unexpected Kea API response/, error.message)
   end
+
+  def test_retries_reservation_get_after_db_connection_error
+    error_response = {
+      'result' => 1,
+      'text' => 'fatal database error or connectivity lost',
+    }
+
+    success_response = {
+      'result' => 0,
+      'arguments' => {'ip-address' => '192.168.1.5'},
+    }
+
+    request = stub_request(:post, URL)
+              .to_return(
+                {body: [error_response].to_json},
+                {body: [success_response].to_json}
+              )
+
+    @client.expects(:sleep).with(1).once
+
+    result = @client.reservation_by_ip(1, '192.168.1.5')
+
+    assert_equal '192.168.1.5', result['ip-address']
+    assert_requested request, times: 2
+  end
+
+  def test_db_connection_retry_limit
+    error_response = {
+      'result' => 1,
+      'text' => 'fatal database error or connectivity lost',
+    }
+
+    request = stub_request(:post, URL)
+              .to_return(body: [error_response].to_json)
+
+    @client.expects(:sleep).with(1).twice
+
+    error = assert_raises(Proxy::DHCP::Error) do
+      @client.reservation_by_ip(1, '192.168.1.5')
+    end
+
+    assert_match(/fatal database error or connectivity lost/, error.message)
+    assert_requested request, times: 3
+  end
+
+  def test_does_not_retry_write_commands
+    error_response = {
+      'result' => 1,
+      'text' => 'fatal database error or connectivity lost',
+    }
+
+    request = stub_request(:post, URL)
+              .to_return(body: [error_response].to_json)
+
+    @client.expects(:sleep).never
+
+    assert_raises(Proxy::DHCP::Error) do
+      @client.add_reservation({})
+    end
+
+    assert_requested request, times: 1
+  end
+
+  def test_does_not_retry_unrelated_errors
+    error_response = {
+      'result' => 1,
+      'text' => 'Invalid reservation parameters',
+    }
+
+    request = stub_request(:post, URL)
+              .to_return(body: [error_response].to_json)
+
+    @client.expects(:sleep).never
+
+    error = assert_raises(Proxy::DHCP::Error) do
+      @client.reservation_by_ip(1, '192.168.1.5')
+    end
+
+    assert_match(/Invalid reservation parameters/, error.message)
+    assert_requested request, times: 1
+  end
 end
