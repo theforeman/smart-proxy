@@ -13,6 +13,17 @@ module Proxy::DHCP::Kea
 
     PAGE_SIZE = 1000
 
+    RETRYABLE_READ_COMMANDS = %w[
+      reservation-get
+      reservation-get-page
+      lease4-get
+      lease4-get-all
+    ].freeze
+
+    DB_CONNECTION_ERROR = 'fatal database error or connectivity lost'.freeze
+    MAX_DB_RETRIES = 2
+    DB_RETRY_DELAY = 1
+
     attr_reader :api_url, :username, :password, :verify_ssl, :timeout
 
     def initialize(api_url, username = nil, password = nil, verify_ssl: true, timeout: 5)
@@ -27,23 +38,39 @@ module Proxy::DHCP::Kea
       payload = {'command' => command, 'service' => ['dhcp4']}
       payload['arguments'] = arguments if arguments
 
-      logger.debug "Sending Kea command '#{command}' with arguments #{arguments.inspect}"
-      response = http_post(payload)
-      result = response.first if response.is_a?(Array)
+      retries = 0
 
-      unless result.is_a?(Hash) && result.key?('result')
-        raise Proxy::DHCP::Error, "Unexpected Kea API response for '#{command}'"
-      end
+      loop do
+        logger.debug "Sending Kea command '#{command}' with arguments #{arguments.inspect}"
 
-      case result['result']
-      when RESULT_SUCCESS
-        result['arguments'] || {}
-      when RESULT_EMPTY
-        nil
-      when RESULT_UNSUPPORTED
-        raise Proxy::DHCP::Error, "Kea command '#{command}' is not supported, is the required hook library loaded? #{result['text']}"
-      else
-        raise Proxy::DHCP::Error, "Kea command '#{command}' failed: #{result['text']}"
+        response = http_post(payload)
+        result = response.first if response.is_a?(Array)
+
+        unless result.is_a?(Hash) && result.key?('result')
+          raise Proxy::DHCP::Error, "Unexpected Kea API response for '#{command}'"
+        end
+
+        case result['result']
+        when RESULT_SUCCESS
+          return result['arguments'] || {}
+        when RESULT_EMPTY
+          return nil
+        when RESULT_UNSUPPORTED
+          raise Proxy::DHCP::Error,
+                "Kea command '#{command}' is not supported, is the required hook library loaded? #{result['text']}"
+        else
+          if result['result'] == RESULT_ERROR &&
+             RETRYABLE_READ_COMMANDS.include?(command) &&
+             result['text'].to_s.include?(DB_CONNECTION_ERROR) &&
+             retries < MAX_DB_RETRIES
+            retries += 1
+            logger.warn "Kea command '#{command}' failed due to database connectivity, retrying (#{retries}/#{MAX_DB_RETRIES})"
+            sleep DB_RETRY_DELAY
+            next
+          end
+
+          raise Proxy::DHCP::Error, "Kea command '#{command}' failed: #{result['text']}"
+        end
       end
     end
 
