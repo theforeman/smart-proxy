@@ -106,12 +106,12 @@ module ::Proxy::PuppetCa::TokenWhitelisting
         logger.warn "Failed to decode token."
         return false
       end
-      # token in our list?
-      unless storage.read.include? token
+
+      # token in our list? Remove it atomically so it can only be used once.
+      unless storage.remove token
         logger.warn "Certname not valid."
         return false
       end
-      storage.remove token
       true
     end
   end
