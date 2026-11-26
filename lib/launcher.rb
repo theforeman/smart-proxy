@@ -82,6 +82,13 @@ module Proxy
       tls_ciphers = resolve_tls_ciphers
       cipher_list, ciphersuites = validate_tls_ciphers!(tls_ciphers)
 
+      ssl_certs = load_ssl_certificates(settings.ssl_certificate)
+      extra_chain = ssl_certs.drop(1)
+
+      if extra_chain.any?
+        logger.info "Loaded #{extra_chain.size} additional chain certificate(s) from #{settings.ssl_certificate}"
+      end
+
       https_settings = {
         :app => app,
         :Port => https_port, # only being used to correctly log https port being used
@@ -89,13 +96,14 @@ module Proxy
         :SSLEnable => true,
         :SSLVerifyClient => OpenSSL::SSL::VERIFY_PEER,
         :SSLPrivateKey => load_ssl_private_key(settings.ssl_private_key),
-        :SSLCertificate => load_ssl_certificate(settings.ssl_certificate),
+        :SSLCertificate => ssl_certs.first,
         :SSLCACertificateFile => settings.ssl_ca_file,
         :SSLOptions => build_ssl_options,
         :SSLCiphers => cipher_list,
         :SSLCiphersuites => ciphersuites,
         :SSLMinVersion => resolve_tls_min_version,
       }
+      https_settings[:SSLExtraChainCert] = extra_chain unless extra_chain.empty?
       base_app_settings.merge(https_settings)
     end
 
@@ -185,10 +193,32 @@ module Proxy
       raise e
     end
 
-    def load_ssl_certificate(path)
-      OpenSSL::X509::Certificate.new(File.read(path))
-    rescue Exception => e
-      logger.error "Unable to load SSL certificate. Are the values correct in settings.yml and do permissions allow reading?", e
+    def load_ssl_certificates(path)
+      certs = if OpenSSL::X509::Certificate.respond_to?(:load_file)
+                OpenSSL::X509::Certificate.load_file(path)
+              else
+                certificate_data = File.binread(path)
+                blocks = certificate_data.scan(/-----BEGIN CERTIFICATE-----.*?-----END CERTIFICATE-----/m)
+                # Like the native PEM loader, ignore surrounding text but reject incomplete certificates.
+                remainder = certificate_data.gsub(/-----BEGIN CERTIFICATE-----.*?-----END CERTIFICATE-----/m, '')
+                if remainder.include?('-----BEGIN CERTIFICATE-----') || remainder.include?('-----END CERTIFICATE-----')
+                  raise OpenSSL::X509::CertificateError, "Incomplete certificate in #{path}"
+                end
+                if blocks.empty? && !certificate_data.empty?
+                  [OpenSSL::X509::Certificate.new(certificate_data)]
+                else
+                  blocks.map do |pem|
+                    OpenSSL::X509::Certificate.new(pem)
+                  end
+                end
+              end
+      raise OpenSSL::X509::CertificateError, "No certificates found in #{path}. Are the values correct in settings.yml?" if certs.nil? || certs.empty?
+      certs
+    rescue Errno::ENOENT, Errno::EACCES => e
+      logger.error "Unable to read SSL certificate file #{path}. Do permissions allow reading?", e
+      raise e
+    rescue OpenSSL::X509::CertificateError => e
+      logger.error "Unable to parse SSL certificate in #{path}.", e
       raise e
     end
 
