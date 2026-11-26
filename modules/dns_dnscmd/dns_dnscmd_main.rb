@@ -113,7 +113,7 @@ module Proxy::Dns::Dnscmd
       response.each do |line|
         line.chomp!
         logger.debug "Extracting record from dnscmd output '#{line}'"
-        /^@?\s+\d+\s+(A|AAAA|PTR|CNAME)+\s+(?<record>\S+)/ =~ line
+        /^@?\s+(?:\[[^\]]*\]\s*)*\d+\s+(A|AAAA|PTR|CNAME)+\s+(?<record>\S+)/ =~ line
         if record.nil?
           logger.debug "No DNS record found in this line"
         else
