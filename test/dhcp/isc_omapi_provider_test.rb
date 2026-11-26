@@ -4,7 +4,7 @@ require 'dhcp/dhcp_plugin'
 require 'dhcp/sparc_attrs'
 require 'dhcp_common/isc/omapi_provider'
 
-class IscOmapiProviderTest < Test::Unit::TestCase
+class IscOmapiProviderTest < Minitest::Test
   class OMIO
     attr_reader :input_commands
 
@@ -147,9 +147,7 @@ class IscOmapiProviderTest < Test::Unit::TestCase
   end
 
   def test_validate_ip
-    assert_nothing_raised do
-      @dhcp.validate_supported_address("192.168.122.0", "192.168.122.0", "192.168.122.0", "192.168.122.0", "192.168.122.0")
-    end
+    @dhcp.validate_supported_address("192.168.122.0", "192.168.122.0", "192.168.122.0", "192.168.122.0", "192.168.122.0")
   end
 
   def test_should_not_validate_ipv6

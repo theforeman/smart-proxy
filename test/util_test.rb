@@ -1,6 +1,6 @@
 require 'test_helper'
 
-class ProxyUtilTest < Test::Unit::TestCase
+class ProxyUtilTest < Minitest::Test
   class UtilClass; extend Proxy::Util; end
 
   def test_util_should_support_path

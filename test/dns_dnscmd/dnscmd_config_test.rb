@@ -4,14 +4,14 @@ require 'dns_dnscmd/plugin_configuration'
 require 'dns_dnscmd/dns_dnscmd_plugin'
 require 'dns_dnscmd/dns_dnscmd_main'
 
-class DnsCmdConfigTest < Test::Unit::TestCase
+class DnsCmdConfigTest < Minitest::Test
   def test_default_configuration
     ::Proxy::Dns::Dnscmd::Plugin.load_test_settings()
     assert_equal 'localhost', ::Proxy::Dns::Dnscmd::Plugin.settings.dns_server
   end
 end
 
-class DnsCmdWiringTest < Test::Unit::TestCase
+class DnsCmdWiringTest < Minitest::Test
   def setup
     @container = ::Proxy::DependencyInjection::Container.new
     @config = ::Proxy::Dns::Dnscmd::PluginConfiguration.new

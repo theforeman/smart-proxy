@@ -5,7 +5,7 @@ require 'dns_nsupdate/dns_nsupdate_main'
 require 'dns_nsupdate/dns_nsupdate_gss'
 require 'dns_nsupdate/dns_nsupdate_gss_main'
 
-class DnsNsupdateConfigTest < Test::Unit::TestCase
+class DnsNsupdateConfigTest < Minitest::Test
   def test_nsupdate_default_settings
     Proxy::Dns::Nsupdate::Plugin.load_test_settings()
 
@@ -24,7 +24,7 @@ end
 
 require 'dns_nsupdate/nsupdate_configuration'
 
-class DnsNsupdateWiringTest < Test::Unit::TestCase
+class DnsNsupdateWiringTest < Minitest::Test
   def setup
     @container = ::Proxy::DependencyInjection::Container.new
     @config = ::Proxy::Dns::Nsupdate::PluginConfiguration.new
@@ -40,7 +40,7 @@ class DnsNsupdateWiringTest < Test::Unit::TestCase
   end
 end
 
-class DnsNsupdateGSSWiringTest < Test::Unit::TestCase
+class DnsNsupdateGSSWiringTest < Minitest::Test
   def setup
     @container = ::Proxy::DependencyInjection::Container.new
     @config = ::Proxy::Dns::NsupdateGSS::PluginConfiguration.new

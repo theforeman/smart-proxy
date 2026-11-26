@@ -1,7 +1,7 @@
 require 'test_helper'
 require 'dhcp_libvirt/dhcp_libvirt'
 
-class DhcpLibvirtConfigTest < Test::Unit::TestCase
+class DhcpLibvirtConfigTest < Minitest::Test
   def test_omitted_settings_have_default_values
     ::Proxy::DHCP::Libvirt::Plugin.load_test_settings()
     assert_equal 'default', ::Proxy::DHCP::Libvirt::Plugin.settings.network

@@ -5,9 +5,9 @@ require 'mocha'
 require 'templates/templates_plugin'
 require "proxy/util"
 require 'proxy/request'
-require 'webmock/test_unit'
+require 'webmock/minitest'
 
-class RequestTest < Test::Unit::TestCase
+class RequestTest < Minitest::Test
   def setup
     @foreman_url = 'https://foreman.example.com'
     Proxy::SETTINGS.stubs(:foreman_url).returns(@foreman_url)

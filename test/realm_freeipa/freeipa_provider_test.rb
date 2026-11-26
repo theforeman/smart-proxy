@@ -2,7 +2,7 @@ require 'test_helper'
 require 'xmlrpc/client'
 require 'realm_freeipa/provider'
 
-class FreeIPATest < Test::Unit::TestCase
+class FreeIPATest < Minitest::Test
   class IpaConfigParserForTesting
     attr_reader :realm
 
@@ -47,7 +47,7 @@ class FreeIPATest < Test::Unit::TestCase
 
   def test_delete
     ok_result = {:a => 'a'}
-    @provider.expects(:ipa_call).with('host_del', ['a_host'], 'updatedns' => true).returns(ok_result)
+    @provider.expects(:ipa_call).with('host_del', ['a_host'], {'updatedns' => true}).returns(ok_result)
     assert_equal JSON.pretty_generate(ok_result), @provider.delete(@realm, 'a_host')
   end
 
@@ -57,13 +57,13 @@ class FreeIPATest < Test::Unit::TestCase
 
   def test_delete_respects_remove_dns_parameter
     provider = Proxy::FreeIPARealm::Provider.new(@ipa_config, 'keytab', 'prinicipal', false, false)
-    provider.expects(:ipa_call).with('host_del', ['a_host'], 'updatedns' => false).returns(true)
+    provider.expects(:ipa_call).with('host_del', ['a_host'], {'updatedns' => false}).returns(true)
     provider.delete(@realm, 'a_host')
   end
 
   def test_delete_if_host_does_not_exist_and_remove_dns_is_true
-    @provider.expects(:ipa_call).with('host_del', ['a_host'], 'updatedns' => true).raises(StandardError)
-    @provider.expects(:ipa_call).with('host_del', ['a_host'], 'updatedns' => false).returns(true)
+    @provider.expects(:ipa_call).with('host_del', ['a_host'], {'updatedns' => true}).raises(StandardError)
+    @provider.expects(:ipa_call).with('host_del', ['a_host'], {'updatedns' => false}).returns(true)
     @provider.delete(@realm, 'a_host')
   end
 
@@ -72,7 +72,7 @@ class FreeIPATest < Test::Unit::TestCase
     setattr = 'userclass'
     @provider.expects(:find).with(hostname).returns('result' => {'has_keytab' => true})
     @provider.expects(:ipa_call).with('host_disable', [hostname])
-    @provider.expects(:ipa_call).with('host_mod', [hostname], :random => 1, :setattr => ['userclass=userclass']).returns({})
+    @provider.expects(:ipa_call).with('host_mod', [hostname], {:random => 1, :setattr => ['userclass=userclass']}).returns({})
     @provider.create(@realm, hostname, :rebuild => 'true', setattr => setattr)
   end
 
@@ -80,7 +80,7 @@ class FreeIPATest < Test::Unit::TestCase
     hostname = 'hostname'
     setattr = 'userclass'
     @provider.expects(:find).with(hostname).returns('result' => {})
-    @provider.expects(:ipa_call).with('host_mod', [hostname], :setattr => ['userclass=userclass']).returns({})
+    @provider.expects(:ipa_call).with('host_mod', [hostname], {:setattr => ['userclass=userclass']}).returns({})
     @provider.create(@realm, hostname, setattr => setattr)
   end
 
@@ -88,7 +88,7 @@ class FreeIPATest < Test::Unit::TestCase
     hostname = 'hostname'
     setattr = 'userclass'
     @provider.expects(:find).with(hostname).returns(nil)
-    @provider.expects(:ipa_call).with('host_add', [hostname], :random => 1, :force => 1, :setattr => ['userclass=userclass']).returns({})
+    @provider.expects(:ipa_call).with('host_add', [hostname], {:random => 1, :force => 1, :setattr => ['userclass=userclass']}).returns({})
     @provider.create(@realm, hostname, setattr => setattr)
   end
 

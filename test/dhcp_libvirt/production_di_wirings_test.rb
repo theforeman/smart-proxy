@@ -5,7 +5,7 @@ require 'dhcp_libvirt/libvirt_dhcp_network'
 require 'dhcp_libvirt/dhcp_libvirt_main'
 require 'dhcp_libvirt/configuration_loader'
 
-class DhcpLibvirtProductionDIWiringsTest < Test::Unit::TestCase
+class DhcpLibvirtProductionDIWiringsTest < Minitest::Test
   def setup
     @settings = {:network => "a_network", :url => "qemu:///system"}
     @container = ::Proxy::DependencyInjection::Container.new
@@ -19,7 +19,7 @@ class DhcpLibvirtProductionDIWiringsTest < Test::Unit::TestCase
   end
 
   def test_free_ips_initialization
-    assert_not_nil @container.get_dependency(:free_ips)
+    refute_nil @container.get_dependency(:free_ips)
   end
 
   def test_initialized_subnet_service_initialization
@@ -36,6 +36,6 @@ class DhcpLibvirtProductionDIWiringsTest < Test::Unit::TestCase
     provider = @container.get_dependency(:dhcp_provider)
     assert_equal @settings[:network], provider.network
     assert_equal expected_subnet_service, provider.service
-    assert_not_nil provider.free_ips
+    refute_nil provider.free_ips
   end
 end

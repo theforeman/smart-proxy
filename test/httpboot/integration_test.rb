@@ -4,6 +4,20 @@ require 'root/root_v2_api'
 require 'httpboot/httpboot_plugin'
 
 class HttpbootApiFeaturesTest < SmartProxyRootApiTestCase
+  def setup
+    super
+    @http_port = Proxy::SETTINGS.http_port
+    @https_port = Proxy::SETTINGS.https_port
+    Proxy::SETTINGS.http_port = nil
+    Proxy::SETTINGS.https_port = 8443
+  end
+
+  def teardown
+    Proxy::SETTINGS.http_port = @http_port
+    Proxy::SETTINGS.https_port = @https_port
+    super
+  end
+
   def test_features
     Proxy::DefaultModuleLoader.any_instance.expects(:load_configuration_file).with('httpboot.yml').returns(enabled: true, root_dir: '/var/lib/tftpboot')
 

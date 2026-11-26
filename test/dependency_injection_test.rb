@@ -49,7 +49,7 @@ class TestDependsTwo
   inject_attr :singleton_dependency, :singleton_var
 end
 
-class DependencyInjectionTest < Test::Unit::TestCase
+class DependencyInjectionTest < Minitest::Test
   def test_can_locate_dependency
     assert TestContainer.instance.get_dependency(:test_dependency_one)
     assert TestContainer.instance.get_dependency(:singleton_dependency)

@@ -1,7 +1,7 @@
 require 'test_helper'
 require 'registration/registration_api'
 
-class RegistrationRegisterApiTest < Test::Unit::TestCase
+class RegistrationRegisterApiTest < Minitest::Test
   include Rack::Test::Methods
 
   def app
@@ -27,6 +27,7 @@ class RegistrationRegisterApiTest < Test::Unit::TestCase
   def setup
     @foreman_url = 'http://foreman.example.com'
     Proxy::SETTINGS.stubs(:foreman_url).returns(@foreman_url)
+    Proxy::Registration::Plugin.load_test_settings(:registration_url => nil)
     # Clear class-level state between tests to prevent cross-test contamination
     Proxy::Registration::Api.registration_script_cache.clear
     Proxy::Registration::Api::KEY_MUTEXES.clear

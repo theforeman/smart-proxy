@@ -1,7 +1,7 @@
 require 'test_helper'
 require 'dhcp/dhcp_plugin'
 
-class DhcpConfigTest < Test::Unit::TestCase
+class DhcpConfigTest < Minitest::Test
   def test_omitted_settings_have_default_values
     Proxy::DhcpPlugin.load_test_settings()
     assert_equal '127.0.0.1', Proxy::DhcpPlugin.settings.server

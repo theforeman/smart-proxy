@@ -1,7 +1,7 @@
 require 'test_helper'
 require 'tmpdir'
 
-class HttpDownloadsTest < Test::Unit::TestCase
+class HttpDownloadsTest < Minitest::Test
   def setup
     @timeout = Proxy::HttpDownload::DEFAULT_CONNECT_TIMEOUT
     Proxy::HttpDownload.any_instance.stubs(:which).returns('/usr/bin/curl')
@@ -52,7 +52,7 @@ class HttpDownloadsTest < Test::Unit::TestCase
   end
 end
 
-class HttpDownloadsIntegrationTest < Test::Unit::TestCase
+class HttpDownloadsIntegrationTest < Minitest::Test
   def setup
     @server = WEBrick::HTTPServer.new(Port: 0)
     @server.mount_proc '/200' do |req, res|

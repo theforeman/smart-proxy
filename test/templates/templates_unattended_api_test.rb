@@ -2,9 +2,9 @@ require 'test_helper'
 require 'json'
 require 'templates/templates_unattended_api'
 require 'templates/templates'
-require 'webmock/test_unit'
+require 'webmock/minitest'
 
-class TemplatesUnattendedApiTest < Test::Unit::TestCase
+class TemplatesUnattendedApiTest < Minitest::Test
   include Rack::Test::Methods
 
   def app

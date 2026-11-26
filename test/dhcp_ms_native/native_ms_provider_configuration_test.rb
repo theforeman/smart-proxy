@@ -3,7 +3,7 @@ require 'dhcpsapi'
 require 'dhcp_native_ms/plugin_configuration'
 require 'dhcp_native_ms/dhcp_native_ms_main'
 
-class NativeMsProviderConfigurationTest < Test::Unit::TestCase
+class NativeMsProviderConfigurationTest < Minitest::Test
   def setup
     @configuration = ::Proxy::DHCP::NativeMS::PluginConfiguration.new
     @container = ::Proxy::DependencyInjection::Container.new
