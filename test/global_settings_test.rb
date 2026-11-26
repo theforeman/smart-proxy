@@ -26,4 +26,34 @@ class GlobalSettingsTest < Test::Unit::TestCase
     assert_equal ['127.0.0.1'], ::Proxy::Settings::Global.new(:bind_host => '127.0.0.1').bind_host
     assert_equal ['127.0.0.1'], ::Proxy::Settings::Global.new(:bind_host => ['127.0.0.1']).bind_host
   end
+
+  def test_ssl_private_key_default_without_credential
+    settings = ::Proxy::Settings::Global.new({})
+    Dir.mktmpdir do |tmpdir|
+      ENV['CREDENTIALS_DIRECTORY'] = tmpdir
+      assert_nil settings.ssl_private_key
+    end
+  end
+
+  def test_ssl_private_key_default_with_credential
+    settings = ::Proxy::Settings::Global.new({})
+    Dir.mktmpdir do |tmpdir|
+      ENV['CREDENTIALS_DIRECTORY'] = tmpdir
+      path = File.join(tmpdir, 'server-key')
+      FileUtils.touch(path)
+
+      assert_equal path, settings.ssl_private_key
+    end
+  end
+
+  def test_ssl_private_key_with_value
+    settings = ::Proxy::Settings::Global.new({ssl_private_key: 'mykey'})
+    Dir.mktmpdir do |tmpdir|
+      ENV['CREDENTIALS_DIRECTORY'] = tmpdir
+      path = File.join(tmpdir, 'server-key')
+      FileUtils.touch(path)
+
+      assert_equal 'mykey', settings.ssl_private_key
+    end
+  end
 end

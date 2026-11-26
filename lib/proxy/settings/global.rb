@@ -47,5 +47,40 @@ module ::Proxy::Settings
       return value unless how_to.has_key?(key)
       how_to[key].call(value)
     end
+
+    def ssl_private_key
+      credential(:ssl_private_key, 'server-key')
+    end
+
+    def ssl_certificate
+      credential(:ssl_certificate, 'server-certificate')
+    end
+
+    def ssl_ca_file
+      credential(:ssl_ca_file, 'server-client-ca')
+    end
+
+    def foreman_ssl_key
+      credential(:foreman_ssl_key, 'client-key')
+    end
+
+    def foreman_ssl_cert
+      credential(:foreman_ssl_cert, 'client-certificate')
+    end
+
+    def foreman_ssl_key
+      credential(:foreman_ssl_ca, 'client-ca')
+    end
+
+    private
+
+    def credential(setting, cred)
+      value = self[cred]
+      if !value && ENV.key?('CREDENTIALS_DIRECTORY')
+        path = File.join(ENV['CREDENTIALS_DIRECTORY'], cred)
+        value = path if File.exist?(path)
+      end
+      value
+    end
   end
 end
