@@ -18,6 +18,12 @@ class Proxy::TemplatesUnattendedApi < Sinatra::Base
     end
   end
 
+  get "/:kind/:template" do |kind, template|
+    log_halt(nil, "Failed to retrieve #{kind} hostgroup template for #{params.inspect}: ") do
+      Proxy::Templates::TemplateProxyRequest.new.get([kind, template], request.env, params)
+    end
+  end
+
   get "/:kind" do |kind|
     log_halt(nil, "Failed to proxy /#{kind} for #{params.inspect}: ") do
       Proxy::Templates::TemplateProxyRequest.new.get([kind], request.env, params)
